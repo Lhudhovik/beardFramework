@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<data>
+	<meta title="BeardFramework" package="beardFramework" version="1.0.0" company="Ludo" />
+	<set name="beardFramework" />
+	<source path="../" />
+</data>
