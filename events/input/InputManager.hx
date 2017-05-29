@@ -1,10 +1,12 @@
 package beardFramework.events.input;
 import beardFramework.events.input.InputAction;
 import openfl.Assets;
+import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
 import openfl.ui.GameInput;
 import openfl.ui.Keyboard;
+
 
 
 
@@ -131,7 +133,7 @@ class InputManager
 		}
 	}
 	
-	public function RegisterActionCallback(actionID : String, callback:Float -> Void, active : Bool = true, once :Bool = false):Void
+	public function RegisterActionCallback(actionID : String, callback:Event -> Void, active : Bool = true, once :Bool = false):Void
 	{
 		if (actions[actionID] != null && callback != null){
 			actions[actionID].Link(callback, once);
@@ -140,7 +142,7 @@ class InputManager
 
 	}
 	
-	public function UnregisterActionCallback(actionID : String, callback:Float -> Void = null):Void
+	public function UnregisterActionCallback(actionID : String, callback:Event -> Void = null):Void
 	{
 		if (actions[actionID] != null && callback != null){
 			actions[actionID].UnLink(callback);

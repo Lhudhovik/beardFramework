@@ -1,4 +1,4 @@
-package BeardFramework.Resources.Assets 
+package beardFramework.resources.assets 
 {
 	import com.greensock.events.LoaderEvent;
 	import com.greensock.loading.DataLoader;

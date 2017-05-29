@@ -1,4 +1,4 @@
-package BeardFramework.GameSystem.Entities 
+package beardFramework.gameSystem.entities 
 {
 	import starling.display.Sprite;
 	
