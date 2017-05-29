@@ -73,6 +73,7 @@ class InputManager
 				UnlinkActionToInput(actionID, linkedID);
 			
 			actions[actionID] = null;
+			actions.remove(actionID);
 		}
 		
 		
@@ -110,11 +111,8 @@ class InputManager
 			
 			trace(GetActionsFromInput(inputID));
 		}
-		//else throw "Non-existing Action";
-		//catch (ErrorText:String){
-			//trace(ErrorText);
-			//
-		//}
+		else throw "Non-existing Action";
+		
 		
 	}
 	
@@ -176,9 +174,9 @@ class InputManager
 	{
 		
 		if (inputs[e.type] != null){
-			
+			trace(e.type);
 			for (action in inputs[e.type]){
-				
+				trace(action);
 				actions[action].Proceed(e.type,"", e);
 			}
 		}

@@ -46,6 +46,8 @@ class BeardMain extends Sprite
 		stage.addEventListener(KeyboardEvent.KEY_UP, InputManager.get_instance().OnKeyboardEvent);
 		stage.addEventListener(KeyboardEvent.KEY_DOWN, InputManager.get_instance().OnKeyboardEvent);
 		
+		
+		
 	}
 	
 	/*private function onSettingsLoaded(e:LoaderEvent):Void{

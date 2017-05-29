@@ -39,6 +39,8 @@ class InputAction
 	
 	public inline function Proceed(inputID:String, inputType:String, inputValue:Event):Void
 	{
+		trace(activated);
+		trace(CheckInputType(inputID, inputType));
 		if (activated && CheckInputType(inputID, inputType)) signal.dispatch(inputValue);
 	}
 	
