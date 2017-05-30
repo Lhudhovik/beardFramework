@@ -11,11 +11,13 @@ import mloader.XmlLoader;
 import msignal.Signal.Signal0;
 import msignal.Signal.Signal1;
 import openfl.Assets;
+import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.utils.ArrayBuffer;
+import openfl.utils.ByteArray;
+import openfl.utils.Object;
 import starling.textures.Texture;
 import starling.textures.TextureAtlas;
-
-
 
 /**
  * ...
@@ -100,18 +102,15 @@ class AssetManager
 				loaders[loaderName] = new XmlLoader(url);
 				
 				
-			case AssetType.DATA : 	
+			case AssetType.DATA | AssetType.SOUND: 	
 				
 				loaders[loaderName] = new StringLoader(url);
 				
-			case AssetType.SOUND :
-				loaders[loaderName] = new StringLoader(url);
-				
-			case AssetType.ATLAS:
+			case AssetType.ATLAS_PNG | AssetType.ATLAS_JPG:
 				if (requestedAtlasQueue.indexOf(loaderName) == -1){
 					requestedAtlasQueue.push(loaderName);
 					Append(AssetType.XML, '${url}/${loaderName}.xml', '${loaderName}_xml', onCompleteCallback, onProgressCallback, onErrorCallback, onCancelCallback);
-					Append(AssetType.IMAGE, '${url}/${loaderName}.png', '${loaderName}_image', onCompleteCallback, onProgressCallback, onErrorCallback, onCancelCallback);
+					Append(AssetType.IMAGE, '${url}/${loaderName}${(type == AssetType.ATLAS_PNG ? ".png" : ".jpg")}', '${loaderName}_image', onCompleteCallback, onProgressCallback, onErrorCallback, onCancelCallback);
 					
 				}
 				return;
@@ -165,14 +164,11 @@ class AssetManager
 			case LoaderEventType.Start:
 				onStart.dispatch();
 			case LoaderEventType.Complete:
-				trace(requestedAtlasQueue);
 				for (requestedAtlas in requestedAtlasQueue){
 					
 					CreateAtlas(requestedAtlas);
 					requestedAtlasQueue.remove(requestedAtlas);
 				}
-				
-				trace(requestedAtlasQueue);
 				onComplete.dispatch();
 			case LoaderEventType.Progress:
 				onProgress.dispatch(get_progress());
@@ -196,19 +192,29 @@ class AssetManager
 	public function getContent(loaderName:String):Dynamic{
 		
 		var content : Dynamic = null;
-		if(loaders[loaderName] != null && loaders[loaderName].content != null)
-		content =  loaders[loaderName].content;
+		if (loaders[loaderName] != null){
+			
+			if (loaders[loaderName].content != null)
+			content =  loaders[loaderName].content;
+			else trace("content null");
+		}
+		else trace("loader null");
 		
 		return content;
 	}
 	
 	
-	private function CreateAtlas(atlasName:String):Void{
+	public function CreateAtlas(atlasName:String):Void{
+		
 		
 		if (atlases[atlasName] == null){
-			trace(Type.getClassName(getContent('${atlasName}_image')));
-			//var texture : Texture = Texture.fromBitmapData(getContent('${atlasName}_image'));
-			//atlases[atlasName] = new TextureAtlas(Texture.fromBitmapData(cast(getContent('${atlasName}_image'), BitmapData)), cast(getContent('${atlasName}_xml'), Xml));
+			var bitmapData:BitmapData = cast(getContent(cast ('${atlasName}_image', String)), BitmapData);
+			
+			var texture : Texture = Texture.fromBitmapData(bitmapData,false);
+			trace("success 1");
+			
+			atlases[atlasName] = new TextureAtlas(texture, cast(getContent('${atlasName}_xml'), Xml));
+			trace("success");
 		}else throw "Atlas already exists";
 		
 	}
@@ -242,5 +248,6 @@ enum AssetType{
 		XML;
 		DATA;
 		SOUND;
-		ATLAS;
+		ATLAS_PNG;
+		ATLAS_JPG;
 	}
