@@ -96,18 +96,15 @@ class AssetManager
 				loaders[loaderName] = new XmlLoader(url);
 				
 				
-			case AssetType.DATA : 	
+			case AssetType.DATA | AssetType.SOUND : 	
 				
 				loaders[loaderName] = new StringLoader(url);
 				
-			case AssetType.SOUND :
-				loaders[loaderName] = new StringLoader(url);
-				
-			case AssetType.ATLAS:
+			case AssetType.ATLAS_PNG | AssetType.ATLAS_JPG:
 				if (requestedAtlasQueue.indexOf(loaderName) == -1){
 					requestedAtlasQueue.push(loaderName);
 					Append(AssetType.XML, '${url}/${loaderName}.xml', '${loaderName}_xml', onCompleteCallback, onProgressCallback, onErrorCallback, onCancelCallback);
-					Append(AssetType.IMAGE, '${url}/${loaderName}.png', '${loaderName}_image', onCompleteCallback, onProgressCallback, onErrorCallback, onCancelCallback);
+					Append(AssetType.IMAGE, '${url}/${loaderName}${ type == AssetType.ATLAS_PNG ? ".png" : ".jpg"}', '${loaderName}_image', onCompleteCallback, onProgressCallback, onErrorCallback, onCancelCallback);
 					
 				}
 				return;
@@ -122,9 +119,9 @@ class AssetManager
 			//loaders[loaderName].loaded.addOnce(onErrorCallback).forType(LoaderEventType.Fail(LoaderErrorType.Data));
 		if (onCancelCallback!=null)
 			loaders[loaderName].loaded.addOnce(onCancelCallback).forType(LoaderEventType.Cancel);
-		trace(loaderName);
+		//trace(loaderName);
 		trace(url);
-		
+		//
 		loaderQueue.add(loaders[loaderName]);
 		
 		
@@ -161,14 +158,11 @@ class AssetManager
 			case LoaderEventType.Start:
 				onStart.dispatch();
 			case LoaderEventType.Complete:
-				trace(requestedAtlasQueue);
+				
 				for (requestedAtlas in requestedAtlasQueue){
-					
 					CreateAtlas(requestedAtlas);
 					requestedAtlasQueue.remove(requestedAtlas);
 				}
-				
-				trace(requestedAtlasQueue);
 				onComplete.dispatch();
 			case LoaderEventType.Progress:
 				onProgress.dispatch(get_progress());
@@ -199,7 +193,7 @@ class AssetManager
 	}
 	
 	
-	private function CreateAtlas(atlasName:String):Void{
+	public function CreateAtlas(atlasName:String):Void{
 		
 		if (atlases[atlasName] == null){
 			
@@ -237,5 +231,6 @@ enum AssetType{
 		XML;
 		DATA;
 		SOUND;
-		ATLAS;
+		ATLAS_PNG;
+		ATLAS_JPG;
 	}

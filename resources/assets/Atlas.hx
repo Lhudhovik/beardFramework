@@ -1,8 +1,10 @@
 package beardFramework.resources.assets;
+import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.Tileset;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
+import resources.assets.BeardTileSet;
 
 /**
  * ...
@@ -17,6 +19,7 @@ class Atlas
 		
 		
 		subAreas = new Map<String, SubArea>();
+		atlasBitmapData = bitmapData.clone();
 		parseXml(xml);
 		
 	}
@@ -41,10 +44,11 @@ class Atlas
             var frameWidth:Float   = getXmlFloat(subTexture, "frameWidth");
             var frameHeight:Float  = getXmlFloat(subTexture, "frameHeight");
             var rotated:Bool       = parseBool(subTexture.get("rotated"));
-
+			
+		
             imageArea.setTo(x, y, width, height);
             frame.setTo(frameX, frameY, frameWidth, frameHeight);
-            subAreas[name] = new SubArea(imageArea, frameWidth > 0 && frameHeight > 0 ? frame : null ,rotated);
+			subAreas[name] = new SubArea(imageArea.clone(), frameWidth > 0 && frameHeight > 0 ? frame.clone() : null ,rotated);
             
         }
     }
@@ -68,15 +72,21 @@ class Atlas
 		source.height = subAreas[name].imageArea.height >= subAreas[name].frame.height? subAreas[name].imageArea.height : subAreas[name].frame.height;
 		source.x = -subAreas[name].frame.x;
 		source.y = -subAreas[name].frame.y;
-		var bitmapData:BitmapData = new BitmapData(Math.ceil(source.width), Math.ceil(source.height));
+		trace(subAreas[name].imageArea.x);
+		var bitmapData:BitmapData = new BitmapData(Math.ceil(source.width), Math.ceil(source.height), true, 0x00ffffff);
 		bitmapData.copyPixels(atlasBitmapData, subAreas[name].imageArea, new Point(source.x, source.y));
+		
 		return bitmapData;
 		
 	}
-	public function ToBeardTileSet():Tileset{
+	public function ToBeardTileSet():BeardTileSet{
 		
-		var tileSet : Tileset= new Tileset(atlasBitmapData);
-		
+		var tileSet : BeardTileSet= new BeardTileSet(atlasBitmapData);
+		for (key in subAreas.keys())
+		{
+			tileSet.addTileType(key, subAreas[key].imageArea);
+		}
+			
 		return tileSet;
 		
 	}
