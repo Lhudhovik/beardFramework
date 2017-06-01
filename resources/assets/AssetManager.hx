@@ -12,10 +12,6 @@ import msignal.Signal.Signal0;
 import msignal.Signal.Signal1;
 import openfl.Assets;
 import openfl.display.BitmapData;
-import starling.textures.Texture;
-import starling.textures.TextureAtlas;
-
-
 
 /**
  * ...
@@ -32,7 +28,7 @@ class AssetManager
 	
 	private var loaderQueue:LoaderQueue;
 	private var loaders:Map<String, Loader<Dynamic>>;
-	private var atlases:Map<String, TextureAtlas>;
+	private var atlases:Map<String, Atlas>;
 	private var onComplete:Signal0;
 	private var onProgress:Signal1<Float>;
 	private var onCancel:Signal0;
@@ -59,7 +55,7 @@ class AssetManager
 	private function Init():Void{
 		
 		loaders = new Map<String, Loader<Dynamic>>();
-		atlases = new Map<String, TextureAtlas>();
+		atlases = new Map<String, Atlas>();
 		
 		requestedAtlasQueue = new Array<String>();
 		
@@ -206,25 +202,24 @@ class AssetManager
 	private function CreateAtlas(atlasName:String):Void{
 		
 		if (atlases[atlasName] == null){
-			trace(Type.getClassName(getContent('${atlasName}_image')));
-			//var texture : Texture = Texture.fromBitmapData(getContent('${atlasName}_image'));
-			//atlases[atlasName] = new TextureAtlas(Texture.fromBitmapData(cast(getContent('${atlasName}_image'), BitmapData)), cast(getContent('${atlasName}_xml'), Xml));
+			
+			atlases[atlasName] = new Atlas(getContent('${atlasName}_image'),getContent('${atlasName}_xml'));
 		}else throw "Atlas already exists";
 		
 	}
 	
-	public function GetAtlas(atlasName:String):TextureAtlas
+	public function GetAtlas(atlasName:String):Atlas
 	{
 		return atlases[atlasName] != null ? atlases[atlasName] : null;
 	}
-	public function GetTexture(textureName:String, atlasName:String):TextureAtlas
+	public function GetBitmapData(textureName:String, atlasName:String):BitmapData
 	{
-		return atlases[atlasName] != null ? atlases[atlasName] : null;
+		return atlases[atlasName] != null ? atlases[atlasName].GetBitmapData(textureName) : null;
 	}
 	public function ClearAtlas(atlasName:String):Void
 	{
 		if ( atlases[atlasName] != null ){
-			atlases[atlasName].dispose();
+			atlases[atlasName].Dispose();
 			atlases[atlasName] = null;
 			
 		}
