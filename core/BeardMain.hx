@@ -1,6 +1,10 @@
 package beardFramework.core;
 
+import beardFramework.core.system.OptionsManager;
 import beardFramework.events.input.InputManager;
+import beardFramework.resources.assets.AssetManager;
+import mloader.Loader.LoaderErrorType;
+import mloader.Loader.LoaderEvent;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.display.StageAlign;
@@ -38,8 +42,7 @@ class BeardMain extends Sprite
 				
 		
 		//load settings
-		//AssetManager.getInstance().append(AssetManager.LOADER_TYPE_XML, SETTINGS_PATH, SETTINGS);
-		//AssetManager.getInstance().load(onSettingsLoaded, onSettingsProgressing, onSettingsFailed);
+		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 		//Inputs Should Check for the settings to add listeners
 		stage.addEventListener(MouseEvent.CLICK, InputManager.get_instance().OnMouseEvent);
@@ -50,25 +53,60 @@ class BeardMain extends Sprite
 		
 	}
 	
-	/*private function onSettingsLoaded(e:LoaderEvent):Void{
+	private function OnSettingsLoaded(e:LoaderEvent<Dynamic>):Void{
 		
 	//	trace("complete!");
 		//trace(AssetManager.getInstance().getContent(SETTINGS));
+		OptionsManager.get_instance().parseSettings(AssetManager.get_instance().getContent(SETTINGS));
 		
+		LoadResources();
 	}
 	
-	private function onSettingsProgressing(e:LoaderEvent):void{
+	private function OnSettingsProgressing(e:LoaderEvent<Dynamic>):Void{
 	//	trace("progress...");
 		//trace(e.data);
 		
 	}
 		
-	private function onSettingsFailed(e:LoaderEvent):Void{
+	private function OnSettingsFailed(e:LoaderEvent<Dynamic>):Void{
 		//trace("error !");
 		//trace(e.data +"\n"+ e.text + e.type );
 		
 	}
-	*/
+	
+	private function LoadResources():Void{
+		
+		for (resource in OptionsManager.get_instance().resourcesToLoad)
+		{
+			AssetManager.get_instance().Append(resource.type, resource.url, resource.name);
+		}
+		
+		AssetManager.get_instance().Load(OnResourcesLoaded, OnResourcesProgress, OnResourcesFailed);
+		
+		
+	}
+	
+	private function OnResourcesLoaded():Void
+	{
+		
+		trace("yeah");
+		
+	}
+	
+	private function OnResourcesProgress(progress:Float):Void
+	{
+		
+		
+		
+		
+	}
+	private function OnResourcesFailed(error: LoaderErrorType):Void
+	{
+		
+		
+		
+		
+	}
 	private function deactivate(e:Event):Void{
 		
 		

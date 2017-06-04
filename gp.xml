@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <data>
 <version></version>
-<atlases></atlases>
+<atlases>
+	<atlas name="name" fileExtension="png" path="assets/atlases" />
+</atlases>
 <fx></fx>
 <soundBank></soundBank>
-<settings></settings>
+<settings>
+	<inputs>
+		<input action="ActionName" defaultInput="A">
+			<compatibleAction>ActionName</compatibleInput>
+		</input>
+	</inputs>
+</settings>
 </data>
