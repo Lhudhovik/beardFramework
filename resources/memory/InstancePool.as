@@ -1,4 +1,4 @@
-package BeardFramework.Resources.Memory 
+package beardFramework.resources.memory 
 {
 	/**
 	 * ...
@@ -24,7 +24,7 @@ package BeardFramework.Resources.Memory
 			
 		}
 		
-			
+			<
 		public function push(addedObject:*):Boolean
 		{
 			var result : Boolean = false;

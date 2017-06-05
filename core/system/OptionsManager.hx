@@ -1,4 +1,5 @@
 package beardFramework.core.system;
+import beardFramework.events.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
 
 /**
@@ -11,6 +12,7 @@ class OptionsManager
 	private static var instance(get,null):OptionsManager;
 	
 	public var resourcesToLoad:Array<ResourceToLoad>;
+	private var settings:Xml;
 	private function new() 
 	{
 		
@@ -35,6 +37,7 @@ class OptionsManager
 	public function parseSettings(xml:Xml):Void
 	{
 		resourcesToLoad = new Array<ResourceToLoad>();
+		xml = xml.firstElement();
 		
 		for (element in xml.elements())
 		{
@@ -45,6 +48,13 @@ class OptionsManager
 				{
 					resourcesToLoad.push({ type:atlas.get("fileExtention") == "jpg" ?AssetType.ATLAS_JPG : AssetType.ATLAS_PNG, name : atlas.get("name"), url:atlas.get("path") });
 				}
+			}
+			
+			if (element.nodeName == "settings")
+			{
+				settings = element;
+				InputManager.get_instance().ParseInputSettings(settings.elementsNamed("inputs").next());
+				
 			}
 			
 			

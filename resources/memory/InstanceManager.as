@@ -1,4 +1,4 @@
-package BeardFramework.Resources.Memory 
+package beardFramework.resources.memory 
 {
 	import flash.utils.Dictionary;
 	import flash.utils.getQualifiedClassName;

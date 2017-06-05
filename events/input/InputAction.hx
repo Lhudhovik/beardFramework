@@ -81,7 +81,7 @@ class InputAction
 	public function AddCompatibleAction(addedAction:String):Void{
 		
 		if (compatibleActions.indexOf(addedAction) == -1) compatibleActions.push(addedAction);
-		
+		trace(compatibleActions);
 	}
 	
 	public function RemoveCompatibleAction(removedAction:String):Void

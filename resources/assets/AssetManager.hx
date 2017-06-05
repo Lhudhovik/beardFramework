@@ -117,11 +117,11 @@ class AssetManager
 			loaders[loaderName].loaded.addOnce(onProgressCallback).forType(LoaderEventType.Progress);
 		//if (onErrorCallback!=null)
 			//loaders[loaderName].loaded.addOnce(onErrorCallback).forType(LoaderEventType.Fail(LoaderErrorType.Data));
-		if (onCancelCallback!=null)
-			loaders[loaderName].loaded.addOnce(onCancelCallback).forType(LoaderEventType.Cancel);
+		//if (onCancelCallback!=null)
+			//loaders[loaderName].loaded.addOnce(onCancelCallback).forType(LoaderEventType.Cancel);
 		//trace(loaderName);
-		trace(url);
-		//
+		//trace(url);
+		
 		loaderQueue.add(loaders[loaderName]);
 		
 		
@@ -152,13 +152,12 @@ class AssetManager
 	
 	private function OnLoadingEvent(e:LoaderEvent<Dynamic> = null):Void
 	{
-		
+		//trace(e.type.getName());
 		switch(e.type){
 			
 			case LoaderEventType.Start:
 				onStart.dispatch();
 			case LoaderEventType.Complete:
-				
 				for (requestedAtlas in requestedAtlasQueue){
 					CreateAtlas(requestedAtlas);
 					requestedAtlasQueue.remove(requestedAtlas);
@@ -181,7 +180,8 @@ class AssetManager
 	
 	public function get_loading():Bool return loaderQueue.loading;
 	
-	public function get_progress():Float return (loaderQueue.progress + loaderQueue.content[0].progress) / 2;
+	public function get_progress():Float return loaderQueue.progress;
+	
 	
 	public function getContent(loaderName:String):Dynamic{
 		

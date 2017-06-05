@@ -45,7 +45,12 @@ class InputManager
 	}
 	
 	public function ParseInputSettings(data:Xml):Void{
-			//add keys when parsing settings
+		
+		for (input in data.elementsNamed("input"))
+		{
+			CreateAction(input.get("action"), input.get("defaultInput"), [for (action in input.elements()) action.firstChild().toString()]);
+		}
+		
 	}
 	
 	public function CreateAction(actionID : String, ?defaultInputID : String = "", ?defaultInputType : String = "", ?compatibleActionsIDs : Array<String> = null):Void
@@ -109,7 +114,7 @@ class InputManager
 				
 			}
 			
-			trace(GetActionsFromInput(inputID));
+			//trace(GetActionsFromInput(inputID));
 		}
 		else throw "Non-existing Action";
 		
