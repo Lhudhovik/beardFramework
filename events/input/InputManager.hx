@@ -1,9 +1,18 @@
 package beardFramework.events.input;
+import beardFramework.core.BeardGame;
 import beardFramework.events.input.InputAction;
+import lime.ui.Gamepad;
+import lime.ui.GamepadAxis;
+import lime.ui.GamepadButton;
+import lime.ui.KeyCode;
+import lime.ui.KeyModifier;
+import lime.ui.Window;
 import openfl.Assets;
+import openfl.display.DisplayObject;
 import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
+import openfl.geom.Point;
 import openfl.ui.GameInput;
 import openfl.ui.Keyboard;
 
@@ -44,7 +53,25 @@ class InputManager
 		actions = new Map<String, InputAction>();
 	}
 	
-	public function ParseInputSettings(data:Xml):Void{
+	public function Activate(window:Window):Void
+	{
+		window.onKeyDown.add(OnKeyDown);
+		window.onKeyUp.add(OnKeyUp);
+		window.onMouseDown.add(OnMouseDown);
+		window.onMouseMove.add(OnMouseMove);
+		window.onMouseUp.add(OnMouseUp);
+		window.onMouseWheel.add(OnMouseWheel);
+		
+		for (gamepad in Gamepad.devices)
+			OnGamepadConnect(gamepad);
+			
+		Gamepad.onConnect.add(OnGamepadConnect);
+		
+		
+	}
+	
+	public function ParseInputSettings(data:Xml):Void
+	{
 		
 		for (input in data.elementsNamed("input"))
 		{
@@ -83,7 +110,6 @@ class InputManager
 		
 		
 	}
-	
 	
 	public function LinkActionToInput(actionID : String, inputID:String, inputType:String, uniqueLink:Bool = false):Void 
 	{
@@ -160,7 +186,6 @@ class InputManager
 		}
 		
 	}
-		
 	
 	public function GetActionsFromInput(inputID:String):Array<String>
 	{
@@ -168,6 +193,7 @@ class InputManager
 		return inputs[inputID] != null? inputs[inputID].concat([]) : null;
 		
 	}
+	
 	public function GetInputsFromAction(actionID:String):Array<String>
 	{
 		
@@ -189,6 +215,63 @@ class InputManager
 		
 	}
 	
+	public function OnMouseDown(mouseX:Float, mouseY:Float, clicType:Int):Void
+	{
+		
+		//if (inputs[e.type] != null){
+			//trace(e.type);
+			//for (action in inputs[e.type]){
+				//trace(action);
+				//actions[action].Proceed(e.type,"", e);
+			//}
+		//}
+		trace(mouseX + "  " + mouseY + " " +clicType);
+		var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(new Point(mouseX, mouseY));
+		trace( objects[0] != null ? objects[0].name : objects);
+	}
+	
+	public function OnMouseUp(mouseX:Float, mouseY:Float, clicType:Int):Void
+	{
+		
+		//if (inputs[e.type] != null){
+			//trace(e.type);
+			//for (action in inputs[e.type]){
+				//trace(action);
+				//actions[action].Proceed(e.type,"", e);
+			//}
+		//}
+		
+		trace(mouseX + "  " + mouseY + " " +clicType);
+	}
+	
+	public function OnMouseMove(mouseX:Float, mouseY:Float):Void
+	{
+		
+		//if (inputs[e.type] != null){
+			//trace(e.type);
+			//for (action in inputs[e.type]){
+				//trace(action);
+				//actions[action].Proceed(e.type,"", e);
+			//}
+		//}
+		
+		//trace(mouseX + "  " + mouseY );
+	}
+	
+	public function OnMouseWheel(value:Float, axisDirection:Float):Void
+	{
+		
+		//if (inputs[e.type] != null){
+			//trace(e.type);
+			//for (action in inputs[e.type]){
+				//trace(action);
+				//actions[action].Proceed(e.type,"", e);
+			//}
+		//}
+		
+		trace(value + "  " + axisDirection );
+	}
+	
 	public function OnKeyboardEvent(e:KeyboardEvent):Void
 	{
 		var code:String =String.fromCharCode(e.charCode).toUpperCase(); 
@@ -206,6 +289,83 @@ class InputManager
 		
 		
 	}
+	
+	public function OnKeyUp(key:KeyCode, modifier:KeyModifier):Void
+	{
+		//need to do the separation with modifier
+		//var code:String =String.fromCharCode(key).toUpperCase(); 
+		//
+		//if (inputs[code] != null){
+			//
+			//for (action in inputs[code]){
+				//
+				//actions[action].Proceed(code, e.type, e);
+				//
+			//}
+			//
+		//}
+		
+		trace(key);
+		
+	}
+	
+	public function OnKeyDown(key:KeyCode, modifier:KeyModifier):Void
+	{
+		//need to do the separation with modifier
+		//var code:String =String.fromCharCode(key).toUpperCase(); 
+		//
+		//if (inputs[code] != null){
+			//
+			//for (action in inputs[code]){
+				//
+				//actions[action].Proceed(code, e.type, e);
+				//
+			//}
+			//
+		//}
+			trace(key);
+		
+		
+	}
+	
+	public function OnGamepadAxisMove(axis:GamepadAxis, value:Float):Void
+	{
+		
+		trace(value);
+		
+	}
+	
+	public function OnGamepadButtonUp(button:GamepadButton):Void
+	{
+		
+		//gamepad.onAxisMove
+		trace(button.toString());
+		
+	}
+	
+	public function OnGamepadButtonDown(button:GamepadButton):Void
+	{
+		
+		//gamepad.onAxisMove
+		trace(button.toString());
+	}
+	
+	public function OnGamepadConnect(gamepad:Gamepad):Void
+	{
+		trace('gamepad ' + gamepad.id + ' ('+ gamepad.name + ') connected');
+		gamepad.onAxisMove.add(OnGamepadAxisMove);
+		gamepad.onButtonDown.add(OnGamepadButtonDown);
+		gamepad.onButtonUp.add(OnGamepadButtonUp);
+		gamepad.onDisconnect.add(OnGamepadDisconnect);
+	}
+	
+	public function OnGamepadDisconnect():Void
+	{
+		
+		
+		
+	}
+	
 	//
 	//public function OnTouchEvent(e:TouchEvent):void
 	//{

@@ -9,6 +9,7 @@ import mloader.Loader.LoaderEvent;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.display.StageAlign;
+import openfl.display.Window;
 import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
@@ -23,7 +24,7 @@ class BeardGame extends Sprite
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SETTINGS(default, never):String = "settings";
-	
+	private static var instance:BeardGame;
 	public function new() 
 	{
 		super();
@@ -39,16 +40,18 @@ class BeardGame extends Sprite
 	
 	private function Init():Void{
 	
+		instance = this;
 		// Do visual Loading stuff
 	
 		//Inputs Should Check for the settings to add listeners
-		stage.addEventListener(MouseEvent.CLICK, InputManager.get_instance().OnMouseEvent);
-		stage.addEventListener(KeyboardEvent.KEY_UP, InputManager.get_instance().OnKeyboardEvent);
-		stage.addEventListener(KeyboardEvent.KEY_DOWN, InputManager.get_instance().OnKeyboardEvent);
-		
+		//stage.addEventListener(MouseEvent.CLICK, InputManager.get_instance().OnMouseEvent);
+		//stage.addEventListener(KeyboardEvent.KEY_UP, InputManager.get_instance().OnKeyboardEvent);
+		//stage.addEventListener(KeyboardEvent.KEY_DOWN, InputManager.get_instance().OnKeyboardEvent);
+		InputManager.get_instance().Activate(stage.window);
 		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 		AssetManager.get_instance().Load();
+		
 	}
 	
 	private function OnSettingsLoaded(e:LoaderEvent<Dynamic>):Void{
@@ -116,5 +119,9 @@ class BeardGame extends Sprite
 		
 		
 		
+	}
+	public static inline function getInstance():BeardGame
+	{
+		return instance;
 	}
 }
