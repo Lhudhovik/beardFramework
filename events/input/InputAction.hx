@@ -1,7 +1,7 @@
 package beardFramework.events.input;
 import beardFramework.events.input.InputAction.InputDetails;
 import msignal.Signal;
-import openfl.events.Event;
+//import openfl.events.Event;
 
 /**
  * ...
@@ -9,71 +9,83 @@ import openfl.events.Event;
  */
 class InputAction
 {
-	private var signal(null, null):Signal1<Event>;
+	//private var signal(null, null):Signal1<Event>;
+	private var callbacks:Array<CallbackDetails>;
 	private var associatedInputs:Array<InputDetails>;
 	private var compatibleActions:Array<String>;
 	public var activated:Bool;
+	public var toggleType:InputType;
 	
 	
 	public function new(defaultCompatibleActionsIDs : Array<String> = null) 
 	{
-		signal = new Signal1(Event);
+		//signal = new Signal1(Event);
+		callbacks = new Array<CallbackDetails>();
 		associatedInputs = new Array<InputDetails>();
 		compatibleActions = defaultCompatibleActionsIDs != null ? defaultCompatibleActionsIDs : new Array<String>();
 	}
 	
-	public inline function get_associatedInputs():Array<String>{
+	public inline function get_associatedInputs():Array<InputDetails>{
 		
-		var inputs:Array<String> = new Array<String>();
-		
-		for (detail in associatedInputs){
-			
-			inputs.push(detail.input);
-			
-		}
-		
-		
-		return inputs;
+		return associatedInputs;
 	}
 	public inline function get_compatibleActions():Array<String> return compatibleActions;
 	
-	public inline function Proceed(inputID:String, inputType:String, inputValue:Event):Void
-	{
-		trace(activated);
-		trace(CheckInputType(inputID, inputType));
-		if (activated && CheckInputType(inputID, inputType)) signal.dispatch(inputValue);
-	}
-	
-	public function Link(callback:Event -> Void, ?once:Bool = false):Void
+	public inline function Proceed(inputValue:Float=0, targetName:String=""):Void
 	{
 		
-		if (once) signal.addOnce(callback);
-		else signal.add(callback);
-		
+		if (activated)
+			for (detail in callbacks)
+				if (detail.activated && (targetName == "" || detail.targetName == targetName)){
+					
+					detail.callback(inputValue);
+					if (detail.once) callbacks.remove(detail);
+					if(detail
+				}
+				
 	}
 	
-	public function UnLink(callback:Event -> Void = null):Void
+	public function Link(callback:Float -> Void, once:Bool = false, targetName:String=""):Void
+	{
+		var callbackDetail : CallbackDetails = {callback:callback, once:once, targetName:targetName};
+		
+		
+		if(!CheckIsExisting(callbackDetail)) callbacks.push(callbackDetail);
+		trace(callbacks);
+	}
+	
+	public function UnLink(callback:Float -> Void = null, targetName:String = ""):Void
 	{
 		
-		if (callback != null) signal.remove(callback);
-		else signal.removeAll();
+		for (detail in callbacks){
+			if ( callback == null || ( (targetName == ""|| targetName == detail.targetName)  && detail.callback == callback) ) 
+				callbacks.remove(detail);
+		}
 		
 	}
 	
-	public function AddAssociatedInput(addedInput:String, inputType:String):Void{
+	public function AddAssociatedInput(input:String, inputType:InputType):Void{
 		
-		if (get_associatedInputs().indexOf(addedInput) == -1){
-			var detail : InputDetails = {type:inputType, input : addedInput};
+		var alreadyAssociated : Bool = false;
+		for (detail in associatedInputs)
+		{
+			if(alreadyAssociated = (detail.input == input && detail.type == inputType)) break;
+			
+		}
+		
+		if (alreadyAssociated == false) {
+			
+			var detail : InputDetails = {type:inputType, input : input};
 			associatedInputs.push(detail);
 		}
 		
 	}
 	
-	public function RemoveAssociatedInput(removedInput:String):Void
+	public function RemoveAssociatedInput(removedInput:String, inputType:InputType):Void
 	{
 		for (detail in associatedInputs){
 			
-			if (detail.input == removedInput) associatedInputs.remove(detail);
+			if (detail.input == removedInput && detail.type == inputType) associatedInputs.remove(detail);
 		}
 		
 	}
@@ -89,22 +101,48 @@ class InputAction
 		compatibleActions.remove(removedAction);
 	}
 	
-	private inline function CheckInputType(inputID:String, inputType:String):Bool
+	//private inline function CheckInputType(inputID:String, inputType:InputType):Bool
+	//{
+		//var success:Bool = false;
+		//
+		//for (detail in associatedInputs){
+			//
+			//if (success = (detail.input == inputID && detail.type == inputType))
+				//break;
+		//}
+		//
+		//return success;
+	//}
+	
+	private inline function CheckIsExisting(checkedDetail : CallbackDetails):Bool
 	{
 		var success:Bool = false;
 		
-		for (detail in associatedInputs){
+		for (detail in callbacks){
 			
-			if (success = (detail.input == inputID && detail.type == inputType))
+			if (success = (detail.callback == checkedDetail.callback && detail.targetName == checkedDetail.targetName))
 				break;
 		}
 		
 		return success;
+	}
+	public inline function toggle(value:Float):Void
+	{
+		activated = true;
 	}
 }
 
 typedef InputDetails =
 {
 	var input : String;
-	var type : String;
+	var type : InputType;
+}
+
+typedef CallbackDetails =
+{
+	var callback:Float->Void;
+	var targetName:String;
+	var once:Bool;
+	var activated:Bool;
+	var toggleType:InputType;
 }

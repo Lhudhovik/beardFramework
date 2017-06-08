@@ -8,7 +8,7 @@
 <soundBank></soundBank>
 <settings>
 	<inputs>
-		<input action="ActionName" defaultInput="A">
+		<input action="ActionName" defaultInput="A" defaultInputType="KEY_UP">
 			<compatibleAction>ActionName</compatibleInput>
 		</input>
 	</inputs>
