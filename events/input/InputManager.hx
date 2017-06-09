@@ -29,11 +29,18 @@ class InputManager
 	private static var instance(get,null):InputManager;
 	public static inline var MOUSE_MOVE:String = "Mouse_Move";
 	public static inline var MOUSE_WHEEL:String = "Mouse_Wheel";
+	public static inline var MOUSE_OVER:String = "Mouse_Over";
+	public static inline var MOUSE_OUT:String = "Mouse_Out";
+	public static inline var CLICK_DELAY:Float = 250;
+	public static inline var GAMEPAD_PRESS_DELAY:Float = 250;
+	public static inline var KEY_PRESS_DELAY:Float = 250;
 	private var inputs:Map<String, Array<String>>;
 	private var actions:Map<String, InputAction>;
-	//private var toggleActions:Map<String, Array<String>>;
-	private var utilMouseCoordinates:Point;
-	private var utilID:String;
+	private var timeCounters:Map<String, Float>;
+	private var utilPoint:Point;
+	private var utilString:String;
+	private var mouseMoveTargetName:String;
+	private var mouseDownTargetName:String;
 	
 	private function new() 
 	{
@@ -55,8 +62,8 @@ class InputManager
 	{
 		inputs = new Map<String, Array<String>>();
 		actions = new Map<String, InputAction>();
-		//toggleActions =new Map<String, Array<String>>();
-		utilMouseCoordinates = new Point();
+		timeCounters = new Map<String, Float>();
+		utilPoint = new Point();
 	}
 	
 	public function Activate(window:Window):Void
@@ -81,35 +88,17 @@ class InputManager
 		
 		for (input in data.elementsNamed("input"))
 		{
-			CreateAction(input.get("action"), input.get("defaultInput"), GetInputTypeFromString(input.get("defaultInputType")), [for (action in input.elements()) action.firstChild().toString()]);
+			LinkActionToInput(input.get("action"), input.get("defaultInput"), GetInputTypeFromString(input.get("defaultInputType")), [for (action in input.elements()) action.firstChild().toString()]);
 		}
 		
 	}
 	
-	public function CreateAction(actionID : String, ?defaultInputID : String = "", ?defaultInputType : InputType = null, ?compatibleActionsIDs : Array<String> = null):Void
-	{
 		
-		if (actions[actionID] == null){
-			actions[actionID] = new InputAction(compatibleActionsIDs);
-			
-			for (compatibleID in actions[actionID].get_compatibleActions())
-			{
-				if (actions[compatibleID] != null) actions[compatibleID].AddCompatibleAction(actionID);
-			}
-			
-			if (defaultInputID != "")
-				LinkActionToInput(actionID, defaultInputID, defaultInputType);
-			
-		}
-		
-		
-	}
-	
 	public function DeleteAction(actionID : String):Void
 	{
 		if (actions[actionID] != null){
 			for (inputDetail in actions[actionID].get_associatedInputs())
-				UnlinkActionToInput(actionID, inputDetail.input, inputDetail.type);
+				UnlinkActionFromInput(actionID, inputDetail.input, inputDetail.type);
 			
 			actions[actionID].UnLink();
 			actions[actionID] = null;
@@ -119,68 +108,54 @@ class InputManager
 		
 	}
 	
-	public function LinkActionToInput(actionID : String, inputID:String, inputType:InputType, toggleType:InputType = null, uniqueLink:Bool = false):Void 
+	public function LinkActionToInput(actionID : String, inputID:String, inputType:InputType, ?compatibleActionsIDs : Array<String> = null):Void 
 	{
-		utilID = inputID + inputType;
+		utilString = inputID != "" ? inputID + inputType : GetStringFromInputType(inputType);
+		trace("added input link : " + actionID + " linked to " + utilString);  
+		//Create the action if non-existing
+		if (actions[actionID] == null){
+			actions[actionID] = new InputAction(compatibleActionsIDs);
+			
+			//make sure every compatible action is aware of each other
+			for (compatibleID in actions[actionID].get_compatibleActions())	if (actions[compatibleID] != null) actions[compatibleID].AddCompatibleAction(actionID);
+			
+		}
 		
-		if (actions[actionID] != null)
-		{
-			if (inputs[utilID] == null )
-				inputs[utilID] = new Array<String>();
-				
-			if (inputs[utilID].indexOf(actionID) == -1){
-				
-				//if only one input for the action is allowed, remove the other linked inputs
-				if (uniqueLink){
-					
-					for (linkedInput in actions[actionID].get_associatedInputs())
-						UnlinkActionToInput(actionID, linkedInput.input, linkedInput.type);
-				}
-				
-				//make sure only compatible actions share the input
-				for (linkedAction in inputs[utilID]){
-					
-					if (actions[actionID].get_compatibleActions().indexOf(linkedAction) == -1)
-						UnlinkActionToInput(linkedAction, inputID,inputType);
-				}
-				
-				//add the new input
-				inputs[utilID].push(actionID);
+		//create input action list if non existing
+		if (inputs[utilString] == null )
+			inputs[utilString] = new Array<String>();
 			
-				actions[actionID].AddAssociatedInput(inputID, inputType);
+		//si l'action n'est pas déjà liée
+		if (inputs[utilString].indexOf(actionID) == -1){
 			
-				if (toggleType != null)
-				{
-					
-					utilID = actionID + "toggle";
-					
-					actions[actionID].toggleType = toggleType;
-					
-					if (actions[utilID] == null) CreateAction(utilID);
-					
-					LinkActionToInput(utilID, inputID, toggleType);
-					
-					
-				}
+			
+			//make sure only compatible actions share the input
+			for (linkedAction in inputs[utilString]){
 				
+				if (actions[actionID].get_compatibleActions().indexOf(linkedAction) == -1)
+					UnlinkActionFromInput(linkedAction, inputID,inputType);
 			}
 			
-			//trace(GetActionsFromInput(inputID));
+			//add the new input
+			inputs[utilString].push(actionID);
+			actions[actionID].AddAssociatedInput(inputID, inputType);
+		
+			
+			
 		}
-		else throw "Non-existing Action";
 		
 		
 	}
 	
-	public function UnlinkActionToInput(actionID : String, inputID:String, inputType:InputType):Void 
+	public function UnlinkActionFromInput(actionID:String, inputID:String, inputType:InputType):Void 
 	{
 		if (actions[actionID] != null)
 		{
-			utilID = inputID + inputType;
+			utilString = inputID + inputType;
 			
-			if (inputs[utilID] != null && inputs[utilID].indexOf(actionID) != -1)
+			if (inputs[utilString] != null && inputs[utilString].indexOf(actionID) != -1)
 			{
-				inputs[utilID].remove(actionID);
+				inputs[utilString].remove(actionID);
 				actions[actionID].RemoveAssociatedInput(inputID, inputType);
 			}
 				
@@ -191,11 +166,10 @@ class InputManager
 	public function RegisterActionCallback(actionID : String, callback:Float -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
 	{
 		if (actions[actionID] != null && callback != null){
-			actions[actionID].Link(callback,once,targetName, active);
-			if (actions[actionID].toggleType != null){
-				RegisterActionCallback(actionID + "toggle", actions[actionID].toggle, targetName,once);
-			}
+			actions[actionID].Link(callback, once, targetName);
+			actions[actionID].activated = active;
 		}
+		
 	}
 	
 	public function UnregisterActionCallback(actionID : String, callback:Float -> Void = null, targetName:String = ""):Void
@@ -228,20 +202,23 @@ class InputManager
 		
 	}
 		
-	public function OnMouseDown(mouseX:Float, mouseY:Float, clicType:Int):Void
+	public function OnMouseDown(mouseX:Float, mouseY:Float, mouseButton:Int):Void
 	{
-		utilID =  GetMouseInputID(clicType) + InputType.MOUSE_DOWN;
-		utilMouseCoordinates.setTo(mouseX, mouseY);
-		var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilMouseCoordinates);
+		utilString =  GetMouseInputID(mouseButton) + InputType.MOUSE_DOWN;
+		utilPoint.setTo(mouseX, mouseY);
 		
-		if (inputs[utilID] != null){
+		timeCounters[GetMouseInputID(mouseButton)] = Date.now().getTime();
+		
+		var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilPoint);
+		
+		mouseDownTargetName = objects[0] != null ? objects[0].name : "";
+		
+		if (inputs[utilString] != null){
 			
-			for (action in inputs[utilID]){
+			for (action in inputs[utilString])
+				if (actions[action].activated)	
+					actions[action].Proceed(0, mouseDownTargetName);
 				
-				actions[action].Proceed(0,  objects[0] != null ? objects[0].name : "");
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.MOUSE_DOWN);
-				
-			}
 		}
 		
 		
@@ -249,78 +226,164 @@ class InputManager
 		
 	}
 	
-	public function OnMouseUp(mouseX:Float, mouseY:Float, clicType:Int):Void
+	public function OnMouseUp(mouseX:Float, mouseY:Float, mouseButton:Int):Void
 	{
-		utilID =  GetMouseInputID(clicType) + InputType.MOUSE_UP;
-		utilMouseCoordinates.setTo(mouseX, mouseY);
-		var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilMouseCoordinates);
 		
-		if (inputs[utilID] != null){
+		//mouse UP 
+		utilString =  GetMouseInputID(mouseButton) + InputType.MOUSE_UP;
+		
+		utilPoint.setTo(mouseX, mouseY);
+		
+		var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilPoint);
+		
+		if (inputs[utilString] != null){
 			
-			for (action in inputs[utilID]){
-				
-				actions[action].Proceed(0, objects[0] != null ? objects[0].name : "");
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.MOUSE_UP);
+			for (action in inputs[utilString]) 
+				if (actions[action].activated) 
+					actions[action].Proceed(0, objects[0] != null ? objects[0].name : "");
+		}
+		
+		//Mouse Click
+		utilString = GetMouseInputID(mouseButton);
+		
+		
+		
+		if (Date.now().getTime() - timeCounters[utilString]  <= CLICK_DELAY)
+		{
+			utilString += InputType.MOUSE_CLICK;
+			
+			if( inputs[utilString] != null){
+				for (action in inputs[utilString]) 
+					if (actions[action].activated) 
+						actions[action].Proceed(0, (objects[0] != null && mouseDownTargetName == objects[0].name) ? mouseDownTargetName : "" );
 			}
 		}
+		
+		timeCounters[ GetMouseInputID(mouseButton)] = 0;
+		
+		
 	}
 	
 	public function OnMouseMove(mouseX:Float, mouseY:Float):Void
 	{
-		if (inputs[MOUSE_MOVE] != null){
+		
+		if (inputs[GetStringFromInputType(InputType.MOUSE_MOVE)] != null){
 			
-			for (action in inputs[MOUSE_MOVE]){
-				
-				actions[action].Proceed();
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.MOUSE_MOVE);
-			}
+			for (action in inputs[GetStringFromInputType(InputType.MOUSE_MOVE)]) 
+				if (actions[action].activated) 
+					actions[action].Proceed();
+			
 		}
-	}
+		
+		if (inputs[GetStringFromInputType(InputType.MOUSE_OVER)] != null || inputs[GetStringFromInputType(InputType.MOUSE_OUT)] != null){
+			
+			utilPoint.setTo(mouseX, mouseY);
+			
+			var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilPoint);
+			
+			
+			if (objects[0] != null && mouseMoveTargetName != objects[0].name){
+				
+				trace("previous  " +mouseMoveTargetName);
+				trace(objects[0].name);
+				if (inputs[GetStringFromInputType(InputType.MOUSE_OVER)] != null){
+			
+					for (action in inputs[GetStringFromInputType(InputType.MOUSE_OVER)])
+						if (actions[action].activated)	
+							actions[action].Proceed(0, objects[0].name);
+				
+				}
+				if (inputs[GetStringFromInputType(InputType.MOUSE_OUT)] != null){
+			
+					for (action in inputs[GetStringFromInputType(InputType.MOUSE_OUT)])
+						if (actions[action].activated)	
+							actions[action].Proceed(0, mouseMoveTargetName);
+				
+				}
+				
+				mouseMoveTargetName = objects[0].name;
+			}
+			else if (objects[0] == null) mouseMoveTargetName = "";
+			
+			
+		}
+		
+	}	
 	
 	public function OnMouseWheel(value:Float, axisDirection:Float):Void
 	{
 		
 		if (inputs[MOUSE_WHEEL] != null){
 			
-			for (action in inputs[MOUSE_WHEEL]){
-				
-				actions[action].Proceed(axisDirection);
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.MOUSE_WHEEL);
-			}
+			for (action in inputs[MOUSE_WHEEL])	
+				if (actions[action].activated) 
+					actions[action].Proceed(axisDirection);
+
 		}
 	}
 		
 	public function OnKeyUp(key:KeyCode, modifier:KeyModifier):Void
 	{
-			utilID = String.fromCharCode(key);
-		if (cast (modifier, Int) > 0)
-			utilID += modifier;
-		utilID += InputType.KEY_UP;
-		trace("key up");
-		if (inputs[utilID] != null){
+		
+		//Key Up
+		utilString = String.fromCharCode(key);
+		
+		modifier.capsLock = modifier.numLock = false;
+		if (cast(modifier,Int) > 0) utilString += modifier;
+		
+		utilString += InputType.KEY_UP;
+		
+		if (inputs[utilString] != null){
 			
-			for (action in inputs[utilID]){
-				
-				actions[action].Proceed();
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.KEY_UP);
-			}
+			for (action in inputs[utilString]) 
+				if (actions[action].activated) 
+					actions[action].Proceed();
+			
 		}
+		
+		//Check Key Pressed
+		
+		utilString = String.fromCharCode(key);
+		
+		
+		if (Date.now().getTime() - timeCounters[utilString] <= KEY_PRESS_DELAY){
+			
+			modifier.capsLock = modifier.numLock = false;
+			if (cast(modifier,Int) > 0)utilString += modifier;
+		
+			utilString += InputType.KEY_PRESS;
+		
+		
+			if (inputs[utilString] != null){
+			
+				for (action in inputs[utilString]) 
+					if (actions[action].activated) 
+						actions[action].Proceed();
+			}
+				
+		}
+		timeCounters[String.fromCharCode(key)] = 0;
+		
+		
+		
 	}
 	
 	public function OnKeyDown(key:KeyCode, modifier:KeyModifier):Void
 	{
-		utilID = String.fromCharCode(key);
-		if (cast (modifier, Int) > 0)
-			utilID += modifier;
-		utilID += InputType.KEY_DOWN;
-		trace("key down");
-		if (inputs[utilID] != null){
+		utilString = String.fromCharCode(key);
+		
+		if( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] = Date.now().getTime();
+		
+		modifier.capsLock = modifier.numLock = false;
+		if (cast(modifier,Int) > 0)utilString += modifier;
+		
+		utilString += InputType.KEY_DOWN;
 			
-			for (action in inputs[utilID]){
-				
-				actions[action].Proceed();
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.KEY_DOWN);
-			}
+		if (inputs[utilString] != null){
+			
+			for (action in inputs[utilString])
+				if (actions[action].activated)	
+					actions[action].Proceed();
 			
 		}
 		
@@ -329,50 +392,66 @@ class InputManager
 	
 	public function OnGamepadAxisMove(axis:GamepadAxis, value:Float):Void
 	{
-		utilID = axis.toString();
+		utilString = axis.toString();
 		
-		if (inputs[utilID] != null){
+		if (inputs[utilString] != null)
 			
-			for (action in inputs[utilID]){
-				
-				actions[action].Proceed(value);
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.GAMEPAD_AXIS_MOVE);
-			}
-			
-		}
+			for (action in inputs[utilString]) 
+				if (actions[action].activated)
+					actions[action].Proceed(value);
 		
 	}
 	
 	public function OnGamepadButtonUp(button:GamepadButton):Void
 	{
 		
-		utilID = button.toString();
+		utilString = button.toString() + InputType.GAMEPAD_BUTTON_UP;
 		
-		if (inputs[utilID] != null){
+		if (inputs[utilString] != null){
 			
-			for (action in inputs[utilID]){
-				
-				actions[action].Proceed();
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.GAMEPAD_BUTTON_UP);
-			}
+			for (action in inputs[utilString])
+				if(actions[action].activated)
+					actions[action].Proceed();
+			
 			
 		}
+		
+		//Check button press
+		utilString = button.toString();
+		
+		if (Date.now().getTime() - timeCounters[utilString] <= GAMEPAD_PRESS_DELAY){
+			
+			utilString += InputType.GAMEPAD_BUTTON_PRESS;
+			
+			if (inputs[utilString] != null){
+			
+				for (action in inputs[utilString]) 
+					if (actions[action].activated) 
+						actions[action].Proceed();
+			}
+				
+		}
+		
+		timeCounters[button.toString()] = 0;
+		
 		
 	}
 	
 	public function OnGamepadButtonDown(button:GamepadButton):Void
 	{
 		
-		utilID = button.toString();
+		utilString = button.toString();
 		
-		if (inputs[utilID] != null){
+		if(timeCounters[utilString] == null || timeCounters[utilString] ==0) timeCounters[utilString] = Date.now().getTime();
+		
+		utilString += InputType.GAMEPAD_BUTTON_DOWN;
+		
+		if (inputs[utilString] != null){
 			
-			for (action in inputs[utilID]){
+			for (action in inputs[utilString])
+				if(actions[action].activated)
+					actions[action].Proceed();
 				
-				actions[action].Proceed();
-				//actions[action].activated = !(actions[action].toggleType != null && actions[action].toggleType != InputType.GAMEPAD_BUTTON_DOWN);
-			}
-			
 		}
 	}
 	
@@ -409,21 +488,50 @@ class InputManager
 		 switch(type)
 		{
 			
-			case "MOUSE_DOWN" : inputType = InputType.MOUSE_DOWN; 
-			case "MOUSE_UP": inputType = InputType.MOUSE_UP;
-			case "MOUSE_MOVE":inputType =  InputType.MOUSE_MOVE;
-			case "MOUSE_WHEEL":inputType =  InputType.MOUSE_WHEEL;
-			case "KEY_UP": inputType = InputType.KEY_UP;
-			case "KEY_DOWN":inputType = InputType.KEY_DOWN;
-			case "GAMEPAD_AXIS_MOVE":inputType = InputType.GAMEPAD_AXIS_MOVE;
-			case "GAMEPAD_BUTTON_UP": inputType = InputType.GAMEPAD_BUTTON_UP;
-			case "GAMEPAD_BUTTON_DOWN": inputType = InputType.GAMEPAD_BUTTON_DOWN;
+			case "MOUSE_DOWN" : 		inputType = InputType.MOUSE_DOWN; 
+			case "MOUSE_CLICK" : 		inputType = InputType.MOUSE_CLICK; 
+			case "MOUSE_UP": 			inputType = InputType.MOUSE_UP;
+			case "MOUSE_MOVE":			inputType = InputType.MOUSE_MOVE;
+			case "MOUSE_OUT":			inputType = InputType.MOUSE_OUT;
+			case "MOUSE_OVER":			inputType = InputType.MOUSE_OVER;
+			case "MOUSE_WHEEL":			inputType = InputType.MOUSE_WHEEL;
+			case "KEY_UP": 				inputType = InputType.KEY_UP;
+			case "KEY_PRESS":			inputType = InputType.KEY_PRESS;
+			case "KEY_DOWN":			inputType = InputType.KEY_DOWN;
+			case "GAMEPAD_AXIS_MOVE":	inputType = InputType.GAMEPAD_AXIS_MOVE;
+			case "GAMEPAD_BUTTON_UP":	inputType = InputType.GAMEPAD_BUTTON_UP;
+			case "GAMEPAD_BUTTON_DOWN":	inputType = InputType.GAMEPAD_BUTTON_DOWN;
+			case "GAMEPAD_BUTTON_PRESS":inputType = InputType.GAMEPAD_BUTTON_PRESS;
 			
 			
 		}
 		return inputType;
 	}
-	
+	public static inline function GetStringFromInputType(type:InputType):String
+	{
+		var string :String = "Unknown";
+		switch(type)
+		{
+			
+			case InputType.MOUSE_DOWN: 				string = "MOUSE_DOWN" ; 
+			case InputType.MOUSE_CLICK: 			string = "MOUSE_CLICK" ; 
+			case InputType.MOUSE_UP: 				string = "MOUSE_UP";
+			case InputType.MOUSE_MOVE: 				string =  "MOUSE_MOVE";
+			case InputType.MOUSE_OUT: 				string =  "MOUSE_OUT";
+			case InputType.MOUSE_OVER:				string =  "MOUSE_OVER";
+			case InputType.MOUSE_WHEEL:				string =  "MOUSE_WHEEL";
+			case InputType.KEY_UP:					string = "KEY_UP";
+			case InputType.KEY_PRESS: 				string = "KEY_PRESS";
+			case InputType.KEY_DOWN:				string = "KEY_DOWN";
+			case InputType.GAMEPAD_AXIS_MOVE:		string = "GAMEPAD_AXIS_MOVE";
+			case InputType.GAMEPAD_BUTTON_UP: 		string = "GAMEPAD_BUTTON_UP";
+			case InputType.GAMEPAD_BUTTON_DOWN: 	string = "GAMEPAD_BUTTON_DOWN";
+			case InputType.GAMEPAD_BUTTON_PRESS: 	string = "GAMEPAD_BUTTON_PRESS";
+			
+			
+		}
+		return string;
+	}
 	
 
 	
