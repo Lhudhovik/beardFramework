@@ -2,6 +2,7 @@ package beardFramework.core;
 
 import beardFramework.core.system.OptionsManager;
 import beardFramework.events.input.InputManager;
+import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
 import mloader.Loader;
 import mloader.Loader.LoaderErrorType;
@@ -24,7 +25,9 @@ class BeardGame extends Sprite
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SETTINGS(default, never):String = "settings";
-	private static var instance:BeardGame;
+	private static var game:BeardGame;
+	private var physicsEnabled:Bool;
+	
 	public function new() 
 	{
 		super();
@@ -40,7 +43,7 @@ class BeardGame extends Sprite
 	
 	private function Init():Void{
 	
-		instance = this;
+		game = this;
 		// Do visual Loading stuff
 	
 		//Inputs Should Check for the settings to add listeners
@@ -58,7 +61,7 @@ class BeardGame extends Sprite
 		
 		
 		OptionsManager.get_instance().parseSettings(AssetManager.get_instance().getContent(SETTINGS));
-		
+		physicsEnabled = OptionsManager.get_instance().GetSettings("physics").get("enabled") == "true";
 		LoadResources();
 	}
 	
@@ -91,7 +94,8 @@ class BeardGame extends Sprite
 	
 	private function GameStart():Void{
 		
-		
+		if (physicsEnabled)
+			PhysicsManager.get_instance().InitSpace(OptionsManager.get_instance().GetSettings("physics"));
 		
 	}
 	private function OnResourcesProgress(progress:Float):Void
@@ -115,13 +119,25 @@ class BeardGame extends Sprite
 		
 		
 	}
+	
+	override function __enterFrame(deltaTime:Int):Void 
+	{
+		super.__enterFrame(deltaTime);
+		
+		if (physicsEnabled && PhysicsManager.get_instance().get_space() != null)
+			PhysicsManager.get_instance().Step(deltaTime);
+		
+	}
+	
+	
+	
 	private function deactivate(e:Event):Void{
 		
 		
 		
 	}
-	public static inline function getInstance():BeardGame
+	public static inline function Game():BeardGame
 	{
-		return instance;
+		return game;
 	}
 }

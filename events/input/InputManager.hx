@@ -209,7 +209,7 @@ class InputManager
 		
 		timeCounters[GetMouseInputID(mouseButton)] = Date.now().getTime();
 		
-		var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilPoint);
+		var objects:Array<DisplayObject> = BeardGame.Game().stage.getObjectsUnderPoint(utilPoint);
 		
 		mouseDownTargetName = objects[0] != null ? objects[0].name : "";
 		
@@ -234,7 +234,7 @@ class InputManager
 		
 		utilPoint.setTo(mouseX, mouseY);
 		
-		var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilPoint);
+		var objects:Array<DisplayObject> = BeardGame.Game().stage.getObjectsUnderPoint(utilPoint);
 		
 		if (inputs[utilString] != null){
 			
@@ -279,10 +279,10 @@ class InputManager
 			
 			utilPoint.setTo(mouseX, mouseY);
 			
-			var objects:Array<DisplayObject> = BeardGame.getInstance().stage.getObjectsUnderPoint(utilPoint);
+			var objects:Array<DisplayObject> = BeardGame.Game().stage.getObjectsUnderPoint(utilPoint);
 			
 			
-			if (objects[0] != null && mouseMoveTargetName != objects[0].name){
+			if (objects != null && objects[0] != null && mouseMoveTargetName != objects[0].name){
 				
 				trace("previous  " +mouseMoveTargetName);
 				trace(objects[0].name);
@@ -303,7 +303,18 @@ class InputManager
 				
 				mouseMoveTargetName = objects[0].name;
 			}
-			else if (objects[0] == null) mouseMoveTargetName = "";
+			else if (objects == null || objects[0] == null){
+				
+				if (inputs[GetStringFromInputType(InputType.MOUSE_OUT)] != null){
+			
+					for (action in inputs[GetStringFromInputType(InputType.MOUSE_OUT)])
+						if (actions[action].activated)	
+							actions[action].Proceed(0, mouseMoveTargetName);
+				
+				}
+					
+				mouseMoveTargetName = "";
+			}
 			
 			
 		}

@@ -12,7 +12,7 @@ class OptionsManager
 	private static var instance(get,null):OptionsManager;
 	
 	public var resourcesToLoad:Array<ResourceToLoad>;
-	private var settings:Xml;
+	private var settings(null,null):Xml;
 	private function new() 
 	{
 		
@@ -59,6 +59,20 @@ class OptionsManager
 			
 			
 		}
+	}
+	
+	public function GetSettings(settingsName:String):Xml
+	{
+		var returnedSettings : Xml = null;
+		if (settingsName == "") returnedSettings = settings;
+		else for (element in settings.elementsNamed(settingsName)) 
+			if (element.nodeName == settingsName)
+			{ 
+				returnedSettings = element; 
+				break;
+			} 
+			
+		return returnedSettings;
 	}
 	
 	

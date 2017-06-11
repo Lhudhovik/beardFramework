@@ -30,7 +30,7 @@ class InputAction
 		
 		for (detail in callbacks){
 			
-			if (targetName == "" || detail.targetName == targetName){
+			if (detail.targetName == targetName){
 				detail.callback(inputValue);
 				if (detail.once) callbacks.remove(detail);
 			}

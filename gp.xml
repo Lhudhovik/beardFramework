@@ -7,6 +7,7 @@
 <fx></fx>
 <soundBank></soundBank>
 <settings>
+	<physics enabled="true" gravityX="0" gravityY="9.81" />
 	<inputs>
 		<input action="ActionName" defaultInput="A" defaultInputType="KEY_UP">
 			<compatibleAction>ActionName</compatibleInput>
