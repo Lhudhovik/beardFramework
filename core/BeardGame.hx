@@ -27,6 +27,8 @@ class BeardGame extends Sprite
 	public var SETTINGS(default, never):String = "settings";
 	private static var game:BeardGame;
 	private var physicsEnabled:Bool;
+	private var contentLayer:Sprite;
+	private var UILayer:Sprite;
 	
 	public function new() 
 	{
@@ -45,11 +47,11 @@ class BeardGame extends Sprite
 	
 		game = this;
 		// Do visual Loading stuff
-	
-		//Inputs Should Check for the settings to add listeners
-		//stage.addEventListener(MouseEvent.CLICK, InputManager.get_instance().OnMouseEvent);
-		//stage.addEventListener(KeyboardEvent.KEY_UP, InputManager.get_instance().OnKeyboardEvent);
-		//stage.addEventListener(KeyboardEvent.KEY_DOWN, InputManager.get_instance().OnKeyboardEvent);
+		contentLayer = new Sprite();
+		UILayer = new Sprite();
+		
+		stage.addChild(contentLayer);
+		stage.addChild(UILayer);
 		InputManager.get_instance().Activate(stage.window);
 		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
@@ -140,4 +142,13 @@ class BeardGame extends Sprite
 	{
 		return game;
 	}
+	public inline function GetContentLayer():Sprite
+	{
+		return contentLayer;
+	}
+	public inline function GetUILayer():Sprite
+	{
+		return UILayer;
+	}
+
 }

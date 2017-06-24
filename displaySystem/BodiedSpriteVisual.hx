@@ -7,7 +7,7 @@ import nape.phys.Body;
  * ...
  * @author Ludo
  */
-class BodiedVisual extends SpriteVisual 
+class BodiedSpriteVisual extends SpriteVisual 
 {
 
 	private var body:Body;

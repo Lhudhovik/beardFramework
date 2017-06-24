@@ -29,8 +29,10 @@ class InstancePool<TClass>
 	public function Populate(elements:Array<TClass>):Void 
 	{
 		Flush();
-		instances = Vector.fromArrayCopy(elements);
-		freeIndex = elements.length -1;
+		
+		for (i in 0...instances.length)
+			instances[i] = elements[i];
+		
 		
 		for (i in 0...freeIndex +1)
 			states[i] = true;
