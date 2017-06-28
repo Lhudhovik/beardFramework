@@ -7,6 +7,7 @@ import beardFramework.resources.assets.AssetManager;
 import mloader.Loader;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
+import openfl.display.DisplayObject;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.display.StageAlign;
@@ -14,6 +15,7 @@ import openfl.display.Window;
 import openfl.events.Event;
 import openfl.events.KeyboardEvent;
 import openfl.events.MouseEvent;
+import openfl.geom.Point;
 import openfl.ui.Multitouch;
 import openfl.ui.MultitouchInputMode;
 /**
@@ -131,7 +133,16 @@ class BeardGame extends Sprite
 		
 	}
 	
-	
+	public function getTargetUnderPoint (point:Point):Array<DisplayObject> {
+		
+		var stack = new Array<DisplayObject> ();
+		__hitTest (point.x, point.y, false, stack, true, stage);
+		//for (element in stack)
+		//trace(element.name);
+		stack.reverse ();
+		return stack;
+		
+	}
 	
 	private function deactivate(e:Event):Void{
 		

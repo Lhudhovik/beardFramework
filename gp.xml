@@ -8,7 +8,7 @@
 <soundBank></soundBank>
 <settings>
 	<physics enabled="true" gravityX="0" gravityY="9.81" />
-	<inputs>
+	<inputs keyboard="true" mouse="true" mouseButtons="10" gamepad="true" touch="true">
 		<input action="ActionName" defaultInput="A" defaultInputType="KEY_UP">
 			<compatibleAction>ActionName</compatibleInput>
 		</input>

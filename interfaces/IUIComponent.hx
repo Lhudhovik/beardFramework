@@ -17,4 +17,6 @@ interface IUIComponent
 	public var hAlign:UInt;
 	public var fillPart:Float;
 	public var keepRatio:Bool;
+	
+	public function UpdateVisual():Void;
 }

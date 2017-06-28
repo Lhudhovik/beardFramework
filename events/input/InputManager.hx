@@ -31,6 +31,9 @@ class InputManager
 	public static inline var MOUSE_WHEEL:String = "Mouse_Wheel";
 	public static inline var MOUSE_OVER:String = "Mouse_Over";
 	public static inline var MOUSE_OUT:String = "Mouse_Out";
+	public static inline var MOUSE_UP:String = "Mouse_UP";
+	public static inline var MOUSE_CLICK:String = "Mouse_Click";
+	public static inline var MOUSE_DOWN:String = "Mouse_Down";
 	public static inline var CLICK_DELAY:Float = 250;
 	public static inline var GAMEPAD_PRESS_DELAY:Float = 250;
 	public static inline var KEY_PRESS_DELAY:Float = 250;
@@ -89,6 +92,21 @@ class InputManager
 		for (input in data.elementsNamed("input"))
 		{
 			LinkActionToInput(input.get("action"), input.get("defaultInput"), GetInputTypeFromString(input.get("defaultInputType")), [for (action in input.elements()) action.firstChild().toString()]);
+		}
+		
+		if (data.get("mouse") == "true"){
+			
+			LinkActionToInput(MOUSE_OVER, "", InputType.MOUSE_OVER);
+			LinkActionToInput(MOUSE_OUT, "", InputType.MOUSE_OUT);
+			LinkActionToInput(MOUSE_MOVE, "", InputType.MOUSE_MOVE);
+			LinkActionToInput(MOUSE_WHEEL, "", InputType.MOUSE_WHEEL);
+			
+			for (i in 0...(Std.parseInt(data.get("mouseButtons")))){
+				LinkActionToInput(MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
+				LinkActionToInput(MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
+				LinkActionToInput(MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
+			}
+			
 		}
 		
 	}
@@ -209,15 +227,15 @@ class InputManager
 		
 		timeCounters[GetMouseInputID(mouseButton)] = Date.now().getTime();
 		
-		var objects:Array<DisplayObject> = BeardGame.Game().stage.getObjectsUnderPoint(utilPoint);
+		var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
 		
 		mouseDownTargetName = objects[0] != null ? objects[0].name : "";
-		
+		trace("mouse down target : " + mouseDownTargetName);
 		if (inputs[utilString] != null){
 			
 			for (action in inputs[utilString])
 				if (actions[action].activated)	
-					actions[action].Proceed(0, mouseDownTargetName);
+					actions[action].Proceed(mouseButton, mouseDownTargetName);
 				
 		}
 		
@@ -234,13 +252,14 @@ class InputManager
 		
 		utilPoint.setTo(mouseX, mouseY);
 		
-		var objects:Array<DisplayObject> = BeardGame.Game().stage.getObjectsUnderPoint(utilPoint);
+		var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
+		
 		
 		if (inputs[utilString] != null){
 			
 			for (action in inputs[utilString]) 
 				if (actions[action].activated) 
-					actions[action].Proceed(0, objects[0] != null ? objects[0].name : "");
+					actions[action].Proceed(mouseButton, objects[0] != null ? objects[0].name : "");
 		}
 		
 		//Mouse Click
@@ -255,7 +274,7 @@ class InputManager
 			if( inputs[utilString] != null){
 				for (action in inputs[utilString]) 
 					if (actions[action].activated) 
-						actions[action].Proceed(0, (objects[0] != null && mouseDownTargetName == objects[0].name) ? mouseDownTargetName : "" );
+						actions[action].Proceed(mouseButton, (objects[0] != null && mouseDownTargetName == objects[0].name) ? mouseDownTargetName : "" );
 			}
 		}
 		
@@ -279,13 +298,13 @@ class InputManager
 			
 			utilPoint.setTo(mouseX, mouseY);
 			
-			var objects:Array<DisplayObject> = BeardGame.Game().stage.getObjectsUnderPoint(utilPoint);
+			var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
 			
 			
 			if (objects != null && objects[0] != null && mouseMoveTargetName != objects[0].name){
 				
 				trace("previous  " +mouseMoveTargetName);
-				trace(objects[0].name);
+				trace("new " +objects[0].name);
 				if (inputs[GetStringFromInputType(InputType.MOUSE_OVER)] != null){
 			
 					for (action in inputs[GetStringFromInputType(InputType.MOUSE_OVER)])

@@ -72,7 +72,7 @@ class UIContainer implements IUIComponent
 					
 					element.x = this.x + (element.width + separator*width) * i++ + leftMargin;
 					element.y = this.y + topMargin;
-						
+					element.UpdateVisual();
 				}
 			}
 			else {
@@ -84,6 +84,7 @@ class UIContainer implements IUIComponent
 					element.x = this.x + helper + separator*width*i++ + leftMargin;
 					element.y = this.y +topMargin;
 					helper += element.width;
+					element.UpdateVisual();
 				}	
 			}
 			
@@ -102,7 +103,7 @@ class UIContainer implements IUIComponent
 					
 					element.y = this.y + (element.height + separator*height) * i++ + topMargin;
 					element.x = this.x + leftMargin;
-						
+					element.UpdateVisual();	
 				}
 			}
 			else {
@@ -114,6 +115,7 @@ class UIContainer implements IUIComponent
 					element.y = this.y + helper + separator*height*i++ + topMargin;
 					element.x = this.x + leftMargin;
 					helper += element.height;
+					element.UpdateVisual();
 				}	
 			}
 			
@@ -138,7 +140,7 @@ class UIContainer implements IUIComponent
 	{
 		if (x != value){
 			x = value;
-			UpdateVisual();
+			//UpdateVisual();
 		}
 		return x;
 	}
@@ -154,7 +156,7 @@ class UIContainer implements IUIComponent
 	{
 		if (y != value){
 			y = value;
-			UpdateVisual();
+			//UpdateVisual();
 		}
 		return y;
 	}
@@ -191,7 +193,7 @@ class UIContainer implements IUIComponent
 	{
 		if (width != value){
 		width = value;
-		UpdateVisual();	
+		//UpdateVisual();	
 		}
 		
 		return width;
@@ -201,7 +203,7 @@ class UIContainer implements IUIComponent
 	{
 		if (height != value){
 			height = value;
-			UpdateVisual();
+			//UpdateVisual();
 		}
 		return height;
 	}

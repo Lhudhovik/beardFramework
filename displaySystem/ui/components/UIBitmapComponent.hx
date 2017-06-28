@@ -1,7 +1,7 @@
 package beardFramework.displaySystem.ui.components;
 
+import beardFramework.displaySystem.BeardBitmap;
 import beardFramework.interfaces.IUIComponent;
-import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
 
@@ -9,12 +9,20 @@ import openfl.display.PixelSnapping;
  * ...
  * @author Ludo
  */
-class UIBitmapComponent extends Bitmap implements IUIComponent
+class UIBitmapComponent extends BeardBitmap implements IUIComponent
 {
 	public function new(bitmapData:BitmapData=null, pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 
 	{
 		super(bitmapData, pixelSnapping, smoothing);
 		keepRatio = true;
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IUIComponent */
+	
+	public function UpdateVisual():Void 
+	{
+		
 	}
 	
 	

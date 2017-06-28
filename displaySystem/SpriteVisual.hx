@@ -1,13 +1,14 @@
 package beardFramework.displaySystem;
 
 import beardFramework.interfaces.IEntityVisual;
-import openfl.display.Sprite;
+import beardFramework.displaySystem.BeardSprite;
+
 
 /**
  * ...
  * @author Ludo
  */
-class SpriteVisual extends Sprite implements IEntityVisual
+class SpriteVisual extends BeardSprite implements IEntityVisual
 {
 	
 	public function new() 

@@ -1,6 +1,6 @@
-package beardFramework.displaySystem;
+package beardFramework.displaySystem.ui.components;
 
-import interfaces.IEntityVisual;
+import beardFramework.displaySystem.ui.components.UIBitmapComponent;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
 
@@ -8,7 +8,7 @@ import openfl.display.PixelSnapping;
  * ...
  * @author Ludo
  */
-class BitmapVisual extends BeardBitmap implements IEntityVisual
+class UIBitmapButton extends UIBitmapComponent
 {
 
 	public function new(bitmapData:BitmapData=null, pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 

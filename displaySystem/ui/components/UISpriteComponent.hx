@@ -1,13 +1,14 @@
 package beardFramework.displaySystem.ui.components;
 
+import beardFramework.displaySystem.BeardSprite;
 import beardFramework.interfaces.IUIComponent;
-import openfl.display.Sprite;
+
 
 /**
  * ...
  * @author Ludo
  */
-class UISpriteComponent extends Sprite implements IUIComponent
+class UISpriteComponent extends BeardSprite implements IUIComponent
 {
 
 
@@ -24,6 +25,14 @@ class UISpriteComponent extends Sprite implements IUIComponent
 	{
 		super();
 				
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IUIComponent */
+	
+	public function UpdateVisual():Void 
+	{
+		
 	}
 	
 	
