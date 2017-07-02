@@ -1,6 +1,7 @@
 package beardFramework.core;
 
 import beardFramework.core.system.OptionsManager;
+import beardFramework.displaySystem.cameras.Camera;
 import beardFramework.events.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
@@ -18,6 +19,8 @@ import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import openfl.ui.Multitouch;
 import openfl.ui.MultitouchInputMode;
+import openfl._internal.renderer.RenderSession;
+import openfl._internal.renderer.opengl.GLDisplayObject;
 /**
  * ...
  * @author Ludo
@@ -31,6 +34,7 @@ class BeardGame extends Sprite
 	private var physicsEnabled:Bool;
 	private var contentLayer:Sprite;
 	private var UILayer:Sprite;
+	public var cameras:Map<String,Camera>;
 	
 	public function new() 
 	{
@@ -38,8 +42,8 @@ class BeardGame extends Sprite
 		
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
-		stage.addEventListener(Event.DEACTIVATE, deactivate);
-		
+		stage.addEventListener(Event.DEACTIVATE, Deactivate);
+		stage.addEventListener(Event.RESIZE, Resize);
 		Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
 		
 		Init();
@@ -51,13 +55,16 @@ class BeardGame extends Sprite
 		// Do visual Loading stuff
 		contentLayer = new Sprite();
 		UILayer = new Sprite();
-		
+		cameras = new Map<String,Camera>();
+		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
 		stage.addChild(contentLayer);
 		stage.addChild(UILayer);
 		InputManager.get_instance().Activate(stage.window);
 		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 		AssetManager.get_instance().Load();
+		
+		
 		
 	}
 	
@@ -84,10 +91,11 @@ class BeardGame extends Sprite
 	private function LoadResources():Void{
 		
 		if (OptionsManager.get_instance().resourcesToLoad.length > 0){
-				for (resource in OptionsManager.get_instance().resourcesToLoad)
+			for (resource in OptionsManager.get_instance().resourcesToLoad)
 			{
 				AssetManager.get_instance().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
 			}
+			trace(OptionsManager.get_instance().resourcesToLoad);
 			
 			AssetManager.get_instance().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
 		}
@@ -124,6 +132,23 @@ class BeardGame extends Sprite
 		
 	}
 	
+	public function AddCamera(camera:Camera):Bool
+	{
+		if (!cameras.exists(camera.id)){
+			cameras[camera.id] = camera;
+			return true;
+		}
+		
+		return false;
+		
+	}
+	
+	public function RemoveCamera(id:String):Void
+	{
+		cameras[id] = null;	
+		
+	}
+	
 	override function __enterFrame(deltaTime:Int):Void 
 	{
 		super.__enterFrame(deltaTime);
@@ -144,10 +169,20 @@ class BeardGame extends Sprite
 		
 	}
 	
-	private function deactivate(e:Event):Void{
+	private function Deactivate(e:Event):Void{
 		
 		
 		
+	}
+	
+	private function Resize(e:Event):Void{
+		
+		if (cameras != null && cameras["default"] != null){
+			
+			cameras["default"].width = stage.stageWidth;
+			cameras["default"].height = stage.stageHeight;
+			trace("default camera resized");
+		}
 	}
 	public static inline function Game():BeardGame
 	{
@@ -161,5 +196,54 @@ class BeardGame extends Sprite
 	{
 		return UILayer;
 	}
+	
+	private override function __renderGL (renderSession:RenderSession):Void {
+		
+		if (!__renderable || __worldAlpha <= 0) return;
+		
+		GLDisplayObject.render (this, renderSession);
+		
+		var utilX:Float;
+		var utilY:Float;
+	
+		renderSession.filterManager.pushObject (this);
+		
+		for (camera in cameras.iterator()){
+		
+			renderSession.maskManager.pushRect (camera.GetRect(), camera.transform);
+			
+			for (child in __children) {
+				if (camera.Contains(child)){
+					utilX = child.__transform.tx;
+					utilY = child.__transform.ty;
+					child.__transform.tx = camera.viewportX +(utilX - camera.x);
+					child.__transform.ty = camera.viewportY + (utilY - camera.y);
+					child.__update(true, true);
+					child.__renderGL (renderSession);
+					child.__transform.tx = utilX;
+					child.__transform.ty = utilY;
+				}
+				
+				
+			}
+		
+			for (orphan in __removedChildren) {
+				
+				if (orphan.stage == null) {
+					
+					orphan.__cleanup ();
+					
+				}
+				
+			}
+		
+		__removedChildren.length = 0;
+		
+			
+			renderSession.maskManager.popRect ();
+		}
+		renderSession.filterManager.popObject (this);
+	}
+	
 
 }

@@ -1,22 +1,38 @@
 package beardFramework.displaySystem;
 
+import beardFramework.interfaces.ICameraDependent;
 import openfl.display.Sprite;
 
 /**
  * ...
  * @author Ludo
  */
-class BeardSprite extends Sprite
+class BeardSprite extends Sprite implements ICameraDependent
 {
 	private var widthChanged:Bool;
 	private var heightChanged:Bool;
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
+	public var restrictedCameras(default,null):Array<String>;
+
 	public function new() 
 	{
 		super();
 		
 	}
+	
+	public function AuthorizeCamera(addedCameraID : String):Void
+	{
+		if (restrictedCameras == null) restrictedCameras = new Array<String>();
+		
+		if (restrictedCameras.indexOf(addedCameraID) == -1) restrictedCameras.push(addedCameraID);
+	}
+	public function ForbidCamera(forbiddenCameraID : String):Void
+	{
+		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
+	}
+	
+	
 	override function set_width(value:Float):Float 
 	{
 		widthChanged = true;

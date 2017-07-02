@@ -4,7 +4,7 @@ import openfl.display.BitmapData;
 import openfl.display.Tileset;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
-import resources.assets.BeardTileSet;
+import beardFramework.resources.assets.BeardTileSet;
 
 /**
  * ...

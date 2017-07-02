@@ -129,7 +129,7 @@ class InputManager
 	public function LinkActionToInput(actionID : String, inputID:String, inputType:InputType, ?compatibleActionsIDs : Array<String> = null):Void 
 	{
 		utilString = inputID != "" ? inputID + inputType : GetStringFromInputType(inputType);
-		trace("added input link : " + actionID + " linked to " + utilString);  
+		//trace("added input link : " + actionID + " linked to " + utilString);  
 		//Create the action if non-existing
 		if (actions[actionID] == null){
 			actions[actionID] = new InputAction(compatibleActionsIDs);
@@ -230,7 +230,7 @@ class InputManager
 		var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
 		
 		mouseDownTargetName = objects[0] != null ? objects[0].name : "";
-		trace("mouse down target : " + mouseDownTargetName);
+		//trace("mouse down target : " + mouseDownTargetName);
 		if (inputs[utilString] != null){
 			
 			for (action in inputs[utilString])
@@ -303,8 +303,8 @@ class InputManager
 			
 			if (objects != null && objects[0] != null && mouseMoveTargetName != objects[0].name){
 				
-				trace("previous  " +mouseMoveTargetName);
-				trace("new " +objects[0].name);
+				//trace("previous  " +mouseMoveTargetName);
+				//trace("new " +objects[0].name);
 				if (inputs[GetStringFromInputType(InputType.MOUSE_OVER)] != null){
 			
 					for (action in inputs[GetStringFromInputType(InputType.MOUSE_OVER)])
@@ -487,7 +487,7 @@ class InputManager
 	
 	public function OnGamepadConnect(gamepad:Gamepad):Void
 	{
-		trace('gamepad ' + gamepad.id + ' ('+ gamepad.name + ') connected');
+		//trace('gamepad ' + gamepad.id + ' ('+ gamepad.name + ') connected');
 		gamepad.onAxisMove.add(OnGamepadAxisMove);
 		gamepad.onButtonDown.add(OnGamepadButtonDown);
 		gamepad.onButtonUp.add(OnGamepadButtonUp);

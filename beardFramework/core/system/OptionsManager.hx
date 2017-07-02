@@ -46,7 +46,7 @@ class OptionsManager
 			{
 				for (atlas in element.elementsNamed("atlas"))
 				{
-					resourcesToLoad.push({ type:atlas.get("fileExtention") == "jpg" ?AssetType.ATLAS_JPG : AssetType.ATLAS_PNG, name : atlas.get("name"), url:atlas.get("path") });
+					resourcesToLoad.push({ type: (atlas.get("fileExtension") == "jpg" ?AssetType.ATLAS_JPG : AssetType.ATLAS_PNG), name : atlas.get("name"), url:atlas.get("path") });
 				}
 			}
 			

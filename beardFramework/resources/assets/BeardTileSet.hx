@@ -1,4 +1,4 @@
-package resources.assets;
+package beardFramework.resources.assets;
 import openfl.display.BitmapData;
 import openfl.display.Tileset;
 import openfl.geom.Rectangle;

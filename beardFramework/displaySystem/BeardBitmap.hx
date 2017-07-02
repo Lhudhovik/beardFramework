@@ -1,5 +1,6 @@
 package beardFramework.displaySystem;
 
+import beardFramework.interfaces.ICameraDependent;
 import openfl._internal.renderer.RenderSession;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
@@ -11,17 +12,28 @@ import openfl.geom.Rectangle;
  * ...
  * @author Ludo
  */
-class BeardBitmap extends Bitmap
+class BeardBitmap extends Bitmap implements ICameraDependent
 {
 	private var widthChanged:Bool;
 	private var heightChanged:Bool;
 	private var cachedWidth:Float;
-	private var cachedHeight:Float:
-	 
+	private var cachedHeight:Float;
+	public var restrictedCameras(default,null):Array<String>;
 	public function new(bitmapData:BitmapData=null, pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 
 	{
 		super(bitmapData, pixelSnapping, smoothing);
+		heightChanged = widthChanged = true;
+	}
+	//as soon as we authorize a camera, others won't display the bitmap unless they are authorized too
+	public function AuthorizeCamera(addedCameraID : String):Void
+	{
+		if (restrictedCameras == null) restrictedCameras = new Array<String>();
 		
+		if (restrictedCameras.indexOf(addedCameraID) == -1) restrictedCameras.push(addedCameraID);
+	}
+	public function ForbidCamera(forbiddenCameraID : String):Void
+	{
+		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
 	}
 	
 	override function set_width(value:Float):Float 
@@ -36,6 +48,7 @@ class BeardBitmap extends Bitmap
 			cachedWidth = super.get_width();
 			widthChanged = false;
 		}
+		
 		return cachedWidth;
 	}
 	
@@ -67,7 +80,6 @@ class BeardBitmap extends Bitmap
 	
 	override function __renderCairo(renderSession:RenderSession):Void 
 	{
-		if(
 		super.__renderCairo(renderSession);
 	}
 	override function __renderDOM(renderSession:RenderSession):Void 
@@ -82,4 +94,5 @@ class BeardBitmap extends Bitmap
 	{
 		super.__renderCanvas(renderSession);
 	}
+
 }

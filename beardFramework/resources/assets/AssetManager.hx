@@ -158,10 +158,13 @@ class AssetManager
 			case LoaderEventType.Start:
 				onStart.dispatch();
 			case LoaderEventType.Complete:
+				var i:Int=0;
 				for (requestedAtlas in requestedAtlasQueue){
 					CreateAtlas(requestedAtlas);
-					requestedAtlasQueue.remove(requestedAtlas);
+					requestedAtlasQueue[i++] = null;
 				}
+				requestedAtlasQueue = [];
+				
 				onComplete.dispatch();
 			case LoaderEventType.Progress:
 				onProgress.dispatch(get_progress());
@@ -196,8 +199,7 @@ class AssetManager
 	public function CreateAtlas(atlasName:String):Void{
 		
 		if (atlases[atlasName] == null){
-			
-			atlases[atlasName] = new Atlas(getContent('${atlasName}_image'),getContent('${atlasName}_xml'));
+			atlases[atlasName] = new Atlas(getContent('${atlasName}_image'), getContent('${atlasName}_xml'));
 		}else throw "Atlas already exists";
 		
 	}
