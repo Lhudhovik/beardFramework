@@ -1,15 +1,14 @@
 package beardFramework.displaySystem;
-
+import beardFramework.displaySystem.cameras.Camera;
 import beardFramework.interfaces.ICameraDependent;
-import openfl._internal.renderer.RenderSession;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.display.Graphics;
 import openfl.display.PixelSnapping;
-import openfl.geom.Matrix;
-import openfl.geom.Rectangle;
+
 
 /**
- * ...
+ * reused of the bitmap code
  * @author Ludo
  */
 class BeardBitmap extends Bitmap implements ICameraDependent
@@ -18,22 +17,46 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 	private var heightChanged:Bool;
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
-	public var restrictedCameras(default,null):Array<String>;
-	public function new(bitmapData:BitmapData=null, pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 
+	public var restrictedCameras(default, null):Array<String>;
+	
+	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) 
 	{
-		super(bitmapData, pixelSnapping, smoothing);
+		
+		super (bitmapData, pixelSnapping,smoothing);
+		
 		heightChanged = widthChanged = true;
+	
 	}
-	//as soon as we authorize a camera, others won't display the bitmap unless they are authorized too
+	
 	public function AuthorizeCamera(addedCameraID : String):Void
 	{
 		if (restrictedCameras == null) restrictedCameras = new Array<String>();
 		
 		if (restrictedCameras.indexOf(addedCameraID) == -1) restrictedCameras.push(addedCameraID);
 	}
+	
 	public function ForbidCamera(forbiddenCameraID : String):Void
 	{
 		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
+	}
+	
+	public function RenderThroughCamera(camera:Camera):Void
+	{
+		
+	
+		
+	}
+	
+	override function set_bitmapData(value:BitmapData):BitmapData 
+	{
+		heightChanged = widthChanged = true;
+		return super.set_bitmapData(value);
+	}
+	
+	override public function __update(transformOnly:Bool, updateChildren:Bool, ?maskGraphics:Graphics = null):Void 
+	{
+		super.__update(transformOnly, updateChildren, maskGraphics);
+		if (!transformOnly) widthChanged = heightChanged = true;
 	}
 	
 	override function set_width(value:Float):Float 
@@ -48,7 +71,6 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 			cachedWidth = super.get_width();
 			widthChanged = false;
 		}
-		
 		return cachedWidth;
 	}
 	
@@ -60,11 +82,13 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 		}
 		return cachedHeight;
 	}
+	
 	override function set_height(value:Float):Float 
 	{
 		heightChanged = true;
 		return super.set_height(value);
 	}
+	
 	override function set_scaleX(value:Float):Float 
 	{
 		widthChanged = true;
@@ -78,21 +102,6 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 	}
 	
 	
-	override function __renderCairo(renderSession:RenderSession):Void 
-	{
-		super.__renderCairo(renderSession);
-	}
-	override function __renderDOM(renderSession:RenderSession):Void 
-	{
-		super.__renderDOM(renderSession);
-	}
-	override function __renderGL(renderSession:RenderSession):Void 
-	{
-		super.__renderGL(renderSession);
-	}
-	override function __renderCanvas(renderSession:RenderSession):Void 
-	{
-		super.__renderCanvas(renderSession);
-	}
-
+	
+	
 }
