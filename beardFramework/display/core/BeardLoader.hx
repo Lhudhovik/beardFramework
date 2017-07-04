@@ -1,5 +1,6 @@
-package beardFramework.displaySystem;
+package beardFramework.displaySystem.core;
 
+import beardFramework.display.core.BeardDisplayObjectContainer;
 import haxe.io.Path;
 import lime.utils.AssetLibrary in LimeAssetLibrary;
 import lime.utils.AssetManifest;

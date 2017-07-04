@@ -1,4 +1,4 @@
-package beardFramework.displaySystem;
+package beardFramework.display.core;
 
 import openfl.display.Tile;
 import openfl.display.Tilemap;

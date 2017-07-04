@@ -1,7 +1,7 @@
 package beardFramework.core;
 
 import beardFramework.core.system.OptionsManager;
-import beardFramework.displaySystem.cameras.Camera;
+import beardFramework.display.cameras.Camera;
 import beardFramework.events.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
@@ -180,8 +180,8 @@ class BeardGame extends Sprite
 		
 		if (cameras != null && cameras["default"] != null){
 			
-			cameras["default"].width = stage.stageWidth;
-			cameras["default"].height = stage.stageHeight;
+			cameras["default"].viewportWidth = stage.stageWidth;
+			cameras["default"].viewportHeight = stage.stageHeight;
 			trace("default camera resized");
 		}
 	}
@@ -224,8 +224,8 @@ class BeardGame extends Sprite
 					else{
 						utilX = child.__transform.tx;
 						utilY = child.__transform.ty;
-						child.__transform.tx = camera.viewportX +(utilX - camera.x);
-						child.__transform.ty = camera.viewportY + (utilY - camera.y);
+						child.__transform.tx = camera.viewportX +(utilX - camera.cameraX);
+						child.__transform.ty = camera.viewportY + (utilY - camera.cameraY);
 						child.__update(true, true);
 						child.__renderGL (renderSession);
 						child.__transform.tx = utilX;

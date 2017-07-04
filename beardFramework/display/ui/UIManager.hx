@@ -1,6 +1,6 @@
-package beardFramework.displaySystem.ui;
+package beardFramework.display.ui;
 import beardFramework.core.BeardGame;
-import beardFramework.displaySystem.ui.components.UIContainer;
+import beardFramework.display.ui.components.UIContainer;
 import beardFramework.interfaces.IUIComponent;
 import openfl.display.DisplayObject;
 import openfl.display.Sprite;

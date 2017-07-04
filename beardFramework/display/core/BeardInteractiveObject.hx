@@ -1,7 +1,7 @@
-package beardFramework.displaySystem;
+package beardFramework.displaySystem.core;
 
 
-import beardFramework.displaySystem.BeardDisplayObject;
+import beardFramework.display.core.BeardDisplayObject;
 import openfl.display.DisplayObject;
 import openfl.geom.Rectangle;
 

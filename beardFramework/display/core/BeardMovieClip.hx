@@ -1,5 +1,6 @@
-package beardFramework.displaySystem;
+package beardFramework.display.core;
 
+import beardFramework.display.core.BeardSprite;
 import lime.utils.Log;
 import openfl._internal.swf.SWFLite;
 import openfl._internal.symbols.BitmapSymbol;

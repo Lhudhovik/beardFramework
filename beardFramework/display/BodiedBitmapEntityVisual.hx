@@ -1,5 +1,6 @@
-package beardFramework.displaySystem;
+package beardFramework.display;
 
+import beardFramework.display.BitmapEntityVisual;
 import nape.phys.Body;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
@@ -8,7 +9,7 @@ import openfl.display.PixelSnapping;
  * ...
  * @author Ludo
  */
-class BodiedBitmapVisual extends BitmapVisual
+class BodiedBitmapEntityVisual extends BitmapEntityVisual
 {
 
 	private var body:Body;

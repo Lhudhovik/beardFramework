@@ -1,6 +1,6 @@
-package beardFramework.displaySystem;
+package beardFramework.display;
 
-import beardFramework.displaySystem.SpriteVisual;
+import beardFramework.display.SpriteVisual;
 import nape.phys.Body;
 
 /**

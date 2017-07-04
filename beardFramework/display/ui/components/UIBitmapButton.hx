@@ -1,6 +1,6 @@
-package beardFramework.displaySystem.ui.components;
+package beardFramework.display.ui.components;
 
-import beardFramework.displaySystem.ui.components.UIBitmapComponent;
+import beardFramework.display.ui.components.UIBitmapComponent;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
 

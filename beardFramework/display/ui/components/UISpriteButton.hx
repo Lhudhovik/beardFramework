@@ -1,6 +1,6 @@
-package beardFramework.displaySystem.ui.components;
+package beardFramework.display.ui.components;
 
-import beardFramework.displaySystem.ui.components.UISpriteComponent;
+import beardFramework.display.ui.components.UISpriteComponent;
 import beardFramework.events.input.InputManager;
 import beardFramework.events.input.InputType;
 import beardFramework.resources.assets.AssetManager;

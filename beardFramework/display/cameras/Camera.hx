@@ -1,4 +1,4 @@
-package beardFramework.displaySystem.cameras;
+package beardFramework.display.cameras;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.geom.Matrix;
 import openfl.geom.Rectangle;
@@ -13,10 +13,10 @@ class Camera
 	private static var utilRect:Rectangle;
 	public var id(default, null):String;
 	public var zoom(get,set):Float;
-	public var width:Float;
-	public var height:Float;
-	public var x:Float;
-	public var y:Float;
+	public var viewportWidth:Float;
+	public var viewportHeight:Float;
+	public var cameraX:Float;
+	public var cameraY:Float;
 	public var viewportX(get, set):Float;
 	public var viewportY(get, set):Float;
 	public var buffer:Float;
@@ -27,8 +27,8 @@ class Camera
 	{
 		transform = new Matrix();
 		this.id = id;
-		this.width = width;
-		this.height = height;
+		this.viewportWidth = width;
+		this.viewportHeight = height;
 		this.buffer = buffer;
 		
 	}
@@ -38,6 +38,9 @@ class Camera
 	public inline function get_zoom():Float return transform.a;
 	public function set_zoom(newZoom:Float):Float{
 		
+		buffer *= zoom;
+		buffer /= newZoom;
+		trace(buffer);
 		transform.d = newZoom;
 		return transform.a = newZoom;
 	}
@@ -49,8 +52,8 @@ class Camera
 		if (utilRect == null)
 		utilRect = new Rectangle();
 		
-		utilRect.width = this.width;
-		utilRect.height = this.height;
+		utilRect.width = this.viewportWidth/zoom;
+		utilRect.height = this.viewportHeight/zoom;
 		utilRect.x = 0;
 		utilRect.y = 0;
 		
@@ -62,8 +65,18 @@ class Camera
 		var success:Bool = (cast(object, ICameraDependent).restrictedCameras == null || cast(object, ICameraDependent).restrictedCameras.indexOf(id) != -1);
 		
 		if (success)
-			success = (((object.x + object.width) > (x - buffer)) && (object.x < (x + width + buffer)) && ((object.y + object.height) > (y - buffer)) && (object.y < (y + height + buffer)));
+			success = (((object.x + object.width) > (cameraX - buffer)) && (object.x < (cameraX + viewportWidth + buffer)) && ((object.y + object.height) > (cameraY - buffer)) && (object.y < (cameraY + viewportHeight + buffer)));
 	
+		if (this.id == "two"){
+			
+			if (!success) trace(object.x - this.cameraX);
+			//trace(object.name + "  " + success);
+		}
+		//trace(" left " + (object.x + object.width) + " greater than " + (x - buffer));
+		//trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
+		//trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));
+		//trace(" left " + (object.y) + " lesser than " + (y + height + buffer));
+		//trace("------------------------------------------------------------------");
 		return success;
 	}
 	

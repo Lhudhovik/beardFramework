@@ -1,6 +1,6 @@
-package beardFramework.displaySystem.renderers.gl;
+package beardFramework.display.renderers.gl;
 
-import beardFramework.displaySystem.cameras.Camera;
+import beardFramework.display.cameras.Camera;
 import openfl._internal.renderer.opengl.GLBitmap;
 import openfl._internal.renderer.opengl.GLRenderer;
 import lime.utils.Float32Array;
@@ -38,19 +38,16 @@ class BeardGLBitmap extends GLBitmap
 			var renderer:GLRenderer = cast renderSession.renderer;
 			var gl = renderSession.gl;
 			
-			renderSession.blendModeManager.setBlendMode (bitmap.__worldBlendMode);
-			
-			
+			if (_adjustedTransform == null) _adjustedTransform = new Matrix ();
 			_adjustedTransform.a = bitmap.__renderTransform.a * camera.transform.a + bitmap.__renderTransform.b * camera.transform.c;
 			_adjustedTransform.b = bitmap.__renderTransform.a * camera.transform.b + bitmap.__renderTransform.b * camera.transform.d;
 			_adjustedTransform.c = bitmap.__renderTransform.c * camera.transform.a + bitmap.__renderTransform.d * camera.transform.c;
 			_adjustedTransform.d = bitmap.__renderTransform.c * camera.transform.b + bitmap.__renderTransform.d * camera.transform.d;
-			_adjustedTransform.tx = bitmap.__renderTransform.tx * camera.transform.a + bitmap.__renderTransform.ty * camera.transform.c + camera.transform.tx;
-			_adjustedTransform.ty = bitmap.__renderTransform.tx * camera.transform.b + bitmap.__renderTransform.ty * camera.transform.d + camera.transform.ty;
-			
-			
+			_adjustedTransform.tx = bitmap.__renderTransform.tx * camera.transform.a + bitmap.__renderTransform.ty * camera.transform.c + camera.transform.tx + (bitmap.__renderTransform.tx - camera.cameraX);
+			_adjustedTransform.ty = bitmap.__renderTransform.tx * camera.transform.b + bitmap.__renderTransform.ty * camera.transform.d + camera.transform.ty + (bitmap.__renderTransform.ty - camera.cameraY);
+		
+			renderSession.blendModeManager.setBlendMode (bitmap.__worldBlendMode);
 			renderSession.maskManager.pushObject (bitmap);
-			//renderSession.maskManager.p (bitmap);
 			
 			var shader = renderSession.filterManager.pushObject (bitmap);
 	

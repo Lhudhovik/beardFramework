@@ -1,6 +1,6 @@
-package beardFramework.displaySystem.ui.components;
+package beardFramework.display.ui.components;
 
-import beardFramework.displaySystem.BeardSprite;
+import beardFramework.display.core.BeardSprite;
 import beardFramework.interfaces.IUIComponent;
 
 

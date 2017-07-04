@@ -1,7 +1,7 @@
-package beardFramework.displaySystem;
+package beardFramework.display;
 
 import beardFramework.interfaces.IEntityVisual;
-import beardFramework.displaySystem.BeardSprite;
+import beardFramework.display.core.BeardSprite;
 
 
 /**

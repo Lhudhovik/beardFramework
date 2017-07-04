@@ -1,5 +1,5 @@
 package beardFramework.interfaces;
-import beardFramework.displaySystem.cameras.Camera;
+import beardFramework.display.cameras.Camera;
 import openfl._internal.renderer.RenderSession;
 
 /**

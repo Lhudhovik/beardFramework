@@ -1,6 +1,6 @@
-package beardFramework.displaySystem;
-import beardFramework.displaySystem.cameras.Camera;
-import beardFramework.displaySystem.renderers.gl.BeardGLBitmap;
+package beardFramework.display.core;
+import beardFramework.display.cameras.Camera;
+import beardFramework.display.renderers.gl.BeardGLBitmap;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
@@ -46,7 +46,7 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 	{
 		
 		BeardGLBitmap.renderThroughCamera(this, renderSession, camera);
-		trace("render");
+		
 	}
 	
 	override function set_bitmapData(value:BitmapData):BitmapData 

@@ -1,34 +1,29 @@
-package beardFramework.displaySystem;
+package beardFramework.display.core;
 
+import beardFramework.display.cameras.Camera;
+import beardFramework.display.renderers.gl.BeardGLDisplayObject;
 import beardFramework.interfaces.ICameraDependent;
-import openfl.display.DisplayObject;
-import openfl.display.DisplayObjectContainer;
 import openfl.display.Graphics;
-
+import openfl.display.Sprite;
+import openfl._internal.renderer.RenderSession;
 
 /**
- * reused of the bitmap code
+ * ...
  * @author Ludo
  */
-class BeardDisplayObjectContainer extends DisplayObjectContainer implements ICameraDependent{
-	
+class BeardSprite extends Sprite implements ICameraDependent{
 	
 	private var widthChanged:Bool;
 	private var heightChanged:Bool;
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
 	public var restrictedCameras(default, null):Array<String>;
-	
-	private function new () 
+
+	public function new () 
 	{
 		
 		super ();
 		
-		mouseChildren = true;
-		
-		__children = new Array<DisplayObject> ();
-		__removedChildren = new Vector<DisplayObject> ();
-		__tempStack = new Vector<DisplayObject> ();
 		widthChanged = heightChanged = true;
 	}
 	
@@ -44,45 +39,33 @@ class BeardDisplayObjectContainer extends DisplayObjectContainer implements ICam
 		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
 	}
 	
-	public function RenderThroughCamera(camera:Camera):Void{
-		
-	
-		
-	}
-		
-	override public function addChildAt(child:DisplayObject, index:Int):DisplayObject 
+	public function RenderThroughCamera(camera:Camera, renderSession:RenderSession):Void
 	{
-		widthChanged = heightChanged = true;
-		return super.addChildAt(child, index);
-	}
 		
-	override public function removeChild(child:DisplayObject):DisplayObject 
-	{
-		widthChanged = heightChanged = true;
-		return super.removeChild(child);
+		BeardGLDisplayObject.renderThroughCamera(this, renderSession, camera);
+		
 	}
 	
-	override public function removeChildren(beginIndex:Int = 0, endIndex:Int = 0x7FFFFFFF):Void 
-	{
-		widthChanged = heightChanged = true;
-		super.removeChildren(beginIndex, endIndex);
-	}
 	
-	override public function __update (transformOnly:Bool, updateChildren:Bool, ?maskGraphics:Graphics = null):Void {
-		
-		super.__update (transformOnly, updateChildren, maskGraphics);
-		
+	override public function __update(transformOnly:Bool, updateChildren:Bool, ?maskGraphics:Graphics = null):Void 
+	{
+		super.__update(transformOnly, updateChildren, maskGraphics);
 		if (!transformOnly) widthChanged = heightChanged = true;
-		
 	}
 	
-	
-	override public function __updateChildren (transformOnly:Bool):Void {
+	override public function __updateChildren (transformOnly:Bool):Void 
+	{
 		
 		super.__updateChildren (transformOnly);
 		
 		if(!transformOnly) 	widthChanged = heightChanged = true;
 	}
+	
+	//override function set_width(value:Float):Float 
+	//{
+		//widthChanged = true;
+		//return super.set_width(value);
+	//}
 	
 	override function get_width():Float 
 	{
@@ -120,6 +103,11 @@ class BeardDisplayObjectContainer extends DisplayObjectContainer implements ICam
 		return super.set_scaleY(value);
 	}
 	
+	override function get_graphics():Graphics 
+	{
+		widthChanged = heightChanged = true;
+		return super.get_graphics();
+	}
 	
 	
 	

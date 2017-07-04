@@ -1,4 +1,4 @@
-package beardFramework.displaySystem.ui.components;
+package beardFramework.display.ui.components;
 import beardFramework.interfaces.IUIComponent;
 import openfl.display.DisplayObject;
 

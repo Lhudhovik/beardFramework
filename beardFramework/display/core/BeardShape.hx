@@ -1,4 +1,5 @@
-package beardFramework.displaySystem;
+package beardFramework.display.core;
+import beardFramework.display.core.BeardDisplayObject;
 import openfl.display.Graphics;
 
 
