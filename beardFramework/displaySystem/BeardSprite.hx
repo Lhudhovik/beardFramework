@@ -5,6 +5,7 @@ import beardFramework.displaySystem.cameras.Camera;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.display.Graphics;
 import openfl.display.Sprite;
+import openfl._internal.renderer.RenderSession;
 
 /**
  * ...
@@ -38,12 +39,13 @@ class BeardSprite extends Sprite implements ICameraDependent{
 		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
 	}
 	
-	public function RenderThroughCamera(camera:Camera):Void
+	public function RenderThroughCamera(camera:Camera, renderSession:RenderSession):Void
 	{
 		
-	
+		
 		
 	}
+	
 	
 	override public function __update(transformOnly:Bool, updateChildren:Bool, ?maskGraphics:Graphics = null):Void 
 	{

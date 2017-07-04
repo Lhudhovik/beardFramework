@@ -3,6 +3,7 @@ package beardFramework.core;
 import beardFramework.core.system.OptionsManager;
 import beardFramework.displaySystem.cameras.Camera;
 import beardFramework.events.input.InputManager;
+import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
 import mloader.Loader;
@@ -214,14 +215,23 @@ class BeardGame extends Sprite
 			
 			for (child in __children) {
 				if (camera.Contains(child)){
-					utilX = child.__transform.tx;
-					utilY = child.__transform.ty;
-					child.__transform.tx = camera.viewportX +(utilX - camera.x);
-					child.__transform.ty = camera.viewportY + (utilY - camera.y);
-					child.__update(true, true);
-					child.__renderGL (renderSession);
-					child.__transform.tx = utilX;
-					child.__transform.ty = utilY;
+					
+					
+					if (Std.is(child, ICameraDependent)){
+						
+						cast(child, ICameraDependent).RenderThroughCamera(camera, renderSession);
+					}
+					else{
+						utilX = child.__transform.tx;
+						utilY = child.__transform.ty;
+						child.__transform.tx = camera.viewportX +(utilX - camera.x);
+						child.__transform.ty = camera.viewportY + (utilY - camera.y);
+						child.__update(true, true);
+						child.__renderGL (renderSession);
+						child.__transform.tx = utilX;
+						child.__transform.ty = utilY;
+					}
+					
 				}
 				
 				

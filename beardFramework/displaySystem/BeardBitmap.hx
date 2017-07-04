@@ -1,10 +1,12 @@
 package beardFramework.displaySystem;
 import beardFramework.displaySystem.cameras.Camera;
+import beardFramework.displaySystem.renderers.gl.BeardGLBitmap;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.Graphics;
 import openfl.display.PixelSnapping;
+import openfl._internal.renderer.RenderSession;
 
 
 /**
@@ -40,11 +42,11 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
 	}
 	
-	public function RenderThroughCamera(camera:Camera):Void
+	public function RenderThroughCamera(camera:Camera, renderSession:RenderSession):Void
 	{
 		
-	
-		
+		BeardGLBitmap.renderThroughCamera(this, renderSession, camera);
+		trace("render");
 	}
 	
 	override function set_bitmapData(value:BitmapData):BitmapData 
