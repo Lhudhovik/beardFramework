@@ -1,26 +1,31 @@
 package beardFramework.core.system.thread;
-import beardFramework.core.system.thread.Thread.MethodDetails;
+
 
 /**
  * ...
  * @author Ludo
  */
-class Thread 
+class Thread<T>
 {
-	var threadedMethod:Array<MethodDetails>;
-	var allowedTime:Float;
-	public function new(threshold:Float) 
+	private var threadedMethods:Array<ThreadDetail<T>>;
+	private var allowedTime:Float;
+	public var empty(get, null):Bool;
+	
+	public function new(timeLimit:Float) 
 	{
-		this.allowedTime = threshold;
+		this.allowedTime = timeLimit;
 		
 	}
 	
-	public function AddToThread(method:Dynamic->Float->Bool, parameter:Dynamic):Void
+	public function AddToThread(method:ThreadDetail<T>->Bool, parameter:T):Void
 	{
-		if (threadedMethod == null) threadedMethod = new Array<MethodDetails>();
-		var details:MethodDetails = {action:method, parameter:parameter};
+		if (threadedMethods == null) threadedMethods = new Array<ThreadDetail<T>>();
+		var details:ThreadDetail<T> = {action:method, parameter:parameter, allowedTime:0};
 		
-		if (!CheckIsExisting(details)) threadedMethod.push(details);
+		if (!CheckIsExisting(details)){
+			threadedMethods.push(details);
+			trace("thread method added");
+		}
 	}
 	
 	
@@ -28,23 +33,46 @@ class Thread
 	{
 		var time:Float = Date.now().getTime();
 		var i : Int = 0;
-		while (i< threadedMethod.length)
+		var individualTime :Float = this.allowedTime / threadedMethods.length;
+		
+		while (i< threadedMethods.length)
 		{
-			if (threadedMethod[i] != null && threadedMethod[i].action(threadedMethod[i].parameter, allowedTime/threadedMethod.length)){
-				threadedMethod.remove(threadedMethod[i]);
-				i--;
+			if (threadedMethods[i] != null){
+				
+				threadedMethods[i].allowedTime = individualTime;
+				
+				if( threadedMethods[i].action(threadedMethods[i])){
+					threadedMethods.remove(threadedMethods[i]);
+					i--;
+				}
 			}
 			//trace(threadedMethod[i].parameter);
 			if ((Date.now().getTime() - time) > allowedTime) break;
+			
+			i++;
 		}
 		
 	}
 	
-	private inline function CheckIsExisting(checkedDetail : MethodDetails):Bool
+	public function Clear():Void
+	{
+		
+		if (threadedMethods != null){
+			
+			for (detail in threadedMethods){
+				
+				detail = null;
+			}
+			
+		}
+		threadedMethods = [];
+	}
+	
+	private inline function CheckIsExisting(checkedDetail : ThreadDetail<T>):Bool
 	{
 		var success:Bool = false;
 		
-		for (method in threadedMethod){
+		for (method in threadedMethods){
 			
 			if (success = (method.action == checkedDetail.action))
 				break;
@@ -53,11 +81,18 @@ class Thread
 		return success;
 	}
 	
+	public function get_empty():Bool 
+	{
+		return (threadedMethods == null || threadedMethods.length==0);
+	}
+	
 	
 }
 
-typedef MethodDetails = {
+typedef ThreadDetail<T> = {
 	
-	var action:Dynamic->Float->Bool;	
-	var parameter:Dynamic;	
+	var action:ThreadDetail<T>->Bool;	
+	var parameter:T;
+	var allowedTime:Float;
+	
 }

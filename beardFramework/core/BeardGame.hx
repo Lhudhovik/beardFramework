@@ -1,6 +1,7 @@
 package beardFramework.core;
 
 import beardFramework.core.system.OptionsManager;
+import beardFramework.debug.MemoryUsage;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.events.input.InputManager;
@@ -67,7 +68,8 @@ class BeardGame extends Sprite
 		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 		AssetManager.get_instance().Load();
-		
+		var fps:MemoryUsage = new MemoryUsage(10,10,0xffffff);
+		stage.addChild(fps);
 		
 		
 	}

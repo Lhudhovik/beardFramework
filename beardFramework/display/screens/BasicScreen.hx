@@ -1,5 +1,6 @@
 package beardFramework.display.screens;
 import beardFramework.core.BeardGame;
+import beardFramework.core.system.thread.Thread.ThreadDetail;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardSprite;
 import msignal.Signal.Signal0;
@@ -32,12 +33,15 @@ class BasicScreen
 	{
 		contentLayer = BeardGame.Game().GetContentLayer();
 		defaultCamera = BeardGame.Game().cameras["default"];
-		
+	
 	}
 	
-	public function ParseScreenData(xml:Xml):Void
+	public function ParseScreenData(threadDetail:ThreadDetail<Xml>):Void
 	{
 
+		
+		
+		
 	}
 	
 	public function Clear():Bool
