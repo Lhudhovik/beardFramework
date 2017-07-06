@@ -18,6 +18,7 @@ class UIContainer implements IUIComponent
 {
 	@:isVar public var width(get, set):Float;
 	@:isVar public var height(get, set):Float;
+	@:isVar public var name(get, set):String;
 	public var fillPart:Float;
 	public var vAlign:UInt;
 	public var hAlign:UInt;
@@ -57,6 +58,17 @@ class UIContainer implements IUIComponent
 		UpdateVisual();
 	}
 	
+	public function GetComponent(name:String):IUIComponent
+	{
+		
+		for (element in elements){
+			
+			if (element.name == name) return element;
+		}
+		
+		return null;
+		
+	}
 	public function UpdateVisual():Void
 	{
 		//adjust size
@@ -129,6 +141,15 @@ class UIContainer implements IUIComponent
 	
 	/* INTERFACE beardFramework.interfaces.IUIComponent */
 	
+	public function Clear():Void 
+	{
+		
+	}
+	
+	
+	
+	/* INTERFACE beardFramework.interfaces.IUIComponent */
+	
 	@:isVar public var x(get, set):Float;
 	
 	function get_x():Float 
@@ -184,11 +205,7 @@ class UIContainer implements IUIComponent
 	{
 		return scaleY = value;
 	}
-	
-	
-
-	
-	
+		
 	function set_width(value:Float):Float 
 	{
 		if (width != value){
@@ -216,6 +233,16 @@ class UIContainer implements IUIComponent
 	function get_height():Float 
 	{
 		return height;
+	}
+	
+	function get_name():String 
+	{
+		return name;
+	}
+	
+	function set_name(value:String):String 
+	{
+		return name = value;
 	}
 	
 		

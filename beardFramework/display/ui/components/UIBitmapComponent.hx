@@ -28,6 +28,14 @@ class UIBitmapComponent extends BeardBitmap implements IUIComponent
 	
 	/* INTERFACE beardFramework.interfaces.IUIComponent */
 	
+	public function Clear():Void 
+	{
+		
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IUIComponent */
+	
 	public var vAlign:UInt;
 	
 	public var hAlign:UInt;

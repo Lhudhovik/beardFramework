@@ -8,6 +8,7 @@ interface IUIComponent
 	
 	public var x(get,set):Float;
 	public var y(get,set):Float;
+	public var name(get,set):String;
 	public var width(get,set):Float;
 	public var height(get,set):Float;
 	public var scaleX(get,set):Float;
@@ -19,4 +20,5 @@ interface IUIComponent
 	public var keepRatio:Bool;
 	
 	public function UpdateVisual():Void;
+	public function Clear():Void;
 }

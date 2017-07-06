@@ -1,38 +1,35 @@
 package beardFramework.display.ui.components;
 
-import beardFramework.display.core.BeardSprite;
+import beardFramework.display.core.BeardTextField;
 import beardFramework.interfaces.IUIComponent;
-
 
 /**
  * ...
  * @author Ludo
  */
-class UISpriteComponent extends BeardSprite implements IUIComponent
+class UITextFieldComponent extends BeardTextField implements IUIComponent
 {
 
-
-	
-	public var fillPart:Float;
-	
-	public var keepRatio:Bool;
-	
-	public var vAlign:UInt;
-	
-	public var hAlign:UInt;
-	
 	public function new() 
 	{
 		super();
-				
+		
 	}
 	
 	
 	/* INTERFACE beardFramework.interfaces.IUIComponent */
 	
+	public var vAlign:UInt;
+	
+	public var hAlign:UInt;
+	
+	public var fillPart:Float;
+	
+	public var keepRatio:Bool;
+	
 	public function UpdateVisual():Void 
 	{
-		
+		__updateLayout();
 	}
 	
 	
@@ -42,8 +39,5 @@ class UISpriteComponent extends BeardSprite implements IUIComponent
 	{
 		
 	}
-	
-	
-	
 	
 }

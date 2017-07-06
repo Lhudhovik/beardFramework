@@ -2,6 +2,7 @@ package beardFramework.core;
 
 import beardFramework.core.system.OptionsManager;
 import beardFramework.display.cameras.Camera;
+import beardFramework.display.core.BeardSprite;
 import beardFramework.events.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
@@ -28,14 +29,15 @@ import openfl._internal.renderer.opengl.GLDisplayObject;
  */
 class BeardGame extends Sprite
 {
+	private static var game(get,null):BeardGame;
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SETTINGS(default, never):String = "settings";
-	private static var game:BeardGame;
 	private var physicsEnabled:Bool;
-	private var contentLayer:Sprite;
-	private var UILayer:Sprite;
+	private var contentLayer:BeardSprite;
+	private var UILayer:BeardSprite;
 	public var cameras:Map<String,Camera>;
+	private var pause:Bool;
 	
 	public function new() 
 	{
@@ -50,12 +52,13 @@ class BeardGame extends Sprite
 		Init();
 	}
 	
-	private function Init():Void{
+	private function Init():Void
+	{
 	
 		game = this;
 		// Do visual Loading stuff
-		contentLayer = new Sprite();
-		UILayer = new Sprite();
+		contentLayer = new BeardSprite();
+		UILayer = new BeardSprite();
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
 		stage.addChild(contentLayer);
@@ -69,7 +72,8 @@ class BeardGame extends Sprite
 		
 	}
 	
-	private function OnSettingsLoaded(e:LoaderEvent<Dynamic>):Void{
+	private function OnSettingsLoaded(e:LoaderEvent<Dynamic>):Void
+	{
 		
 		
 		OptionsManager.get_instance().parseSettings(AssetManager.get_instance().getContent(SETTINGS));
@@ -77,19 +81,22 @@ class BeardGame extends Sprite
 		LoadResources();
 	}
 	
-	private function OnSettingsProgressing(e:LoaderEvent<Dynamic>):Void{
+	private function OnSettingsProgressing(e:LoaderEvent<Dynamic>):Void
+	{
 		trace("progress...");
 		trace(e.target.progress);
 		
 	}
 		
-	private function OnSettingsFailed(e:LoaderEvent<Dynamic>):Void{
+	private function OnSettingsFailed(e:LoaderEvent<Dynamic>):Void
+	{
 		trace("error !");
 		trace(e.type.getName() +"\n" + e.type.getParameters());
 		
 	}
 	
-	private function LoadResources():Void{
+	private function LoadResources():Void
+	{
 		
 		if (OptionsManager.get_instance().resourcesToLoad.length > 0){
 			for (resource in OptionsManager.get_instance().resourcesToLoad)
@@ -105,12 +112,14 @@ class BeardGame extends Sprite
 		
 	}
 	
-	private function GameStart():Void{
+	private function GameStart():Void
+	{
 		
 		if (physicsEnabled)
 			PhysicsManager.get_instance().InitSpace(OptionsManager.get_instance().GetSettings("physics"));
 		
 	}
+	
 	private function OnResourcesProgress(progress:Float):Void
 	{
 		
@@ -118,6 +127,7 @@ class BeardGame extends Sprite
 		
 		
 	}
+	
 	private function OnPreciseResourcesProgress(e:LoaderEvent<Dynamic>):Void
 	{
 		
@@ -125,6 +135,7 @@ class BeardGame extends Sprite
 		
 		
 	}
+	
 	private function OnResourcesFailed(error: LoaderErrorType):Void
 	{
 		
@@ -150,16 +161,28 @@ class BeardGame extends Sprite
 		
 	}
 	
+	public function Pause(pause:Bool=true):Void
+	{
+		
+		this.pause = pause;
+		//do more stuff if needed
+
+	}
 	override function __enterFrame(deltaTime:Int):Void 
 	{
 		super.__enterFrame(deltaTime);
 		
-		if (physicsEnabled && PhysicsManager.get_instance().get_space() != null)
-			PhysicsManager.get_instance().Step(deltaTime);
+		if (!pause){
+			
 		
+			if (physicsEnabled && PhysicsManager.get_instance().get_space() != null)
+				PhysicsManager.get_instance().Step(deltaTime);
+			
+		}
 	}
 	
-	public function getTargetUnderPoint (point:Point):Array<DisplayObject> {
+	public function getTargetUnderPoint (point:Point):Array<DisplayObject> 
+	{
 		
 		var stack = new Array<DisplayObject> ();
 		__hitTest (point.x, point.y, false, stack, true, stage);
@@ -170,13 +193,15 @@ class BeardGame extends Sprite
 		
 	}
 	
-	private function Deactivate(e:Event):Void{
+	private function Deactivate(e:Event):Void
+	{
 		
 		
 		
 	}
 	
-	private function Resize(e:Event):Void{
+	private function Resize(e:Event):Void
+	{
 		
 		if (cameras != null && cameras["default"] != null){
 			
@@ -185,20 +210,24 @@ class BeardGame extends Sprite
 			trace("default camera resized");
 		}
 	}
-	public static inline function Game():BeardGame
+	
+	public static inline function get_game():BeardGame
 	{
 		return game;
 	}
-	public inline function GetContentLayer():Sprite
+	
+	public inline function GetContentLayer():BeardSprite
 	{
 		return contentLayer;
 	}
-	public inline function GetUILayer():Sprite
+	
+	public inline function GetUILayer():BeardSprite
 	{
 		return UILayer;
 	}
 	
-	private override function __renderGL (renderSession:RenderSession):Void {
+	private override function __renderGL (renderSession:RenderSession):Void 
+	{
 		
 		if (!__renderable || __worldAlpha <= 0) return;
 		
