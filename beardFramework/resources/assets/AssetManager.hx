@@ -52,7 +52,8 @@ class AssetManager
 		return instance;
 	}
 	
-	private function Init():Void{
+	private function Init():Void
+	{
 		
 		loaders = new Map<String, Loader<Dynamic>>();
 		atlases = new Map<String, Atlas>();
@@ -71,9 +72,8 @@ class AssetManager
 		
 		
 	}
-	
-	
-	 public function Append(type:AssetType, url:String, loaderName:String, onCompleteCallback:LoaderEvent<Dynamic>->Void = null, onProgressCallback:LoaderEvent<Dynamic>->Void = null, onErrorCallback:LoaderEvent<Dynamic>->Void = null, onCancelCallback:LoaderEvent<Dynamic>->Void = null):Void
+		
+	public function Append(type:AssetType, url:String, loaderName:String, onCompleteCallback:LoaderEvent<Dynamic>->Void = null, onProgressCallback:LoaderEvent<Dynamic>->Void = null, onErrorCallback:LoaderEvent<Dynamic>->Void = null, onCancelCallback:LoaderEvent<Dynamic>->Void = null):Void
 	{
 	
 		if (loaderName == null)
@@ -179,14 +179,13 @@ class AssetManager
 		
 		
 	}
-	
-	
+		
 	public function get_loading():Bool return loaderQueue.loading;
 	
 	public function get_progress():Float return loaderQueue.progress;
 	
-	
-	public function getContent(loaderName:String):Dynamic{
+	public function GetContent(loaderName:String):Dynamic
+	{
 		
 		var content : Dynamic = null;
 		if(loaders[loaderName] != null && loaders[loaderName].content != null)
@@ -195,11 +194,16 @@ class AssetManager
 		return content;
 	}
 	
+	public inline function HasContent(loaderName:String):Bool
+	{
+		return (loaders[loaderName] != null && loaders[loaderName].content != null);
+	}
 	
-	public function CreateAtlas(atlasName:String):Void{
+	public function CreateAtlas(atlasName:String):Void
+	{
 		
 		if (atlases[atlasName] == null){
-			atlases[atlasName] = new Atlas(getContent('${atlasName}_image'), getContent('${atlasName}_xml'));
+			atlases[atlasName] = new Atlas(GetContent('${atlasName}_image'), GetContent('${atlasName}_xml'));
 		}else throw "Atlas already exists";
 		
 	}
@@ -208,10 +212,12 @@ class AssetManager
 	{
 		return atlases[atlasName] != null ? atlases[atlasName] : null;
 	}
+	
 	public function GetBitmapData(textureName:String, atlasName:String):BitmapData
 	{
 		return atlases[atlasName] != null ? atlases[atlasName].GetBitmapData(textureName) : null;
 	}
+	
 	public function ClearAtlas(atlasName:String):Void
 	{
 		if ( atlases[atlasName] != null ){

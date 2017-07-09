@@ -15,7 +15,7 @@ class CrossThread<T> extends Thread<T>
 	
 	override public function Proceed():Void 
 	{
-		if (currentIndex < threadedMethods.length && threadedMethods[currentIndex] != null){
+		if (threadedMethods.length > 0 && currentIndex < threadedMethods.length && threadedMethods[currentIndex] != null){
 			
 			threadedMethods[currentIndex].allowedTime = allowedTime;
 			
@@ -23,8 +23,10 @@ class CrossThread<T> extends Thread<T>
 				threadedMethods.remove(threadedMethods[currentIndex]);
 				currentIndex--;
 			}
+			
+			if (threadedMethods.length == 0) completed.dispatch();
+			
 		}
-		
 		if (++currentIndex >= threadedMethods.length) currentIndex = 0;
 		
 	}

@@ -14,9 +14,10 @@ import openfl.display.Stage;
 class BasicScreen 
 {
 	public var onReady(get, null):Signal0;
+	public var dataPath:String;
 	private var contentLayer:BeardSprite;
 	private var defaultCamera:Camera;
-	private var id:String;
+	//private var id:String;
 	private var loadingProgression(get, null):Float;
 	
 	public function new(dataNeeded:Bool = true) 
@@ -25,26 +26,36 @@ class BasicScreen
 		if (!dataNeeded) Init();
 	}
 	
-	public inline function get_onReady():Signal0
-		return onReady;
+	public inline function get_onReady():Signal0 return onReady;
 		
-	
 	private function Init():Void
 	{
 		contentLayer = BeardGame.Game().GetContentLayer();
 		defaultCamera = BeardGame.Game().cameras["default"];
-	
 	}
 	
 	public function ParseScreenData(threadDetail:ThreadDetail<Xml>):Void
 	{
-
-		
-		
 		
 	}
 	
-	public function Clear():Bool
+	public function Clear(threadDetail:ThreadDetail<Int>):Bool
+	{
+		return true;
+	}
+	
+	public function Freeze(freeze:Bool = true):Void
+	{
+		//do stuff to stop game Logic and prevent any error during loading etc.
+	}
+		
+	public function TransitionIn():Void
+	{
+		contentLayer.visible = true;
+		onReady.dispatch();
+	}
+	
+	public function TransitionOut():Void
 	{
 		
 	}
@@ -52,6 +63,16 @@ class BasicScreen
 	inline function get_loadingProgression():Float 
 	{
 		return loadingProgression;
+	}
+	
+	public inline function Hide():Void
+	{
+		contentLayer.visible = false;
+	}
+	
+	public inline function Show():Void
+	{
+		contentLayer.visible = true;
 	}
 	
 	

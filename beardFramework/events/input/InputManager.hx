@@ -227,7 +227,7 @@ class InputManager
 		
 		timeCounters[GetMouseInputID(mouseButton)] = Date.now().getTime();
 		
-		var objects:Array<DisplayObject> = BeardGame.get_game().getTargetUnderPoint(utilPoint);
+		var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
 		
 		mouseDownTargetName = objects[0] != null ? objects[0].name : "";
 		//trace("mouse down target : " + mouseDownTargetName);
@@ -252,7 +252,7 @@ class InputManager
 		
 		utilPoint.setTo(mouseX, mouseY);
 		
-		var objects:Array<DisplayObject> = BeardGame.get_game().getTargetUnderPoint(utilPoint);
+		var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
 		
 		
 		if (inputs[utilString] != null){
@@ -298,7 +298,7 @@ class InputManager
 			
 			utilPoint.setTo(mouseX, mouseY);
 			
-			var objects:Array<DisplayObject> = BeardGame.get_game().getTargetUnderPoint(utilPoint);
+			var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
 			
 			
 			if (objects != null && objects[0] != null && mouseMoveTargetName != objects[0].name){

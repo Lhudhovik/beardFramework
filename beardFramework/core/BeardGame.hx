@@ -4,6 +4,7 @@ import beardFramework.core.system.OptionsManager;
 import beardFramework.debug.MemoryUsage;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardSprite;
+import beardFramework.display.screens.BasicScreen;
 import beardFramework.events.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
@@ -30,15 +31,17 @@ import openfl._internal.renderer.opengl.GLDisplayObject;
  */
 class BeardGame extends Sprite
 {
-	private static var game(get,null):BeardGame;
+	private static var game:BeardGame;
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SETTINGS(default, never):String = "settings";
 	private var physicsEnabled:Bool;
 	private var contentLayer:BeardSprite;
 	private var UILayer:BeardSprite;
+	private var LoadingLayer:BeardSprite;
 	public var cameras:Map<String,Camera>;
 	private var pause:Bool;
+	private var currentScreen(get, null):BasicScreen;
 	
 	public function new() 
 	{
@@ -60,10 +63,12 @@ class BeardGame extends Sprite
 		// Do visual Loading stuff
 		contentLayer = new BeardSprite();
 		UILayer = new BeardSprite();
+		LoadingLayer = new BeardSprite();
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
 		stage.addChild(contentLayer);
 		stage.addChild(UILayer);
+		stage.addChild(LoadingLayer);
 		InputManager.get_instance().Activate(stage.window);
 		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
@@ -78,7 +83,7 @@ class BeardGame extends Sprite
 	{
 		
 		
-		OptionsManager.get_instance().parseSettings(AssetManager.get_instance().getContent(SETTINGS));
+		OptionsManager.get_instance().parseSettings(AssetManager.get_instance().GetContent(SETTINGS));
 		physicsEnabled = OptionsManager.get_instance().GetSettings("physics").get("enabled") == "true";
 		LoadResources();
 	}
@@ -213,7 +218,7 @@ class BeardGame extends Sprite
 		}
 	}
 	
-	public static inline function get_game():BeardGame
+	public static inline function Game():BeardGame
 	{
 		return game;
 	}
@@ -226,6 +231,10 @@ class BeardGame extends Sprite
 	public inline function GetUILayer():BeardSprite
 	{
 		return UILayer;
+	}
+	public inline function GetLoadingLayer():BeardSprite
+	{
+		return LoadingLayer;
 	}
 	
 	private override function __renderGL (renderSession:RenderSession):Void 
@@ -284,6 +293,11 @@ class BeardGame extends Sprite
 			renderSession.maskManager.popRect ();
 		}
 		renderSession.filterManager.popObject (this);
+	}
+	
+	public function get_currentScreen():BasicScreen 
+	{
+		return currentScreen;
 	}
 	
 

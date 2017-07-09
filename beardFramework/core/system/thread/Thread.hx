@@ -1,4 +1,5 @@
 package beardFramework.core.system.thread;
+import msignal.Signal.Signal0;
 
 
 /**
@@ -10,11 +11,12 @@ class Thread<T>
 	private var threadedMethods:Array<ThreadDetail<T>>;
 	private var allowedTime:Float;
 	public var empty(get, null):Bool;
+	public var completed(get, null):Signal0;
 	
 	public function new(timeLimit:Float) 
 	{
 		this.allowedTime = timeLimit;
-		
+		completed = new Signal0();
 	}
 	
 	public function AddToThread(method:ThreadDetail<T>->Bool, parameter:T):Void
@@ -46,11 +48,22 @@ class Thread<T>
 					i--;
 				}
 			}
-			//trace(threadedMethod[i].parameter);
+			
+			
+			if (threadedMethods.length == 0) completed.dispatch();
 			if ((Date.now().getTime() - time) > allowedTime) break;
 			
 			i++;
 		}
+		
+		
+		
+	}
+	
+	public function ThreadedProceed(threadDetail:ThreadDetail<Int>):Bool
+	{
+		Proceed();
+		return get_empty();
 		
 	}
 	
@@ -66,6 +79,7 @@ class Thread<T>
 			
 		}
 		threadedMethods = [];
+		completed.removeAll();
 	}
 	
 	private inline function CheckIsExisting(checkedDetail : ThreadDetail<T>):Bool
@@ -81,10 +95,16 @@ class Thread<T>
 		return success;
 	}
 	
-	public function get_empty():Bool 
+	public inline function get_empty():Bool 
 	{
 		return (threadedMethods == null || threadedMethods.length==0);
 	}
+	
+	function inline get_completed():Signal0 
+	{
+		return completed;
+	}
+	
 	
 	
 }
