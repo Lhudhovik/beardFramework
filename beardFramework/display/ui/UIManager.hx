@@ -30,7 +30,7 @@ class UIManager
 	
 	private function Init():Void
 	{
-		UILayer = BeardGame.get_game().GetUILayer();
+		UILayer = BeardGame.Game().GetUILayer();
 		templates = new Map<String, IUIComponent>();
 	}
 	

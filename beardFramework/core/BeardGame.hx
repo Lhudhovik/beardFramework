@@ -62,8 +62,11 @@ class BeardGame extends Sprite
 		game = this;
 		// Do visual Loading stuff
 		contentLayer = new BeardSprite();
+		contentLayer.visible = false;
 		UILayer = new BeardSprite();
+		UILayer.visible = false;
 		LoadingLayer = new BeardSprite();
+		LoadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
 		stage.addChild(contentLayer);

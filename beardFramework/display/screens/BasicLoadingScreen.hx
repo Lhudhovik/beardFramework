@@ -12,13 +12,14 @@ class BasicLoadingScreen extends BasicScreen
 {
 	private static var instance(get, null):BasicLoadingScreen;
 	private var components:UIContainer;
-	public var activeLoadingTasksCount : Int;
+	public var loadingTasksCount : Int;
+	public var completedLoadingTasksCount : Int;
 
 	public function new(dataNeeded:Bool=true) 
 	{
 		super(dataNeeded);
 		instance = this;
-		activeLoadingTasksCount = 0;
+		loadingTasksCount = 0;
 	}
 	
 	
@@ -40,6 +41,8 @@ class BasicLoadingScreen extends BasicScreen
 	
 	public function OnLoadingProgress(progression:Float):Void
 	{
+		
+		trace((progression + completedLoadingTasksCount) / loadingTasksCount);
 		
 	}
 	

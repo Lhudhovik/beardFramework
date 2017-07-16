@@ -8,8 +8,10 @@ import msignal.Signal.Signal0;
  */
 class Thread<T>
 {
+	private static var markedDate:Float;
 	private var threadedMethods:Array<ThreadDetail<T>>;
 	private var allowedTime:Float;
+	private var length(get, null):Int;
 	public var empty(get, null):Bool;
 	public var completed(get, null):Signal0;
 	
@@ -22,7 +24,7 @@ class Thread<T>
 	public function AddToThread(method:ThreadDetail<T>->Bool, parameter:T):Void
 	{
 		if (threadedMethods == null) threadedMethods = new Array<ThreadDetail<T>>();
-		var details:ThreadDetail<T> = {action:method, parameter:parameter, allowedTime:0};
+		var details:ThreadDetail<T> = {action:method, parameter:parameter, allowedTime:0, progression:0};
 		
 		if (!CheckIsExisting(details)){
 			threadedMethods.push(details);
@@ -100,9 +102,23 @@ class Thread<T>
 		return (threadedMethods == null || threadedMethods.length==0);
 	}
 	
-	function inline get_completed():Signal0 
+	public inline function  get_completed():Signal0 
 	{
 		return completed;
+	}
+	
+	public inline function get_length():Int 
+	{
+		return threadedMethods.length;
+	}
+	
+	public static inline function MarkDate():Void
+	{
+		markedDate = Date.now().getTime();
+	}
+	public static inline function CheckTimeExpiration(threshold:Float):Bool
+	{
+		return (Date.now().getTime() - markedDate >= threshold);
 	}
 	
 	
@@ -114,5 +130,6 @@ typedef ThreadDetail<T> = {
 	var action:ThreadDetail<T>->Bool;	
 	var parameter:T;
 	var allowedTime:Float;
+	var progression:Float;
 	
 }
