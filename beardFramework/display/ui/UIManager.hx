@@ -1,5 +1,6 @@
 package beardFramework.display.ui;
 import beardFramework.core.BeardGame;
+import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.display.ui.components.UIContainer;
 import beardFramework.interfaces.IUIComponent;
@@ -13,7 +14,7 @@ import openfl.display.Sprite;
 class UIManager 
 {
 	private static var instance(get,null):UIManager;
-	private var UILayer:BeardSprite;
+	private var UILayer:BeardLayer;
 	private var templates:Map<String, IUIComponent>;
 	private function new() 
 	{

@@ -16,12 +16,13 @@ class BeardDisplayObject extends DisplayObject implements ICameraDependent
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
 	public var restrictedCameras(default, null):Array<String>;
+	public var displayingCameras(default, null):List<String>;
 	
 	public function new() 
 	{
 		super();
 		heightChanged = widthChanged = true;
-		
+		displayingCameras = new List<String>();
 	}
 	
 	public function AuthorizeCamera(addedCameraID : String):Void

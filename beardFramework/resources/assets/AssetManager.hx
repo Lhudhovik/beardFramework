@@ -227,7 +227,7 @@ class AssetManager
 		}
 	}
 	
-	public function cancel():Void
+	public function Cancel():Void
 	{
 		loaderQueue.cancel();
 	}

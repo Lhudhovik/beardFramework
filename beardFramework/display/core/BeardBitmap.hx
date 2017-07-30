@@ -4,6 +4,7 @@ import beardFramework.display.renderers.gl.BeardGLBitmap;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
+import openfl.display.DisplayObject;
 import openfl.display.Graphics;
 import openfl.display.PixelSnapping;
 import openfl._internal.renderer.RenderSession;
@@ -20,14 +21,16 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
 	public var restrictedCameras(default, null):Array<String>;
+	public var displayingCameras(default, null):List<String>;
+	public var mouseEnabled:Bool;
 	
 	public function new (bitmapData:BitmapData = null, pixelSnapping:PixelSnapping = null, smoothing:Bool = false) 
 	{
 		
 		super (bitmapData, pixelSnapping,smoothing);
-		
+		mouseEnabled = false;
 		heightChanged = widthChanged = true;
-	
+		displayingCameras = new List<String>();
 	}
 	
 	public function AuthorizeCamera(addedCameraID : String):Void
@@ -47,6 +50,20 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 		
 		BeardGLBitmap.renderThroughCamera(this, renderSession, camera);
 		
+	}
+	
+	override function __hitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool, hitObject:DisplayObject):Bool 
+	{
+		
+		//trace("*****************  " + this.name +" hit Test");
+		var success:Bool = super.__hitTest(x, y, shapeFlag, stack, interactiveOnly, hitObject);
+		
+		if (success && mouseEnabled && stack != null){
+			//trace( this.name +" added to stack");
+			stack.push(this);
+		}
+		
+		return success;
 	}
 	
 	override function set_bitmapData(value:BitmapData):BitmapData 

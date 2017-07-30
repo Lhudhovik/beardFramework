@@ -15,9 +15,9 @@ class BasicLoadingScreen extends BasicScreen
 	public var loadingTasksCount : Int;
 	public var completedLoadingTasksCount : Int;
 
-	public function new(dataNeeded:Bool=true) 
+	public function new( ) 
 	{
-		super(dataNeeded);
+		super();
 		instance = this;
 		loadingTasksCount = 0;
 	}
@@ -27,7 +27,7 @@ class BasicLoadingScreen extends BasicScreen
 	{
 		super.Init();
 		
-		contentLayer = BeardGame.Game().GetLoadingLayer();
+		displayLayer = BeardGame.Game().GetLoadingLayer();
 		//var loadingSign:UIBitmapComponent = new UIBitmapComponent();
 		//var loadingText:UITextFieldComponent = new UITextFieldComponent();
 		

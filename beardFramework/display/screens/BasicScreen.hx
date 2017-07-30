@@ -2,6 +2,7 @@ package beardFramework.display.screens;
 import beardFramework.core.BeardGame;
 import beardFramework.core.system.thread.Thread.ThreadDetail;
 import beardFramework.display.cameras.Camera;
+import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import msignal.Signal.Signal0;
 import openfl.display.Sprite;
@@ -16,25 +17,25 @@ class BasicScreen
 	public var onReady(get, null):Signal0;
 	public var onTransitionFinished(get, null):Signal0;
 	public var dataPath:String;
-	private var contentLayer:BeardSprite;
+	private var displayLayer:BeardLayer;
 	private var defaultCamera:Camera;
 	//private var id:String;
 	private var loadingProgression(get, null):Float;
 	
 	
-	public function new(dataNeeded:Bool = true) 
+	public function new() 
 	{
 		onReady = new Signal0();
 		onTransitionFinished = new Signal0();
-		if (!dataNeeded) Init();
+		displayLayer = BeardGame.Game().GetContentLayer();
+		defaultCamera = BeardGame.Game().cameras["default"];
 	}
 	
 	public inline function get_onReady():Signal0 return onReady;
 		
 	private function Init():Void
 	{
-		contentLayer = BeardGame.Game().GetContentLayer();
-		defaultCamera = BeardGame.Game().cameras["default"];
+		
 	}
 	
 	public function ParseScreenData(threadDetail:ThreadDetail<Xml>):Bool
@@ -43,10 +44,16 @@ class BasicScreen
 		return true;
 	}
 	
+	public function Play():Void
+	{
+		//start/restart game logic
+	}
+		
 	public function Clear(threadDetail:ThreadDetail<Int>):Bool
 	{
 		return true;
 	}
+	
 	
 	public function Freeze(freeze:Bool = true):Void
 	{
@@ -56,7 +63,8 @@ class BasicScreen
 	public function TransitionIn():Void
 	{
 		Show();
-		//Do visual Stuff
+		onTransitionFinished.addOnce(Play);
+		//Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
 	}
 	
 	public function TransitionOut():Void
@@ -71,12 +79,20 @@ class BasicScreen
 	
 	public inline function Hide():Void
 	{
-		contentLayer.visible = false;
+		if (displayLayer != null){
+			displayLayer.visible = false;
+			displayLayer.mouseEnabled = false;
+		}
+		
 	}
 	
 	public inline function Show():Void
 	{
-		contentLayer.visible = true;
+		if (displayLayer != null){
+			displayLayer.visible = true;
+			displayLayer.mouseEnabled = true;
+		}
+		
 	}
 	
 	function get_onTransitionFinished():Signal0 
@@ -85,7 +101,7 @@ class BasicScreen
 	}
 	public inline function isDisplayed():Bool
 	{
-		return contentLayer.visible;
+		return displayLayer.visible;
 	}
 	
 	

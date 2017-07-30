@@ -3,9 +3,14 @@ package beardFramework.display.core;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.renderers.gl.BeardGLDisplayObject;
 import beardFramework.interfaces.ICameraDependent;
+import openfl.display.DisplayObject;
 import openfl.display.Graphics;
 import openfl.display.Sprite;
 import openfl._internal.renderer.RenderSession;
+import openfl.geom.Point;
+
+@:access(openfl.display.Graphics)
+@:access(openfl.geom.Point)
 
 /**
  * ...
@@ -18,6 +23,8 @@ class BeardSprite extends Sprite implements ICameraDependent{
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
 	public var restrictedCameras(default, null):Array<String>;
+	public var displayingCameras(default, null):List<String>;
+	private var hitFocusOverChildren:Bool;
 
 	public function new () 
 	{
@@ -25,6 +32,8 @@ class BeardSprite extends Sprite implements ICameraDependent{
 		super ();
 		
 		widthChanged = heightChanged = true;
+		displayingCameras = new List<String>();
+		hitFocusOverChildren = true;
 	}
 	
 	public function AuthorizeCamera(addedCameraID : String):Void
@@ -44,6 +53,30 @@ class BeardSprite extends Sprite implements ICameraDependent{
 		
 		BeardGLDisplayObject.renderThroughCamera(this, renderSession, camera);
 		
+		var utilX:Float;
+		var utilY:Float;
+		
+		for (child in __children) {
+			
+			if (Std.is(child, ICameraDependent)){
+						
+				cast(child, ICameraDependent).displayingCameras.remove(camera.id);
+				cast(child, ICameraDependent).displayingCameras.add(camera.id);
+				cast(child, ICameraDependent).RenderThroughCamera(camera, renderSession);
+			}
+			else{
+				utilX = child.__transform.tx;
+				utilY = child.__transform.ty;
+				child.__transform.tx = camera.viewportX +(utilX - camera.cameraX);
+				child.__transform.ty = camera.viewportY + (utilY - camera.cameraY);
+				child.__update(true, true);
+				child.__renderGL (renderSession);
+				child.__transform.tx = utilX;
+				child.__transform.ty = utilY;
+			}
+			
+		}
+		
 	}
 	
 	
@@ -61,11 +94,34 @@ class BeardSprite extends Sprite implements ICameraDependent{
 		if(!transformOnly) 	widthChanged = heightChanged = true;
 	}
 	
-	//override function set_width(value:Float):Float 
-	//{
-		//widthChanged = true;
-		//return super.set_width(value);
-	//}
+	public function beardHitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool, hitObject:DisplayObject):Bool 
+	{
+		var stackSize : Int = stack!= null? stack.length:0;
+		super.__hitTest(x, y, shapeFlag, stack, interactiveOnly, hitObject);
+		if (stack != null && stack.length > stackSize) stack.push(this);		
+		return true;
+	}
+	
+	override private function __hitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool, hitObject:DisplayObject):Bool 
+	{
+		
+		//trace("*****************  " + this.name +" hit Test");
+		var stackSize : Int = stack != null? stack.length:0;
+		var success:Bool = false;
+		
+		super.__hitTest(x, y, shapeFlag, stack, interactiveOnly, hitObject);
+		
+		if (stack != null && stack.length > stackSize){
+			success = true;
+			//trace("---------------------------" + this.name +"      hit succeeded");
+			if (hitFocusOverChildren == true){
+				stack.push(this);	
+				//trace(this.name + "  added to stack");
+			}
+		}
+		return success;
+	}
+	
 	
 	override function get_width():Float 
 	{
@@ -85,11 +141,6 @@ class BeardSprite extends Sprite implements ICameraDependent{
 		return cachedHeight;
 	}
 	
-	//override function set_height(value:Float):Float 
-	//{
-		//heightChanged = true;
-		//return super.set_height(value);
-	//}
 	
 	override function set_scaleX(value:Float):Float 
 	{

@@ -1,11 +1,13 @@
 package beardFramework.core.system;
+import beardFramework.core.system.ScreenFlowManager.NextScreenData;
 import beardFramework.core.system.thread.ChainThread;
 import beardFramework.core.system.thread.Thread;
 import beardFramework.display.screens.BasicLoadingScreen;
 import beardFramework.display.screens.BasicScreen;
 import beardFramework.display.ui.UIManager;
 import beardFramework.resources.assets.AssetManager;
-import cpp.Void;
+import beardFramework.utils.StringLibrary;
+import mloader.Loader.LoaderEvent;
 
 /**
  * ...
@@ -14,21 +16,16 @@ import cpp.Void;
 class ScreenFlowManager
 {
 	private static var instance(get, null):ScreenFlowManager;
-	
-	public var LEVELS_PATH(default, never):String = "assets/levels/";
-	//public var SCREENDATA(default, never):String = "screenData";
+		//public var SCREENDATA(default, never):String = "screenData";
 	public var currentLoadingScreen : BasicLoadingScreen;
 	public var transitioning:Bool;
 	
-	private var loadingScreens:Map<Class<BasicLoadingScreen>, BasicLoadingScreen>;
-	private var existingScreens:Map<Class<BasicScreen>, BasicScreen>;
+	private var loadingScreens:Map<String, BasicLoadingScreen>;
+	private var existingScreens:Map<String, BasicScreen>;
 	private var loadThread:Thread<Xml>;
 	private var clearThread:Thread<Int>;
-	private var TransitionThread:ChainThread<Int>;
-	private var nextScreen:BasicScreen;
-	private var nextScreenReUse:Bool;
-	private var nextScreenClass:Class<BasicScreen>;
-	private var nextScreenDataPath:String;
+	private var transitionThread(get, null):ChainThread<Int>;
+	private var nextScreenData:NextScreenData;
 	
 	private function new() 
 	{
@@ -49,69 +46,55 @@ class ScreenFlowManager
 	{
 		loadThread = new Thread<Xml>(10);
 		clearThread = new Thread<Int>(10);
-		TransitionThread = new ChainThread<Int>(10);
-		loadingScreens = new Map<Class<BasicLoadingScreen>, BasicLoadingScreen>();
-		existingScreens = new Map<Class<BasicScreen>, BasicScreen>();
+		transitionThread = new ChainThread<Int>(10);
+		loadingScreens = new Map<String, BasicLoadingScreen>();
+		existingScreens = new Map<String, BasicScreen>();
+		nextScreenData = { screen:null, reUse:false, screenClass:null, dataPath:""};
 		transitioning = false;
 	}
 	
 	public function LoadScreen(screenClass:Class<BasicScreen>, loadingScreenClass:Class<BasicLoadingScreen>, dataPath:String = "", reUse:Bool = true):Void
 	{
-		BeardGame.Game().get_currentScreen().Freeze();
-		nextScreenReUse = reUse;
-		nextScreenDataPath = dataPath;
-		nextScreenClass = screenClass;
+		if (BeardGame.Game().currentScreen!= null){
+			BeardGame.Game().currentScreen.Freeze();
+			clearThread.AddToThread(BeardGame.Game().currentScreen.Clear, 0);
+		}
+		nextScreenData.reUse = reUse;
+		nextScreenData.dataPath = dataPath;
+		nextScreenData.screenClass = screenClass;
 		transitioning = true;
 		DisplayLoadingScreen(loadingScreenClass,true,OnTransitionReady);
-		
-		//if (reUse){
-			//
-			//if (existingScreens[screenClass] == null) existingScreens[screenClass] == Type.createInstance(screenClass, [dataPath != ""]));
-			//
-			//nextScreen = existingScreens[screenClass];
-			//
-		//}
-		//else nextScreen = Type.createInstance(screenClass, [dataPath != ""]);
-		//
-		//nextScreen.dataPath = dataPath;
-		//
-		//if (dataPath != "" && !AssetManager.get_instance().HasContent(dataPath)){
-			//
-			//currentLoadingScreen.activeLoadingTasksCount++;
-			//
-			//AssetManager.get_instance().Append(AssetType.XML, dataPath, dataPath, null, null, OnSettingsFailed);
-			//AssetManager.get_instance().Load(OnScreenDataReady, currentLoadingScreen.OnProgress);
-		//
-		//}
-		//else
-		//{
-			//OnScreenDataReady();			
-		//}
-		
 	}
 	
 	
 	private function OnTransitionReady():Void
 	{
 		currentLoadingScreen.loadingTasksCount = 2;//clear previous screen + load the next screen
+		StringLibrary.utilString = Type.getClassName(nextScreenData.screenClass);
 		
-		if (nextScreenReUse){
+		if (nextScreenData.reUse){
+						
+			if (existingScreens[StringLibrary.utilString] == null) existingScreens[StringLibrary.utilString] = Type.createInstance(nextScreenData.screenClass,[]);
 			
-			if (existingScreens[nextScreenClass] == null) existingScreens[nextScreenClass] == Type.createInstance(nextScreenClass, [nextScreenDataPath != ""]));
-			
-			nextScreen = existingScreens[nextScreenClass];
+			nextScreenData.screen = existingScreens[StringLibrary.utilString];
 			
 		}
-		else nextScreen = Type.createInstance(nextScreenClass, [nextScreenDataPath != ""]);
+		else nextScreenData.screen = Type.createInstance(nextScreenData.screenClass, []);
 		
-		nextScreen.dataPath = nextScreenDataPath;
+		if (nextScreenData.screen == null){
+			trace(StringLibrary.utilString);
+			trace("hum... unexpected : Screen Class ->   " + nextScreenData.screenClass);
+			return;
+		}
 		
-		if (nextScreenDataPath != "" && !AssetManager.get_instance().HasContent(nextScreenDataPath)){
+		nextScreenData.screen.dataPath = nextScreenData.dataPath;
+		
+		if (nextScreenData.dataPath != "" && !AssetManager.get_instance().HasContent(nextScreenData.dataPath)){
 			
 			currentLoadingScreen.loadingTasksCount++;
 			
-			AssetManager.get_instance().Append(AssetType.XML, nextScreenDataPath, nextScreenDataPath, null, null, OnSettingsFailed);
-			AssetManager.get_instance().Load(OnScreenDataReady, currentLoadingScreen.OnProgress);
+			AssetManager.get_instance().Append(AssetType.XML, nextScreenData.dataPath, nextScreenData.dataPath, null, null, BeardGame.Game().OnSettingsFailed);
+			AssetManager.get_instance().Load(OnScreenDataReady, currentLoadingScreen.OnLoadingProgress);
 		
 		}
 		else
@@ -123,29 +106,31 @@ class ScreenFlowManager
 	private function OnScreenDataReady():Void
 	{
 	
-		clearThread.AddToThread(BeardGame.Game().get_currentScreen().Clear, 0);
-		loadThread.AddToThread(nextScreen.ParseScreenData, AssetManager.get_instance().GetContent(nextScreen.dataPath));
-		TransitionThread.AddToThread(clearThread.ThreadedProceed, 0);
-		TransitionThread.AddToThread(loadThread.ThreadedProceed, 0);
+		loadThread.AddToThread(nextScreenData.screen.ParseScreenData, AssetManager.get_instance().GetContent(nextScreenData.screen.dataPath));
+		if(!clearThread.empty) transitionThread.AddToThread(clearThread.ThreadedProceed, 0);
+		transitionThread.AddToThread(loadThread.ThreadedProceed, 0);
 		//TransitionThread.completed.addOnce(OnTransitionThreadFinished);
-		nextScreen.onReady.addOnce(OnScreenReady);
+		nextScreenData.screen.onReady.addOnce(OnScreenReady);
 		
 	}
 	
+	
+	
 	private inline function OnScreenReady():Void
 	{
-		
-		HideLoadingScreen(true, nextScreen.TransitionIn);
+		BeardGame.Game().currentScreen = nextScreenData.screen;
+		HideLoadingScreen(true, nextScreenData.screen.TransitionIn);
 		transitioning = false;
 	}
 	
 	public function DisplayLoadingScreen(loadingScreenClass:Class<BasicLoadingScreen>, transition:Bool = true, onComplete:Void->Void = null):Void
 	{
-		
-		if (loadingScreens[loadingScreenClass] == null){
-			loadingScreens[loadingScreenClass] = Type.createInstance(loadingScreenClass, [false]);
+		StringLibrary.utilString = Type.getClassName(loadingScreenClass);
+		if (loadingScreens[StringLibrary.utilString] == null){
+			loadingScreens[StringLibrary.utilString] = Type.createInstance(loadingScreenClass, []);
+			loadingScreens[StringLibrary.utilString].ParseScreenData(null);
 		}
-		currentLoadingScreen = loadingScreens[loadingScreenClass];
+		currentLoadingScreen = loadingScreens[StringLibrary.utilString];
 		
 		if (transition){
 			if (onComplete != null) currentLoadingScreen.onTransitionFinished.addOnce(onComplete);
@@ -179,4 +164,17 @@ class ScreenFlowManager
 		
 	}
 	
+	public function get_transitionThread():ChainThread<Int> 
+	{
+		return transitionThread;
+	}
+	
+}
+
+typedef NextScreenData =
+{
+	var screen:BasicScreen;
+	var reUse:Bool;
+	var screenClass:Class<BasicScreen>;
+	var dataPath:String;
 }

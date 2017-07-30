@@ -1,6 +1,7 @@
 package beardFramework.display.cameras;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.geom.Matrix;
+import openfl.geom.Point;
 import openfl.geom.Rectangle;
 import openfl.display.DisplayObject;
 
@@ -60,6 +61,34 @@ class Camera
 		return utilRect;
 	}
 	
+	public function GetOnScreenRect():Rectangle
+	{
+		if (utilRect == null)
+		utilRect = new Rectangle();
+		
+		utilRect.width = this.viewportWidth;
+		utilRect.height = this.viewportHeight;
+		utilRect.x = transform.tx;
+		utilRect.y = transform.ty;
+		
+		return utilRect;
+	}
+	
+	public function ContainsPoint(point:Point):Bool
+	{
+		if (utilRect == null)
+		utilRect = new Rectangle( );
+		
+		utilRect.width = this.viewportWidth;
+		utilRect.height = this.viewportHeight;
+		utilRect.x = transform.tx;
+		utilRect.y = transform.ty;
+		
+		return utilRect.containsPoint(point);
+		
+		
+	}
+	
 	public function Contains(object:DisplayObject):Bool{
 		
 		var success:Bool = (cast(object, ICameraDependent).restrictedCameras == null || cast(object, ICameraDependent).restrictedCameras.indexOf(id) != -1);
@@ -67,11 +96,11 @@ class Camera
 		if (success)
 			success = (((object.x + object.width) > (cameraX - buffer)) && (object.x < (cameraX + viewportWidth + buffer)) && ((object.y + object.height) > (cameraY - buffer)) && (object.y < (cameraY + viewportHeight + buffer)));
 	
-		if (this.id == "two"){
-			
-			if (!success) trace(object.x - this.cameraX);
-			//trace(object.name + "  " + success);
-		}
+		//if (this.id == "two"){
+			//
+			//if (!success) trace(object.x - this.cameraX);
+			////trace(object.name + "  " + success);
+		//}
 		//trace(" left " + (object.x + object.width) + " greater than " + (x - buffer));
 		//trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
 		//trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));

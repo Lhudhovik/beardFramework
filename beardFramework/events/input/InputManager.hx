@@ -1,6 +1,7 @@
 package beardFramework.events.input;
 import beardFramework.core.BeardGame;
 import beardFramework.events.input.InputAction;
+import beardFramework.utils.StringLibrary;
 import lime.ui.Gamepad;
 import lime.ui.GamepadAxis;
 import lime.ui.GamepadButton;
@@ -27,13 +28,6 @@ class InputManager
 {
 
 	private static var instance(get,null):InputManager;
-	public static inline var MOUSE_MOVE:String = "Mouse_Move";
-	public static inline var MOUSE_WHEEL:String = "Mouse_Wheel";
-	public static inline var MOUSE_OVER:String = "Mouse_Over";
-	public static inline var MOUSE_OUT:String = "Mouse_Out";
-	public static inline var MOUSE_UP:String = "Mouse_UP";
-	public static inline var MOUSE_CLICK:String = "Mouse_Click";
-	public static inline var MOUSE_DOWN:String = "Mouse_Down";
 	public static inline var CLICK_DELAY:Float = 250;
 	public static inline var GAMEPAD_PRESS_DELAY:Float = 250;
 	public static inline var KEY_PRESS_DELAY:Float = 250;
@@ -96,15 +90,15 @@ class InputManager
 		
 		if (data.get("mouse") == "true"){
 			
-			LinkActionToInput(MOUSE_OVER, "", InputType.MOUSE_OVER);
-			LinkActionToInput(MOUSE_OUT, "", InputType.MOUSE_OUT);
-			LinkActionToInput(MOUSE_MOVE, "", InputType.MOUSE_MOVE);
-			LinkActionToInput(MOUSE_WHEEL, "", InputType.MOUSE_WHEEL);
+			LinkActionToInput(StringLibrary.MOUSE_OVER, "", InputType.MOUSE_OVER);
+			LinkActionToInput(StringLibrary.MOUSE_OUT, "", InputType.MOUSE_OUT);
+			LinkActionToInput(StringLibrary.MOUSE_MOVE, "", InputType.MOUSE_MOVE);
+			LinkActionToInput(StringLibrary.MOUSE_WHEEL, "", InputType.MOUSE_WHEEL);
 			
 			for (i in 0...(Std.parseInt(data.get("mouseButtons")))){
-				LinkActionToInput(MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
-				LinkActionToInput(MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
-				LinkActionToInput(MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
+				LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
+				LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
+				LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
 			}
 			
 		}
@@ -227,9 +221,9 @@ class InputManager
 		
 		timeCounters[GetMouseInputID(mouseButton)] = Date.now().getTime();
 		
-		var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
+		var object:DisplayObject= BeardGame.Game().getTargetUnderPoint(utilPoint);
 		
-		mouseDownTargetName = objects[0] != null ? objects[0].name : "";
+		mouseDownTargetName = object != null ? object.name : "";
 		//trace("mouse down target : " + mouseDownTargetName);
 		if (inputs[utilString] != null){
 			
@@ -252,14 +246,14 @@ class InputManager
 		
 		utilPoint.setTo(mouseX, mouseY);
 		
-		var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
+		var object:DisplayObject = BeardGame.Game().getTargetUnderPoint(utilPoint);
 		
 		
 		if (inputs[utilString] != null){
 			
 			for (action in inputs[utilString]) 
 				if (actions[action].activated) 
-					actions[action].Proceed(mouseButton, objects[0] != null ? objects[0].name : "");
+					actions[action].Proceed(mouseButton, object != null ? object.name : "");
 		}
 		
 		//Mouse Click
@@ -274,11 +268,11 @@ class InputManager
 			if( inputs[utilString] != null){
 				for (action in inputs[utilString]) 
 					if (actions[action].activated) 
-						actions[action].Proceed(mouseButton, (objects[0] != null && mouseDownTargetName == objects[0].name) ? mouseDownTargetName : "" );
+						actions[action].Proceed(mouseButton, (object != null && mouseDownTargetName == object.name) ? mouseDownTargetName : "" );
 			}
 		}
 		
-		timeCounters[ GetMouseInputID(mouseButton)] = 0;
+		timeCounters[GetMouseInputID(mouseButton)] = 0;
 		
 		
 	}
@@ -298,10 +292,10 @@ class InputManager
 			
 			utilPoint.setTo(mouseX, mouseY);
 			
-			var objects:Array<DisplayObject> = BeardGame.Game().getTargetUnderPoint(utilPoint);
+			var object:DisplayObject = BeardGame.Game().getTargetUnderPoint(utilPoint);
 			
 			
-			if (objects != null && objects[0] != null && mouseMoveTargetName != objects[0].name){
+			if (object != null && mouseMoveTargetName != object.name){
 				
 				//trace("previous  " +mouseMoveTargetName);
 				//trace("new " +objects[0].name);
@@ -309,7 +303,7 @@ class InputManager
 			
 					for (action in inputs[GetStringFromInputType(InputType.MOUSE_OVER)])
 						if (actions[action].activated)	
-							actions[action].Proceed(0, objects[0].name);
+							actions[action].Proceed(0, object.name);
 				
 				}
 				if (inputs[GetStringFromInputType(InputType.MOUSE_OUT)] != null){
@@ -320,9 +314,9 @@ class InputManager
 				
 				}
 				
-				mouseMoveTargetName = objects[0].name;
+				mouseMoveTargetName = object.name;
 			}
-			else if (objects == null || objects[0] == null){
+			else if (object == null){
 				
 				if (inputs[GetStringFromInputType(InputType.MOUSE_OUT)] != null){
 			
@@ -343,9 +337,9 @@ class InputManager
 	public function OnMouseWheel(value:Float, axisDirection:Float):Void
 	{
 		
-		if (inputs[MOUSE_WHEEL] != null){
+		if (inputs[StringLibrary.MOUSE_WHEEL] != null){
 			
-			for (action in inputs[MOUSE_WHEEL])	
+			for (action in inputs[StringLibrary.MOUSE_WHEEL])	
 				if (actions[action].activated) 
 					actions[action].Proceed(axisDirection);
 

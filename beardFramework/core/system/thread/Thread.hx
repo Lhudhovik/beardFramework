@@ -118,6 +118,7 @@ class Thread<T>
 	}
 	public static inline function CheckTimeExpiration(threshold:Float):Bool
 	{
+		trace(Date.now().getTime() + " -  " + markedDate + ">=" + threshold);
 		return (Date.now().getTime() - markedDate >= threshold);
 	}
 	

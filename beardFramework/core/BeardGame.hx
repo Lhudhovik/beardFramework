@@ -1,18 +1,22 @@
 package beardFramework.core;
 
 import beardFramework.core.system.OptionsManager;
+import beardFramework.core.system.ScreenFlowManager;
 import beardFramework.debug.MemoryUsage;
 import beardFramework.display.cameras.Camera;
+import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.display.screens.BasicScreen;
 import beardFramework.events.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.utils.StringLibrary;
 import mloader.Loader;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
 import openfl.display.DisplayObject;
+import openfl.display.DisplayObjectContainer;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.display.StageAlign;
@@ -25,6 +29,10 @@ import openfl.ui.Multitouch;
 import openfl.ui.MultitouchInputMode;
 import openfl._internal.renderer.RenderSession;
 import openfl._internal.renderer.opengl.GLDisplayObject;
+
+@:access(openfl.display.Graphics)
+@:access(openfl.display.Stage)
+@:access(openfl.geom.Point)
 /**
  * ...
  * @author Ludo
@@ -36,12 +44,15 @@ class BeardGame extends Sprite
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SETTINGS(default, never):String = "settings";
 	private var physicsEnabled:Bool;
-	private var contentLayer:BeardSprite;
-	private var UILayer:BeardSprite;
-	private var LoadingLayer:BeardSprite;
-	public var cameras:Map<String,Camera>;
+	private var contentLayer:BeardLayer;
+	private var UILayer:BeardLayer;
+	private var LoadingLayer:BeardLayer;
 	private var pause:Bool;
-	private var currentScreen(get, null):BasicScreen;
+	
+	public var cameras:Map<String,Camera>;
+	public var currentScreen:BasicScreen;
+	
+
 	
 	public function new() 
 	{
@@ -61,21 +72,24 @@ class BeardGame extends Sprite
 	
 		game = this;
 		// Do visual Loading stuff
-		contentLayer = new BeardSprite();
+		contentLayer = new BeardLayer("ContentLayer");
 		contentLayer.visible = false;
-		UILayer = new BeardSprite();
+		UILayer = new BeardLayer("UILayer");
 		UILayer.visible = false;
-		LoadingLayer = new BeardSprite();
+		LoadingLayer = new BeardLayer("LoadingLayer");
 		LoadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
 		stage.addChild(contentLayer);
 		stage.addChild(UILayer);
 		stage.addChild(LoadingLayer);
+		//
 		InputManager.get_instance().Activate(stage.window);
+		
 		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 		AssetManager.get_instance().Load();
+		
 		var fps:MemoryUsage = new MemoryUsage(10,10,0xffffff);
 		stage.addChild(fps);
 		
@@ -98,7 +112,7 @@ class BeardGame extends Sprite
 		
 	}
 		
-	private function OnSettingsFailed(e:LoaderEvent<Dynamic>):Void
+	public function OnSettingsFailed(e:LoaderEvent<Dynamic>):Void
 	{
 		trace("error !");
 		trace(e.type.getName() +"\n" + e.type.getParameters());
@@ -182,6 +196,12 @@ class BeardGame extends Sprite
 	{
 		super.__enterFrame(deltaTime);
 		
+		if (ScreenFlowManager.get_instance().transitioning)
+		{
+			
+			if (!ScreenFlowManager.get_instance().get_transitionThread().empty) ScreenFlowManager.get_instance().get_transitionThread().Proceed();
+		}
+		
 		if (!pause){
 			
 		
@@ -191,17 +211,44 @@ class BeardGame extends Sprite
 		}
 	}
 	
-	public function getTargetUnderPoint (point:Point):Array<DisplayObject> 
+	
+	
+	public function getTargetUnderPoint (point:Point):DisplayObject
 	{
-		
+		var tempPoint:Point = Point.__pool.get ();
 		var stack = new Array<DisplayObject> ();
-		__hitTest (point.x, point.y, false, stack, true, stage);
-		//for (element in stack)
-		//trace(element.name);
+		var hit:Bool = false;
+		var i :Int = 0;
+		for (camera in cameras){
+			
+			if (camera.ContainsPoint(point))
+			{
+				hit = false;
+				tempPoint.x = (point.x - camera.viewportX) + camera.cameraX;
+				tempPoint.y = (point.y - camera.viewportY) + camera.cameraY;
+				
+				//trace(tempPoint);
+				if (ScreenFlowManager.get_instance().transitioning)	hit = LoadingLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, LoadingLayer);
+				else if(!(hit = UILayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, UILayer)))
+					hit = contentLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, contentLayer);
+				if (hit) break;
+			}
+			
+		}
+		
+		StringLibrary.utilString = "";
+		for (element in stack){
+			StringLibrary.utilString += "   -->  " + element.name;
+		}
+		
+		trace(StringLibrary.utilString);
+		
+		
 		stack.reverse ();
-		return stack;
+		return stack != null ? stack[0] : null;
 		
 	}
+	
 	
 	private function Deactivate(e:Event):Void
 	{
@@ -226,82 +273,23 @@ class BeardGame extends Sprite
 		return game;
 	}
 	
-	public inline function GetContentLayer():BeardSprite
+	public inline function GetContentLayer():BeardLayer
 	{
 		return contentLayer;
 	}
 	
-	public inline function GetUILayer():BeardSprite
+	public inline function GetUILayer():BeardLayer
 	{
 		return UILayer;
 	}
-	public inline function GetLoadingLayer():BeardSprite
+	public inline function GetLoadingLayer():BeardLayer
 	{
 		return LoadingLayer;
 	}
 	
-	private override function __renderGL (renderSession:RenderSession):Void 
-	{
-		
-		if (!__renderable || __worldAlpha <= 0) return;
-		
-		GLDisplayObject.render (this, renderSession);
-		
-		var utilX:Float;
-		var utilY:Float;
 	
-		renderSession.filterManager.pushObject (this);
-		
-		for (camera in cameras.iterator()){
-		
-			renderSession.maskManager.pushRect (camera.GetRect(), camera.transform);
-			
-			for (child in __children) {
-				if (camera.Contains(child)){
-					
-					
-					if (Std.is(child, ICameraDependent)){
-						
-						cast(child, ICameraDependent).RenderThroughCamera(camera, renderSession);
-					}
-					else{
-						utilX = child.__transform.tx;
-						utilY = child.__transform.ty;
-						child.__transform.tx = camera.viewportX +(utilX - camera.cameraX);
-						child.__transform.ty = camera.viewportY + (utilY - camera.cameraY);
-						child.__update(true, true);
-						child.__renderGL (renderSession);
-						child.__transform.tx = utilX;
-						child.__transform.ty = utilY;
-					}
-					
-				}
-				
-				
-			}
-		
-			for (orphan in __removedChildren) {
-				
-				if (orphan.stage == null) {
-					
-					orphan.__cleanup ();
-					
-				}
-				
-			}
-		
-		__removedChildren.length = 0;
-		
-			
-			renderSession.maskManager.popRect ();
-		}
-		renderSession.filterManager.popObject (this);
-	}
 	
-	public function get_currentScreen():BasicScreen 
-	{
-		return currentScreen;
-	}
+	
 	
 
 }

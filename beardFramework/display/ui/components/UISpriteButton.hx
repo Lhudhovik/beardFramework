@@ -4,6 +4,7 @@ import beardFramework.display.ui.components.UISpriteComponent;
 import beardFramework.events.input.InputManager;
 import beardFramework.events.input.InputType;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.utils.StringLibrary;
 import openfl.display.BitmapData;
 import openfl.display.DisplayObject;
 import openfl.display.PixelSnapping;
@@ -22,11 +23,12 @@ class UISpriteButton extends UISpriteComponent
 	{
 		super();
 		
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_OVER, OnOver, this.name);
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_OUT, OnOut, this.name);
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_MOVE, OnMove);
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
+		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		//this.mouseChildren = false;
+	
 	}
 	
 	
@@ -60,18 +62,26 @@ class UISpriteButton extends UISpriteComponent
 	override function set_name(value:String):String 
 	{
 		
-		InputManager.get_instance().UnregisterActionCallback(InputManager.MOUSE_OVER, OnOver, this.name);
-		InputManager.get_instance().UnregisterActionCallback(InputManager.MOUSE_OUT, OnOut, this.name);
-		InputManager.get_instance().UnregisterActionCallback(InputManager.MOUSE_MOVE, OnMove);
-		InputManager.get_instance().UnregisterActionCallback(InputManager.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
+		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		
-		super.set_name(value);
+		super.set_name("Sprite button" + value);
 		
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_OVER, OnOver, this.name);
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_OUT, OnOut, this.name);
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_MOVE, OnMove);
-		InputManager.get_instance().RegisterActionCallback(InputManager.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
+		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		return this.name;
 	}
-	
+	override public function Clear():Void 
+	{
+		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
+		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		
+		
+	}
 }

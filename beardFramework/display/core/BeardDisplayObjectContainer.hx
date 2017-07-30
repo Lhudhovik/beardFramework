@@ -18,6 +18,7 @@ class BeardDisplayObjectContainer extends DisplayObjectContainer implements ICam
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
 	public var restrictedCameras(default, null):Array<String>;
+	public var displayingCameras(default, null):List<String>;
 	
 	private function new () 
 	{
@@ -30,6 +31,7 @@ class BeardDisplayObjectContainer extends DisplayObjectContainer implements ICam
 		__removedChildren = new Vector<DisplayObject> ();
 		__tempStack = new Vector<DisplayObject> ();
 		widthChanged = heightChanged = true;
+		displayingCameras = new List<String>();
 	}
 	
 	public function AuthorizeCamera(addedCameraID : String):Void

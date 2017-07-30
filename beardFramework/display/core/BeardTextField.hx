@@ -21,11 +21,12 @@ class BeardTextField extends TextField implements ICameraDependent
 	public function new() 
 	{
 		super();
-		
+		displayingCameras = new List<String>();
 	}
 	
 	
 	public var restrictedCameras(default, null):Array<String>;
+	public var displayingCameras(default, null):List<String>;
 	
 	public function AuthorizeCamera(addedCameraID:String):Void 
 	{
