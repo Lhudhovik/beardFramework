@@ -1,5 +1,5 @@
 package beardFramework.core.system;
-import beardFramework.events.input.InputManager;
+import beardFramework.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
 
 /**

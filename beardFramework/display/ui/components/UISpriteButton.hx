@@ -1,8 +1,9 @@
 package beardFramework.display.ui.components;
 
 import beardFramework.display.ui.components.UISpriteComponent;
-import beardFramework.events.input.InputManager;
-import beardFramework.events.input.InputType;
+import beardFramework.input.InputManager;
+import beardFramework.input.InputType;
+import beardFramework.interfaces.IButton;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.StringLibrary;
 import openfl.display.BitmapData;
@@ -15,7 +16,7 @@ import openfl.display.Sprite;
  * ...
  * @author Ludo
  */
-class UISpriteButton extends UISpriteComponent 
+class UISpriteButton extends UISpriteComponent implements IButton
 {
 
 	

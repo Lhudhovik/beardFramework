@@ -7,7 +7,7 @@ import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.display.screens.BasicScreen;
-import beardFramework.events.input.InputManager;
+import beardFramework.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;

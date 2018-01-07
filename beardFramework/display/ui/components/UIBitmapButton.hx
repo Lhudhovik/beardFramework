@@ -1,7 +1,8 @@
 package beardFramework.display.ui.components;
 
 import beardFramework.display.ui.components.UIBitmapComponent;
-import beardFramework.events.input.InputManager;
+import beardFramework.input.InputManager;
+import beardFramework.interfaces.IButton;
 import beardFramework.utils.StringLibrary;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
@@ -10,7 +11,7 @@ import openfl.display.PixelSnapping;
  * ...
  * @author Ludo
  */
-class UIBitmapButton extends UIBitmapComponent
+class UIBitmapButton extends UIBitmapComponent implements IButton
 {
 
 	public function new(bitmapData:BitmapData=null, pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 

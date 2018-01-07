@@ -1,6 +1,6 @@
-package beardFramework.events.input;
+package beardFramework.input;
 import beardFramework.core.BeardGame;
-import beardFramework.events.input.InputAction;
+import beardFramework.input.InputAction;
 import beardFramework.utils.StringLibrary;
 import lime.ui.Gamepad;
 import lime.ui.GamepadAxis;

@@ -1,4 +1,4 @@
-package beardFramework.events.input;
+package beardFramework.input;
 
 /**
  * @author Ludo

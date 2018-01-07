@@ -1,5 +1,6 @@
-package beardFramework.events.input;
-import beardFramework.events.input.InputAction.InputDetails;
+package beardFramework.input;
+import beardFramework.input.InputAction;
+import beardFramework.input.InputAction.InputDetails;
 import msignal.Signal;
 //import openfl.events.Event;
 
