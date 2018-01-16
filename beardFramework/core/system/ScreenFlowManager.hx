@@ -66,6 +66,24 @@ class ScreenFlowManager
 		DisplayLoadingScreen(loadingScreenClass,true,OnTransitionReady);
 	}
 	
+	public function DisplayLoadingScreen(loadingScreenClass:Class<BasicLoadingScreen>, transition:Bool = true, onComplete:Void->Void = null):Void
+	{
+		StringLibrary.utilString = Type.getClassName(loadingScreenClass);
+		if (loadingScreens[StringLibrary.utilString] == null){
+			loadingScreens[StringLibrary.utilString] = Type.createInstance(loadingScreenClass, []);
+			loadingScreens[StringLibrary.utilString].ParseScreenData(null);
+		}
+		currentLoadingScreen = loadingScreens[StringLibrary.utilString];
+		
+		if (transition){
+			if (onComplete != null) currentLoadingScreen.onTransitionFinished.addOnce(onComplete);
+			currentLoadingScreen.TransitionIn();
+		}
+		else{
+			currentLoadingScreen.Show();
+			if(onComplete != null) onComplete();
+		}
+	}
 	
 	private function OnTransitionReady():Void
 	{
@@ -123,24 +141,7 @@ class ScreenFlowManager
 		transitioning = false;
 	}
 	
-	public function DisplayLoadingScreen(loadingScreenClass:Class<BasicLoadingScreen>, transition:Bool = true, onComplete:Void->Void = null):Void
-	{
-		StringLibrary.utilString = Type.getClassName(loadingScreenClass);
-		if (loadingScreens[StringLibrary.utilString] == null){
-			loadingScreens[StringLibrary.utilString] = Type.createInstance(loadingScreenClass, []);
-			loadingScreens[StringLibrary.utilString].ParseScreenData(null);
-		}
-		currentLoadingScreen = loadingScreens[StringLibrary.utilString];
-		
-		if (transition){
-			if (onComplete != null) currentLoadingScreen.onTransitionFinished.addOnce(onComplete);
-			currentLoadingScreen.TransitionIn();
-		}
-		else{
-			currentLoadingScreen.Show();
-			if(onComplete != null) onComplete();
-		}
-	}
+	
 	
 	
 	public function HideLoadingScreen(transition:Bool = true, onComplete:Void->Void):Void

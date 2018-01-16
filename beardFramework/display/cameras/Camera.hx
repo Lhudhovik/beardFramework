@@ -12,6 +12,7 @@ import openfl.display.DisplayObject;
 class Camera
 {
 	private static var utilRect:Rectangle;
+	public static var DEFAULT(default, null):String = "default";
 	public var id(default, null):String;
 	public var zoom(get,set):Float;
 	public var viewportWidth:Float;

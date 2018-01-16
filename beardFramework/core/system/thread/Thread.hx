@@ -9,7 +9,7 @@ import msignal.Signal.Signal0;
 class Thread<T>
 {
 	private static var markedDate:Float;
-	private var threadedMethods:Array<ThreadDetail<T>>;
+	private var individualThreads:Array<ThreadDetail<T>>;
 	private var allowedTime:Float;
 	private var length(get, null):Int;
 	public var empty(get, null):Bool;
@@ -23,11 +23,11 @@ class Thread<T>
 	
 	public function AddToThread(method:ThreadDetail<T>->Bool, parameter:T):Void
 	{
-		if (threadedMethods == null) threadedMethods = new Array<ThreadDetail<T>>();
+		if (individualThreads == null) individualThreads = new Array<ThreadDetail<T>>();
 		var details:ThreadDetail<T> = {action:method, parameter:parameter, allowedTime:0, progression:0};
 		
 		if (!CheckIsExisting(details)){
-			threadedMethods.push(details);
+			individualThreads.push(details);
 			trace("thread method added");
 		}
 	}
@@ -37,22 +37,21 @@ class Thread<T>
 	{
 		var time:Float = Date.now().getTime();
 		var i : Int = 0;
-		var individualTime :Float = this.allowedTime / threadedMethods.length;
+		var individualTime :Float = this.allowedTime / individualThreads.length;
 		
-		while (i< threadedMethods.length)
+		while (i< individualThreads.length)
 		{
-			if (threadedMethods[i] != null){
+			if (individualThreads[i] != null){
 				
-				threadedMethods[i].allowedTime = individualTime;
+				individualThreads[i].allowedTime = individualTime;
 				
-				if( threadedMethods[i].action(threadedMethods[i])){
-					threadedMethods.remove(threadedMethods[i]);
+				if( individualThreads[i].action(individualThreads[i])){
+					individualThreads.remove(individualThreads[i]);
 					i--;
 				}
 			}
 			
-			
-			if (threadedMethods.length == 0) completed.dispatch();
+			if (individualThreads.length == 0) completed.dispatch();
 			if ((Date.now().getTime() - time) > allowedTime) break;
 			
 			i++;
@@ -72,15 +71,15 @@ class Thread<T>
 	public function Clear():Void
 	{
 		
-		if (threadedMethods != null){
+		if (individualThreads != null){
 			
-			for (detail in threadedMethods){
+			for (detail in individualThreads){
 				
 				detail = null;
 			}
 			
 		}
-		threadedMethods = [];
+		individualThreads = [];
 		completed.removeAll();
 	}
 	
@@ -88,7 +87,7 @@ class Thread<T>
 	{
 		var success:Bool = false;
 		
-		for (method in threadedMethods){
+		for (method in individualThreads){
 			
 			if (success = (method.action == checkedDetail.action))
 				break;
@@ -99,7 +98,7 @@ class Thread<T>
 	
 	public inline function get_empty():Bool 
 	{
-		return (threadedMethods == null || threadedMethods.length==0);
+		return (individualThreads == null || individualThreads.length==0);
 	}
 	
 	public inline function  get_completed():Signal0 
@@ -109,7 +108,7 @@ class Thread<T>
 	
 	public inline function get_length():Int 
 	{
-		return threadedMethods.length;
+		return individualThreads.length;
 	}
 	
 	public static inline function MarkDate():Void

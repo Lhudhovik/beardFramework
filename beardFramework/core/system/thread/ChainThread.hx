@@ -4,7 +4,7 @@ package beardFramework.core.system.thread;
  * ...
  * @author Ludo
  */
-class ChainThread<T> extends CrossThread<T>
+class ChainThread<T> extends Thread<T>
 {
 
 	public function new(timeLimit:Float) 
@@ -15,15 +15,15 @@ class ChainThread<T> extends CrossThread<T>
 	
 	override public function Proceed():Void 
 	{
-		if (threadedMethods.length > 0 && threadedMethods[0] != null){
+		if (individualThreads.length > 0 && individualThreads[0] != null){
 			
-			threadedMethods[0].allowedTime = allowedTime;
+			individualThreads[0].allowedTime = allowedTime;
 			
-			if( threadedMethods[0].action(threadedMethods[0])){
-				threadedMethods.remove(threadedMethods[0]);
+			if( individualThreads[0].action(individualThreads[0])){
+				individualThreads.remove(individualThreads[0]);
 			}
 			
-			if (threadedMethods.length == 0) completed.dispatch();
+			if (individualThreads.length == 0) completed.dispatch();
 			
 		}
 		

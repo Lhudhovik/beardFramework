@@ -28,7 +28,7 @@ class BasicScreen
 		onReady = new Signal0();
 		onTransitionFinished = new Signal0();
 		displayLayer = BeardGame.Game().GetContentLayer();
-		defaultCamera = BeardGame.Game().cameras["default"];
+		defaultCamera = BeardGame.Game().cameras[Camera.DEFAULT];
 	}
 	
 	public inline function get_onReady():Signal0 return onReady;

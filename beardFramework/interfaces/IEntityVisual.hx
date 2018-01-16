@@ -3,7 +3,7 @@ package beardFramework.interfaces;
 /**
  * @author Ludo
  */
-interface IEntityVisual 
+interface IEntityVisual extends IEntityComponent 
 {
 	
 	public var x(get,set):Float;
