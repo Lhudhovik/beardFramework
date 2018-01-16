@@ -20,6 +20,7 @@ class GameEntity
 		this.x = x;
 		this.y = y;
 		
+		components = new Array<IEntityComponent>();
 		isVirtual = false;
 	}
 	
@@ -79,8 +80,14 @@ class GameEntity
 		return null;
 		
 	}
+	public function GetComponents():Array<IEntityComponent>
+	{
+		
+		return components;
+		
+	}
 	
-	private function Update():Void
+	public function Update():Void
 	{
 		for (component in components)
 		{
@@ -98,6 +105,8 @@ class GameEntity
 		forcedLocation = true;
 	
 	}
+	
+	
 	
 	public function Virtualize():Void{
 		//clear basic components

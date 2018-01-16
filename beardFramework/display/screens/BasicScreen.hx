@@ -4,6 +4,8 @@ import beardFramework.core.system.thread.Thread.ThreadDetail;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
+import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.interfaces.IEntityVisual;
 import msignal.Signal.Signal0;
 import openfl.display.Sprite;
 import openfl.display.Stage;
@@ -29,6 +31,26 @@ class BasicScreen
 		onTransitionFinished = new Signal0();
 		displayLayer = BeardGame.Game().GetContentLayer();
 		defaultCamera = BeardGame.Game().cameras[Camera.DEFAULT];
+	}
+	
+	public inline function AddEntity(entity:GameEntity):Void
+	{
+		
+		if (BeardGame.Game().entities.indexOf(entity) == -1)
+		{
+			BeardGame.Game().entities.push(entity);
+			for (component in entity.GetComponents())
+			{
+				if (Std.is(component, IEntityVisual))
+				{
+					cast(component, IEntityVisual).Register();
+				}
+			}
+		
+			
+		}
+		
+		
 	}
 	
 	public inline function get_onReady():Signal0 return onReady;

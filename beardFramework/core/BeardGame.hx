@@ -7,6 +7,7 @@ import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.display.screens.BasicScreen;
+import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
@@ -49,8 +50,10 @@ class BeardGame extends Sprite
 	private var LoadingLayer:BeardLayer;
 	private var pause:Bool;
 	
+	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
 	public var currentScreen:BasicScreen;
+	
 	
 
 	
@@ -90,6 +93,8 @@ class BeardGame extends Sprite
 		
 		AssetManager.get_instance().Load();
 		
+		entities = new Array<GameEntity>();
+		
 		var fps:MemoryUsage = new MemoryUsage(10,10,0xffffff);
 		stage.addChild(fps);
 		
@@ -102,6 +107,7 @@ class BeardGame extends Sprite
 		
 		OptionsManager.get_instance().parseSettings(AssetManager.get_instance().GetContent(SETTINGS));
 		physicsEnabled = OptionsManager.get_instance().GetSettings("physics").get("enabled") == "true";
+		
 		LoadResources();
 	}
 	
@@ -204,6 +210,10 @@ class BeardGame extends Sprite
 		
 		if (!pause){
 			
+			for (entity in entities)
+			{
+				entity.Update();
+			}
 		
 			if (physicsEnabled && PhysicsManager.get_instance().get_space() != null)
 				PhysicsManager.get_instance().Step(deltaTime);
