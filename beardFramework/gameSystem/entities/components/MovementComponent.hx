@@ -10,25 +10,24 @@ import beardFramework.interfaces.IEntityComponent;
  */
 class MovementComponent implements IEntityComponent 
 {
-	var horizontalMovement:Int = 0;
-	var verticalMovement:Int = 0;
+	var horizontalMovement:Float = 0;
+	var verticalMovement:Float = 0;
 	
 	public function new() 
 	{
-		InputManager.get_instance().RegisterActionCallback("MoveLeft", Left);
-		InputManager.get_instance().RegisterActionCallback("MoveRight", Right);
+		InputManager.get_instance().BindAction("HorizontalMove", HorizontalMove);
+		InputManager.get_instance().BindAction("VerticalMove", VerticalMove);
 	}
 	
-	private function Left(value:Float):Void
+	private function HorizontalMove(value:Float):Void
 	{
-		horizontalMovement -= 1;
-		trace("Left");
+		horizontalMovement += value*2;
+	
 		
 	}
-	private function Right(value:Float):Void
+	private function VerticalMove(value:Float):Void
 	{
-		horizontalMovement += 1;
-		trace("Right");
+		verticalMovement += value*2;
 	}
 	
 	/* INTERFACE beardFramework.interfaces.IEntityComponent */

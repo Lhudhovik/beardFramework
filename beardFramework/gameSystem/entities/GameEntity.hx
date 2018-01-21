@@ -24,13 +24,17 @@ class GameEntity
 		isVirtual = false;
 	}
 	
-	public function AddComponent(component:IEntityComponent, update:Bool = true):Void
+	public function AddComponent(component:IEntityComponent, update:Bool = true, position:Int = -1):Void
 	{
 		
 		if (components.indexOf(component) == -1)
 		{
-			components.push(component);
+		
+			if (position >= 0) components.insert(position, component);
+			else components.push(component);
+			
 			component.parentEntity = this;
+			
 			if (update) component.Update();
 		}
 		

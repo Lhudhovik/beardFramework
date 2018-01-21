@@ -21,10 +21,10 @@ class UIBitmapButton extends UIBitmapComponent implements IButton
 		this.name = "Bitmap button " + name;
 		mouseEnabled = true;
 		
-		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.get_instance().BindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().BindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.get_instance().BindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		
 		
 		
@@ -58,25 +58,25 @@ class UIBitmapButton extends UIBitmapComponent implements IButton
 	override function set_name(value:String):String 
 	{
 		
-		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.get_instance().UnbindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().UnbindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.get_instance().UnbindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		
 		super.set_name("Bitmap button" + value);
 		
-		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.get_instance().BindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().BindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.get_instance().BindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		return this.name;
 	}
 	
 	override public function Clear():Void 
 	{
-		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.get_instance().UnbindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.get_instance().UnbindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.get_instance().UnbindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 	}
 }

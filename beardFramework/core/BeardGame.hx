@@ -200,7 +200,6 @@ class BeardGame extends Sprite
 	}
 	override function __enterFrame(deltaTime:Int):Void 
 	{
-		super.__enterFrame(deltaTime);
 		
 		if (ScreenFlowManager.get_instance().transitioning)
 		{
@@ -208,17 +207,25 @@ class BeardGame extends Sprite
 			if (!ScreenFlowManager.get_instance().get_transitionThread().empty) ScreenFlowManager.get_instance().get_transitionThread().Proceed();
 		}
 		
+		
 		if (!pause){
 			
+			InputManager.get_instance().Update();
+			
+			if (physicsEnabled && PhysicsManager.get_instance().get_space() != null)
+				PhysicsManager.get_instance().Step(deltaTime);
+				
 			for (entity in entities)
 			{
 				entity.Update();
 			}
 		
-			if (physicsEnabled && PhysicsManager.get_instance().get_space() != null)
-				PhysicsManager.get_instance().Step(deltaTime);
+			
 			
 		}
+		
+		super.__enterFrame(deltaTime);
+		
 	}
 	
 	
