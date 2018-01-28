@@ -33,7 +33,7 @@ class SpriteVisual extends BeardSprite implements IEntityVisual
 	
 	public function Register():Void 
 	{
-		BeardGame.Game().GetContentLayer().addChild(this);
+		BeardGame.Get().GetContentLayer().addChild(this);
 	}
 		
 	override function __enterFrame(deltaTime:Int):Void 

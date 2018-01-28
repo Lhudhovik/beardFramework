@@ -25,8 +25,8 @@ class Trigger extends GameEntity
 	{
 		super.Devirtualize();
 		
-		body = PhysicsManager.get_instance().GetBody();
-		body.shapes.add(PhysicsManager.get_instance().GetPolygon().localVerts = Polygon.box(width, height);
+		body = PhysicsManager.Get().GetBody();
+		body.shapes.add(PhysicsManager.Get().GetPolygon().localVerts = Polygon.box(width, height);
 		body.position.x = this.x;
 		body.position.y = this.y;
 	}

@@ -38,7 +38,7 @@ class BeardLayer extends DisplayObjectContainer
 	
 		renderSession.filterManager.pushObject (this);
 		
-		for (camera in BeardGame.Game().cameras.iterator()){
+		for (camera in BeardGame.Get().cameras.iterator()){
 		
 			renderSession.maskManager.pushRect (camera.GetRect(), camera.transform);
 			

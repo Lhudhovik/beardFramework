@@ -22,7 +22,7 @@ class AssetManager
 	
 	
 	
-	private static var instance(get, null):AssetManager;
+	private static var instance(default, null):AssetManager;
 	
 	private var DEFAULT_LOADER_NAME(null, never):String = "DefaultName";
 	
@@ -41,7 +41,7 @@ class AssetManager
 		
 	}
 	
-	public static function get_instance():AssetManager
+	public static function Get():AssetManager
 	{
 		if (instance == null)
 		{

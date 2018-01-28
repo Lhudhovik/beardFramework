@@ -15,7 +15,7 @@ import mloader.Loader.LoaderEvent;
  */
 class ScreenFlowManager
 {
-	private static var instance(get, null):ScreenFlowManager;
+	private static var instance(default, null):ScreenFlowManager;
 		//public var SCREENDATA(default, never):String = "screenData";
 	public var currentLoadingScreen : BasicLoadingScreen;
 	public var transitioning:Bool;
@@ -31,7 +31,7 @@ class ScreenFlowManager
 	{
 		
 	}
-	public static function get_instance():ScreenFlowManager
+	public static function Get():ScreenFlowManager
 	{
 		if (instance == null)
 		{
@@ -55,9 +55,9 @@ class ScreenFlowManager
 	
 	public function LoadScreen(screenClass:Class<BasicScreen>, loadingScreenClass:Class<BasicLoadingScreen>, dataPath:String = "", reUse:Bool = true):Void
 	{
-		if (BeardGame.Game().currentScreen!= null){
-			BeardGame.Game().currentScreen.Freeze();
-			clearThread.AddToThread(BeardGame.Game().currentScreen.Clear, 0);
+		if (BeardGame.Get().currentScreen!= null){
+			BeardGame.Get().currentScreen.Freeze();
+			clearThread.AddToThread(BeardGame.Get().currentScreen.Clear, 0);
 		}
 		nextScreenData.reUse = reUse;
 		nextScreenData.dataPath = dataPath;
@@ -107,12 +107,12 @@ class ScreenFlowManager
 		
 		nextScreenData.screen.dataPath = nextScreenData.dataPath;
 		
-		if (nextScreenData.dataPath != "" && !AssetManager.get_instance().HasContent(nextScreenData.dataPath)){
+		if (nextScreenData.dataPath != "" && !AssetManager.Get().HasContent(nextScreenData.dataPath)){
 			
 			currentLoadingScreen.loadingTasksCount++;
 			
-			AssetManager.get_instance().Append(AssetType.XML, nextScreenData.dataPath, nextScreenData.dataPath, null, null, BeardGame.Game().OnSettingsFailed);
-			AssetManager.get_instance().Load(OnScreenDataReady, currentLoadingScreen.OnLoadingProgress);
+			AssetManager.Get().Append(AssetType.XML, nextScreenData.dataPath, nextScreenData.dataPath, null, null, BeardGame.Get().OnSettingsFailed);
+			AssetManager.Get().Load(OnScreenDataReady, currentLoadingScreen.OnLoadingProgress);
 		
 		}
 		else
@@ -124,7 +124,7 @@ class ScreenFlowManager
 	private function OnScreenDataReady():Void
 	{
 	
-		loadThread.AddToThread(nextScreenData.screen.ParseScreenData, AssetManager.get_instance().GetContent(nextScreenData.screen.dataPath));
+		loadThread.AddToThread(nextScreenData.screen.ParseScreenData, AssetManager.Get().GetContent(nextScreenData.screen.dataPath));
 		if(!clearThread.empty) transitionThread.AddToThread(clearThread.ThreadedProceed, 0);
 		transitionThread.AddToThread(loadThread.ThreadedProceed, 0);
 		//TransitionThread.completed.addOnce(OnTransitionThreadFinished);
@@ -136,7 +136,7 @@ class ScreenFlowManager
 	
 	private inline function OnScreenReady():Void
 	{
-		BeardGame.Game().currentScreen = nextScreenData.screen;
+		BeardGame.Get().currentScreen = nextScreenData.screen;
 		HideLoadingScreen(true, nextScreenData.screen.TransitionIn);
 		transitioning = false;
 	}

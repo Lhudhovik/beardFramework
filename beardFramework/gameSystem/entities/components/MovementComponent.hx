@@ -15,18 +15,20 @@ class MovementComponent implements IEntityComponent
 	
 	public function new() 
 	{
-		InputManager.get_instance().BindAction("HorizontalMove", HorizontalMove);
-		InputManager.get_instance().BindAction("VerticalMove", VerticalMove);
+		InputManager.Get().BindAction("HorizontalMove", HorizontalMove);
+		InputManager.Get().BindAction("VerticalMove", VerticalMove);
 	}
 	
 	private function HorizontalMove(value:Float):Void
 	{
+		if(Math.abs(value) >= InputManager.GAMEPAD_AXIS_MOVEMENT_CEIL)
 		horizontalMovement += value*2;
 	
 		
 	}
 	private function VerticalMove(value:Float):Void
 	{
+		if(Math.abs(value) >= InputManager.GAMEPAD_AXIS_MOVEMENT_CEIL)
 		verticalMovement += value*2;
 	}
 	

@@ -9,33 +9,45 @@
 <settings>
 	<physics enabled="true" gravityX="0" gravityY="9.81" />
 	
-	<!-- INPUT TYPES :
-		
-		
-		keyboard: 	KEY_UP,	KEY_DOWN, KEY_PRESS
-		Mouse : 	MOUSE_DOWN, MOUSE_CLICK, MOUSE_UP,	MOUSE_MOVE, MOUSE_OVER,	MOUSE_OUT,MOUSE_WHEEL
-		Gamepad : 	GAMEPAD_AXIS_MOVE, GAMEPAD_BUTTON_UP, GAMEPAD_BUTTON_DOWN, GAMEPAD_BUTTON_PRESS;
-		Touch :		to do...
+	<!-- 
 		
 		DEFAULT INPUTS :
 		
-		Keyboard: 	[Key] ex: a, b, c......y,z, ENTER, SPACE...
-		Mouse: 		[MouseButton] + [ButtonID] ex: MouseButton0, MouseButton1...
-		Gamepad:	[Gamepad] + [GamepadID] + [ButtonID] ex : Gamepad0A, Gamepad1RIGHT_SHOULDER
+		Keyboard: 	[key] ex: a, b, c......y,z, ENTER, SPACE...
+		Mouse: 		[mouse] + [ButtonID] ex: mouse0, mouse1...
+		Gamepad:	[ButtonID] ex : A, RIGHT_SHOULDER, LEFT_X...
+					(default shared actions gamepad ID = -1, else it will be created only for one specific gamepad ex : defaultInput="Gamepad1A" defaultInputType="GAMEPAD" gamepadID="1")
+		Touch:		
 		
+		DEFAULT INPUT TYPES :
+		
+		
+		keyboard: 	keyUp,	keyDown, keyPress
+		Mouse : 	mouseDown, mouseClick, mouseUp,	mouseMove, mouseOver, mouseOut, mouseWheel
+		Gamepad : 	gamepadAxisMove, gamepadButtonUp, gamepadButtonDown, gamepadButtonPress;
+		Touch :		to do...
 	-->
-	<inputs keyboard="true" mouse="true" mouseButtons="10" gamepad="true" touch="true">
-		<input action="Validate" defaultInput="ENTER" defaultInputType="KEY_PRESS">
+	<inputs keyboard="true" mouse="true" mouseButtons="10" gamepad="true" maxGamepads="8" touch="true">
+		<!--KEYBOARD-->
+		<input action="Validate" defaultInput="ENTER" defaultInputType="keyPress">
+			<secondaryInput input=""/>
 			<compatibleAction>ActionName</compatibleInput>
 		</input>
-		<input action="MouseAction" defaultInput="MouseButton1" defaultInputType="MOUSE_UP">
+		
+		<!--MOUSE-->
+		<input action="MouseAction" defaultInput="mouse1" defaultInputType="mouseUp">
+			<secondaryInput input=""/>
 			<compatibleAction>ActionName</compatibleInput>
 		</input>
 			
-			<input action="Validate" defaultInput="Gamepad1A" defaultInputType="GAMPAD">
+			
+		<!--GAMEPAD-->
+		<input action="Validate" defaultInput="A" defaultInputType="gamepadButtonPress" gamepadID="-1">
+			<secondaryInput input=""/>
 			<compatibleAction>ActionName</compatibleInput>
 		</input>
-			
+		
+		<!--TOUCH-->
 	</inputs>
 </settings>
 </data>

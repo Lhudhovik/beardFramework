@@ -9,7 +9,7 @@ import beardFramework.resources.assets.AssetManager;
 class OptionsManager
 {
 
-	private static var instance(get,null):OptionsManager;
+	private static var instance(default,null):OptionsManager;
 	
 	public var resourcesToLoad:Array<ResourceToLoad>;
 	private var settings(null,null):Xml;
@@ -18,7 +18,7 @@ class OptionsManager
 		
 	}
 	
-	public static function get_instance():OptionsManager
+	public static function Get():OptionsManager
 	{
 		if (instance == null)
 		{
@@ -53,7 +53,7 @@ class OptionsManager
 			if (element.nodeName == "settings")
 			{
 				settings = element;
-				InputManager.get_instance().ParseInputSettings(settings.elementsNamed("inputs").next());
+				InputManager.Get().ParseInputSettings(settings.elementsNamed("inputs").next());
 				
 			}
 			

@@ -14,7 +14,7 @@ import nape.space.Space;
  */
 class PhysicsManager
 {
-	private static var instance(get, null):PhysicsManager;
+	private static var instance(default, null):PhysicsManager;
 	
 	private var space(get,null):Space;
 	private var GRAVITY(get, null):Vec2;
@@ -29,7 +29,7 @@ class PhysicsManager
 		
 	}
 	
-	public static inline function get_instance():PhysicsManager
+	public static inline function Get():PhysicsManager
 	{
 		if (instance == null)
 		{

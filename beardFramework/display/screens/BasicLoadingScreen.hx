@@ -27,7 +27,7 @@ class BasicLoadingScreen extends BasicScreen
 	{
 		super.Init();
 		
-		displayLayer = BeardGame.Game().GetLoadingLayer();
+		displayLayer = BeardGame.Get().GetLoadingLayer();
 		//var loadingSign:UIBitmapComponent = new UIBitmapComponent();
 		//var loadingText:UITextFieldComponent = new UITextFieldComponent();
 		

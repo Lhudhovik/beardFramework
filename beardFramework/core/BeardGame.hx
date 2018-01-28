@@ -40,7 +40,7 @@ import openfl._internal.renderer.opengl.GLDisplayObject;
  */
 class BeardGame extends Sprite
 {
-	private static var game:BeardGame;
+	private static var game(default, null):BeardGame;
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SETTINGS(default, never):String = "settings";
@@ -87,11 +87,11 @@ class BeardGame extends Sprite
 		stage.addChild(UILayer);
 		stage.addChild(LoadingLayer);
 		//
-		InputManager.get_instance().Activate(stage.window);
+		InputManager.Get().Activate(stage.window);
 		
-		AssetManager.get_instance().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
+		AssetManager.Get().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
-		AssetManager.get_instance().Load();
+		AssetManager.Get().Load();
 		
 		entities = new Array<GameEntity>();
 		
@@ -105,8 +105,8 @@ class BeardGame extends Sprite
 	{
 		
 		
-		OptionsManager.get_instance().parseSettings(AssetManager.get_instance().GetContent(SETTINGS));
-		physicsEnabled = OptionsManager.get_instance().GetSettings("physics").get("enabled") == "true";
+		OptionsManager.Get().parseSettings(AssetManager.Get().GetContent(SETTINGS));
+		physicsEnabled = OptionsManager.Get().GetSettings("physics").get("enabled") == "true";
 		
 		LoadResources();
 	}
@@ -128,14 +128,14 @@ class BeardGame extends Sprite
 	private function LoadResources():Void
 	{
 		
-		if (OptionsManager.get_instance().resourcesToLoad.length > 0){
-			for (resource in OptionsManager.get_instance().resourcesToLoad)
+		if (OptionsManager.Get().resourcesToLoad.length > 0){
+			for (resource in OptionsManager.Get().resourcesToLoad)
 			{
-				AssetManager.get_instance().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
+				AssetManager.Get().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
 			}
-			trace(OptionsManager.get_instance().resourcesToLoad);
+			trace(OptionsManager.Get().resourcesToLoad);
 			
-			AssetManager.get_instance().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
+			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
 		}
 		else GameStart();
 		
@@ -146,7 +146,7 @@ class BeardGame extends Sprite
 	{
 		
 		if (physicsEnabled)
-			PhysicsManager.get_instance().InitSpace(OptionsManager.get_instance().GetSettings("physics"));
+			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
 		
 	}
 	
@@ -161,7 +161,7 @@ class BeardGame extends Sprite
 	private function OnPreciseResourcesProgress(e:LoaderEvent<Dynamic>):Void
 	{
 		
-		trace((e.target.progress + AssetManager.get_instance().get_progress()) / 2);
+		trace((e.target.progress + AssetManager.Get().get_progress()) / 2);
 		
 		
 	}
@@ -201,19 +201,19 @@ class BeardGame extends Sprite
 	override function __enterFrame(deltaTime:Int):Void 
 	{
 		
-		if (ScreenFlowManager.get_instance().transitioning)
+		if (ScreenFlowManager.Get().transitioning)
 		{
 			
-			if (!ScreenFlowManager.get_instance().get_transitionThread().empty) ScreenFlowManager.get_instance().get_transitionThread().Proceed();
+			if (!ScreenFlowManager.Get().get_transitionThread().empty) ScreenFlowManager.Get().get_transitionThread().Proceed();
 		}
 		
 		
 		if (!pause){
 			
-			InputManager.get_instance().Update();
+			if(!InputManager.directMode) InputManager.Get().Update();
 			
-			if (physicsEnabled && PhysicsManager.get_instance().get_space() != null)
-				PhysicsManager.get_instance().Step(deltaTime);
+			if (physicsEnabled && PhysicsManager.Get().get_space() != null)
+				PhysicsManager.Get().Step(deltaTime);
 				
 			for (entity in entities)
 			{
@@ -245,7 +245,7 @@ class BeardGame extends Sprite
 				tempPoint.y = (point.y - camera.viewportY) + camera.cameraY;
 				
 				//trace(tempPoint);
-				if (ScreenFlowManager.get_instance().transitioning)	hit = LoadingLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, LoadingLayer);
+				if (ScreenFlowManager.Get().transitioning)	hit = LoadingLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, LoadingLayer);
 				else if(!(hit = UILayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, UILayer)))
 					hit = contentLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, contentLayer);
 				if (hit) break;
@@ -285,7 +285,7 @@ class BeardGame extends Sprite
 		}
 	}
 	
-	public static inline function Game():BeardGame
+	public static inline function Get():BeardGame
 	{
 		return game;
 	}

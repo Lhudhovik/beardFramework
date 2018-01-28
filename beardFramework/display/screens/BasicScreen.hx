@@ -29,16 +29,16 @@ class BasicScreen
 	{
 		onReady = new Signal0();
 		onTransitionFinished = new Signal0();
-		displayLayer = BeardGame.Game().GetContentLayer();
-		defaultCamera = BeardGame.Game().cameras[Camera.DEFAULT];
+		displayLayer = BeardGame.Get().GetContentLayer();
+		defaultCamera = BeardGame.Get().cameras[Camera.DEFAULT];
 	}
 	
 	public inline function AddEntity(entity:GameEntity):Void
 	{
 		
-		if (BeardGame.Game().entities.indexOf(entity) == -1)
+		if (BeardGame.Get().entities.indexOf(entity) == -1)
 		{
-			BeardGame.Game().entities.push(entity);
+			BeardGame.Get().entities.push(entity);
 			for (component in entity.GetComponents())
 			{
 				if (Std.is(component, IEntityVisual))

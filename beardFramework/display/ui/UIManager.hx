@@ -13,14 +13,14 @@ import openfl.display.Sprite;
  */
 class UIManager 
 {
-	private static var instance(get,null):UIManager;
+	private static var instance(default,null):UIManager;
 	private var UILayer:BeardLayer;
 	private var templates:Map<String, IUIComponent>;
 	private function new() 
 	{
 		
 	}
-	public static inline function get_instance():UIManager
+	public static inline function Get():UIManager
 	{
 		if (instance == null){
 			instance = new UIManager();
@@ -31,7 +31,7 @@ class UIManager
 	
 	private function Init():Void
 	{
-		UILayer = BeardGame.Game().GetUILayer();
+		UILayer = BeardGame.Get().GetUILayer();
 		templates = new Map<String, IUIComponent>();
 	}
 	
