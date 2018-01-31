@@ -87,11 +87,11 @@ class BeardGame extends Sprite
 		stage.addChild(UILayer);
 		stage.addChild(LoadingLayer);
 		//
-		InputManager.Get().Activate(stage.window);
+		//InputManager.Get().Activate(stage.window);
 		
-		AssetManager.Get().Append(AssetType.XML, SETTING_PATH, SETTINGS, OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
+		AssetManager.Get().Append(AssetType.XML, SETTING_PATH, SETTINGS);
 		
-		AssetManager.Get().Load();
+		AssetManager.Get().Load( OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 		entities = new Array<GameEntity>();
 		
@@ -101,7 +101,7 @@ class BeardGame extends Sprite
 		
 	}
 	
-	private function OnSettingsLoaded(e:LoaderEvent<Dynamic>):Void
+	private function OnSettingsLoaded():Void
 	{
 		
 		
@@ -111,17 +111,17 @@ class BeardGame extends Sprite
 		LoadResources();
 	}
 	
-	private function OnSettingsProgressing(e:LoaderEvent<Dynamic>):Void
+	private function OnSettingsProgressing(progress:Float):Void
 	{
 		trace("progress...");
-		trace(e.target.progress);
+		trace(progress);
 		
 	}
 		
-	public function OnSettingsFailed(e:LoaderEvent<Dynamic>):Void
+	public function OnSettingsFailed(e:LoaderErrorType):Void
 	{
 		trace("error !");
-		trace(e.type.getName() +"\n" + e.type.getParameters());
+		trace(e.getName() +"\n" + e.getParameters());
 		
 	}
 	
@@ -258,7 +258,7 @@ class BeardGame extends Sprite
 			StringLibrary.utilString += "   -->  " + element.name;
 		}
 		
-		trace(StringLibrary.utilString);
+		//trace(StringLibrary.utilString);
 		
 		
 		stack.reverse ();

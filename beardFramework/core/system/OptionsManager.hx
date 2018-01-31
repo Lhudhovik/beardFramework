@@ -36,6 +36,7 @@ class OptionsManager
 	
 	public function parseSettings(xml:Xml):Void
 	{
+		
 		resourcesToLoad = new Array<ResourceToLoad>();
 		xml = xml.firstElement();
 		

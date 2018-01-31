@@ -27,12 +27,11 @@
 		Gamepad : 	gamepadAxisMove, gamepadButtonUp, gamepadButtonDown, gamepadButtonPress;
 		Touch :		to do...
 	-->
-	<inputs keyboard="true" mouse="true" mouseButtons="10" gamepad="true" maxGamepads="8" touch="true">
+	<inputs keyboard="true" mouse="true" mouseButtons="10" gamepad="true" maxGamepads="8" touch="true" maxTouches="4" defaultAction="true">
 		<!--KEYBOARD-->
-		<input action="Validate" defaultInput="ENTER" defaultInputType="keyPress">
-			<secondaryInput input=""/>
-			<compatibleAction>ActionName</compatibleInput>
-		</input>
+		<input action="Validate" defaultInput="ENTER" defaultInputType="keyPress"><secondaryInput input=""/></input>
+		<input action="MoveLeft" defaultInput="q" defaultInputType="keyDown"><secondaryInput input=""/></input>
+		<input action="MoveRight" defaultInput="d" defaultInputType="keyDown"><secondaryInput input=""/></input>
 		
 		<!--MOUSE-->
 		<input action="MouseAction" defaultInput="mouse1" defaultInputType="mouseUp">
@@ -42,12 +41,16 @@
 			
 			
 		<!--GAMEPAD-->
-		<input action="Validate" defaultInput="A" defaultInputType="gamepadButtonPress" gamepadID="-1">
-			<secondaryInput input=""/>
-			<compatibleAction>ActionName</compatibleInput>
-		</input>
-		
+		<input action="Validate" defaultInput="A" defaultInputType="gamepadButtonPress" gamepadID="-1"><secondaryInput input=""/></input>
+		<input action="HorizontalMove" defaultInput="LEFT_X" defaultInputType="gamepadAxisMove" gamepadID="-1"><secondaryInput input=""/></input>
+		<input action="VerticalMove" defaultInput="LEFT_Y" defaultInputType="gamepadAxisMove" gamepadID="-1"><secondaryInput input=""/></input>
+		<input action="CameraVertical" defaultInput="RIGHT_Y" defaultInputType="gamepadAxisMove" gamepadID="-1"><secondaryInput input=""/></input>
+		<input action="CameraHorizontal" defaultInput="RIGHT_X" defaultInputType="gamepadAxisMove" gamepadID="-1"><secondaryInput input=""/></input>
 		<!--TOUCH-->
+			
+		
+	
+		
 	</inputs>
 </settings>
 </data>

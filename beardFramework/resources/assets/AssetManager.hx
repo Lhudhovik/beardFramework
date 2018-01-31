@@ -119,8 +119,8 @@ class AssetManager
 			//loaders[loaderName].loaded.addOnce(onErrorCallback).forType(LoaderEventType.Fail(LoaderErrorType.Data));
 		//if (onCancelCallback!=null)
 			//loaders[loaderName].loaded.addOnce(onCancelCallback).forType(LoaderEventType.Cancel);
-		//trace(loaderName);
-		//trace(url);
+		trace(loaderName);
+		trace(url);
 		
 		loaderQueue.add(loaders[loaderName]);
 		
@@ -138,6 +138,7 @@ class AssetManager
 	public function Load(onCompleteCallback:Void->Void = null, onProgressCallback:Float->Void = null, onErrorCallback:LoaderErrorType->Void = null, onCancelCallback:Void->Void = null):Void
 	{
 		
+		
 		if (onCompleteCallback != null)
 			onComplete.addOnce(onCompleteCallback);
 		if (onProgressCallback!=null)
@@ -146,13 +147,16 @@ class AssetManager
 			onError.addOnce(onErrorCallback);
 		if (onCancelCallback!=null)
 			onCancel.addOnce(onCancelCallback);
+			
+		trace(onCompleteCallback);
+		trace(loaderQueue.size);
 		loaderQueue.load();
 	
 	}
 	
 	private function OnLoadingEvent(e:LoaderEvent<Dynamic> = null):Void
 	{
-		//trace(e.type.getName());
+		trace(e.type);
 		switch(e.type){
 			
 			case LoaderEventType.Start:
@@ -166,6 +170,8 @@ class AssetManager
 				requestedAtlasQueue = [];
 				
 				onComplete.dispatch();
+				
+				
 			case LoaderEventType.Progress:
 				onProgress.dispatch(get_progress());
 			case LoaderEventType.Cancel:

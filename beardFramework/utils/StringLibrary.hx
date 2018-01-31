@@ -8,6 +8,7 @@ class StringLibrary
 {
 	
 	public static inline var ACTION:String 					= "action";
+	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
 	public static inline var GAMEPAD:String 				= "gamepad";
 	public static inline var GAMEPAD_AXIS_MOVE:String 		= "gamepadAxisMove";
 	public static inline var GAMEPAD_BUTTON_DOWN:String 	= "gamepadButtonDown";
@@ -24,6 +25,7 @@ class StringLibrary
 	public static inline var KEY_DOWN:String				= "keyDown";
 	public static inline var KEY_PRESS:String				= "keyPress";
 	public static inline var KEY_UP:String					= "keyUp";
+	public static inline var KEYBOARD:String				= "keyboard";
 	public static inline var LEVELS_PATH:String 			= "assets/levels/";
 	public static inline var MOUSE:String 					= "mouse";
 	public static inline var MOUSE_BUTTONS:String 			= "mouseButtons";
@@ -39,12 +41,12 @@ class StringLibrary
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";
 	public static inline var TOUCH_END:String 				= "touchEnd";
+	public static inline var TOUCH_MAX:String 				= "maxTouches";
 	public static inline var TOUCH_MOVE:String 				= "touchMove";
 	public static inline var TOUCH_OUT:String 				= "touchOut";
 	public static inline var TOUCH_OVER:String 				= "touchOver";
 	public static inline var TOUCH_START:String 			= "touchStart";
 	public static inline var TOUCH_TAP:String 				= "touchTap";
-	public static inline var TOUCH:String 					= "touch";
 	public static inline var UNKNOWN:String 				= "unknown";
 
 	
