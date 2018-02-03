@@ -9,6 +9,7 @@ class StringLibrary
 	
 	public static inline var ACTION:String 					= "action";
 	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
+	public static inline var DIRECT_MODE:String 			= "directMode";
 	public static inline var GAMEPAD:String 				= "gamepad";
 	public static inline var GAMEPAD_AXIS_MOVE:String 		= "gamepadAxisMove";
 	public static inline var GAMEPAD_BUTTON_DOWN:String 	= "gamepadButtonDown";
@@ -28,7 +29,7 @@ class StringLibrary
 	public static inline var KEYBOARD:String				= "keyboard";
 	public static inline var LEVELS_PATH:String 			= "assets/levels/";
 	public static inline var MOUSE:String 					= "mouse";
-	public static inline var MOUSE_BUTTONS:String 			= "mouseButtons";
+	public static inline var MOUSE_BUTTONS_MAX:String 		= "maxMouseButtons";
 	public static inline var MOUSE_CLICK:String				= "mouseClick";
 	public static inline var MOUSE_DOUBLE_CLICK:String		= "mouseDoubleClick";
 	public static inline var MOUSE_DOWN:String 				= "mouseDown";

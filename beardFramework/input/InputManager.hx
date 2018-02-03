@@ -34,6 +34,9 @@ class InputManager
 	private static var instance(default,null):InputManager;
 	public static var directMode(default,null):Bool = false;
 	public static var defaultActionsEnabled(default,null):Bool = false;
+	public static var maxGamepads(default,null):Int = 8;
+	public static var maxTouches(default,null):Int = 8;
+	public static var maxMouseButtons(default,null):Int = 8;
 	public static inline var CLICK_DELAY:Float = 250;
 	public static inline var TAP_DELAY:Float = 250;
 	public static inline var GAMEPAD_PRESS_DELAY:Float = 250;
@@ -108,6 +111,8 @@ class InputManager
 	public function ParseInputSettings(data:Xml):Void
 	{
 		
+		directMode = (data.get(StringLibrary.DIRECT_MODE) == "true");
+		
 		if (data.get(StringLibrary.MOUSE) == "true"){
 			
 		
@@ -116,6 +121,7 @@ class InputManager
 			BeardGame.Get().stage.window.onMouseUp.add(OnMouseUp);
 			BeardGame.Get().stage.window.onMouseWheel.add(OnMouseWheel);
 			
+			maxMouseButtons = Std.parseInt(data.get(StringLibrary.MOUSE_BUTTONS_MAX));
 			
 			
 			
@@ -128,7 +134,7 @@ class InputManager
 			LinkActionToInput(StringLibrary.MOUSE_MOVE,StringLibrary.MOUSE_MOVE, InputType.MOUSE_MOVE);
 			LinkActionToInput(StringLibrary.MOUSE_WHEEL, StringLibrary.MOUSE_WHEEL, InputType.MOUSE_WHEEL);
 			
-			for (i in 0...(Std.parseInt(data.get(StringLibrary.MOUSE_BUTTONS)))){
+			for (i in 0...maxMouseButtons){
 				// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
 				// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
 				LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
@@ -144,7 +150,9 @@ class InputManager
 			OnGamepadConnect(gamepad);
 			
 			Gamepad.onConnect.add(OnGamepadConnect);
-				
+			
+			
+			maxGamepads = Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX));
 			//***********************************DEFAULT
 			//var gamepadButton:GamepadButton;
 			//var gamepadAxis:GamepadAxis;
@@ -208,7 +216,7 @@ class InputManager
 			Touch.onStart.add(OnTouchStart);
 			Touch.onMove.add(OnTouchMove);
 			Touch.onEnd.add(OnTouchEnd);
-			
+			maxTouches = Std.parseInt(data.get(StringLibrary.TOUCH_MAX));
 			
 			//***********************************DEFAULT
 			//for (i in 0...(Std.parseInt(data.get(StringLibrary.TOUCH_MAX))))
@@ -315,22 +323,74 @@ class InputManager
 		
 	}
 	
-	public function BindToInput(inputID:String, inputType:InputType, callback:Float -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
+	public function BindToInput(inputID:String, inputType:InputType, callback:Float -> Void, targetName:String="", once:Bool = false, active : Bool = true):Void
 	{
 		
-		utilString = GetDefaultInputActionID(inputID,inputType);
-		
-		if (handledInputs[inputID] == null || actions[utilString] == null){
-			LinkActionToInput(utilString, inputID, inputType);
-		}
-			
-		if (!CheckDetailExisting(actions[utilString] , callback, targetName))
+		var inputToBind:Array<String> = [];
+		var specificInput:Bool = false;
+		if (InputTypeToString(inputType).indexOf(StringLibrary.GAMEPAD) != -1)
 		{
-			actions[utilString].callbackDetails.push({ callback:callback, targetName:targetName,once:once });
+			
+			for (i in 0...maxGamepads)
+				if (inputID.indexOf(Std.string(i)) != -1){
+					specificInput = true;
+					break;
+				}
+			
+			if(!specificInput)
+				for (i in 0...maxGamepads)
+					inputToBind.push(GetGamepadInputID(i, inputID));
+			else
+				inputToBind.push(inputID);
+			
+			
+		}
+		else if (InputTypeToString(inputType).indexOf(StringLibrary.TOUCH) != -1)
+		{
+			
+			for (i in 0...maxTouches)
+				inputToBind.push(StringLibrary.TOUCH + i);			
+		}
+		else if (InputTypeToString(inputType).indexOf(StringLibrary.MOUSE) != -1 && (inputType == InputType.MOUSE_CLICK || inputType == InputType.MOUSE_DOWN || inputType == InputType.MOUSE_UP))
+		{
+			for (i in 0...maxMouseButtons)
+				if (inputID.indexOf(Std.string(i)) != -1){
+					specificInput = true;
+					break;
+				}
+			
+			if(!specificInput)
+				for (i in 0...maxMouseButtons)
+					inputToBind.push(GetMouseInputID(i));
+			else
+				inputToBind.push(inputID);
+			
+		}
+		else
+			inputToBind.push(inputID);
+		
+		for (ID in inputToBind)
+		{
+			
+			utilString = GetDefaultInputActionID(ID, inputType);
+	
+			if (handledInputs[ID] == null || actions[utilString] == null){
+				LinkActionToInput(utilString, ID, inputType);
+			}
+				
+			if (!CheckDetailExisting(actions[utilString] , callback, targetName))
+			{
+				actions[utilString].callbackDetails.push({ callback:callback, targetName:targetName,once:once });
+			}
+			
+			actions[utilString].active = active;
+			
+			
 		}
 		
-		actions[utilString].active = active;
 		
+		
+	
 		
 	} 
 		

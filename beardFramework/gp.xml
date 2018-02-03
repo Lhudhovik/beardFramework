@@ -27,7 +27,7 @@
 		Gamepad : 	gamepadAxisMove, gamepadButtonUp, gamepadButtonDown, gamepadButtonPress;
 		Touch :		to do...
 	-->
-	<inputs keyboard="true" mouse="true" mouseButtons="10" gamepad="true" maxGamepads="8" touch="true" maxTouches="4" defaultAction="true">
+	<inputs keyboard="true" mouse="true" maxMouseButtons="10" gamepad="true" maxGamepads="8" touch="true" maxTouches="4" defaultAction="true" directMode="false">
 		<!--KEYBOARD-->
 		<input action="Validate" defaultInput="ENTER" defaultInputType="keyPress"><secondaryInput input=""/></input>
 		<input action="MoveLeft" defaultInput="q" defaultInputType="keyDown"><secondaryInput input=""/></input>
