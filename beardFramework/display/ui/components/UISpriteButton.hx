@@ -24,10 +24,10 @@ class UISpriteButton extends UISpriteComponent implements IButton
 	{
 		super();
 		
-		InputManager.Get().BindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().BindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.Get().BindToAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.Get().BindToAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().BindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.Get().BindToAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		//this.mouseChildren = false;
 	
 	}
@@ -63,25 +63,25 @@ class UISpriteButton extends UISpriteComponent implements IButton
 	override function set_name(value:String):String 
 	{
 		
-		InputManager.Get().UnbindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().UnbindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().UnbindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		
 		super.set_name("Sprite button" + value);
 		
-		InputManager.Get().BindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().BindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.Get().BindToAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.Get().BindToAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().BindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.Get().BindToAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		return this.name;
 	}
 	override public function Clear():Void 
 	{
-		InputManager.Get().UnbindAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().UnbindAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().UnbindAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		
 		
 	}

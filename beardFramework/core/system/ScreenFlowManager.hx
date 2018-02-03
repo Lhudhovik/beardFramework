@@ -135,8 +135,6 @@ class ScreenFlowManager
 		
 	}
 	
-	
-	
 	private inline function OnScreenReady():Void
 	{
 		trace("screen ready");
@@ -144,9 +142,6 @@ class ScreenFlowManager
 		HideLoadingScreen(true, nextScreenData.screen.TransitionIn);
 		transitioning = false;
 	}
-	
-	
-	
 	
 	public function HideLoadingScreen(transition:Bool = true, onComplete:Void->Void):Void
 	{

@@ -15,8 +15,8 @@ class MovementComponent implements IEntityComponent
 	
 	public function new() 
 	{
-		InputManager.Get().BindAction("HorizontalMove", HorizontalMove);
-		InputManager.Get().BindAction("VerticalMove", VerticalMove);
+		InputManager.Get().BindToAction("HorizontalMove", HorizontalMove);
+		InputManager.Get().BindToAction("VerticalMove", VerticalMove);
 	}
 	
 	private function HorizontalMove(value:Float):Void

@@ -146,36 +146,36 @@ class InputManager
 			Gamepad.onConnect.add(OnGamepadConnect);
 				
 			//***********************************DEFAULT
-			var gamepadButton:GamepadButton;
-			var gamepadAxis:GamepadAxis;
-			
-			for (i in 0...(Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX)))){
-				
-				//buttons
-				for ( j in 0...15)
-				{
-					
-					gamepadButton = j;
-					utilString = gamepadButton.toString();
-					
-					// action : StringLibrary.GAMEPAD_BUTTON_DOWN + gamepadButton.toString() --> "gamepadButtonDownA" 
-					// inputID : GetGamepadInputID(i) --> "gamepadA0"; 
-					LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_DOWN + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_DOWN);
-					LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_UP + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_UP);
-					LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_PRESS + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_PRESS);
-					
-					
-				}
-				
-				//trigger and stick
-				for (j in 0...6)
-				{
-					gamepadAxis = j;
-					utilString = gamepadAxis.toString();
-					LinkActionToInput( StringLibrary.GAMEPAD_AXIS_MOVE + utilString, GetGamepadInputID(i, utilString), InputType.GAMEPAD_AXIS_MOVE);
-					
-				}
-			}
+			//var gamepadButton:GamepadButton;
+			//var gamepadAxis:GamepadAxis;
+			//
+			//for (i in 0...(Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX)))){
+				//
+				////buttons
+				//for ( j in 0...15)
+				//{
+					//
+					//gamepadButton = j;
+					//utilString = gamepadButton.toString();
+					//
+					//// action : StringLibrary.GAMEPAD_BUTTON_DOWN + gamepadButton.toString() --> "gamepadButtonDownA" 
+					//// inputID : GetGamepadInputID(i) --> "gamepadA0"; 
+					//LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_DOWN + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_DOWN);
+					//LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_UP + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_UP);
+					//LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_PRESS + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_PRESS);
+					//
+					//
+				//}
+				//
+				////trigger and stick
+				//for (j in 0...6)
+				//{
+					//gamepadAxis = j;
+					//utilString = gamepadAxis.toString();
+					//LinkActionToInput( StringLibrary.GAMEPAD_AXIS_MOVE + utilString, GetGamepadInputID(i, utilString), InputType.GAMEPAD_AXIS_MOVE);
+					//
+				//}
+			//}
 
 			
 		}
@@ -188,16 +188,16 @@ class InputManager
 			
 			
 			//***********************************DEFAULT
-			//var kkey : KeyCode = 0;
-			for (key in Type.getClassFields(KeyCode))
-			{
-				// action : StringLibrary.KEY_PRESS + key --> "keyPressA" 
-				// inputID : key--> "a"; 
-				LinkActionToInput( StringLibrary.KEY_PRESS + key.toLowerCase(), key.toLowerCase(), InputType.KEY_PRESS);
-				LinkActionToInput( StringLibrary.KEY_DOWN + key.toLowerCase(), key.toLowerCase(), InputType.KEY_DOWN);
-				LinkActionToInput( StringLibrary.KEY_UP + key.toLowerCase(), key.toLowerCase(), InputType.KEY_UP);
-				
-			}
+			////var kkey : KeyCode = 0;
+			//for (key in Type.getClassFields(KeyCode))
+			//{
+				//// action : StringLibrary.KEY_PRESS + key --> "keyPressA" 
+				//// inputID : key--> "a"; 
+				//LinkActionToInput( StringLibrary.KEY_PRESS + key.toLowerCase(), key.toLowerCase(), InputType.KEY_PRESS);
+				//LinkActionToInput( StringLibrary.KEY_DOWN + key.toLowerCase(), key.toLowerCase(), InputType.KEY_DOWN);
+				//LinkActionToInput( StringLibrary.KEY_UP + key.toLowerCase(), key.toLowerCase(), InputType.KEY_UP);
+				//
+			//}
 			
 			
 			
@@ -211,17 +211,17 @@ class InputManager
 			
 			
 			//***********************************DEFAULT
-			for (i in 0...(Std.parseInt(data.get(StringLibrary.TOUCH_MAX))))
-			{
-				
-				LinkActionToInput(StringLibrary.TOUCH_START, StringLibrary.TOUCH + i, InputType.TOUCH_START);
-				LinkActionToInput(StringLibrary.TOUCH_END, StringLibrary.TOUCH + i, InputType.TOUCH_END);
-				LinkActionToInput(StringLibrary.TOUCH_MOVE, StringLibrary.TOUCH + i, InputType.TOUCH_MOVE);
-				LinkActionToInput(StringLibrary.TOUCH_OUT, StringLibrary.TOUCH + i, InputType.TOUCH_OUT);
-				LinkActionToInput(StringLibrary.TOUCH_OVER, StringLibrary.TOUCH + i, InputType.TOUCH_OVER);
-				LinkActionToInput(StringLibrary.TOUCH_TAP, StringLibrary.TOUCH + i, InputType.TOUCH_TAP);
-					
-			}
+			//for (i in 0...(Std.parseInt(data.get(StringLibrary.TOUCH_MAX))))
+			//{
+				//
+				//LinkActionToInput(StringLibrary.TOUCH_START, StringLibrary.TOUCH + i, InputType.TOUCH_START);
+				//LinkActionToInput(StringLibrary.TOUCH_END, StringLibrary.TOUCH + i, InputType.TOUCH_END);
+				//LinkActionToInput(StringLibrary.TOUCH_MOVE, StringLibrary.TOUCH + i, InputType.TOUCH_MOVE);
+				//LinkActionToInput(StringLibrary.TOUCH_OUT, StringLibrary.TOUCH + i, InputType.TOUCH_OUT);
+				//LinkActionToInput(StringLibrary.TOUCH_OVER, StringLibrary.TOUCH + i, InputType.TOUCH_OVER);
+				//LinkActionToInput(StringLibrary.TOUCH_TAP, StringLibrary.TOUCH + i, InputType.TOUCH_TAP);
+					//
+			//}
 			
 		}
 		
@@ -292,11 +292,11 @@ class InputManager
 		
 	}
 	
-	public function BindAction(actionID : String, callback:Float -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
+	public function BindToAction(actionID : String, callback:Float -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
 	{
-		trace(actionID);
-		for (key in actions.keys())
-			if(key == actionID ) trace(key);
+		//trace(actionID);
+		//for (key in actions.keys())
+			//if(key == actionID ) trace(key);
 		if (actions[actionID] == null){
 			actions[actionID] = { ID:actionID, active:true, callbackDetails:[]};	
 			
@@ -315,10 +315,29 @@ class InputManager
 		
 	}
 	
-	public function UnbindAction(actionID : String, callback:Float -> Void = null, targetName:String = ""):Void
+	public function BindToInput(inputID:String, inputType:InputType, callback:Float -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
 	{
 		
-		if (actions[actionID] != null)			
+		utilString = GetDefaultInputActionID(inputID,inputType);
+		
+		if (handledInputs[inputID] == null || actions[utilString] == null){
+			LinkActionToInput(utilString, inputID, inputType);
+		}
+			
+		if (!CheckDetailExisting(actions[utilString] , callback, targetName))
+		{
+			actions[utilString].callbackDetails.push({ callback:callback, targetName:targetName,once:once });
+		}
+		
+		actions[utilString].active = active;
+		
+		
+	} 
+		
+	public function UnbindFromAction(actionID : String, callback:Float -> Void = null, targetName:String = ""):Void
+	{
+		
+		if (actions[actionID] != null)	
 			for (detail in actions[actionID].callbackDetails)
 				if (detail.callback == callback && detail.targetName == targetName)
 				{
@@ -328,6 +347,33 @@ class InputManager
 					detail.callback = null;
 					detail = null;
 				}
+	}
+	
+	public function UnbindFromInput(inputID:String, inputType:InputType, callback:Float -> Void = null, targetName:String = ""):Void
+	{
+		utilString = GetDefaultInputActionID(inputID, inputType);
+		
+		if (actions[utilString] != null){
+			
+			for (detail in actions[utilString].callbackDetails)
+				if (detail.callback == callback && detail.targetName == targetName)
+				{
+		
+					
+					actions[utilString].callbackDetails.remove(detail);
+					
+					detail.callback = null;
+					detail = null;
+				}
+				
+				
+			if (actions[utilString].callbackDetails.length == 0){
+				actions[utilString].callbackDetails = null;
+				actions[utilString] = null;
+				actions.remove(utilString);
+			}
+		}
+	
 	}
 	
 	public function ActivateAction(actionID:String, activate : Bool):Void
@@ -567,7 +613,7 @@ class InputManager
 		
 		//Key Up
 		utilString = String.fromCharCode(key);
-		trace(utilString);
+		//trace(utilString);
 		modifier.capsLock = modifier.numLock = false;
 		
 		if (cast(modifier,Int) > 0) utilString += modifier;
@@ -632,7 +678,7 @@ class InputManager
 	public function OnKeyDown(key:KeyCode, modifier:KeyModifier):Void
 	{
 		utilString = String.fromCharCode(key);
-		trace(String.fromCharCode(key));
+		//trace(String.fromCharCode(key));
 		if( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] = Date.now().getTime();
 		
 		modifier.capsLock = modifier.numLock = false;
@@ -667,7 +713,7 @@ class InputManager
 			handledInputs[utilString].value = value;
 			if (directMode) DirectResolveInput(	handledInputs[utilString]);	
 		}
-		trace(utilString);
+		//trace(utilString);
 		
 	}
 	
@@ -880,7 +926,7 @@ class InputManager
 					
 					
 				}
-					trace(input.ID + "    " + input.state + "    " + input.toggle);
+					//trace(input.ID + "    " + input.state + "    " + input.toggle);
 			}
 			
 			if (input.state == GetToggleType(input.state)){
@@ -894,7 +940,7 @@ class InputManager
 	
 	private function DirectResolveInput(input:Input):Void
 	{
-		trace("direct");
+		//trace("direct");
 		if (input.active){
 			var i:Int = 0;
 			var detail:CallbackDetails;
@@ -932,7 +978,7 @@ class InputManager
 				}
 			}
 			trace(input.ID + "    " + input.state + "    " + input.toggle);
-			if (input.state == input.toggle){
+			if (input.state == GetToggleType(input.state)){
 				input.state = InputType.NONE;
 				input.value = 0;
 			}
@@ -974,6 +1020,13 @@ class InputManager
 	public static inline function GetTouchInputID(touchID:Int, type:InputType):String
 	{
 		return "";
+	}
+	
+	public static inline function GetDefaultInputActionID(inputID:String, inputType:InputType):String
+	{
+		
+		return InputTypeToString(inputType) + inputID;
+		
 	}
 	
 	public static inline function StringToInputType(type:String):InputType
