@@ -42,6 +42,7 @@ class InputManager
 	public static inline var GAMEPAD_PRESS_DELAY:Float = 250;
 	public static inline var KEY_PRESS_DELAY:Float = 250;
 	public static inline var GAMEPAD_AXIS_MOVEMENT_CEIL:Float = 0.1;
+	
 
 	private var inputActions:Map<String, Map<InputType, Array<String>>>;
 	private var actions:Map<String, Action>;
@@ -53,7 +54,8 @@ class InputManager
 	private var utilInput:Input;
 	private var mouseMoveTargetName:String;
 	private var mouseTargetName:String;
-
+	private var touchTargets:Map<String, String>;
+	private var currentInput:Input;
 	private var defaultActions:Map<InputType, Signal1<Input>>;
 
 	
@@ -63,7 +65,7 @@ class InputManager
 		
 	}
 	
-	public static function Get():InputManager
+	public static inline function Get():InputManager
 	{
 		if (instance == null)
 		{
@@ -82,9 +84,12 @@ class InputManager
 		inputActions = new Map<String, Map<InputType, Array<String>>>();
 		timeCounters = new Map<String, Float>();
 		utilPoint = new Point();
+		touchTargets = new Map<String, String>();
+		
+		
 		#if mobile
 		
-		directMode = true;
+		//directMode = true;
 		
 		#end 
 	}
@@ -115,7 +120,6 @@ class InputManager
 		
 		if (data.get(StringLibrary.MOUSE) == "true"){
 			
-		
 			BeardGame.Get().stage.window.onMouseDown.add(OnMouseDown);
 			BeardGame.Get().stage.window.onMouseMove.add(OnMouseMove);
 			BeardGame.Get().stage.window.onMouseUp.add(OnMouseUp);
@@ -147,11 +151,10 @@ class InputManager
 		if (data.get(StringLibrary.GAMEPAD) == "true")
 		{
 			for (gamepad in Gamepad.devices)
-			OnGamepadConnect(gamepad);
+				OnGamepadConnect(gamepad);
 			
 			Gamepad.onConnect.add(OnGamepadConnect);
-			
-			
+				
 			maxGamepads = Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX));
 			//***********************************DEFAULT
 			//var gamepadButton:GamepadButton;
@@ -184,7 +187,6 @@ class InputManager
 					//
 				//}
 			//}
-
 			
 		}
 		
@@ -219,9 +221,9 @@ class InputManager
 			maxTouches = Std.parseInt(data.get(StringLibrary.TOUCH_MAX));
 			
 			//***********************************DEFAULT
-			//for (i in 0...(Std.parseInt(data.get(StringLibrary.TOUCH_MAX))))
-			//{
-				//
+			for (i in 0...maxTouches)
+			{
+				
 				//LinkActionToInput(StringLibrary.TOUCH_START, StringLibrary.TOUCH + i, InputType.TOUCH_START);
 				//LinkActionToInput(StringLibrary.TOUCH_END, StringLibrary.TOUCH + i, InputType.TOUCH_END);
 				//LinkActionToInput(StringLibrary.TOUCH_MOVE, StringLibrary.TOUCH + i, InputType.TOUCH_MOVE);
@@ -229,7 +231,7 @@ class InputManager
 				//LinkActionToInput(StringLibrary.TOUCH_OVER, StringLibrary.TOUCH + i, InputType.TOUCH_OVER);
 				//LinkActionToInput(StringLibrary.TOUCH_TAP, StringLibrary.TOUCH + i, InputType.TOUCH_TAP);
 					//
-			//}
+			}
 			
 		}
 		
@@ -349,7 +351,8 @@ class InputManager
 		{
 			
 			for (i in 0...maxTouches)
-				inputToBind.push(StringLibrary.TOUCH + i);			
+				inputToBind.push(InputTypeToString(inputType) + i);
+			
 		}
 		else if (InputTypeToString(inputType).indexOf(StringLibrary.MOUSE) != -1 && (inputType == InputType.MOUSE_CLICK || inputType == InputType.MOUSE_DOWN || inputType == InputType.MOUSE_UP))
 		{
@@ -388,10 +391,7 @@ class InputManager
 			
 		}
 		
-		
-		
-	
-		
+
 	} 
 		
 	public function UnbindFromAction(actionID : String, callback:Float -> Void = null, targetName:String = ""):Void
@@ -411,29 +411,76 @@ class InputManager
 	
 	public function UnbindFromInput(inputID:String, inputType:InputType, callback:Float -> Void = null, targetName:String = ""):Void
 	{
-		utilString = GetDefaultInputActionID(inputID, inputType);
 		
-		if (actions[utilString] != null){
+		var inputToUnbind:Array<String> = [];
+		var specificInput:Bool = false;
+		if (InputTypeToString(inputType).indexOf(StringLibrary.GAMEPAD) != -1)
+		{
 			
-			for (detail in actions[utilString].callbackDetails)
-				if (detail.callback == callback && detail.targetName == targetName)
-				{
-		
-					
-					actions[utilString].callbackDetails.remove(detail);
-					
-					detail.callback = null;
-					detail = null;
+			for (i in 0...maxGamepads)
+				if (inputID.indexOf(Std.string(i)) != -1){
+					specificInput = true;
+					break;
 				}
+			
+			if(!specificInput)
+				for (i in 0...maxGamepads)
+					inputToUnbind.push(GetGamepadInputID(i, inputID));
+			else
+				inputToUnbind.push(inputID);
+			
+			
+		}
+		else if (InputTypeToString(inputType).indexOf(StringLibrary.TOUCH) != -1)
+		{
+			
+			for (i in 0...maxTouches)
+				inputToUnbind.push(InputTypeToString(inputType) + i);			
+		}
+		else if (InputTypeToString(inputType).indexOf(StringLibrary.MOUSE) != -1 && (inputType == InputType.MOUSE_CLICK || inputType == InputType.MOUSE_DOWN || inputType == InputType.MOUSE_UP))
+		{
+			for (i in 0...maxMouseButtons)
+				if (inputID.indexOf(Std.string(i)) != -1){
+					specificInput = true;
+					break;
+				}
+			
+			if(!specificInput)
+				for (i in 0...maxMouseButtons)
+					inputToUnbind.push(GetMouseInputID(i));
+			else
+				inputToUnbind.push(inputID);
+			
+		}
+		else
+			inputToUnbind.push(inputID);
+		
+		for (ID in inputToUnbind)
+		{
+		
+			utilString = GetDefaultInputActionID(ID, inputType);
+			
+			if (actions[utilString] != null){
 				
-				
-			if (actions[utilString].callbackDetails.length == 0){
-				actions[utilString].callbackDetails = null;
-				actions[utilString] = null;
-				actions.remove(utilString);
+				for (detail in actions[utilString].callbackDetails)
+					if (detail.callback == callback && detail.targetName == targetName)
+					{
+			
+						
+						actions[utilString].callbackDetails.remove(detail);
+						
+						detail.callback = null;
+						detail = null;
+					}
+					
+					
+				if (actions[utilString].callbackDetails.length == 0){
+					actions[utilString].callbackDetails = null;
+					actions[utilString] = null;
+					actions.remove(utilString);
+				}
 			}
 		}
-	
 	}
 	
 	public function ActivateAction(actionID:String, activate : Bool):Void
@@ -839,22 +886,20 @@ class InputManager
 	
 	public function OnTouchStart(touch:Touch):Void
 	{
-		utilString = StringLibrary.TOUCH + touch.id;
-		
-		
+		utilString = StringLibrary.TOUCH_START + touch.id;
 		
 		if (handledInputs[utilString] != null)
 		{
-			
-			timeCounters[utilString] = Date.now().getTime();
+			utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
+			timeCounters[StringLibrary.TOUCH + touch.id] = Date.now().getTime();
 		
 			var object:DisplayObject= BeardGame.Get().getTargetUnderPoint(utilPoint);
 		
-			mouseTargetName = object != null ? object.name : "";
+			touchTargets[utilString] = object != null ? object.name : "";
 			
 			handledInputs[utilString].state = InputType.TOUCH_START;		
 			
-			handledInputs[utilString].target = mouseTargetName;
+			handledInputs[utilString].target = touchTargets[utilString];
 			
 			if (directMode) DirectResolveInput(	handledInputs[utilString]);
 			
@@ -864,8 +909,10 @@ class InputManager
 	
 	public function OnTouchMove(touch:Touch):Void
 	{
-		utilString = StringLibrary.TOUCH + touch.id;
-		utilPoint.setTo(touch.x, touch.y);
+		utilString = StringLibrary.TOUCH_MOVE + touch.id;
+		utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
+			
+		if (touchTargets[utilString] == null) touchTargets[utilString] = "";
 		
 		if (handledInputs[utilString] != null)
 		{
@@ -875,36 +922,48 @@ class InputManager
 		}
 		
 		
-			var object:DisplayObject = BeardGame.Get().getTargetUnderPoint(utilPoint);
-			
-			
-			if (object != null && handledInputs[utilString].target != object.name){
-				
-				//trace("previous  " +mouseMoveTargetName);
-				//trace("new " +objects[0].name);
-				handledInputs[utilString].state = InputType.TOUCH_OVER;
-				handledInputs[utilString].target = object.name;
-				if (directMode) DirectResolveInput(	handledInputs[utilString]);
-				
-				handledInputs[StringLibrary.TOUCH_OUT].state = InputType.MOUSE_OUT;
-				handledInputs[StringLibrary.TOUCH_OUT].target = mouseMoveTargetName;
+		var object:DisplayObject = BeardGame.Get().getTargetUnderPoint(utilPoint);
+	
 		
-				mouseMoveTargetName = object.name;
-				
-				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.MOUSE_OVER]);
-				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.MOUSE_OUT]);
-				
-			}
-			else if (object == null){
-				
-				handledInputs[StringLibrary.MOUSE_OUT].state = InputType.MOUSE_OUT;
-				handledInputs[StringLibrary.MOUSE_OUT].target = mouseMoveTargetName;
-					
-				mouseMoveTargetName = "";
-				
-				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.MOUSE_OUT]);
+		if (object != null &&  touchTargets[utilString] != object.name){
+			
+			if (handledInputs[StringLibrary.TOUCH_OVER + touch.id] != null){
+				handledInputs[StringLibrary.TOUCH_OVER + touch.id].state = InputType.TOUCH_OVER;
+				handledInputs[StringLibrary.TOUCH_OVER + touch.id].target = object.name;
+				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.TOUCH_OVER + touch.id]);
 			}
 			
+			if (handledInputs[StringLibrary.TOUCH_OUT + touch.id] != null){
+				//trace("touchOut");
+				//trace("touchtarget"+ utilString + " " + touchTargets[utilString]);
+				handledInputs[StringLibrary.TOUCH_OUT+touch.id].state = InputType.TOUCH_OUT;
+				handledInputs[StringLibrary.TOUCH_OUT+touch.id].target = touchTargets[utilString];
+				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.TOUCH_OUT + touch.id]);
+			}
+			
+			
+			touchTargets[utilString]  = object.name;
+			
+			//trace("new touch target" + utilString + " " +  touchTargets[utilString]);
+			
+			
+		}
+		else if (object == null ){
+			if (handledInputs[StringLibrary.TOUCH_OUT + touch.id] != null){
+					//trace("touchOut2");
+					//trace("touchtarget"+ utilString + " " + touchTargets[utilString]);
+				handledInputs[StringLibrary.TOUCH_OUT+touch.id].state = InputType.TOUCH_OUT;
+				handledInputs[StringLibrary.TOUCH_OUT + touch.id].target = touchTargets[utilString];
+				
+				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.TOUCH_OUT+touch.id]);
+			}
+			touchTargets[utilString] = "";
+			//trace("new touch target" + utilString + " " +  touchTargets[utilString]);
+			//if (handledInputs[utilString] != null) handledInputs[utilString].target = "";
+			
+			
+		}
+	
 			
 		
 		
@@ -914,18 +973,18 @@ class InputManager
 	public function OnTouchEnd(touch:Touch):Void
 	{
 		
-		utilString =  StringLibrary.TOUCH + touch.id;
-		utilPoint.setTo(touch.x, touch.y);
-		
+		utilString =  StringLibrary.TOUCH_END + touch.id;
+		utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
+			
 		var object:DisplayObject = BeardGame.Get().getTargetUnderPoint(utilPoint);
-		mouseTargetName = object != null ? object.name : "";
+		touchTargets[utilString] = object != null ? object.name : "";
 		
 		if (handledInputs[utilString] != null)
 		{
 			
 			handledInputs[utilString].state = InputType.TOUCH_END;		
 			
-			handledInputs[utilString].target = mouseTargetName;
+			handledInputs[utilString].target = touchTargets[utilString];
 			
 			if(directMode) DirectResolveInput(handledInputs[utilString]);
 			
@@ -934,13 +993,14 @@ class InputManager
 		
 		//Mouse Click
 		
-		if (Date.now().getTime() - timeCounters[utilString]  <= TAP_DELAY && 	handledInputs[utilString] != null )
+		if (handledInputs[StringLibrary.TOUCH_TAP + touch.id] != null  && Date.now().getTime() - timeCounters[StringLibrary.TOUCH + touch.id]  <= TAP_DELAY )
 		{
-			handledInputs[utilString].state = InputType.TOUCH_TAP;		
+			handledInputs[StringLibrary.TOUCH_TAP + touch.id].state = InputType.TOUCH_TAP;		
+			handledInputs[StringLibrary.TOUCH_TAP + touch.id].target = touchTargets[utilString];		
 			if(directMode) DirectResolveInput(handledInputs[utilString]);
 		}
 		
-		timeCounters[utilString] = 0;
+		timeCounters[StringLibrary.TOUCH + touch.id] = 0;
 		
 	}
 	
@@ -951,6 +1011,8 @@ class InputManager
 		
 		for (input in handledInputs)
 		{
+			currentInput = input;
+			
 			
 			if (!input.active) continue;
 			
@@ -1002,6 +1064,8 @@ class InputManager
 	{
 		//trace("direct");
 		if (input.active){
+			currentInput = input;
+			
 			var i:Int = 0;
 			var detail:CallbackDetails;
 			if (inputActions[input.ID] != null && inputActions[input.ID][input.state] != null)
@@ -1037,7 +1101,7 @@ class InputManager
 					
 				}
 			}
-			trace(input.ID + "    " + input.state + "    " + input.toggle);
+			//trace(input.ID + "    " + input.state + "    " + input.toggle);
 			if (input.state == GetToggleType(input.state)){
 				input.state = InputType.NONE;
 				input.value = 0;
@@ -1070,6 +1134,13 @@ class InputManager
 	public static inline function GetMouseInputID(button : Int):String
 	{
 		return  StringLibrary.MOUSE + button;
+	}
+	
+	public static inline function GetCallingInput():Input
+	{
+		return instance.currentInput;
+		
+		
 	}
 	
 	public static inline function GetGamepadInputID(gamepadID:Int, inputID : String):String
@@ -1179,7 +1250,7 @@ class InputManager
 			case InputType.TOUCH_MOVE: 				toggleType = InputType.TOUCH_MOVE;
 			case InputType.TOUCH_OUT: 				toggleType = InputType.TOUCH_OUT;
 			case InputType.TOUCH_OVER: 				toggleType = InputType.TOUCH_OVER;
-			case InputType.TOUCH_START: 			toggleType = InputType.TOUCH_END;
+			case InputType.TOUCH_START: 			toggleType = InputType.TOUCH_START;
 			case InputType.TOUCH_TAP: 				toggleType = InputType.TOUCH_TAP;
 			
 			

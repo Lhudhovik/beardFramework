@@ -41,7 +41,7 @@ class AssetManager
 		
 	}
 	
-	public static function Get():AssetManager
+	public static inline function Get():AssetManager
 	{
 		if (instance == null)
 		{

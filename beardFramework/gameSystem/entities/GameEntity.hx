@@ -1,17 +1,20 @@
 package beardFramework.gameSystem.entities;
 import beardFramework.interfaces.IEntityComponent;
 import beardFramework.interfaces.IEntityVisual;
+import beardFramework.resources.save.data.DataEntity;
 /* ...
  * @author Ludo
  */
 class GameEntity
 {
-
+	
+	static private var entitiesCount:Int = 0;
+	public var name:String;
 	public var x:Float;
 	public var y:Float;
 	public var forcedLocation(default, null):Bool = false;
 	public var isVirtual(default,null):Bool;
-	public var visual:IEntityVisual;
+	
 	
 	private var components:Array<IEntityComponent>;
 
@@ -20,8 +23,13 @@ class GameEntity
 		this.x = x;
 		this.y = y;
 		
+		
+		
 		components = new Array<IEntityComponent>();
 		isVirtual = false;
+		
+		name = "Game Entity " + entitiesCount++;
+		
 	}
 	
 	public function AddComponent(component:IEntityComponent, update:Bool = true, position:Int = -1):Void
@@ -146,4 +154,28 @@ class GameEntity
 	//{
 		//return visual != null? visual.y : 0;
 	//}
+	
+	public function ToData():DataEntity
+	{
+		
+		var data:DataEntity =
+		{
+			
+			name:this.name,
+			type:Type.getClassName(GameEntity),
+			x:this.x,
+			y:this.y,
+			components:[for(component in components) component.ToData()]
+			
+			
+		}
+		
+		
+	
+		
+		return data;
+		
+	}
 }
+
+

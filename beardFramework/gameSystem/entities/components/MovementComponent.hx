@@ -3,6 +3,7 @@ package beardFramework.gameSystem.entities.components;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.IEntityComponent;
+import beardFramework.resources.save.data.DataComponent;
 
 /**
  * ...
@@ -56,6 +57,21 @@ class MovementComponent implements IEntityComponent
 		horizontalMovement = 0;
 		verticalMovement = 0;
 		
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IEntityComponent */
+	
+	public function ToData():DataComponent 
+	{
+		var data:DataComponent = 
+		{
+			name:this.name,
+			type:Type.getClassName(MovementComponent)
+			
+			
+		}
+		return data;
 	}
 	
 }

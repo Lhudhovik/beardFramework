@@ -18,7 +18,7 @@ class OptionsManager
 		
 	}
 	
-	public static function Get():OptionsManager
+	public static inline function Get():OptionsManager
 	{
 		if (instance == null)
 		{

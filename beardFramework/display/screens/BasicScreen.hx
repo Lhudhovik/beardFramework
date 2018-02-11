@@ -5,7 +5,9 @@ import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.resources.save.data.DataScreen;
 import beardFramework.interfaces.IEntityVisual;
+import haxe.Json;
 import msignal.Signal.Signal0;
 import openfl.display.Sprite;
 import openfl.display.Stage;
@@ -16,6 +18,7 @@ import openfl.display.Stage;
  */
 class BasicScreen 
 {
+	public var name:String = "BasicScreen";
 	public var onReady(get, null):Signal0;
 	public var onTransitionFinished(get, null):Signal0;
 	public var dataPath:String;
@@ -31,6 +34,7 @@ class BasicScreen
 		onTransitionFinished = new Signal0();
 		displayLayer = BeardGame.Get().GetContentLayer();
 		defaultCamera = BeardGame.Get().cameras[Camera.DEFAULT];
+		name = Type.getClassName(Type.getClass(this));
 	}
 	
 	public inline function AddEntity(entity:GameEntity):Void
@@ -82,17 +86,31 @@ class BasicScreen
 		//do stuff to stop game Logic and prevent any error during loading etc.
 	}
 		
-	public function TransitionIn():Void
+	public function StartTransitionIn():Void
 	{
 		Show();
 		onTransitionFinished.addOnce(Play);
+		TransitionIn();
+		
+	}
+	
+	private function TransitionIn():Void
+	{
+		onTransitionFinished.dispatch();
 		//Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
 	}
 	
-	public function TransitionOut():Void
+	public function StartTransitionOut():Void
 	{
-		
+		onTransitionFinished.addOnce(Hide);
+		TransitionOut();
 	}
+	private function TransitionOut():Void
+	{
+		onTransitionFinished.dispatch();
+		//Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
+	}
+	
 	
 	inline function get_loadingProgression():Float 
 	{
@@ -126,5 +144,24 @@ class BasicScreen
 		return displayLayer.visible;
 	}
 	
+	public function ToData():DataScreen
+	{
+		var data:DataScreen =
+		{
+			name : this.name,
+			type : Type.getClassName(Type.getClass(this)),
+			cameras : [for (camera in BeardGame.Get().cameras) camera ],
+			entitiesData : [for(entity in BeardGame.Get().entities) entity.ToData()]
+			
+		}
+		
+		return data;
+	}
 	
 }
+
+
+
+
+
+

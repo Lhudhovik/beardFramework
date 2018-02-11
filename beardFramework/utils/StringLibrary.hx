@@ -39,6 +39,8 @@ class StringLibrary
 	public static inline var MOUSE_UP:String 				= "mouseUp";
 	public static inline var MOUSE_WHEEL:String 			= "mouseWheel";
 	public static inline var NONE:String 					= "none";
+	public static inline var SAVE:String 					= "save";
+	public static inline var SAVE_EXTENSION:String 			= ".BEARD";
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";
 	public static inline var TOUCH_END:String 				= "touchEnd";

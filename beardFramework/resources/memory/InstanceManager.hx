@@ -16,7 +16,7 @@ class InstanceManager
 	{
 		
 	}
-	public static function Get():InstanceManager
+	public static inline function Get():InstanceManager
 	{
 		if (instance == null)
 		{

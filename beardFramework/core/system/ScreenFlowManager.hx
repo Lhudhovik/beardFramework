@@ -31,7 +31,7 @@ class ScreenFlowManager
 	{
 		
 	}
-	public static function Get():ScreenFlowManager
+	public static inline function Get():ScreenFlowManager
 	{
 		if (instance == null)
 		{
@@ -79,7 +79,7 @@ class ScreenFlowManager
 		
 		if (transition){
 			if (onComplete != null) currentLoadingScreen.onTransitionFinished.addOnce(onComplete);
-			currentLoadingScreen.TransitionIn();
+			currentLoadingScreen.StartTransitionIn();
 		}
 		else{
 			currentLoadingScreen.Show();
@@ -139,7 +139,7 @@ class ScreenFlowManager
 	{
 		trace("screen ready");
 		BeardGame.Get().currentScreen = nextScreenData.screen;
-		HideLoadingScreen(true, nextScreenData.screen.TransitionIn);
+		HideLoadingScreen(true, nextScreenData.screen.StartTransitionIn);
 		transitioning = false;
 	}
 	
@@ -151,7 +151,7 @@ class ScreenFlowManager
 			
 			if (transition){
 				if (onComplete != null) currentLoadingScreen.onTransitionFinished.addOnce(onComplete);
-				currentLoadingScreen.TransitionOut();
+				currentLoadingScreen.StartTransitionOut();
 			}
 			else{
 				currentLoadingScreen.Hide();

@@ -1,4 +1,5 @@
 package beardFramework.interfaces;
+import beardFramework.interfaces.IEntityComponent;
 
 /**
  * @author Ludo

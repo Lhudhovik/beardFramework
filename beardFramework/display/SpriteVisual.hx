@@ -4,6 +4,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.interfaces.IEntityVisual;
 import beardFramework.display.core.BeardSprite;
+import beardFramework.resources.save.data.DataComponent;
 
 
 /**
@@ -34,6 +35,15 @@ class SpriteVisual extends BeardSprite implements IEntityVisual
 	public function Register():Void 
 	{
 		BeardGame.Get().GetContentLayer().addChild(this);
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IEntityVisual */
+	
+	public function ToData():DataComponent 
+	{
+		var data:DataComponent = null;
+		return data;
 	}
 		
 	override function __enterFrame(deltaTime:Int):Void 

@@ -12,7 +12,12 @@ import beardFramework.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.resources.save.data.DataSave;
 import beardFramework.utils.StringLibrary;
+import haxe.Json;
+import haxe.crypto.BaseCode;
+import haxe.io.Bytes;
+import lime.system.System;
 import mloader.Loader;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
@@ -43,12 +48,15 @@ class BeardGame extends Sprite
 	private static var game(default, null):BeardGame;
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
+	public var SAVE_PATH(default, null):String = "save/";
 	public var SETTINGS(default, never):String = "settings";
+	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
 	private var contentLayer:BeardLayer;
 	private var UILayer:BeardLayer;
 	private var LoadingLayer:BeardLayer;
 	private var pause:Bool;
+	
 	
 	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
@@ -74,6 +82,15 @@ class BeardGame extends Sprite
 	{
 	
 		game = this;
+		
+		#if mobile
+			
+		SAVE_PATH = System.applicationStorageDirectory+"/save/";
+			
+		#end
+		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
+		
+		
 		// Do visual Loading stuff
 		contentLayer = new BeardLayer("ContentLayer");
 		contentLayer.visible = false;
@@ -86,7 +103,11 @@ class BeardGame extends Sprite
 		stage.addChild(contentLayer);
 		stage.addChild(UILayer);
 		stage.addChild(LoadingLayer);
-		//
+		
+		
+		
+		
+		
 		//InputManager.Get().Activate(stage.window);
 		
 		AssetManager.Get().Append(AssetType.XML, SETTING_PATH, SETTINGS);
@@ -230,7 +251,7 @@ class BeardGame extends Sprite
 	
 	
 	
-	public function getTargetUnderPoint (point:Point):DisplayObject
+	public function getTargetUnderPoint (point:Point, reverse:Bool = true):DisplayObject
 	{
 		var tempPoint:Point = Point.__pool.get ();
 		var stack = new Array<DisplayObject> ();
@@ -253,15 +274,15 @@ class BeardGame extends Sprite
 			
 		}
 		
-		StringLibrary.utilString = "";
-		for (element in stack){
-			StringLibrary.utilString += "   -->  " + element.name;
-		}
-		
+		//StringLibrary.utilString = "";
+		//for (element in stack){
+			//StringLibrary.utilString += "   -->  " + element.name;
+		//}
+		//
 		//trace(StringLibrary.utilString);
+		//
 		
-		
-		stack.reverse ();
+		if(reverse) stack.reverse ();
 		return stack != null ? stack[0] : null;
 		
 	}
@@ -303,7 +324,6 @@ class BeardGame extends Sprite
 	{
 		return LoadingLayer;
 	}
-	
 	
 	
 	
