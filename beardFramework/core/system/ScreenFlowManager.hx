@@ -6,7 +6,11 @@ import beardFramework.display.screens.BasicLoadingScreen;
 import beardFramework.display.screens.BasicScreen;
 import beardFramework.display.ui.UIManager;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.resources.save.data.DataScreen;
+import beardFramework.utils.Crypto;
+import beardFramework.utils.DataUtils;
 import beardFramework.utils.StringLibrary;
+import haxe.Json;
 import mloader.Loader.LoaderEvent;
 
 /**
@@ -22,7 +26,7 @@ class ScreenFlowManager
 	
 	private var loadingScreens:Map<String, BasicLoadingScreen>;
 	private var existingScreens:Map<String, BasicScreen>;
-	private var loadThread:Thread<Xml>;
+	private var loadThread:Thread<DataScreen>;
 	private var clearThread:Thread<Int>;
 	private var transitionThread(get, null):ChainThread<Int>;
 	private var nextScreenData:NextScreenData;
@@ -44,7 +48,7 @@ class ScreenFlowManager
 	
 	private function Init():Void
 	{
-		loadThread = new Thread<Xml>(10);
+		loadThread = new Thread<DataScreen>(10);
 		clearThread = new Thread<Int>(10);
 		transitionThread = new ChainThread<Int>(10);
 		loadingScreens = new Map<String, BasicLoadingScreen>();
@@ -114,7 +118,7 @@ class ScreenFlowManager
 			
 			currentLoadingScreen.loadingTasksCount++;
 			
-			AssetManager.Get().Append(AssetType.XML, nextScreenData.dataPath, nextScreenData.dataPath);
+			AssetManager.Get().Append(AssetType.DATA, nextScreenData.dataPath, nextScreenData.dataPath);
 			AssetManager.Get().Load(OnScreenDataReady, currentLoadingScreen.OnLoadingProgress, BeardGame.Get().OnSettingsFailed );
 		
 		}
@@ -127,7 +131,15 @@ class ScreenFlowManager
 	private function OnScreenDataReady():Void
 	{
 	trace("screen data rea loading");
-		loadThread.AddToThread(nextScreenData.screen.ParseScreenData, AssetManager.Get().GetContent(nextScreenData.screen.dataPath));
+		var data:DataScreen = null;
+		
+		
+		#if debug
+		loadThread.AddToThread(nextScreenData.screen.ParseScreenData, haxe.Json.parse(AssetManager.Get().GetContent(nextScreenData.screen.dataPath)));
+		#else
+		loadThread.AddToThread(nextScreenData.screen.ParseScreenData, Crypto.DecodedData(AssetManager.Get().GetContent(nextScreenData.screen.dataPath)) );
+		#end
+		
 		if(!clearThread.empty) transitionThread.AddToThread(clearThread.ThreadedProceed, 0);
 		transitionThread.AddToThread(loadThread.ThreadedProceed, 0);
 		//TransitionThread.completed.addOnce(OnTransitionThreadFinished);

@@ -60,8 +60,8 @@ class BeardSprite extends Sprite implements ICameraDependent{
 			
 			if (Std.is(child, ICameraDependent)){
 						
-				cast(child, ICameraDependent).displayingCameras.remove(camera.id);
-				cast(child, ICameraDependent).displayingCameras.add(camera.id);
+				cast(child, ICameraDependent).displayingCameras.remove(camera.name);
+				cast(child, ICameraDependent).displayingCameras.add(camera.name);
 				cast(child, ICameraDependent).RenderThroughCamera(camera, renderSession);
 			}
 			else{

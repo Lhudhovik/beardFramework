@@ -6,5 +6,7 @@ package beardFramework.resources.save.data;
 typedef DataComponent =
 {
 	>DataGeneric,
-	
+	var update:Bool;
+	var position:Int;
+	var additionalData:String;
 }

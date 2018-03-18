@@ -1,5 +1,6 @@
 package beardFramework.display.cameras;
 import beardFramework.interfaces.ICameraDependent;
+import beardFramework.resources.save.data.DataCamera;
 import openfl.geom.Matrix;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
@@ -13,7 +14,7 @@ class Camera
 {
 	private static var utilRect:Rectangle;
 	public static var DEFAULT(default, null):String = "default";
-	public var id(default, null):String;
+	@:isVar public var name(get, set):String;
 	public var zoom(get,set):Float;
 	public var viewportWidth:Float;
 	public var viewportHeight:Float;
@@ -25,10 +26,10 @@ class Camera
 	//a : scale X, d: ScaleY
 	public var transform(default, null):Matrix;
 	
-	public function new(id:String, width:Float = 100, height:Float = 57, buffer : Float = 100) 
+	public function new(name:String, width:Float = 100, height:Float = 57, buffer : Float = 100) 
 	{
 		transform = new Matrix();
-		this.id = id;
+		this.name = name;
 		this.viewportWidth = width;
 		this.viewportHeight = height;
 		this.buffer = buffer;
@@ -92,7 +93,7 @@ class Camera
 	
 	public function Contains(object:DisplayObject):Bool{
 		
-		var success:Bool = (cast(object, ICameraDependent).restrictedCameras == null || cast(object, ICameraDependent).restrictedCameras.indexOf(id) != -1);
+		var success:Bool = (cast(object, ICameraDependent).restrictedCameras == null || cast(object, ICameraDependent).restrictedCameras.indexOf(name) != -1);
 		
 		if (success)
 			success = (((object.x + object.width) > (cameraX - buffer)) && (object.x < (cameraX + viewportWidth + buffer)) && ((object.y + object.height) > (cameraY - buffer)) && (object.y < (cameraY + viewportHeight + buffer)));
@@ -131,6 +132,51 @@ class Camera
 	}
 	
 	
+	function get_name():String 
+	{
+		return name;
+	}
+	
+	function set_name(value:String):String 
+	{
+		return name = value;
+	}
+	
+	public function ToData():DataCamera
+	{
+		
+		return {
+			
+			name:this.name,
+			type:"Camera",
+			zoom:transform.a,
+			viewportWidth:this.viewportWidth,
+			viewportHeight:this.viewportHeight,
+			cameraX:this.cameraX,
+			cameraY:this.cameraY,
+			viewportX:transform.tx,
+			viewportY:transform.ty,
+			buffer:this.buffer
+			
+			
+		}
+		
+	}
+	
+	public function ParseData(data:DataCamera):Void
+	{
+		this.name = data.name;
+		zoom = data.zoom;
+		viewportWidth = data.viewportWidth;
+		viewportHeight = data.viewportHeight;
+		cameraX = data.cameraX;
+		cameraY = data.cameraY;
+		transform.tx = data.viewportX;
+		transform.ty = data.viewportY;
+		buffer = data.buffer;
+	
+		
+	}
 	
 	
 }

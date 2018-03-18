@@ -838,7 +838,7 @@ class InputManager
 		
 			if (handledInputs[utilString] != null){
 			
-				handledInputs[utilString].state = InputType.KEY_PRESS;
+				handledInputs[utilString].state = InputType.GAMEPAD_BUTTON_PRESS;
 				handledInputs[utilString].value = 0.5;
 				if (directMode) DirectResolveInput(	handledInputs[utilString]);
 			}

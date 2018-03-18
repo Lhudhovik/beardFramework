@@ -1,12 +1,18 @@
 package beardFramework.display.screens;
 import beardFramework.core.BeardGame;
+import beardFramework.core.system.thread.Thread;
 import beardFramework.core.system.thread.Thread.ThreadDetail;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.resources.save.SaveManager;
+import beardFramework.resources.save.data.DataCamera;
+import beardFramework.resources.save.data.DataEntity;
+import beardFramework.resources.save.data.DataGeneric;
 import beardFramework.resources.save.data.DataScreen;
 import beardFramework.interfaces.IEntityVisual;
+import beardFramework.utils.DataUtils;
 import haxe.Json;
 import msignal.Signal.Signal0;
 import openfl.display.Sprite;
@@ -26,7 +32,7 @@ class BasicScreen
 	private var defaultCamera:Camera;
 	//private var id:String;
 	private var loadingProgression(get, null):Float;
-	
+	private var savedData:DataScreen;
 	
 	public function new() 
 	{
@@ -35,6 +41,8 @@ class BasicScreen
 		displayLayer = BeardGame.Get().GetContentLayer();
 		defaultCamera = BeardGame.Get().cameras[Camera.DEFAULT];
 		name = Type.getClassName(Type.getClass(this));
+		
+		
 	}
 	
 	public inline function AddEntity(entity:GameEntity):Void
@@ -61,13 +69,94 @@ class BasicScreen
 		
 	private function Init():Void
 	{
-		
+		onReady.dispatch();
 	}
 	
-	public function ParseScreenData(threadDetail:ThreadDetail<Xml>):Bool
+		
+	public function ParseScreenData(threadDetail:ThreadDetail<DataScreen>):Bool
 	{
+		if (threadDetail != null && threadDetail.parameter != null){
+			
+			trace(threadDetail);
+			trace(threadDetail.parameter);
+			trace(threadDetail.parameter.cameras);
+			
+			Thread.MarkDate();
+			
+			if (threadDetail.progression == 0)
+			{
+				savedData = SaveManager.Get().GetScreenSavedData(this.name);
+				
+				trace(savedData);
+				//trace(savedData);
+			}
+			
+			if (threadDetail.progression < 0.2)
+			{
+				
+				
+				
+				var cameraData:DataCamera;
+				var savedCameras:Map<String, DataCamera> = (savedData != null ? DataUtils.DataArrayToMap(savedData.cameras) : null);
+				
+				for (i in threadDetail.marker...threadDetail.parameter.cameras.length)
+				{
+					cameraData = threadDetail.parameter.cameras[i];
+					
+					if (BeardGame.Get().cameras[cameraData.name] == null)
+					{
+						BeardGame.Get().AddCamera(new Camera(cameraData.name));
+					}
+					
+					if (savedCameras != null && savedCameras[cameraData.name] != null){
+						trace("data saved");
+						BeardGame.Get().cameras[cameraData.name].ParseData(savedCameras[cameraData.name]);
+					}
+					else 
+						BeardGame.Get().cameras[cameraData.name].ParseData(cameraData);
+						
+					threadDetail.progression += (0.2 / threadDetail.parameter.cameras.length);
+					threadDetail.marker++;
+					
+					if (Thread.CheckTimeExpiration(threadDetail.allowedTime)) return false;
+						
+				}
+				
+				threadDetail.progression = 0.2;
+				threadDetail.marker = 0;
+				
+			}
+			
+			
+			var entityData:DataEntity;
+			var savedEntities:Map<String, DataEntity> = (savedData != null? DataUtils.DataArrayToMap(savedData.entitiesData) : null);
+			for (i in threadDetail.marker...threadDetail.parameter.entitiesData.length)
+			{
+				
+				entityData = threadDetail.parameter.entitiesData[i];
+				
+				var entity:GameEntity = Type.createInstance(Type.resolveClass(entityData.type),[]); //to be handled by Pool
+				
+				if (savedEntities != null && savedEntities[entityData.name] != null){
+					trace("data saved enitys");
+					entity.ParseData(savedEntities[entityData.name]);
+				}
+				else 
+					entity.ParseData(entityData);
+					
+				AddEntity(entity);
+				
+				threadDetail.marker++;
+				threadDetail.progression += (0.8 / threadDetail.parameter.entitiesData.length);
+				if (Thread.CheckTimeExpiration(threadDetail.allowedTime)) return false;
+			}
+		}
+		
+		
+		savedData = null;
 		Init();
-		return true;
+		return true;		
+	
 	}
 	
 	public function Play():Void
@@ -144,14 +233,14 @@ class BasicScreen
 		return displayLayer.visible;
 	}
 	
-	public function ToData():DataScreen
+	public function ToData(complete:Bool=false):DataScreen
 	{
 		var data:DataScreen =
 		{
 			name : this.name,
 			type : Type.getClassName(Type.getClass(this)),
-			cameras : [for (camera in BeardGame.Get().cameras) camera ],
-			entitiesData : [for(entity in BeardGame.Get().entities) entity.ToData()]
+			cameras : [for (camera in BeardGame.Get().cameras) camera.ToData() ],
+			entitiesData : [for(entity in BeardGame.Get().entities) if(entity.isLocal && (complete || entity.requiredSave) ) entity.ToData()]
 			
 		}
 		

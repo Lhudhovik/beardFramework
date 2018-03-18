@@ -14,6 +14,8 @@ class GameEntity
 	public var y:Float;
 	public var forcedLocation(default, null):Bool = false;
 	public var isVirtual(default,null):Bool;
+	public var isLocal(default,null):Bool=true;
+	public var requiredSave(default,null):Bool=false;
 	
 	
 	private var components:Array<IEntityComponent>;
@@ -32,7 +34,7 @@ class GameEntity
 		
 	}
 	
-	public function AddComponent(component:IEntityComponent, update:Bool = true, position:Int = -1):Void
+	public function AddComponent(component:IEntityComponent, update:Bool = true, position:Int = -1):IEntityComponent
 	{
 		
 		if (components.indexOf(component) == -1)
@@ -45,6 +47,8 @@ class GameEntity
 			
 			if (update) component.Update();
 		}
+		
+		return component;
 		
 	}
 	
@@ -165,7 +169,8 @@ class GameEntity
 			type:Type.getClassName(GameEntity),
 			x:this.x,
 			y:this.y,
-			components:[for(component in components) component.ToData()]
+			components:[for (component in components) component.ToData()],
+			additionalData:""
 			
 			
 		}
@@ -176,6 +181,23 @@ class GameEntity
 		return data;
 		
 	}
+	
+	public function ParseData(data:DataEntity):Void
+	{
+		this.name = data.name;
+		this.x = data.x;
+		this.y = data.y;
+		
+		for (componentData in data.components)
+		{
+			trace(this);
+			var component:Dynamic = Type.createInstance(Type.resolveClass(componentData.type), []);
+			trace(Type.resolveClass(componentData.type));
+			AddComponent(component, componentData.update, componentData.position);
+			component.ParseData(componentData);
+		}
+	}
+	
 }
 
 

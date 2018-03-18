@@ -1,8 +1,10 @@
 package beardFramework.gameSystem.entities.components;
 
+import beardFramework.core.BeardGame;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.IEntityComponent;
+import beardFramework.resources.save.SaveManager;
 import beardFramework.resources.save.data.DataComponent;
 
 /**
@@ -18,6 +20,34 @@ class MovementComponent implements IEntityComponent
 	{
 		InputManager.Get().BindToAction("HorizontalMove", HorizontalMove);
 		InputManager.Get().BindToAction("VerticalMove", VerticalMove);
+		InputManager.Get().BindToAction("Save", SaveState);
+		
+	}
+	
+	
+	private function SaveState(value:Float):Void
+	{
+		trace("save");
+		SaveManager.Get().CreateSave("Test");
+		SaveManager.Get().Load("Test");
+		if (SaveManager.Get().currentSave.gameData.length > 0)
+		{
+			var index:Int = 0;
+			for (data in SaveManager.Get().currentSave.gameData)
+			{
+				if (data.name == BeardGame.Get().currentScreen.name){
+					index = SaveManager.Get().currentSave.gameData.indexOf(data);
+					break;
+				}
+							
+			}
+			
+			SaveManager.Get().currentSave.gameData[index] = BeardGame.Get().currentScreen.ToData(true);
+		}
+		else
+		SaveManager.Get().currentSave.gameData.push(BeardGame.Get().currentScreen.ToData(true));
+		
+		SaveManager.Get().Save("Test", SaveManager.Get().currentSave);
 	}
 	
 	private function HorizontalMove(value:Float):Void
@@ -67,11 +97,21 @@ class MovementComponent implements IEntityComponent
 		var data:DataComponent = 
 		{
 			name:this.name,
-			type:Type.getClassName(MovementComponent)
-			
+			type:Type.getClassName(MovementComponent),
+			update:false,
+			position: -1,
+			additionalData:""
 			
 		}
 		return data;
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IEntityComponent */
+	
+	public function ParseData(data:DataComponent):Void 
+	{
+		
 	}
 	
 }

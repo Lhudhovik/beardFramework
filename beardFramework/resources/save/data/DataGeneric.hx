@@ -7,4 +7,6 @@ typedef DataGeneric =
 {
 	var name:String;
 	var type:String;	
+	
+	
 }

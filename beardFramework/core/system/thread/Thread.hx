@@ -24,7 +24,7 @@ class Thread<T>
 	public function AddToThread(method:ThreadDetail<T>->Bool, parameter:T):Void
 	{
 		if (individualThreads == null) individualThreads = new Array<ThreadDetail<T>>();
-		var details:ThreadDetail<T> = {action:method, parameter:parameter, allowedTime:0, progression:0};
+		var details:ThreadDetail<T> = {action:method, parameter:parameter, allowedTime:0, progression:0, marker:0};
 		
 		if (!CheckIsExisting(details)){
 			individualThreads.push(details);
@@ -131,5 +131,6 @@ typedef ThreadDetail<T> = {
 	var parameter:T;
 	var allowedTime:Float;
 	var progression:Float;
+	var marker:Int;
 	
 }

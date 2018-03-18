@@ -1,7 +1,10 @@
 package beardFramework.resources.save;
 import beardFramework.core.BeardGame;
+import beardFramework.resources.save.data.DataGeneric;
 import beardFramework.resources.save.data.DataSave;
+import beardFramework.resources.save.data.DataScreen;
 import beardFramework.utils.Crypto;
+import beardFramework.utils.DataUtils;
 import beardFramework.utils.StringLibrary;
 import haxe.Json;
 import sys.FileSystem;
@@ -18,7 +21,7 @@ class SaveManager
 	
 	
 	private var saveSlots:Map<String, SaveSlot>;
-	
+	public var currentSave:DataSave;
 	
 	private function new() 
 	{
@@ -46,15 +49,19 @@ class SaveManager
 		{
 			if (element.indexOf(StringLibrary.SAVE_EXTENSION) != -1){
 				
-				var saveData:DataSave = Crypto.DecodedData(File.getContent(BeardGame.Get().SAVE_PATH+ element));	
+				#if debug
+				var saveData:DataSave = haxe.Json.parse(File.getContent(BeardGame.Get().SAVE_PATH + element));
+				#else
+				var saveData:DataSave = Crypto.DecodedData(File.getContent(BeardGame.Get().SAVE_PATH + element));	
+				#end
 				
 				saveSlots[saveData.name] = {
-					address:element,
+					address:BeardGame.Get().SAVE_PATH + element,
 					name: saveData.name,
 					data:saveData
 				}
 				
-				trace(saveData);
+				
 	
 				
 			}
@@ -63,12 +70,9 @@ class SaveManager
 		
 	}
 	
-	public function Load():Void
+	public inline function Load(name:String):Void
 	{
-		
-		
-		
-		
+		currentSave = GetSaveData(name);
 	}
 	
 	public function CreateSave(name:String):Bool
@@ -78,7 +82,11 @@ class SaveManager
 		if (saveSlots[name] == null) 
 		{
 			saveSlots[name] = {	name : name, address : BeardGame.Get().SAVE_PATH +  name + StringLibrary.SAVE_EXTENSION , data: { name:name, playersData:[],gameData:[]} };
+			#if debug
+			File.saveContent(saveSlots[name].address, haxe.Json.stringify(saveSlots[name].data));
+			#else
 			File.saveContent(saveSlots[name].address, Crypto.EncodeData(saveSlots[name].data));
+			#end
 			success = true;
 		}
 		
@@ -118,13 +126,33 @@ class SaveManager
 			
 			if (data != null) saveSlots[name].data = data;
 			
+			
+			#if debug
+				
+			File.saveContent(saveSlots[name].address, haxe.Json.stringify(data));
+	
+			
+			#else
 			File.saveContent(saveSlots[name].address, Crypto.EncodeData(saveSlots[name].data));
+			#end
 			
 			success = true;
 			
 		}
-	
+		
 		return success;
+	}
+	
+	public function GetScreenSavedData(screen:String):Dynamic
+	{
+		
+		var map:Map<String, DataGeneric> = ((currentSave != null && currentSave.gameData != null) ? DataUtils.DataArrayToMap(currentSave.gameData) : null);
+		var screenData:Dynamic = null;
+		
+		if (map != null && map[screen] != null) screenData = map[screen];
+		
+		return screenData;
+		
 	}
 	
 }

@@ -9,7 +9,7 @@ typedef DataScreen =
   
 	>DataGeneric,
 	
-	var cameras:Array<Camera>;
+	var cameras:Array<DataCamera>;
 	var entitiesData:Array<DataEntity>;
 	
 

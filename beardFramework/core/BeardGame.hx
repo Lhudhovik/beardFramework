@@ -197,8 +197,8 @@ class BeardGame extends Sprite
 	
 	public function AddCamera(camera:Camera):Bool
 	{
-		if (!cameras.exists(camera.id)){
-			cameras[camera.id] = camera;
+		if (!cameras.exists(camera.name)){
+			cameras[camera.name] = camera;
 			return true;
 		}
 		

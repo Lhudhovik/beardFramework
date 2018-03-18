@@ -105,17 +105,7 @@ class UICameraComponent extends Camera implements IUIComponent
 	
 	/* INTERFACE beardFramework.interfaces.IUIComponent */
 	
-	@:isVar public var name(get, set):String;
 	
-	function get_name():String 
-	{
-		return name;
-	}
-	
-	function set_name(value:String):String 
-	{
-		return name = value;
-	}
 	
 	public function Clear():Void 
 	{

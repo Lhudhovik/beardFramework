@@ -10,4 +10,5 @@ typedef DataEntity =
 	var x:Float;
 	var y:Float;
 	var components:Array<DataComponent>;
+	var additionalData:String;
 }
