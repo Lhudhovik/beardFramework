@@ -72,7 +72,7 @@ class Atlas
 		source.height = subAreas[name].imageArea.height >= subAreas[name].frame.height? subAreas[name].imageArea.height : subAreas[name].frame.height;
 		source.x = -subAreas[name].frame.x;
 		source.y = -subAreas[name].frame.y;
-		trace(subAreas[name].imageArea.x);
+		//trace(subAreas[name].imageArea.x);
 		var bitmapData:BitmapData = new BitmapData(Math.ceil(source.width), Math.ceil(source.height), true, 0x00ffffff);
 		bitmapData.copyPixels(atlasBitmapData, subAreas[name].imageArea, new Point(source.x, source.y));
 		

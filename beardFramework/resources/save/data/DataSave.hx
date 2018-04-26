@@ -11,3 +11,9 @@ typedef DataSave =
 	
 	
 }
+@:forward
+abstract AbstractDataSave(DataSave) from DataSave to DataSave {
+  inline public function new(data:DataSave) {
+    this = data;
+  }
+}

@@ -1,136 +1,145 @@
 package beardFramework.core.system.thread;
-import msignal.Signal.Signal0;
+import msignal.Signal.Signal1;
 
-
+using beardFramework.utils.SysPreciseTime;
 /**
  * ...
  * @author Ludo
  */
-class Thread<T>
+class Thread 
 {
-	private static var markedDate:Float;
-	private var individualThreads:Array<ThreadDetail<T>>;
-	private var allowedTime:Float;
-	private var length(get, null):Int;
-	public var empty(get, null):Bool;
-	public var completed(get, null):Signal0;
+
+	private var threadDetails:List<AbstractThreadDetail>;
+	private var timeLimitPerFrame:Float;
+	private var length:Int;
 	
-	public function new(timeLimit:Float) 
+	public var name:String;
+	public var completed(get, null):Signal1<Thread>;
+	public var started(get, null):Signal1<Thread>;
+	public var progressed(get, null):Signal1<Thread>;
+	
+	public function new(name:String, timeLimit:Float = 10) 
 	{
-		this.allowedTime = timeLimit;
-		completed = new Signal0();
+		this.name = name;
+		this.timeLimitPerFrame = timeLimit;
+		completed = new Signal1(Thread);
+		progressed = new Signal1(Thread);
+		started = new Signal1(Thread);
 	}
 	
-	public function AddToThread(method:ThreadDetail<T>->Bool, parameter:T):Void
+	private function Proceed():Void
 	{
-		if (individualThreads == null) individualThreads = new Array<ThreadDetail<T>>();
-		var details:ThreadDetail<T> = {action:method, parameter:parameter, allowedTime:0, progression:0, marker:0};
+		var time:Float =Sys.preciseTime();
+		var individualTime :Float = this.timeLimitPerFrame / threadDetails.length;
+		var detail:AbstractThreadDetail;
 		
-		if (!CheckIsExisting(details)){
-			individualThreads.push(details);
-			trace("thread method added");
-		}
-	}
-	
-	
-	public function Proceed():Void
-	{
-		var time:Float = Date.now().getTime();
-		var i : Int = 0;
-		var individualTime :Float = this.allowedTime / individualThreads.length;
 		
-		while (i< individualThreads.length)
+		while (threadDetails.length>0)
 		{
-			if (individualThreads[i] != null){
+			if ((detail = threadDetails.first()) != null){
 				
-				individualThreads[i].allowedTime = individualTime;
+				detail.startTime =Sys.preciseTime();
+				detail.timeLimit = individualTime;
 				
-				if( individualThreads[i].action(individualThreads[i])){
-					individualThreads.remove(individualThreads[i]);
-					i--;
+				
+				//if (detail.action(detail)){
+				if (detail.Call()){
+					
+					detail.Clear();
+					detail = null;
+					threadDetails.pop() ;
+					progressed.dispatch(this);
 				}
+				
+			}
+
+			if ((Date.now().getTime() - time) > timeLimitPerFrame) break;
+			
+		}
+		
+		if (threadDetails.length == 0){
+			completed.dispatch(this);
+			Clear();
+		}
+		
+		
+	}
+	
+	public function Add(detail:AbstractThreadDetail):Void
+	{
+		
+		if (threadDetails == null) threadDetails = new List<AbstractThreadDetail>();
+		
+		var exist:Bool = false;
+		
+		for (existingDetail in threadDetails)
+			if (existingDetail == detail){
+				exist = true;
+				break;
 			}
 			
-			if (individualThreads.length == 0) completed.dispatch();
-			if ((Date.now().getTime() - time) > allowedTime) break;
-			
-			i++;
-		}
-		
-		
+		if (!exist)	threadDetails.add(detail);
 		
 	}
 	
-	public function ThreadedProceed(threadDetail:ThreadDetail<Int>):Bool
+	public inline function ThreadedProceed():Bool
 	{
 		Proceed();
-		return get_empty();
-		
+		//detail.progression = this.progression();
+		return isEmpty();		
+	}
+	
+	public function Start():Void
+	{
+		length = threadDetails.length;
+		BeardGame.Get().AddUpdateProcess(name, Proceed);
+		started.dispatch(this);
 	}
 	
 	public function Clear():Void
 	{
 		
-		if (individualThreads != null){
+		if (threadDetails != null){
 			
-			for (detail in individualThreads){
+			for (detail in threadDetails){
 				
-				detail = null;
+				detail.Clear();
 			}
 			
 		}
-		individualThreads = [];
+		threadDetails.clear();
 		completed.removeAll();
+		BeardGame.Get().RemoveUpdateProcess(name);
 	}
 	
-	private inline function CheckIsExisting(checkedDetail : ThreadDetail<T>):Bool
+	public inline function isEmpty():Bool 
 	{
-		var success:Bool = false;
-		
-		for (method in individualThreads){
-			
-			if (success = (method.action == checkedDetail.action))
-				break;
-		}
-		
-		return success;
+		return (threadDetails == null || threadDetails.length==0);
 	}
 	
-	public inline function get_empty():Bool 
+	public inline function  get_started():Signal1<Thread> 
 	{
-		return (individualThreads == null || individualThreads.length==0);
+		return started;
 	}
 	
-	public inline function  get_completed():Signal0 
+	public inline function  get_progressed():Signal1<Thread>  
+	{
+		return progressed;
+	}
+	
+	public inline function  get_completed():Signal1<Thread>  
 	{
 		return completed;
 	}
 	
-	public inline function get_length():Int 
+	public inline function progression():Float
 	{
-		return individualThreads.length;
-	}
-	
-	public static inline function MarkDate():Void
-	{
-		markedDate = Date.now().getTime();
-	}
-	public static inline function CheckTimeExpiration(threshold:Float):Bool
-	{
-		trace(Date.now().getTime() + " -  " + markedDate + ">=" + threshold);
-		return (Date.now().getTime() - markedDate >= threshold);
+		
+		return threadDetails.length * 100 / length;
+		
 	}
 	
 	
 	
 }
 
-typedef ThreadDetail<T> = {
-	
-	var action:ThreadDetail<T>->Bool;	
-	var parameter:T;
-	var allowedTime:Float;
-	var progression:Float;
-	var marker:Int;
-	
-}

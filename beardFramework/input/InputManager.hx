@@ -23,7 +23,7 @@ import openfl.ui.GameInput;
 import openfl.ui.Keyboard;
 
 using beardFramework.input.GamepadHandler;
-
+using beardFramework.utils.SysPreciseTime;
 /**
  * ...
  * @author Ludo
@@ -505,7 +505,7 @@ class InputManager
 		if (handledInputs[utilString] != null)
 		{
 			
-			timeCounters[utilString] = Date.now().getTime();
+			timeCounters[utilString] =  Sys.preciseTime();
 			
 			var object:DisplayObject= BeardGame.Get().getTargetUnderPoint(utilPoint);
 			mouseTargetName = object != null ? object.name : "";
@@ -567,7 +567,7 @@ class InputManager
 		
 		//Mouse Click
 		
-		if (Date.now().getTime() - timeCounters[utilString]  <= CLICK_DELAY && 	handledInputs[utilString] != null )
+		if ( Sys.preciseTime() - timeCounters[utilString]  <= CLICK_DELAY && 	handledInputs[utilString] != null )
 		{
 			handledInputs[utilString].state = InputType.MOUSE_CLICK;		
 			if (directMode) DirectResolveInput(	handledInputs[utilString]);
@@ -750,7 +750,7 @@ class InputManager
 		
 		utilString = String.fromCharCode(key); 
 		
-		if (Date.now().getTime() - timeCounters[utilString] <= KEY_PRESS_DELAY){
+		if ( Sys.preciseTime() - timeCounters[utilString] <= KEY_PRESS_DELAY){
 			
 			modifier.capsLock = modifier.numLock = false;
 			if (cast(modifier,Int) > 0) utilString += modifier;
@@ -786,7 +786,7 @@ class InputManager
 	{
 		utilString = String.fromCharCode(key);
 		//trace(String.fromCharCode(key));
-		if( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] = Date.now().getTime();
+		if( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] = Sys.preciseTime();
 		
 		modifier.capsLock = modifier.numLock = false;
 		if (cast(modifier,Int) > 0)utilString += modifier;
@@ -834,7 +834,7 @@ class InputManager
 			if (directMode) DirectResolveInput(	handledInputs[utilString]);
 		}
 		
-		if (Date.now().getTime() - timeCounters[utilString] <= GAMEPAD_PRESS_DELAY){
+		if ( Sys.preciseTime() - timeCounters[utilString] <= GAMEPAD_PRESS_DELAY){
 		
 			if (handledInputs[utilString] != null){
 			
@@ -853,7 +853,7 @@ class InputManager
 		utilString = GetGamepadInputID(gamepadID, button.toString());
 	
 		
-		if ( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] = Date.now().getTime();
+		if ( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] =  Sys.preciseTime();
 		
 		if (handledInputs[utilString] != null){
 				
@@ -891,7 +891,7 @@ class InputManager
 		if (handledInputs[utilString] != null)
 		{
 			utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
-			timeCounters[StringLibrary.TOUCH + touch.id] = Date.now().getTime();
+			timeCounters[StringLibrary.TOUCH + touch.id] =  Sys.preciseTime();
 		
 			var object:DisplayObject= BeardGame.Get().getTargetUnderPoint(utilPoint);
 		
@@ -993,7 +993,7 @@ class InputManager
 		
 		//Mouse Click
 		
-		if (handledInputs[StringLibrary.TOUCH_TAP + touch.id] != null  && Date.now().getTime() - timeCounters[StringLibrary.TOUCH + touch.id]  <= TAP_DELAY )
+		if (handledInputs[StringLibrary.TOUCH_TAP + touch.id] != null  &&  Sys.preciseTime() - timeCounters[StringLibrary.TOUCH + touch.id]  <= TAP_DELAY )
 		{
 			handledInputs[StringLibrary.TOUCH_TAP + touch.id].state = InputType.TOUCH_TAP;		
 			handledInputs[StringLibrary.TOUCH_TAP + touch.id].target = touchTargets[utilString];		
@@ -1012,8 +1012,7 @@ class InputManager
 		for (input in handledInputs)
 		{
 			currentInput = input;
-			
-			
+						
 			if (!input.active) continue;
 			
 			if (inputActions[input.ID] != null && inputActions[input.ID][input.state] != null)

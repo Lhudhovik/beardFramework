@@ -9,3 +9,9 @@ typedef DataPlayer =
 	
 	
 }
+@:forward
+abstract AbstractDataPlayer(DataPlayer) from DataPlayer to DataPlayer {
+  inline public function new(data:DataPlayer) {
+    this = data;
+  }
+}

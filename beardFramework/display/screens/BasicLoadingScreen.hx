@@ -42,7 +42,7 @@ class BasicLoadingScreen extends BasicScreen
 	public function OnLoadingProgress(progression:Float):Void
 	{
 		
-		trace((progression + completedLoadingTasksCount) / loadingTasksCount);
+		trace("~~ Loading Screen progress... " + ((progression + completedLoadingTasksCount) / loadingTasksCount) + " %");
 		
 	}
 	

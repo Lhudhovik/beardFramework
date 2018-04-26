@@ -7,6 +7,7 @@ import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
 import beardFramework.display.screens.BasicScreen;
+import beardFramework.display.ui.UIManager;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.ICameraDependent;
@@ -17,7 +18,7 @@ import beardFramework.utils.StringLibrary;
 import haxe.Json;
 import haxe.crypto.BaseCode;
 import haxe.io.Bytes;
-import lime.system.System;
+import openfl.system.System;
 import mloader.Loader;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
@@ -49,6 +50,7 @@ class BeardGame extends Sprite
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SAVE_PATH(default, null):String = "save/";
+	public var UI_PATH(default, null):String = "assets/UI/";
 	public var SETTINGS(default, never):String = "settings";
 	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
@@ -56,14 +58,11 @@ class BeardGame extends Sprite
 	private var UILayer:BeardLayer;
 	private var LoadingLayer:BeardLayer;
 	private var pause:Bool;
-	
+	private var updateProcesses:List<UpdateProcess>;
 	
 	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
 	public var currentScreen:BasicScreen;
-	
-	
-
 	
 	public function new() 
 	{
@@ -100,6 +99,8 @@ class BeardGame extends Sprite
 		LoadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
+		updateProcesses = new List<UpdateProcess>();
+		
 		stage.addChild(contentLayer);
 		stage.addChild(UILayer);
 		stage.addChild(LoadingLayer);
@@ -134,16 +135,12 @@ class BeardGame extends Sprite
 	
 	private function OnSettingsProgressing(progress:Float):Void
 	{
-		trace("progress...");
-		trace(progress);
-		
+		trace("Setting Loading in progress... " + progress +" %" );		
 	}
 		
 	public function OnSettingsFailed(e:LoaderErrorType):Void
 	{
-		trace("error !");
-		trace(e.getName() +"\n" + e.getParameters());
-		
+		trace("/!\\ Setting Loading Failed!\nError name:  " + e.getName() +"\nError Parameters: " + e.getParameters());		
 	}
 	
 	private function LoadResources():Void
@@ -154,7 +151,7 @@ class BeardGame extends Sprite
 			{
 				AssetManager.Get().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
 			}
-			trace(OptionsManager.Get().resourcesToLoad);
+			trace("*** Resources to load : " + OptionsManager.Get().resourcesToLoad);
 			
 			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
 		}
@@ -174,7 +171,7 @@ class BeardGame extends Sprite
 	private function OnResourcesProgress(progress:Float):Void
 	{
 		
-		trace(progress);
+		trace("*** Resources Loading in progress... " + progress + " %");
 		
 		
 	}
@@ -182,7 +179,7 @@ class BeardGame extends Sprite
 	private function OnPreciseResourcesProgress(e:LoaderEvent<Dynamic>):Void
 	{
 		
-		trace((e.target.progress + AssetManager.Get().get_progress()) / 2);
+		trace("*** Precise Resources Loading in progress...!" + ((e.target.progress + AssetManager.Get().get_progress()) / 2));
 		
 		
 	}
@@ -190,8 +187,7 @@ class BeardGame extends Sprite
 	private function OnResourcesFailed(error: LoaderErrorType):Void
 	{
 		
-		trace(error.getName() + "\n" + error.getParameters());
-		
+		trace("/!\\ *** Resources Loading Failed!\nError name:  " + error.getName() +"\nError Parameters: " + error.getParameters());		
 		
 	}
 	
@@ -219,19 +215,54 @@ class BeardGame extends Sprite
 		//do more stuff if needed
 
 	}
-	override function __enterFrame(deltaTime:Int):Void 
+	
+	public function AddUpdateProcess(name: String, call:Void->Void):Void
 	{
-		
-		if (ScreenFlowManager.Get().transitioning)
+		var exist:Bool = false;
+		for (process in updateProcesses)
 		{
-			
-			if (!ScreenFlowManager.Get().get_transitionThread().empty) ScreenFlowManager.Get().get_transitionThread().Proceed();
+			if (process.name == name) return;
 		}
 		
 		
+		updateProcesses.add({name : name, process:call});
+
+		
+	}
+	
+	public function RemoveUpdateProcess(name:String):Void
+	{
+		
+		for (process in updateProcesses)
+		{
+			if (process.name == name){
+				updateProcesses.remove(process);
+				
+			}
+		}
+	}
+	
+	override function __enterFrame(deltaTime:Int):Void 
+	{
+
+		
+		//if (ScreenFlowManager.Get().transitioning)
+		//{
+			//
+			//if (!ScreenFlowManager.Get().get_transitionThread().isEmpty()) ScreenFlowManager.Get().get_transitionThread().Proceed();
+		//}
+		//
+		if (!updateProcesses.isEmpty())
+		{
+			for (process in updateProcesses)
+				process.process();
+		}
+	
 		if (!pause){
 			
-			if(!InputManager.directMode) InputManager.Get().Update();
+			if (!InputManager.directMode) InputManager.Get().Update();
+			
+			UIManager.Get().Update();
 			
 			if (physicsEnabled && PhysicsManager.Get().get_space() != null)
 				PhysicsManager.Get().Step(deltaTime);
@@ -240,17 +271,15 @@ class BeardGame extends Sprite
 			{
 				entity.Update();
 			}
-		
-			
-			
+	
 		}
+		
+		//trace(BeardGame.Get().GetUILayer().visible);
 		
 		super.__enterFrame(deltaTime);
 		
 	}
-	
-	
-	
+		
 	public function getTargetUnderPoint (point:Point, reverse:Bool = true):DisplayObject
 	{
 		var tempPoint:Point = Point.__pool.get ();
@@ -274,19 +303,18 @@ class BeardGame extends Sprite
 			
 		}
 		
-		//StringLibrary.utilString = "";
-		//for (element in stack){
-			//StringLibrary.utilString += "   -->  " + element.name;
-		//}
-		//
-		//trace(StringLibrary.utilString);
-		//
+		/*StringLibrary.utilString = "";
+		for (element in stack){
+			StringLibrary.utilString += "   -->  " + element.name;
+		}
+		
+		trace(StringLibrary.utilString);
+		*/
 		
 		if(reverse) stack.reverse ();
 		return stack != null ? stack[0] : null;
 		
 	}
-	
 	
 	private function Deactivate(e:Event):Void
 	{
@@ -302,7 +330,7 @@ class BeardGame extends Sprite
 			
 			cameras["default"].viewportWidth = stage.stageWidth;
 			cameras["default"].viewportHeight = stage.stageHeight;
-			trace("default camera resized");
+			trace("Default camera resized");
 		}
 	}
 	
@@ -320,13 +348,17 @@ class BeardGame extends Sprite
 	{
 		return UILayer;
 	}
+	
 	public inline function GetLoadingLayer():BeardLayer
 	{
 		return LoadingLayer;
 	}
-	
-	
-	
-	
 
+}
+
+
+typedef UpdateProcess =
+{
+	var name : String;
+	var process: Void->Void;
 }

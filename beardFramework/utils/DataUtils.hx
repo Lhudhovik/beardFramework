@@ -7,8 +7,10 @@ import haxe.Json;
  * ...
  * @author Ludo
  */
+
 class DataUtils 
 {
+
 
 	static public function Convert<T>(data:DataGeneric, to:T):T
 	{
@@ -17,6 +19,7 @@ class DataUtils
 		return to;
 		
 	}
+	
 	
 	static public function DataArrayToMap<T:DataGeneric>(dataArray:Array<T>):Map<String, T>
 	{
@@ -33,6 +36,20 @@ class DataUtils
 		
 	}
 	
+	static public function DataListToMap<T:DataGeneric>(dataList:List<T>):Map<String, T>
+	{
+		
+		var map:Map<String, T> = new Map<String, T>();
+		
+		for (element in dataList)
+		{
+			map.set(element.name, element);			
+		}
+		
+		return map;
+		
+		
+	}
 	
 	static public function MapFromJSON<T>(map:Map<String, T>, data:String):Map<String, T>
 	{
@@ -51,6 +68,7 @@ class DataUtils
 		
 		
 	}
+	
 	
 	static public function MapToJson<T>(map:Map<String, T>):String
 	{

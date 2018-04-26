@@ -1,5 +1,5 @@
 package beardFramework.physics;
-import beardFramework.resources.memory.InstancePool;
+import beardFramework.resources.pool.InstancePool;
 import nape.geom.Vec2;
 import nape.phys.Body;
 import nape.phys.Material;

@@ -27,27 +27,27 @@ class MovementComponent implements IEntityComponent
 	
 	private function SaveState(value:Float):Void
 	{
-		trace("save");
-		SaveManager.Get().CreateSave("Test");
-		SaveManager.Get().Load("Test");
-		if (SaveManager.Get().currentSave.gameData.length > 0)
-		{
-			var index:Int = 0;
-			for (data in SaveManager.Get().currentSave.gameData)
-			{
-				if (data.name == BeardGame.Get().currentScreen.name){
-					index = SaveManager.Get().currentSave.gameData.indexOf(data);
-					break;
-				}
-							
-			}
-			
-			SaveManager.Get().currentSave.gameData[index] = BeardGame.Get().currentScreen.ToData(true);
-		}
-		else
-		SaveManager.Get().currentSave.gameData.push(BeardGame.Get().currentScreen.ToData(true));
-		
-		SaveManager.Get().Save("Test", SaveManager.Get().currentSave);
+		//trace("save");
+		//SaveManager.Get().CreateSave("Test");
+		//SaveManager.Get().Load("Test");
+		//if (SaveManager.Get().currentSave.gameData.length > 0)
+		//{
+			//var index:Int = 0;
+			//for (data in SaveManager.Get().currentSave.gameData)
+			//{
+				//if (data.name == BeardGame.Get().currentScreen.name){
+					//index = SaveManager.Get().currentSave.gameData.indexOf(data);
+					//break;
+				//}
+							//
+			//}
+			//
+			//SaveManager.Get().currentSave.gameData[index] = BeardGame.Get().currentScreen.ToData(true);
+		//}
+		//else
+		//SaveManager.Get().currentSave.gameData.push(BeardGame.Get().currentScreen.ToData(true));
+		//
+		//SaveManager.Get().Save("Test", SaveManager.Get().currentSave);
 	}
 	
 	private function HorizontalMove(value:Float):Void

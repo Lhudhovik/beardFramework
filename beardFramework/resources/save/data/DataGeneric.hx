@@ -10,3 +10,9 @@ typedef DataGeneric =
 	
 	
 }
+@:forward
+abstract AbstractDataGeneric(DataGeneric) from DataGeneric to DataGeneric {
+  inline public function new(data:DataGeneric) {
+    this = data;
+  }
+}

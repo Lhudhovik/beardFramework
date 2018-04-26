@@ -11,6 +11,14 @@ typedef DataScreen =
 	
 	var cameras:Array<DataCamera>;
 	var entitiesData:Array<DataEntity>;
+	var UITemplates:Array<String>;
 	
 
+}
+
+@:forward
+abstract AbstractDataScreen(DataScreen) from DataScreen to DataScreen{
+  inline public function new(data:DataScreen) {
+    this = data;
+  }
 }

@@ -1,4 +1,4 @@
-package beardFramework.resources.memory;
+package beardFramework.resources.pool;
 import beardFramework.interfaces.IPool;
 
 /**

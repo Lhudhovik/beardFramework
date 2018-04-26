@@ -14,9 +14,9 @@ import openfl.display.PixelSnapping;
 class UIBitmapButton extends UIBitmapComponent implements IButton
 {
 
-	public function new(bitmapData:BitmapData=null, pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 
+	public function new(texture:String = "", atlas:String  = "", pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 
 	{
-		super(bitmapData, pixelSnapping, smoothing);
+		super(texture,atlas, pixelSnapping, smoothing);
 				
 		this.name = "Bitmap button " + name;
 		mouseEnabled = true;

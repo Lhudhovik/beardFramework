@@ -50,6 +50,7 @@ class StringLibrary
 	public static inline var TOUCH_OVER:String 				= "touchOver";
 	public static inline var TOUCH_START:String 			= "touchStart";
 	public static inline var TOUCH_TAP:String 				= "touchTap";
+	public static inline var UIBASE:String 					= "UIBase";
 	public static inline var UNKNOWN:String 				= "unknown";
 
 	

@@ -1,4 +1,4 @@
-package beardFramework.resources.memory;
+package beardFramework.resources.pool;
 import haxe.ds.Vector;
 import beardFramework.interfaces.IPool;
 import openfl.display.Bitmap;

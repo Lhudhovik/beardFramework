@@ -43,7 +43,7 @@ class Camera
 		
 		buffer *= zoom;
 		buffer /= newZoom;
-		trace(buffer);
+		//trace(buffer);
 		transform.d = newZoom;
 		return transform.a = newZoom;
 	}

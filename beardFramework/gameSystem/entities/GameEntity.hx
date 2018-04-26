@@ -190,9 +190,9 @@ class GameEntity
 		
 		for (componentData in data.components)
 		{
-			trace(this);
+			//trace(this);
 			var component:Dynamic = Type.createInstance(Type.resolveClass(componentData.type), []);
-			trace(Type.resolveClass(componentData.type));
+			//trace(Type.resolveClass(componentData.type));
 			AddComponent(component, componentData.update, componentData.position);
 			component.ParseData(componentData);
 		}

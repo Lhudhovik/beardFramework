@@ -12,3 +12,10 @@ typedef DataEntity =
 	var components:Array<DataComponent>;
 	var additionalData:String;
 }
+
+@:forward
+abstract AbstractDataEntity(DataEntity) from DataEntity to DataEntity {
+  inline public function new(data:DataEntity) {
+    this = data;
+  }
+}

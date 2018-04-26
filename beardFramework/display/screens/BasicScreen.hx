@@ -1,10 +1,11 @@
 package beardFramework.display.screens;
 import beardFramework.core.BeardGame;
-import beardFramework.core.system.thread.Thread;
-import beardFramework.core.system.thread.Thread.ThreadDetail;
+import beardFramework.core.system.thread.ParamThreadDetail;
+import beardFramework.core.system.thread.ThreadDetail;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardSprite;
+import beardFramework.display.ui.UIManager;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.resources.save.SaveManager;
 import beardFramework.resources.save.data.DataCamera;
@@ -12,6 +13,7 @@ import beardFramework.resources.save.data.DataEntity;
 import beardFramework.resources.save.data.DataGeneric;
 import beardFramework.resources.save.data.DataScreen;
 import beardFramework.interfaces.IEntityVisual;
+import beardFramework.resources.save.data.Test;
 import beardFramework.utils.DataUtils;
 import haxe.Json;
 import msignal.Signal.Signal0;
@@ -30,9 +32,8 @@ class BasicScreen
 	public var dataPath:String;
 	private var displayLayer:BeardLayer;
 	private var defaultCamera:Camera;
-	//private var id:String;
 	private var loadingProgression(get, null):Float;
-	private var savedData:DataScreen;
+	private var savedData:AbstractDataScreen;
 	
 	public function new() 
 	{
@@ -69,39 +70,34 @@ class BasicScreen
 		
 	private function Init():Void
 	{
+		savedData = null;
 		onReady.dispatch();
 	}
 	
-		
-	public function ParseScreenData(threadDetail:ThreadDetail<DataScreen>):Bool
+	public function ParseScreenData(td:ParamThreadDetail<AbstractDataScreen>):Bool
 	{
-		if (threadDetail != null && threadDetail.parameter != null){
+		if (td != null && td.parameter != null){
 			
-			trace(threadDetail);
-			trace(threadDetail.parameter);
-			trace(threadDetail.parameter.cameras);
+			var screenData:AbstractDataScreen = td.parameter;
+			var elementsCount:Int = screenData.entitiesData.length + screenData.cameras.length;
 			
-			Thread.MarkDate();
 			
-			if (threadDetail.progression == 0)
+			if (td.progression == 0)
 			{
-				savedData = SaveManager.Get().GetScreenSavedData(this.name);
-				
-				trace(savedData);
-				//trace(savedData);
+				savedData = SaveManager.Get().GetSavedGameData(this.name, savedData);
 			}
 			
-			if (threadDetail.progression < 0.2)
+			if (td.progression < (screenData.cameras.length/elementsCount))
 			{
-				
-				
 				
 				var cameraData:DataCamera;
 				var savedCameras:Map<String, DataCamera> = (savedData != null ? DataUtils.DataArrayToMap(savedData.cameras) : null);
 				
-				for (i in threadDetail.marker...threadDetail.parameter.cameras.length)
+				while (	screenData.cameras.length > 0)
 				{
-					cameraData = threadDetail.parameter.cameras[i];
+					
+					cameraData = screenData.cameras[0];
+					
 					
 					if (BeardGame.Get().cameras[cameraData.name] == null)
 					{
@@ -109,31 +105,36 @@ class BasicScreen
 					}
 					
 					if (savedCameras != null && savedCameras[cameraData.name] != null){
-						trace("data saved");
+						
 						BeardGame.Get().cameras[cameraData.name].ParseData(savedCameras[cameraData.name]);
 					}
 					else 
 						BeardGame.Get().cameras[cameraData.name].ParseData(cameraData);
-						
-					threadDetail.progression += (0.2 / threadDetail.parameter.cameras.length);
-					threadDetail.marker++;
 					
-					if (Thread.CheckTimeExpiration(threadDetail.allowedTime)) return false;
+					
+					screenData.cameras.shift();
+					
+					cameraData = null;
 						
+					td.progression += ((screenData.cameras.length/elementsCount) / screenData.cameras.length);
+						
+					if (td.TimeExpired()) return false;
+					
+					
 				}
 				
-				threadDetail.progression = 0.2;
-				threadDetail.marker = 0;
+				td.progression = screenData.cameras.length/elementsCount;
 				
+				savedCameras = null;
 			}
 			
 			
 			var entityData:DataEntity;
 			var savedEntities:Map<String, DataEntity> = (savedData != null? DataUtils.DataArrayToMap(savedData.entitiesData) : null);
-			for (i in threadDetail.marker...threadDetail.parameter.entitiesData.length)
+			
+			while (screenData.entitiesData.length > 0)
 			{
-				
-				entityData = threadDetail.parameter.entitiesData[i];
+				entityData = screenData.entitiesData[0];
 				
 				var entity:GameEntity = Type.createInstance(Type.resolveClass(entityData.type),[]); //to be handled by Pool
 				
@@ -145,16 +146,24 @@ class BasicScreen
 					entity.ParseData(entityData);
 					
 				AddEntity(entity);
+							
+				screenData.entitiesData.shift();
 				
-				threadDetail.marker++;
-				threadDetail.progression += (0.8 / threadDetail.parameter.entitiesData.length);
-				if (Thread.CheckTimeExpiration(threadDetail.allowedTime)) return false;
+				entityData = null;
+				
+				td.progression += ((screenData.entitiesData.length / elementsCount)  / screenData.entitiesData.length);
+				
+				if (td.TimeExpired()) return false;
+				
 			}
+			
+			savedEntities = null;
+	
+			
 		}
 		
-		
-		savedData = null;
 		Init();
+					
 		return true;		
 	
 	}
@@ -162,13 +171,13 @@ class BasicScreen
 	public function Play():Void
 	{
 		//start/restart game logic
+		//ShowUI
 	}
 		
-	public function Clear(threadDetail:ThreadDetail<Int>):Bool
+	public function Clear(threadDetail:ThreadDetail):Bool
 	{
 		return true;
 	}
-	
 	
 	public function Freeze(freeze:Bool = true):Void
 	{
@@ -194,12 +203,12 @@ class BasicScreen
 		onTransitionFinished.addOnce(Hide);
 		TransitionOut();
 	}
+	
 	private function TransitionOut():Void
 	{
 		onTransitionFinished.dispatch();
 		//Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
 	}
-	
 	
 	inline function get_loadingProgression():Float 
 	{
@@ -228,6 +237,7 @@ class BasicScreen
 	{
 		return onTransitionFinished;
 	}
+	
 	public inline function isDisplayed():Bool
 	{
 		return displayLayer.visible;
@@ -240,8 +250,8 @@ class BasicScreen
 			name : this.name,
 			type : Type.getClassName(Type.getClass(this)),
 			cameras : [for (camera in BeardGame.Get().cameras) camera.ToData() ],
-			entitiesData : [for(entity in BeardGame.Get().entities) if(entity.isLocal && (complete || entity.requiredSave) ) entity.ToData()]
-			
+			entitiesData : [for(entity in BeardGame.Get().entities) if(entity.isLocal && (complete || entity.requiredSave) ) entity.ToData()],
+			UITemplates:[]
 		}
 		
 		return data;

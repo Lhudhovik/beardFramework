@@ -112,4 +112,55 @@ class UICameraComponent extends Camera implements IUIComponent
 		
 	}
 	
+	
+	/* INTERFACE beardFramework.interfaces.IUIComponent */
+	
+	@:isVar public var preserved(get, set):Bool;
+	
+	function get_preserved():Bool 
+	{
+		return preserved;
+	}
+	
+	function set_preserved(value:Bool):Bool 
+	{
+		return preserved = value;
+	}
+	
+	@:isVar public var container(get, set):String;
+	
+	function get_container():String 
+	{
+		return container;
+	}
+	
+	function set_container(value:String):String 
+	{
+		return container = value;
+	}
+	
+	@:isVar public var visible(get, set):Bool;
+	
+	function get_visible():Bool 
+	{
+		return visible;
+	}
+	
+	function set_visible(value:Bool):Bool 
+	{
+		return visible = value;
+	}
+	
+	@:isVar public var group(get, set):String;
+	
+	function get_group():String 
+	{
+		return group;
+	}
+	
+	function set_group(value:String):String 
+	{
+		return group = value;
+	}
+	
 }

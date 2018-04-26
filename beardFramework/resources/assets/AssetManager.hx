@@ -13,6 +13,7 @@ import msignal.Signal.Signal1;
 import openfl.Assets;
 import openfl.display.BitmapData;
 
+using beardFramework.utils.SysPreciseTime;
 /**
  * ...
  * @author Ludo
@@ -77,7 +78,7 @@ class AssetManager
 	{
 	
 		if (loaderName == null)
-			loaderName = DEFAULT_LOADER_NAME+ Date.now().getTime();
+			loaderName = DEFAULT_LOADER_NAME+ Sys.preciseTime();
 		
 		if (loaders[loaderName] != null){
 			throw "Name already existing";
@@ -119,8 +120,8 @@ class AssetManager
 			//loaders[loaderName].loaded.addOnce(onErrorCallback).forType(LoaderEventType.Fail(LoaderErrorType.Data));
 		//if (onCancelCallback!=null)
 			//loaders[loaderName].loaded.addOnce(onCancelCallback).forType(LoaderEventType.Cancel);
-		trace(loaderName);
-		trace(url);
+		//trace(loaderName);
+		//trace(url);
 		
 		loaderQueue.add(loaders[loaderName]);
 		
@@ -148,15 +149,15 @@ class AssetManager
 		if (onCancelCallback!=null)
 			onCancel.addOnce(onCancelCallback);
 			
-		trace(onCompleteCallback);
-		trace(loaderQueue.size);
+		//trace(onCompleteCallback);
+		//trace(loaderQueue.size);
 		loaderQueue.load();
 	
 	}
 	
 	private function OnLoadingEvent(e:LoaderEvent<Dynamic> = null):Void
 	{
-		trace(e.type);
+		//trace(e.type);
 		switch(e.type){
 			
 			case LoaderEventType.Start:
@@ -169,6 +170,10 @@ class AssetManager
 				}
 				requestedAtlasQueue = [];
 				
+				onProgress.removeAll();
+				onCancel.removeAll();
+				onError.removeAll();
+				
 				onComplete.dispatch();
 				
 				
@@ -176,10 +181,21 @@ class AssetManager
 				onProgress.dispatch(get_progress());
 			case LoaderEventType.Cancel:
 				while(requestedAtlasQueue.length>0) requestedAtlasQueue.pop();
+				
+				onProgress.removeAll();
+				onComplete.removeAll();
+				onError.removeAll();
+				
 				onCancel.dispatch();	
+				
 				//Errors
 			case LoaderEventType.Fail(e):
-				while(requestedAtlasQueue.length>0) requestedAtlasQueue.pop();
+				while (requestedAtlasQueue.length > 0) requestedAtlasQueue.pop();
+				
+				onProgress.removeAll();
+				onCancel.removeAll();
+				onComplete.removeAll();
+				
 				onError.dispatch(e);
 		}
 		
@@ -219,7 +235,7 @@ class AssetManager
 		return atlases[atlasName] != null ? atlases[atlasName] : null;
 	}
 	
-	public function GetBitmapData(textureName:String, atlasName:String):BitmapData
+	public inline function GetBitmapData(textureName:String, atlasName:String):BitmapData
 	{
 		return atlases[atlasName] != null ? atlases[atlasName].GetBitmapData(textureName) : null;
 	}

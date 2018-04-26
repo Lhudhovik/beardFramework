@@ -28,8 +28,8 @@ class TextureUtils
 		renderTexture.draw(imageTemp);
 		rgbTexture.dispose();
 		alphaTexture.dispose();
-		trace(renderTexture.width);
-		trace(renderTexture.height);
+		//trace(renderTexture.width);
+		//trace(renderTexture.height);
 		return renderTexture;
 	}
 	public static function createComposedAtlasFromBitmaps(rgbBitmap : Bitmap, alphaBitmap : Bitmap, xml:XML, name :String = ""):TextureAtlas {
