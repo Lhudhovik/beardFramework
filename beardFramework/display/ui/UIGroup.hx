@@ -16,7 +16,7 @@ class UIGroup implements IUIGroupable
 	@:isVar public var name(get, set):String;
 	@:isVar public var visible(get, set):Bool;
 	
-	private var members:Array<IUIGroupable>;
+	public var members:Array<IUIGroupable>;
 	
 	public function new(name:String) 
 	{
@@ -81,9 +81,16 @@ class UIGroup implements IUIGroupable
 			componentsData:componentsData
 		}
 		
-		trace(componentsData);
+		//trace(componentsData);
 		return data; 
 		
+	}
+	
+	public function Clear():Void 
+	{
+		while (members.length > 0)
+			members.pop();
+		members = null;
 	}
 	
 	function get_group():String 
@@ -118,5 +125,6 @@ class UIGroup implements IUIGroupable
 				
 		return visible = value;
 	}
+	
 	
 }

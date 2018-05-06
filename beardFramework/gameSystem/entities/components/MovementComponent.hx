@@ -114,4 +114,12 @@ class MovementComponent implements IEntityComponent
 		
 	}
 	
+	
+	/* INTERFACE beardFramework.interfaces.IEntityComponent */
+	
+	public function Dispose():Void 
+	{
+		
+	}
+	
 }

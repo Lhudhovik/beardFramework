@@ -20,6 +20,7 @@ import openfl.geom.Matrix;
 @:access(openfl.display.BitmapData)
 @:access(openfl.display.Stage)
 @:access(openfl.filters.BitmapFilter)
+@:access(beardFramework.display.cameras.Camera)
 
 
 /**
@@ -39,13 +40,26 @@ class BeardGLBitmap extends GLBitmap
 			var gl = renderSession.gl;
 			
 			if (_adjustedTransform == null) _adjustedTransform = new Matrix ();
-			_adjustedTransform.a = bitmap.__renderTransform.a * camera.transform.a + bitmap.__renderTransform.b * camera.transform.c;
-			_adjustedTransform.b = bitmap.__renderTransform.a * camera.transform.b + bitmap.__renderTransform.b * camera.transform.d;
-			_adjustedTransform.c = bitmap.__renderTransform.c * camera.transform.a + bitmap.__renderTransform.d * camera.transform.c;
-			_adjustedTransform.d = bitmap.__renderTransform.c * camera.transform.b + bitmap.__renderTransform.d * camera.transform.d;
-			_adjustedTransform.tx = bitmap.__renderTransform.tx * camera.transform.a + bitmap.__renderTransform.ty * camera.transform.c + camera.transform.tx + (bitmap.__renderTransform.tx - camera.cameraX);
-			_adjustedTransform.ty = bitmap.__renderTransform.tx * camera.transform.b + bitmap.__renderTransform.ty * camera.transform.d + camera.transform.ty + (bitmap.__renderTransform.ty - camera.cameraY);
+			_adjustedTransform.a = bitmap.__renderTransform.a * camera.zoom;
+			_adjustedTransform.b = bitmap.__renderTransform.b * camera.transform.d;
+			_adjustedTransform.c = bitmap.__renderTransform.c * camera.zoom;
+			_adjustedTransform.d = bitmap.__renderTransform.d * camera.transform.d;
+			_adjustedTransform.tx = camera.transform.tx + camera.viewportWidth*0.5 +  (bitmap.__renderTransform.tx - camera.centerX) *camera.zoom;
+			_adjustedTransform.ty = camera.transform.ty + camera.viewportHeight *0.5 + (bitmap.__renderTransform.ty - camera.centerY) *camera.zoom;
 		
+			
+			//_adjustedTransform.a = bitmap.__renderTransform.a * camera.zoom;
+			//_adjustedTransform.b = bitmap.__renderTransform.b;
+			//_adjustedTransform.c = bitmap.__renderTransform.c;
+			//_adjustedTransform.d = bitmap.__renderTransform.d * camera.transform.d;
+			//_adjustedTransform.tx = camera.transform.tx + (bitmap.__renderTransform.tx - camera.cameraX);
+			//_adjustedTransform.ty =  camera.transform.ty + (bitmap.__renderTransform.ty - camera.cameraY);
+			
+			//trace(_adjustedTransform.tx);
+			
+			//trace(_adjustedTransform.ty);
+			//trace(_adjustedTransform.ty);
+			
 			renderSession.blendModeManager.setBlendMode (bitmap.__worldBlendMode);
 			renderSession.maskManager.pushObject (bitmap);
 			

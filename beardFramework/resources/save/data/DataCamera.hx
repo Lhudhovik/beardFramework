@@ -10,8 +10,8 @@ typedef DataCamera =
 	var zoom:Float;
 	var viewportWidth:Float;
 	var viewportHeight:Float;
-	var cameraX:Float;
-	var cameraY:Float;
+	var centerX:Float;
+	var centerY:Float;
 	var viewportX:Float;
 	var viewportY:Float;
 	var buffer:Float;

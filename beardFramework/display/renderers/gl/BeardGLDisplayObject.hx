@@ -36,8 +36,8 @@ class BeardGLDisplayObject extends GLDisplayObject
 			_adjustedTransform.b = displayObject.__renderTransform.a * camera.transform.b + displayObject.__renderTransform.b * camera.transform.d;
 			_adjustedTransform.c = displayObject.__renderTransform.c * camera.transform.a + displayObject.__renderTransform.d * camera.transform.c;
 			_adjustedTransform.d = displayObject.__renderTransform.c * camera.transform.b + displayObject.__renderTransform.d * camera.transform.d;
-			_adjustedTransform.tx = displayObject.__renderTransform.tx * camera.transform.a + displayObject.__renderTransform.ty * camera.transform.c + camera.transform.tx + (displayObject.__renderTransform.tx - camera.cameraX);
-			_adjustedTransform.ty = displayObject.__renderTransform.tx * camera.transform.b + displayObject.__renderTransform.ty * camera.transform.d + camera.transform.ty + (displayObject.__renderTransform.ty - camera.cameraY);
+			_adjustedTransform.tx = displayObject.__renderTransform.tx * camera.transform.a + displayObject.__renderTransform.ty * camera.transform.c + camera.transform.tx + (displayObject.__renderTransform.tx - camera.centerX);
+			_adjustedTransform.ty = displayObject.__renderTransform.tx * camera.transform.b + displayObject.__renderTransform.ty * camera.transform.d + camera.transform.ty + (displayObject.__renderTransform.ty - camera.centerY);
 			
 			renderSession.maskManager.pushObject (displayObject);
 			

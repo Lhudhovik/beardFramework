@@ -1,10 +1,10 @@
 package beardFramework.display.screens;
 import beardFramework.core.BeardGame;
-import beardFramework.core.system.thread.ParamThreadDetail;
-import beardFramework.core.system.thread.ThreadDetail;
+import beardFramework.updateProcess.thread.ParamThreadDetail;
+import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
-import beardFramework.display.core.BeardSprite;
+import beardFramework.display.heritage.BeardSprite;
 import beardFramework.display.ui.UIManager;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.resources.save.SaveManager;
@@ -26,14 +26,20 @@ import openfl.display.Stage;
  */
 class BasicScreen 
 {
+	
+	public static var globalEntities:Map<String, GameEntity>;
+	
 	public var name:String = "BasicScreen";
 	public var onReady(get, null):Signal0;
 	public var onTransitionFinished(get, null):Signal0;
 	public var dataPath:String;
+	public var entities:Array<GameEntity>;
 	private var displayLayer:BeardLayer;
 	private var defaultCamera:Camera;
 	private var loadingProgression(get, null):Float;
 	private var savedData:AbstractDataScreen;
+	
+
 	
 	public function new() 
 	{
@@ -42,16 +48,17 @@ class BasicScreen
 		displayLayer = BeardGame.Get().GetContentLayer();
 		defaultCamera = BeardGame.Get().cameras[Camera.DEFAULT];
 		name = Type.getClassName(Type.getClass(this));
-		
-		
+		entities = new Array<GameEntity>();
+		if (globalEntities == null) globalEntities = new Map<String,GameEntity>();
 	}
 	
-	public inline function AddEntity(entity:GameEntity):Void
+	public inline function AddEntity(entity:GameEntity, isLocal:Bool = true):Void
 	{
 		
-		if (BeardGame.Get().entities.indexOf(entity) == -1)
+		if (entities.indexOf(entity) == -1)
 		{
-			BeardGame.Get().entities.push(entity);
+			entity.isLocal = isLocal;
+			entities.push(entity);
 			for (component in entity.GetComponents())
 			{
 				if (Std.is(component, IEntityVisual))
@@ -85,6 +92,8 @@ class BasicScreen
 			if (td.progression == 0)
 			{
 				savedData = SaveManager.Get().GetSavedGameData(this.name, savedData);
+				screenData.cameras.reverse();
+				screenData.entitiesData.reverse();
 			}
 			
 			if (td.progression < (screenData.cameras.length/elementsCount))
@@ -96,7 +105,7 @@ class BasicScreen
 				while (	screenData.cameras.length > 0)
 				{
 					
-					cameraData = screenData.cameras[0];
+					cameraData = screenData.cameras.pop();
 					
 					
 					if (BeardGame.Get().cameras[cameraData.name] == null)
@@ -110,10 +119,7 @@ class BasicScreen
 					}
 					else 
 						BeardGame.Get().cameras[cameraData.name].ParseData(cameraData);
-					
-					
-					screenData.cameras.shift();
-					
+									
 					cameraData = null;
 						
 					td.progression += ((screenData.cameras.length/elementsCount) / screenData.cameras.length);
@@ -134,12 +140,12 @@ class BasicScreen
 			
 			while (screenData.entitiesData.length > 0)
 			{
-				entityData = screenData.entitiesData[0];
+				entityData = screenData.entitiesData.pop();
 				
 				var entity:GameEntity = Type.createInstance(Type.resolveClass(entityData.type),[]); //to be handled by Pool
 				
 				if (savedEntities != null && savedEntities[entityData.name] != null){
-					trace("data saved enitys");
+					//trace("data saved enitys");
 					entity.ParseData(savedEntities[entityData.name]);
 				}
 				else 
@@ -147,8 +153,6 @@ class BasicScreen
 					
 				AddEntity(entity);
 							
-				screenData.entitiesData.shift();
-				
 				entityData = null;
 				
 				td.progression += ((screenData.entitiesData.length / elementsCount)  / screenData.entitiesData.length);
@@ -174,8 +178,38 @@ class BasicScreen
 		//ShowUI
 	}
 		
-	public function Clear(threadDetail:ThreadDetail):Bool
+	public function Clear(td:ThreadDetail):Bool
 	{
+		var entity:GameEntity;
+		if (td.progression == 0){
+			td.length = entities.length;
+			entities.reverse();
+		}
+			
+		while(entities.length > 0){
+			
+			entity = entities.pop();
+			
+			if (entity.isLocal)
+			{
+				entity.Dispose();
+				
+			}
+			else{
+				globalEntities[entity.name] = entity;
+				for (component in entity.GetComponents())
+					if (Std.is(component, IEntityVisual))
+						cast(component, IEntityVisual).UnRegister();
+			}
+			
+			entity = null;
+			
+			td.progression += 1 / td.length;
+			
+			if (td.TimeExpired()) return false;
+		}
+				
+		//trace("fully cleaned");
 		return true;
 	}
 	

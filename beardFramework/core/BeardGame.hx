@@ -1,12 +1,19 @@
 package beardFramework.core;
 
-import beardFramework.core.system.OptionsManager;
-import beardFramework.core.system.ScreenFlowManager;
+import beardFramework.input.InputType;
+import beardFramework.resources.options.OptionsManager;
+import beardFramework.display.screens.ScreenFlowManager;
+import beardFramework.updateProcess.UpdateProcessesManager;
+import beardFramework.updateProcess.Wait;
+import beardFramework.updateProcess.sequence.MultipleStep;
+import beardFramework.updateProcess.sequence.Sequence;
+import beardFramework.updateProcess.sequence.VoidStep;
 import beardFramework.debug.MemoryUsage;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
-import beardFramework.display.core.BeardSprite;
+import beardFramework.display.heritage.BeardSprite;
 import beardFramework.display.screens.BasicScreen;
+import beardFramework.display.screens.SplashScreen;
 import beardFramework.display.ui.UIManager;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
@@ -18,6 +25,7 @@ import beardFramework.utils.StringLibrary;
 import haxe.Json;
 import haxe.crypto.BaseCode;
 import haxe.io.Bytes;
+import lime.app.Application;
 import openfl.system.System;
 import mloader.Loader;
 import mloader.Loader.LoaderErrorType;
@@ -36,6 +44,7 @@ import openfl.ui.Multitouch;
 import openfl.ui.MultitouchInputMode;
 import openfl._internal.renderer.RenderSession;
 import openfl._internal.renderer.opengl.GLDisplayObject;
+import sys.FileSystem;
 
 @:access(openfl.display.Graphics)
 @:access(openfl.display.Stage)
@@ -49,16 +58,18 @@ class BeardGame extends Sprite
 	private static var game(default, null):BeardGame;
 	
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
-	public var SAVE_PATH(default, null):String = "save/";
-	public var UI_PATH(default, null):String = "assets/UI/";
+	public var SAVE_PATH(default, never):String = "save/";
+	public var UI_PATH(default, never):String = "assets/UI/";
 	public var SETTINGS(default, never):String = "settings";
+	public var SPLASHSCREENS_PATH(default, never):String = "assets/splash/";
 	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
 	private var contentLayer:BeardLayer;
 	private var UILayer:BeardLayer;
 	private var LoadingLayer:BeardLayer;
 	private var pause:Bool;
-	private var updateProcesses:List<UpdateProcess>;
+	
+	private var splashScreen:SplashScreen;
 	
 	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
@@ -82,15 +93,15 @@ class BeardGame extends Sprite
 	
 		game = this;
 		
-		#if mobile
-			
-		SAVE_PATH = System.applicationStorageDirectory+"/save/";
-			
-		#end
+		//#if mobile
+			//
+		//SAVE_PATH = System.applicationStorageDirectory+"/save/";
+			//
+		//#end
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
 		
 		
-		// Do visual Loading stuff
+	
 		contentLayer = new BeardLayer("ContentLayer");
 		contentLayer.visible = false;
 		UILayer = new BeardLayer("UILayer");
@@ -99,34 +110,47 @@ class BeardGame extends Sprite
 		LoadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
-		updateProcesses = new List<UpdateProcess>();
+		
 		
 		stage.addChild(contentLayer);
 		stage.addChild(UILayer);
 		stage.addChild(LoadingLayer);
-		
-		
-		
-		
-		
-		//InputManager.Get().Activate(stage.window);
-		
-		AssetManager.Get().Append(AssetType.XML, SETTING_PATH, SETTINGS);
-		
-		AssetManager.Get().Load( OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 		entities = new Array<GameEntity>();
 		
 		var fps:MemoryUsage = new MemoryUsage(10,10,0xffffff);
 		stage.addChild(fps);
 		
+		InputManager.Get().Activate(Application.current.window);
+		
+		//
+		if (FileSystem.exists(SPLASHSCREENS_PATH)){
+			
+			splashScreen = new SplashScreen(FileSystem.readDirectory(SPLASHSCREENS_PATH));
+			//splashScreen.completed.addOnce(LoadSettings);
+			splashScreen.AddStep( new VoidStep("LoadSettings", LoadSettings));
+			Wait.WaitFor(3, splashScreen.Start);
+			
+		}
+		else 
+			LoadSettings();
+	
+		
+		
+		
+		
+	}
+	
+	private inline function LoadSettings():Void
+	{
+		
+		AssetManager.Get().Append(AssetType.XML, SETTING_PATH, SETTINGS);
+		AssetManager.Get().Load( OnSettingsLoaded, OnSettingsProgressing, OnSettingsFailed);
 		
 	}
 	
 	private function OnSettingsLoaded():Void
 	{
-		
-		
 		OptionsManager.Get().parseSettings(AssetManager.Get().GetContent(SETTINGS));
 		physicsEnabled = OptionsManager.Get().GetSettings("physics").get("enabled") == "true";
 		
@@ -143,7 +167,7 @@ class BeardGame extends Sprite
 		trace("/!\\ Setting Loading Failed!\nError name:  " + e.getName() +"\nError Parameters: " + e.getParameters());		
 	}
 	
-	private function LoadResources():Void
+	private inline function LoadResources():Void
 	{
 		
 		if (OptionsManager.Get().resourcesToLoad.length > 0){
@@ -216,70 +240,39 @@ class BeardGame extends Sprite
 
 	}
 	
-	public function AddUpdateProcess(name: String, call:Void->Void):Void
-	{
-		var exist:Bool = false;
-		for (process in updateProcesses)
-		{
-			if (process.name == name) return;
-		}
-		
-		
-		updateProcesses.add({name : name, process:call});
 
-		
-	}
-	
-	public function RemoveUpdateProcess(name:String):Void
-	{
-		
-		for (process in updateProcesses)
-		{
-			if (process.name == name){
-				updateProcesses.remove(process);
-				
-			}
-		}
-	}
-	
 	override function __enterFrame(deltaTime:Int):Void 
 	{
-
 		
-		//if (ScreenFlowManager.Get().transitioning)
-		//{
-			//
-			//if (!ScreenFlowManager.Get().get_transitionThread().isEmpty()) ScreenFlowManager.Get().get_transitionThread().Proceed();
-		//}
-		//
-		if (!updateProcesses.isEmpty())
-		{
-			for (process in updateProcesses)
-				process.process();
-		}
+		
+		if (!InputManager.directMode) InputManager.Get().Update();
+			
+		if (!UpdateProcessesManager.Get().IsEmpty())	UpdateProcessesManager.Get().Update();
+				
+		UIManager.Get().Update();
 	
 		if (!pause){
-			
-			if (!InputManager.directMode) InputManager.Get().Update();
-			
-			UIManager.Get().Update();
 			
 			if (physicsEnabled && PhysicsManager.Get().get_space() != null)
 				PhysicsManager.Get().Step(deltaTime);
 				
-			for (entity in entities)
-			{
-				entity.Update();
-			}
+			if (currentScreen != null)
+				for (entity in currentScreen.entities)
+				{
+					entity.Update();
+				}
 	
 		}
-		
-		//trace(BeardGame.Get().GetUILayer().visible);
-		
+
 		super.__enterFrame(deltaTime);
 		
 	}
-		
+	
+	public inline function GetFPS():Float
+	{
+		return Application.current.frameRate;
+	}
+	
 	public function getTargetUnderPoint (point:Point, reverse:Bool = true):DisplayObject
 	{
 		var tempPoint:Point = Point.__pool.get ();
@@ -291,8 +284,8 @@ class BeardGame extends Sprite
 			if (camera.ContainsPoint(point))
 			{
 				hit = false;
-				tempPoint.x = (point.x - camera.viewportX) + camera.cameraX;
-				tempPoint.y = (point.y - camera.viewportY) + camera.cameraY;
+				tempPoint.x = (point.x - camera.viewportX) + (camera.centerX - camera.viewportWidth *0.5) ;
+				tempPoint.y = (point.y - camera.viewportY) + (camera.centerY - camera.viewportHeight *0.5);
 				
 				//trace(tempPoint);
 				if (ScreenFlowManager.Get().transitioning)	hit = LoadingLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, LoadingLayer);
@@ -357,8 +350,3 @@ class BeardGame extends Sprite
 }
 
 
-typedef UpdateProcess =
-{
-	var name : String;
-	var process: Void->Void;
-}

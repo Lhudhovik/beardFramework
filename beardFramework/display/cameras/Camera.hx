@@ -1,6 +1,8 @@
 package beardFramework.display.cameras;
+import beardFramework.display.core.BeardVisual;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.DataCamera;
+import openfl.display.Tile;
 import openfl.geom.Matrix;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
@@ -14,41 +16,52 @@ class Camera
 {
 	private static var utilRect:Rectangle;
 	public static var DEFAULT(default, null):String = "default";
+	public static var MINZOOM(default, null):Float = 0.00001;
 	@:isVar public var name(get, set):String;
 	public var zoom(get,set):Float;
-	public var viewportWidth:Float;
-	public var viewportHeight:Float;
-	public var cameraX:Float;
-	public var cameraY:Float;
+	public var viewportWidth(default, set):Float;
+	public var viewportHeight(default, set):Float;
+	public var centerX(default, set):Float;
+	public var centerY(default, set):Float;
 	public var viewportX(get, set):Float;
 	public var viewportY(get, set):Float;
-	public var buffer:Float;
-	//a : scale X, d: ScaleY
-	public var transform(default, null):Matrix;
+	public var buffer(default, set):Float;
+	public var needRenderUpdate:Bool;
+	public var transform(default, null):Matrix;//a : scale X, d: ScaleY
+	
 	
 	public function new(name:String, width:Float = 100, height:Float = 57, buffer : Float = 100) 
 	{
 		transform = new Matrix();
 		this.name = name;
-		this.viewportWidth = width;
-		this.viewportHeight = height;
+		this.viewportWidth  = width;
+		this.viewportHeight  = height;
 		this.buffer = buffer;
+		needRenderUpdate = true;
 		
+		centerX = width * 0.5;
+		centerY = height * 0.5;
 	}
-	
-	
-	
+		
 	public inline function get_zoom():Float return transform.a;
+	
 	public function set_zoom(newZoom:Float):Float{
 		
+		if (newZoom <= 0) newZoom = MINZOOM;
 		buffer *= zoom;
 		buffer /= newZoom;
 		//trace(buffer);
 		transform.d = newZoom;
+		
+		if (transform.a != newZoom) needRenderUpdate = true;
 		return transform.a = newZoom;
 	}
 	
-	
+	public inline function Center(centerX:Float=0, centerY:Float=0):Void
+	{
+		this.centerX = centerX;
+		this.centerY = centerY;	
+	}
 	
 	public function GetRect():Rectangle
 	{
@@ -91,14 +104,99 @@ class Camera
 		
 	}
 	
-	public function Contains(object:DisplayObject):Bool{
+	public  function Contains(object:ICameraDependent):Bool{
 		
-		var success:Bool = (cast(object, ICameraDependent).restrictedCameras == null || cast(object, ICameraDependent).restrictedCameras.indexOf(name) != -1);
+		var success:Bool = (object.restrictedCameras == null || object.restrictedCameras.indexOf(name) != -1);
 		
-		if (success)
-			success = (((object.x + object.width) > (cameraX - buffer)) && (object.x < (cameraX + viewportWidth + buffer)) && ((object.y + object.height) > (cameraY - buffer)) && (object.y < (cameraY + viewportHeight + buffer)));
+		if (success && (success = (((object.x + object.width) > (centerX - (viewportWidth*0.5) - buffer)) && (object.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((object.y + object.height) > (centerY - (viewportHeight *0.5) - buffer)) && (object.y < (centerY + (viewportHeight*0.5) + buffer)))))
+		{
+			if (object.displayingCameras != null){
+				for (camera in object.displayingCameras)
+					if (camera == this.name) return success;
+			
+				object.displayingCameras.add(this.name);
+			}
+			
+		}
+		else if (object.displayingCameras != null)
+			for (camera in object.displayingCameras)
+				if (camera == this.name){
+					object.displayingCameras.remove(this.name);
+					break;
+				}
+			
+			
+		/*if (this.id == "two"){
+			
+			if (!success) trace(object.x - this.cameraX);
+			//trace(object.name + "  " + success);
+		}
+		trace(" left " + (object.x + object.width) + " greater than " + (x - buffer));
+		trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
+		trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));
+		trace(" left " + (object.y) + " lesser than " + (y + height + buffer));
+		trace("------------------------------------------------------------------");*/
+		return success;
+	}
 	
-		//if (this.id == "two"){
+	public  function ContainsVisual(object:BeardVisual):Bool{
+		
+		var success:Bool = (object.restrictedCameras == null || object.restrictedCameras.indexOf(name) != -1);
+		
+		if (success && (success = (((object.x + object.width) > (centerX - (viewportWidth*0.5) - buffer)) && (object.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((object.y + object.height) > (centerY - (viewportHeight *0.5) - buffer)) && (object.y < (centerY + (viewportHeight*0.5) + buffer)))))
+		{
+			if (object.displayingCameras != null){
+				for (camera in object.displayingCameras)
+					if (camera == this.name) return success;
+			
+				object.displayingCameras.add(this.name);
+			}
+			
+		}
+		else if (object.displayingCameras != null)
+			for (camera in object.displayingCameras)
+				if (camera == this.name){
+					object.displayingCameras.remove(this.name);
+					break;
+				}
+			
+			
+		/*if (this.id == "two"){
+			
+			if (!success) trace(object.x - this.cameraX);
+			//trace(object.name + "  " + success);
+		}
+		trace(" left " + (object.x + object.width) + " greater than " + (x - buffer));
+		trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
+		trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));
+		trace(" left " + (object.y) + " lesser than " + (y + height + buffer));
+		trace("------------------------------------------------------------------");*/
+		return success;
+	}
+	
+	
+	//public  function ContainsVisual(visual:BeardVisual):Bool{
+		//
+		//var success:Bool = (cast(visual, ICameraDependent).restrictedCameras == null || cast(visual, ICameraDependent).restrictedCameras.indexOf(name) != -1);
+		//
+		//if (success && (success = (((visual.x + width) > (centerX - (viewportWidth*0.5) - buffer)) && (visual.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((visual.y + height) > (centerY - (viewportHeight *0.5) - buffer)) && (visual.y < (centerY + (viewportHeight*0.5) + buffer)))))
+		//{
+			//if (cast(visual, ICameraDependent).displayingCameras != null){
+				//for (camera in cast(visual, ICameraDependent).displayingCameras)
+					//if (camera == this.name) return success;
+				//
+				//cast(visual, ICameraDependent).displayingCameras.add(this.name);
+			//}
+		//}
+		//else if (cast(visual, ICameraDependent).displayingCameras != null)
+			//for (camera in cast(visual, ICameraDependent).displayingCameras)
+				//if (camera == this.name){
+					//cast(visual, ICameraDependent).displayingCameras.remove(this.name);
+					//break;
+				//}
+			//
+			//
+		///*if (this.id == "two"){
 			//
 			//if (!success) trace(object.x - this.cameraX);
 			////trace(object.name + "  " + success);
@@ -107,9 +205,9 @@ class Camera
 		//trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
 		//trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));
 		//trace(" left " + (object.y) + " lesser than " + (y + height + buffer));
-		//trace("------------------------------------------------------------------");
-		return success;
-	}
+		//trace("------------------------------------------------------------------");*/
+		//return success;
+	//}
 	
 	inline function get_viewportX():Float 
 	{
@@ -118,6 +216,7 @@ class Camera
 	
 	inline function set_viewportX(value:Float):Float 
 	{
+		if (transform.tx != value) needRenderUpdate = true;
 		return transform.tx = value;
 	}
 	
@@ -128,16 +227,16 @@ class Camera
 	
 	inline function set_viewportY(value:Float):Float 
 	{
+		if (transform.ty != value) needRenderUpdate = true;
 		return transform.ty = value;
 	}
-	
-	
-	function get_name():String 
+		
+	inline function get_name():String 
 	{
 		return name;
 	}
 	
-	function set_name(value:String):String 
+	inline function set_name(value:String):String 
 	{
 		return name = value;
 	}
@@ -152,8 +251,8 @@ class Camera
 			zoom:transform.a,
 			viewportWidth:this.viewportWidth,
 			viewportHeight:this.viewportHeight,
-			cameraX:this.cameraX,
-			cameraY:this.cameraY,
+			centerX:this.centerX,
+			centerY:this.centerY,
 			viewportX:transform.tx,
 			viewportY:transform.ty,
 			buffer:this.buffer
@@ -169,13 +268,44 @@ class Camera
 		zoom = data.zoom;
 		viewportWidth = data.viewportWidth;
 		viewportHeight = data.viewportHeight;
-		cameraX = data.cameraX;
-		cameraY = data.cameraY;
+		centerX = data.centerX;
+		centerY = data.centerY;
 		transform.tx = data.viewportX;
 		transform.ty = data.viewportY;
 		buffer = data.buffer;
 	
 		
+	}
+	
+	//To Do : update depending on the zoom
+	inline function set_buffer(value:Float):Float 
+	{
+		if (buffer != value) needRenderUpdate = true;
+		return buffer = value;
+	}
+	
+	inline function set_centerX(value:Float):Float 
+	{
+		if(centerX != value) needRenderUpdate = true;
+		return centerX = value;
+	}
+	
+	inline function set_centerY(value:Float):Float 
+	{
+		if (centerY != value) needRenderUpdate = true;
+		return centerY = value;
+	}
+	
+	inline function set_viewportWidth(value:Float):Float 
+	{
+		if (viewportWidth != value) needRenderUpdate = true;
+		return viewportWidth = value;
+	}
+	
+	function set_viewportHeight(value:Float):Float 
+	{
+		if (viewportHeight != value) needRenderUpdate = true;
+		return viewportHeight = value;
 	}
 	
 	

@@ -5,7 +5,7 @@ package beardFramework.resources.save.data;
  */
 typedef DataGeneric =
 {
-	var name:String;
+	>AbstractData,
 	var type:String;	
 	
 	

@@ -1,6 +1,6 @@
 package beardFramework.display.ui.components;
 
-import beardFramework.display.core.BeardTextField;
+import beardFramework.display.heritage.BeardTextField;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.resources.save.data.DataUIComponent;
 

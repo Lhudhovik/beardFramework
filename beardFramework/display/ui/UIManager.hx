@@ -1,11 +1,11 @@
 package beardFramework.display.ui;
 import beardFramework.core.BeardGame;
-import beardFramework.core.system.thread.ParamThreadDetail;
-import beardFramework.core.system.thread.RowThreadDetail;
-import beardFramework.core.system.thread.Thread;
-import beardFramework.core.system.thread.ThreadDetail;
+import beardFramework.updateProcess.thread.ParamThreadDetail;
+import beardFramework.updateProcess.thread.RowThreadDetail;
+import beardFramework.updateProcess.thread.Thread;
+import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.display.core.BeardLayer;
-import beardFramework.display.core.BeardSprite;
+import beardFramework.display.heritage.BeardSprite;
 import beardFramework.display.ui.components.UIContainer;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.interfaces.IUIGroupable;
@@ -194,16 +194,24 @@ class UIManager
 		if (td.progression == 0)
 		{
 			savedData = SaveManager.Get().GetSavedGameData(templateData.name, savedData);
-			templateData.subGroupsData.unshift(templateData);
+			
+			templateData.subGroupsData.reverse();
+			templateData.subGroupsData.push(templateData);
+			
+			for (subGroup in templateData.subGroupsData)
+				subGroup.componentsData.reverse();
+				
+			//td.length = templateData.subGroupsData.length + templateData.componentsData.length;
+			
 		}
 			
 						
 		while (templateData.subGroupsData.length > 0)
 		{
 			if (savedGroups != null && savedGroups[templateData.subGroupsData[0].name] != null)
-				groupData = savedGroups[templateData.subGroupsData[0].name];
-			else groupData = templateData.subGroupsData[0];
-			
+				groupData = savedGroups[templateData.subGroupsData[templateData.subGroupsData.length-1].name];
+			else groupData = templateData.subGroupsData[templateData.subGroupsData.length-1];
+					
 			if ((group = GetUIGroup(groupData.name)) == null){
 				group = new UIGroup(groupData.name);
 				if(groupData.parentGroup != "") AddToGroup(group, groupData.parentGroup);				
@@ -213,7 +221,7 @@ class UIManager
 			while (groupData.componentsData.length > 0)
 			{
 				
-				componentData = groupData.componentsData[0];
+				componentData = groupData.componentsData.pop();
 				
 				//groupData.componentsData = groupData.componentsData.concat(componentData.subComponents);
 				
@@ -231,18 +239,17 @@ class UIManager
 					cast(GetUIComponent(componentData.name), UIContainer).Add(component);
 				else
 					AddComponent(component,group.name);
-					
-				groupData.componentsData.shift();
 				
 				componentData = null;
 				
-				td.progression ++; //to handle
+				td.progression += 1 / td.length;
 				
 				if (td.TimeExpired()) return false;
 				
 			}
 			
-			templateData.subGroupsData.shift();
+			td.progression += 1/td.length;
+			templateData.subGroupsData.pop();
 		}
 		
 		savedComponents = null;
@@ -284,8 +291,50 @@ class UIManager
 	public function ClearUI(td:ThreadDetail):Bool
 	{
 		
+		if (td.progression == 0)
+			baseGroup.members.reverse();
 		
+		var member:IUIGroupable;
+		while (baseGroup.members.length > 0)
+		{
+			
+			member = baseGroup.members.pop();
+			
+			if (Std.is(member, UIGroup))
+			{
+				baseGroup.members = baseGroup.members.concat(cast(member, UIGroup).members);
+				cast(member, UIGroup).members = null;
+			}
+			else
+			{
+				
+				if (Std.is(member, UIContainer))
+				{
+					if (cast(member, UIContainer).components != null)
+					{
+						while (cast(member, UIContainer).components.length > 0)
+						baseGroup.members.push(cast(member, UIContainer).components.pop());
+					}
+					cast(member, UIContainer).components = null;
+				}
+				else
+				{
+					RemoveComponent(cast member);
+					member.Clear();
+				}
+				
+				
+			}
 		
+			member = null;
+		
+			td.progression += 1 / baseGroup.members.length;
+			
+			if (td.TimeExpired()) return false;
+			
+		}
+		
+	
 		//do stuff depending on "preserved" or not
 		
 		return true;

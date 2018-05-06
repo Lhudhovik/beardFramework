@@ -1,4 +1,5 @@
 package beardFramework.resources.assets;
+import beardFramework.display.core.BeardVisual;
 import mloader.HttpLoader;
 import mloader.ImageLoader;
 import mloader.Loader.LoaderEvent;
@@ -225,12 +226,12 @@ class AssetManager
 	{
 		
 		if (atlases[atlasName] == null){
-			atlases[atlasName] = new Atlas(GetContent('${atlasName}_image'), GetContent('${atlasName}_xml'));
+			atlases[atlasName] = new Atlas(atlasName, GetContent('${atlasName}_image'), GetContent('${atlasName}_xml'));
 		}else throw "Atlas already exists";
 		
 	}
 	
-	public function GetAtlas(atlasName:String):Atlas
+	public inline function GetAtlas(atlasName:String):Atlas
 	{
 		return atlases[atlasName] != null ? atlases[atlasName] : null;
 	}
@@ -239,6 +240,19 @@ class AssetManager
 	{
 		return atlases[atlasName] != null ? atlases[atlasName].GetBitmapData(textureName) : null;
 	}
+	
+	public inline function GetTileID(textureName:String, atlasName:String):Int
+	{
+		return atlases[atlasName] != null ?  atlases[atlasName].GetTileID(textureName): -1; 
+		
+		
+	}
+	
+	public inline function DisposeBitmapData(textureName:String, atlasName:String):Void
+	{
+		return atlases[atlasName] != null ? atlases[atlasName].DisposeBitmapData(textureName) : null;
+	}
+	
 	
 	public function ClearAtlas(atlasName:String):Void
 	{

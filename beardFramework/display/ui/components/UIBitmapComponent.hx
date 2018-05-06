@@ -1,10 +1,11 @@
 package beardFramework.display.ui.components;
 
-import beardFramework.display.core.BeardBitmap;
+import beardFramework.display.heritage.BeardBitmap;
+import beardFramework.display.ui.UIManager;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.resources.assets.AssetManager;
-import beardFramework.resources.save.data.DataUIBitmapComponent;
-import beardFramework.resources.save.data.DataUIBitmapComponent.AbstractDataUIBitmapComponent;
+import beardFramework.resources.save.data.DataUIVisualComponent;
+import beardFramework.resources.save.data.DataUIVisualComponent.AbstractDataUIVisualComponent;
 import beardFramework.resources.save.data.DataUIComponent;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
@@ -46,12 +47,12 @@ class UIBitmapComponent extends BeardBitmap implements IUIComponent
 	
 	public function Clear():Void 
 	{
-		
+		AssetManager.Get().DisposeBitmapData(this.texture, this.atlas);
 	}
 	
 	public function ToData():DataUIComponent 
 	{
-		var data:DataUIBitmapComponent = 
+		var data:DataUIVisualComponent = 
 		{
 			visible:this.visible,
 			type:Type.getClassName(Type.getClass(this)),
@@ -81,7 +82,7 @@ class UIBitmapComponent extends BeardBitmap implements IUIComponent
 	public function ParseData(data:DataUIComponent):Void 
 	{
 		
-		var img:AbstractDataUIBitmapComponent = cast data;
+		var img:AbstractDataUIVisualComponent = cast data;
 				
 		this.bitmapData = AssetManager.Get().GetBitmapData(img.texture, img.atlas);
 		

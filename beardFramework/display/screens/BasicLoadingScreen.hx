@@ -1,9 +1,11 @@
 package beardFramework.display.screens;
 import beardFramework.core.BeardGame;
+import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.display.ui.components.UIBitmapComponent;
 import beardFramework.display.ui.components.UIContainer;
 import beardFramework.resources.assets.AssetManager;
 
+using beardFramework.utils.SysPreciseTime;
 /**
  * ...
  * @author Ludo
@@ -11,15 +13,18 @@ import beardFramework.resources.assets.AssetManager;
 class BasicLoadingScreen extends BasicScreen 
 {
 	private static var instance(get, null):BasicLoadingScreen;
+	public static var MINLOADINGTIME:Float = 10;
 	private var components:UIContainer;
 	public var loadingTasksCount : Int;
 	public var completedLoadingTasksCount : Int;
+	
 
 	public function new( ) 
 	{
 		super();
 		instance = this;
 		loadingTasksCount = 0;
+		
 	}
 	
 	
@@ -31,6 +36,12 @@ class BasicLoadingScreen extends BasicScreen
 		//var loadingSign:UIBitmapComponent = new UIBitmapComponent();
 		//var loadingText:UITextFieldComponent = new UITextFieldComponent();
 		
+	}
+	
+
+	public inline function CheckLoadtingTime(threadDetail:ParamThreadDetail<Float>):Bool
+	{
+		return (Sys.preciseTime() - threadDetail.parameter > MINLOADINGTIME);
 	}
 	
 	public static function get_instance():BasicLoadingScreen 

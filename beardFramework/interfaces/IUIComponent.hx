@@ -25,7 +25,6 @@ interface IUIComponent extends IUIGroupable
 
 	
 	public function UpdateVisual():Void;
-	public function Clear():Void;
 	public function ToData():DataUIComponent;
 	public function ParseData(data:DataUIComponent):Void;
 }

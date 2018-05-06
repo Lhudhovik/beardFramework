@@ -5,7 +5,7 @@ package beardFramework.resources.save.data;
  */
 typedef DataSave =
 {
-	var name:String;
+	>AbstractData,
 	var playersData:Array<DataPlayer>;
 	var gameData:Array<DataGeneric>;
 	

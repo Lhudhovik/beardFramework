@@ -96,21 +96,40 @@ class InputManager
 	
 	public function Activate(window:Window):Void
 	{
-		window.onKeyDown.add(OnKeyDown);
-		window.onKeyUp.add(OnKeyUp);
+		
 		window.onMouseDown.add(OnMouseDown);
 		window.onMouseMove.add(OnMouseMove);
 		window.onMouseUp.add(OnMouseUp);
 		window.onMouseWheel.add(OnMouseWheel);
-		Touch.onStart.add(OnTouchStart);
-		Touch.onMove.add(OnTouchMove);
-		Touch.onEnd.add(OnTouchEnd);
-	
+			
+		//action : StringLibrary.MOUSE_OVER --> "Mouse_Over"
+		//inputID :StringLibrary.MOUSE_OVER --> "Mouse_Over"
+		LinkActionToInput(StringLibrary.MOUSE_OVER,StringLibrary.MOUSE_OVER, InputType.MOUSE_OVER);
+		LinkActionToInput(StringLibrary.MOUSE_OUT,StringLibrary.MOUSE_OUT, InputType.MOUSE_OUT);
+		LinkActionToInput(StringLibrary.MOUSE_MOVE,StringLibrary.MOUSE_MOVE, InputType.MOUSE_MOVE);
+		LinkActionToInput(StringLibrary.MOUSE_WHEEL, StringLibrary.MOUSE_WHEEL, InputType.MOUSE_WHEEL);
+		
+		for (i in 0...3){
+			// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
+			// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
+			LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
+			LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
+			LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
+		}
+			
+		
 		for (gamepad in Gamepad.devices)
 			OnGamepadConnect(gamepad);
 			
 		Gamepad.onConnect.add(OnGamepadConnect);
-
+			
+		window.onKeyDown.add(OnKeyDown);
+		window.onKeyUp.add(OnKeyUp);
+			
+		Touch.onStart.add(OnTouchStart);
+		Touch.onMove.add(OnTouchMove);
+		Touch.onEnd.add(OnTouchEnd);			
+		
 	}
 	
 	public function ParseInputSettings(data:Xml):Void
@@ -118,122 +137,25 @@ class InputManager
 		
 		directMode = (data.get(StringLibrary.DIRECT_MODE) == "true");
 		
-		if (data.get(StringLibrary.MOUSE) == "true"){
-			
-			BeardGame.Get().stage.window.onMouseDown.add(OnMouseDown);
-			BeardGame.Get().stage.window.onMouseMove.add(OnMouseMove);
-			BeardGame.Get().stage.window.onMouseUp.add(OnMouseUp);
-			BeardGame.Get().stage.window.onMouseWheel.add(OnMouseWheel);
-			
+		if (data.get(StringLibrary.MOUSE) == "true")
+		{
 			maxMouseButtons = Std.parseInt(data.get(StringLibrary.MOUSE_BUTTONS_MAX));
-			
-			
-			
-			//***********************************DEFAULT
-			
-			//action : StringLibrary.MOUSE_OVER --> "Mouse_Over"
-			//inputID :StringLibrary.MOUSE_OVER --> "Mouse_Over"
-			LinkActionToInput(StringLibrary.MOUSE_OVER,StringLibrary.MOUSE_OVER, InputType.MOUSE_OVER);
-			LinkActionToInput(StringLibrary.MOUSE_OUT,StringLibrary.MOUSE_OUT, InputType.MOUSE_OUT);
-			LinkActionToInput(StringLibrary.MOUSE_MOVE,StringLibrary.MOUSE_MOVE, InputType.MOUSE_MOVE);
-			LinkActionToInput(StringLibrary.MOUSE_WHEEL, StringLibrary.MOUSE_WHEEL, InputType.MOUSE_WHEEL);
-			
-			for (i in 0...maxMouseButtons){
-				// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
-				// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
-				LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
-				LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
-				LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
-			}
-			
-		}
-		
-		if (data.get(StringLibrary.GAMEPAD) == "true")
-		{
-			for (gamepad in Gamepad.devices)
-				OnGamepadConnect(gamepad);
-			
-			Gamepad.onConnect.add(OnGamepadConnect);
-				
-			maxGamepads = Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX));
-			//***********************************DEFAULT
-			//var gamepadButton:GamepadButton;
-			//var gamepadAxis:GamepadAxis;
-			//
-			//for (i in 0...(Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX)))){
-				//
-				////buttons
-				//for ( j in 0...15)
-				//{
-					//
-					//gamepadButton = j;
-					//utilString = gamepadButton.toString();
-					//
-					//// action : StringLibrary.GAMEPAD_BUTTON_DOWN + gamepadButton.toString() --> "gamepadButtonDownA" 
-					//// inputID : GetGamepadInputID(i) --> "gamepadA0"; 
-					//LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_DOWN + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_DOWN);
-					//LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_UP + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_UP);
-					//LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_PRESS + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_PRESS);
-					//
-					//
-				//}
-				//
-				////trigger and stick
-				//for (j in 0...6)
-				//{
-					//gamepadAxis = j;
-					//utilString = gamepadAxis.toString();
-					//LinkActionToInput( StringLibrary.GAMEPAD_AXIS_MOVE + utilString, GetGamepadInputID(i, utilString), InputType.GAMEPAD_AXIS_MOVE);
-					//
-				//}
-			//}
-			
-		}
-		
-		if (data.get(StringLibrary.KEYBOARD) == "true")
-		{
-		
-			Application.current.window.onKeyDown.add(OnKeyDown);
-			Application.current.window.onKeyUp.add(OnKeyUp);
-			
-			
-			//***********************************DEFAULT
-			////var kkey : KeyCode = 0;
-			//for (key in Type.getClassFields(KeyCode))
-			//{
-				//// action : StringLibrary.KEY_PRESS + key --> "keyPressA" 
-				//// inputID : key--> "a"; 
-				//LinkActionToInput( StringLibrary.KEY_PRESS + key.toLowerCase(), key.toLowerCase(), InputType.KEY_PRESS);
-				//LinkActionToInput( StringLibrary.KEY_DOWN + key.toLowerCase(), key.toLowerCase(), InputType.KEY_DOWN);
-				//LinkActionToInput( StringLibrary.KEY_UP + key.toLowerCase(), key.toLowerCase(), InputType.KEY_UP);
-				//
-			//}
-			
-			
-			
-		}
-		
-		if (data.get(StringLibrary.TOUCH) == "true")
-		{
-			Touch.onStart.add(OnTouchStart);
-			Touch.onMove.add(OnTouchMove);
-			Touch.onEnd.add(OnTouchEnd);
-			maxTouches = Std.parseInt(data.get(StringLibrary.TOUCH_MAX));
-			
-			//***********************************DEFAULT
-			for (i in 0...maxTouches)
+			if (maxMouseButtons > 3)
 			{
-				
-				//LinkActionToInput(StringLibrary.TOUCH_START, StringLibrary.TOUCH + i, InputType.TOUCH_START);
-				//LinkActionToInput(StringLibrary.TOUCH_END, StringLibrary.TOUCH + i, InputType.TOUCH_END);
-				//LinkActionToInput(StringLibrary.TOUCH_MOVE, StringLibrary.TOUCH + i, InputType.TOUCH_MOVE);
-				//LinkActionToInput(StringLibrary.TOUCH_OUT, StringLibrary.TOUCH + i, InputType.TOUCH_OUT);
-				//LinkActionToInput(StringLibrary.TOUCH_OVER, StringLibrary.TOUCH + i, InputType.TOUCH_OVER);
-				//LinkActionToInput(StringLibrary.TOUCH_TAP, StringLibrary.TOUCH + i, InputType.TOUCH_TAP);
-					//
-			}
+				for (i in 3...maxMouseButtons){
 			
+					// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
+					// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
+					LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
+					LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
+					LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
+					
+				}
+			}
 		}
+			
+		if (data.get(StringLibrary.GAMEPAD) == "true")	maxGamepads = Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX));
+		if (data.get(StringLibrary.TOUCH) == "true") maxTouches = Std.parseInt(data.get(StringLibrary.TOUCH_MAX));
 		
 		//**************************************Specific actions
 			
@@ -391,7 +313,6 @@ class InputManager
 			
 		}
 		
-
 	} 
 		
 	public function UnbindFromAction(actionID : String, callback:Float -> Void = null, targetName:String = ""):Void
@@ -1006,6 +927,7 @@ class InputManager
 	
 	public function Update():Void
 	{
+		
 		var i:Int = 0;
 		var detail:CallbackDetails;
 		
@@ -1025,6 +947,7 @@ class InputManager
 						{
 							
 							i = actions[actionID].callbackDetails.length;
+							
 							while (--i >= 0)
 							{
 								detail = actions[actionID].callbackDetails[i];
@@ -1274,6 +1197,126 @@ class InputManager
 
 	
 }
+//public function Activate(window:Window):Void
+	//{
+		//if (data.get(StringLibrary.MOUSE) == "true"){
+			//
+			//BeardGame.Get().stage.window.onMouseDown.add(OnMouseDown);
+			//BeardGame.Get().stage.window.onMouseMove.add(OnMouseMove);
+			//BeardGame.Get().stage.window.onMouseUp.add(OnMouseUp);
+			//BeardGame.Get().stage.window.onMouseWheel.add(OnMouseWheel);
+			//
+			//maxMouseButtons = Std.parseInt(data.get(StringLibrary.MOUSE_BUTTONS_MAX));
+			//
+			//
+			//
+			////***********************************DEFAULT
+			//
+			////action : StringLibrary.MOUSE_OVER --> "Mouse_Over"
+			////inputID :StringLibrary.MOUSE_OVER --> "Mouse_Over"
+			//LinkActionToInput(StringLibrary.MOUSE_OVER,StringLibrary.MOUSE_OVER, InputType.MOUSE_OVER);
+			//LinkActionToInput(StringLibrary.MOUSE_OUT,StringLibrary.MOUSE_OUT, InputType.MOUSE_OUT);
+			//LinkActionToInput(StringLibrary.MOUSE_MOVE,StringLibrary.MOUSE_MOVE, InputType.MOUSE_MOVE);
+			//LinkActionToInput(StringLibrary.MOUSE_WHEEL, StringLibrary.MOUSE_WHEEL, InputType.MOUSE_WHEEL);
+			//
+			//for (i in 0...maxMouseButtons){
+				//// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
+				//// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
+				//LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
+				//LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
+				//LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
+			//}
+			//
+		//}
+		//
+		//if (data.get(StringLibrary.GAMEPAD) == "true")
+		//{
+			//for (gamepad in Gamepad.devices)
+				//OnGamepadConnect(gamepad);
+			//
+			//Gamepad.onConnect.add(OnGamepadConnect);
+				//
+			//maxGamepads = Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX));
+			////***********************************DEFAULT
+			////var gamepadButton:GamepadButton;
+			////var gamepadAxis:GamepadAxis;
+			////
+			////for (i in 0...(Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX)))){
+				////
+				//////buttons
+				////for ( j in 0...15)
+				////{
+					////
+					////gamepadButton = j;
+					////utilString = gamepadButton.toString();
+					////
+					////// action : StringLibrary.GAMEPAD_BUTTON_DOWN + gamepadButton.toString() --> "gamepadButtonDownA" 
+					////// inputID : GetGamepadInputID(i) --> "gamepadA0"; 
+					////LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_DOWN + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_DOWN);
+					////LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_UP + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_UP);
+					////LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_PRESS + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_PRESS);
+					////
+					////
+				////}
+				////
+				//////trigger and stick
+				////for (j in 0...6)
+				////{
+					////gamepadAxis = j;
+					////utilString = gamepadAxis.toString();
+					////LinkActionToInput( StringLibrary.GAMEPAD_AXIS_MOVE + utilString, GetGamepadInputID(i, utilString), InputType.GAMEPAD_AXIS_MOVE);
+					////
+				////}
+			////}
+			//
+		//}
+		//
+		//if (data.get(StringLibrary.KEYBOARD) == "true")
+		//{
+		//
+			//Application.current.window.onKeyDown.add(OnKeyDown);
+			//Application.current.window.onKeyUp.add(OnKeyUp);
+			//
+			//
+			////***********************************DEFAULT
+			//////var kkey : KeyCode = 0;
+			////for (key in Type.getClassFields(KeyCode))
+			////{
+				////// action : StringLibrary.KEY_PRESS + key --> "keyPressA" 
+				////// inputID : key--> "a"; 
+				////LinkActionToInput( StringLibrary.KEY_PRESS + key.toLowerCase(), key.toLowerCase(), InputType.KEY_PRESS);
+				////LinkActionToInput( StringLibrary.KEY_DOWN + key.toLowerCase(), key.toLowerCase(), InputType.KEY_DOWN);
+				////LinkActionToInput( StringLibrary.KEY_UP + key.toLowerCase(), key.toLowerCase(), InputType.KEY_UP);
+				////
+			////}
+			//
+			//
+			//
+		//}
+		//
+		//if (data.get(StringLibrary.TOUCH) == "true")
+		//{
+			//Touch.onStart.add(OnTouchStart);
+			//Touch.onMove.add(OnTouchMove);
+			//Touch.onEnd.add(OnTouchEnd);
+			//maxTouches = Std.parseInt(data.get(StringLibrary.TOUCH_MAX));
+			//
+			////***********************************DEFAULT
+			//for (i in 0...maxTouches)
+			//{
+				//
+				////LinkActionToInput(StringLibrary.TOUCH_START, StringLibrary.TOUCH + i, InputType.TOUCH_START);
+				////LinkActionToInput(StringLibrary.TOUCH_END, StringLibrary.TOUCH + i, InputType.TOUCH_END);
+				////LinkActionToInput(StringLibrary.TOUCH_MOVE, StringLibrary.TOUCH + i, InputType.TOUCH_MOVE);
+				////LinkActionToInput(StringLibrary.TOUCH_OUT, StringLibrary.TOUCH + i, InputType.TOUCH_OUT);
+				////LinkActionToInput(StringLibrary.TOUCH_OVER, StringLibrary.TOUCH + i, InputType.TOUCH_OVER);
+				////LinkActionToInput(StringLibrary.TOUCH_TAP, StringLibrary.TOUCH + i, InputType.TOUCH_TAP);
+					////
+			//}
+			//
+		//}
+//
+	//}
 
 
 

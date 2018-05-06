@@ -13,6 +13,7 @@ interface IEntityComponent
   	public function Update():Void;
   	public function ToData():DataComponent;
   	public function ParseData(data:DataComponent):Void;
+  	public function Dispose():Void;
 	
 	
 }

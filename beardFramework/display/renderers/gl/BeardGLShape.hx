@@ -59,8 +59,8 @@ class BeardGLShape extends GLShape
 				_adjustedTransform.b = graphics.__worldTransform.a * camera.transform.b + graphics.__worldTransform.b * camera.transform.d;
 				_adjustedTransform.c = graphics.__worldTransform.c * camera.transform.a + graphics.__worldTransform.d * camera.transform.c;
 				_adjustedTransform.d = graphics.__worldTransform.c * camera.transform.b + graphics.__worldTransform.d * camera.transform.d;
-				_adjustedTransform.tx = graphics.__worldTransform.tx * camera.transform.a + graphics.__worldTransform.ty * camera.transform.c + camera.transform.tx + (graphics.__worldTransform.tx - camera.cameraX);
-				_adjustedTransform.ty = graphics.__worldTransform.tx * camera.transform.b + graphics.__worldTransform.ty * camera.transform.d + camera.transform.ty + (graphics.__worldTransform.ty - camera.cameraY);
+				_adjustedTransform.tx = graphics.__worldTransform.tx * camera.transform.a + graphics.__worldTransform.ty * camera.transform.c + camera.transform.tx + (graphics.__worldTransform.tx - camera.centerX);
+				_adjustedTransform.ty = graphics.__worldTransform.tx * camera.transform.b + graphics.__worldTransform.ty * camera.transform.d + camera.transform.ty + (graphics.__worldTransform.ty - camera.centerY);
 			
 				
 				

@@ -1,10 +1,12 @@
 package beardFramework.resources.assets;
+import beardFramework.display.heritage.BeardTileset;
+import beardFramework.utils.TextureUtils;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.Tileset;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
-import beardFramework.resources.assets.BeardTileSet;
+
 
 /**
  * ...
@@ -14,12 +16,20 @@ class Atlas
 {
 	public var atlasBitmapData:BitmapData;
 	private var subAreas:Map<String, SubArea>;
-	public function new(bitmapData:BitmapData, xml:Xml) 
+	private var usedBitmapData:Map<String,UsedBitmapData>;
+	private var usedTileRect:Map<String,Int>;
+	public var tileSet:BeardTileset;
+	//public var name:String;
+	public function new(name:String, bitmapData:BitmapData, xml:Xml) 
 	{
 		
-		
+		usedBitmapData = new Map<String, UsedBitmapData>();
+		usedTileRect = new Map<String, Int>();
 		subAreas = new Map<String, SubArea>();
 		atlasBitmapData = bitmapData.clone();
+		tileSet = new BeardTileset(name, atlasBitmapData);
+		bitmapData.dispose();
+		
 		parseXml(xml);
 		
 	}
@@ -48,7 +58,8 @@ class Atlas
 		
             imageArea.setTo(x, y, width, height);
             frame.setTo(frameX, frameY, frameWidth, frameHeight);
-			subAreas[name] = new SubArea(imageArea.clone(), frameWidth > 0 && frameHeight > 0 ? frame.clone() : null ,rotated);
+			subAreas[name] = new SubArea(imageArea.clone(),frameWidth > 0 && frameHeight > 0 ? frame.clone() : null , rotated);
+			subAreas[name].ID = tileSet.addRect(imageArea.clone());
             
         }
     }
@@ -67,16 +78,66 @@ class Atlas
 	public function GetBitmapData(name:String):BitmapData
 	{	
 		if (subAreas[name] == null) return null;
-		var source:Rectangle = new Rectangle();
-		source.width = subAreas[name].imageArea.width >= subAreas[name].frame.width? subAreas[name].imageArea.width : subAreas[name].frame.width;
-		source.height = subAreas[name].imageArea.height >= subAreas[name].frame.height? subAreas[name].imageArea.height : subAreas[name].frame.height;
-		source.x = -subAreas[name].frame.x;
-		source.y = -subAreas[name].frame.y;
-		//trace(subAreas[name].imageArea.x);
-		var bitmapData:BitmapData = new BitmapData(Math.ceil(source.width), Math.ceil(source.height), true, 0x00ffffff);
-		bitmapData.copyPixels(atlasBitmapData, subAreas[name].imageArea, new Point(source.x, source.y));
 		
-		return bitmapData;
+		//trace(subAreas[name].imageArea.x);
+		
+		if (!usedBitmapData.exists(name)) 
+		{
+			var source:Rectangle = TextureUtils.GetRectangle();
+			source.width = subAreas[name].imageArea.width >= subAreas[name].frame.width? subAreas[name].imageArea.width : subAreas[name].frame.width;
+			source.height = subAreas[name].imageArea.height >= subAreas[name].frame.height? subAreas[name].imageArea.height : subAreas[name].frame.height;
+			source.x = -subAreas[name].frame.x;
+			source.y = -subAreas[name].frame.y;
+			
+			var bitmapData:BitmapData = new BitmapData(Math.ceil(source.width), Math.ceil(source.height), true, 0x00ffffff);
+			bitmapData.copyPixels(atlasBitmapData, subAreas[name].imageArea, new Point(source.x, source.y));
+			//trace("bitmapdData added");
+			usedBitmapData[name] = 
+			{
+				bitmapData:bitmapData,
+				count:0
+			}
+		}
+		
+		usedBitmapData[name].count++;
+		//trace(usedBitmapData[name].count);
+		
+		return usedBitmapData[name].bitmapData;
+		
+	}
+	
+	public inline function GetTileID(name:String):Int
+	{
+		if (subAreas[name] == null) return -1;
+		
+		//trace(subAreas[name].imageArea.x)
+		
+		//if (!usedTileRect.exists(name)) 
+		//{
+			//var source:Rectangle = TextureUtils.GetRectangle();
+			//source.width = subAreas[name].imageArea.width >= subAreas[name].frame.width? subAreas[name].imageArea.width : subAreas[name].frame.width;
+			//source.height = subAreas[name].imageArea.height >= subAreas[name].frame.height? subAreas[name].imageArea.height : subAreas[name].frame.height;
+			//source.x = -subAreas[name].frame.x;
+			//source.y = -subAreas[name].frame.y;
+			//
+			//usedTileRect[name] = tileSet.addRect(source);
+			//
+		//}
+				//
+		return subAreas[name].ID;
+		
+	}
+	
+	public inline function GetTextureDimensions(name:String):Rectangle
+	{
+		if (subAreas[name] == null){
+			
+				//pool
+			return new Rectangle();
+		}
+		
+		return subAreas[name].imageArea;
+		
 		
 	}
 	public function ToBeardTileSet():BeardTileSet{
@@ -103,6 +164,26 @@ class Atlas
 		atlasBitmapData = null;
 	}
 	
+	public function DisposeBitmapData(name:String):Void
+	{
+		if (usedBitmapData.exists(name))
+		{
+			
+			if (--usedBitmapData[name].count <= 0){
+				
+				usedBitmapData[name].bitmapData.dispose();
+				usedBitmapData[name].bitmapData = null;
+				usedBitmapData[name] = null;
+				usedBitmapData.remove(name);
+				//trace("bitmap Removed");
+			}
+			
+			
+		}
+		
+		
+	}
+	
 }
 
 private class SubArea
@@ -110,6 +191,7 @@ private class SubArea
 	public var imageArea:Rectangle;
 	public var frame:Rectangle;
 	public var rotated : Bool;
+	public var ID:Int;
 	public function new(imageArea:Rectangle, frame:Rectangle, rotated:Bool)
 	{
 		
@@ -119,4 +201,10 @@ private class SubArea
 		
 	}
 	
+}
+
+typedef UsedBitmapData = 
+{
+	var bitmapData:BitmapData;
+	var count:Int;
 }

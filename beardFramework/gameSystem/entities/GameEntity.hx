@@ -12,9 +12,9 @@ class GameEntity
 	public var name:String;
 	public var x:Float;
 	public var y:Float;
+	public var isLocal:Bool=true;
 	public var forcedLocation(default, null):Bool = false;
 	public var isVirtual(default,null):Bool;
-	public var isLocal(default,null):Bool=true;
 	public var requiredSave(default,null):Bool=false;
 	
 	
@@ -96,6 +96,7 @@ class GameEntity
 		return null;
 		
 	}
+	
 	public function GetComponents():Array<IEntityComponent>
 	{
 		
@@ -122,8 +123,6 @@ class GameEntity
 	
 	}
 	
-	
-	
 	public function Virtualize():Void{
 		//clear basic components
 		//remove Listeners if needed
@@ -134,30 +133,6 @@ class GameEntity
 		//redeem basic components
 		//re-add listeners if needed
 	}
-	
-	//public function set_x(value:Float):Float
-	//{
-		//if (visual != null)
-		//visual.x = value;
-		//return value;
-	//}
-	
-	//public function get_x():Float
-	//{
-		//return visual != null? visual.x : 0;
-	//}
-	
-	//public function set_y(value:Float):Float
-	//{
-		//if (visual != null)
-		//visual.y = value;
-		//return value;
-	//}
-	
-	//public function get_y():Float
-	//{
-		//return visual != null? visual.y : 0;
-	//}
 	
 	public function ToData():DataEntity
 	{
@@ -196,6 +171,26 @@ class GameEntity
 			AddComponent(component, componentData.update, componentData.position);
 			component.ParseData(componentData);
 		}
+	}
+	
+	public function Dispose():Void
+	{
+		entitiesCount--;
+		
+		for (component in components)
+		{
+				
+			if (Std.is(component, IEntityVisual))
+			{
+				cast(component, IEntityVisual).UnRegister();
+			}
+			
+			component.Dispose();
+		}
+			
+		
+		
+		
 	}
 	
 }
