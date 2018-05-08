@@ -108,6 +108,14 @@ class BeardSprite extends Sprite implements ICameraDependent{
 		return true;
 	}
 	
+	
+	/* INTERFACE beardFramework.interfaces.ICameraDependent */
+	
+	public function RenderMaskThroughCamera(camera:Camera, renderSession:RenderSession):Void 
+	{
+		//BeardGLDisplayObject.renderThroughCamera(this, renderSession, camera);
+	}
+	
 	override private function __hitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool, hitObject:DisplayObject):Bool 
 	{
 		

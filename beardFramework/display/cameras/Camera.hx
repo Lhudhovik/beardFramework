@@ -308,5 +308,8 @@ class Camera
 		return viewportHeight = value;
 	}
 	
-	
+	public function AdjustResize():Void
+	{
+		
+	}
 }

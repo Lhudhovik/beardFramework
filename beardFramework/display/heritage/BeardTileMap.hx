@@ -6,9 +6,16 @@ import beardFramework.display.renderers.gl.BeardGLTilemap;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.assets.AssetManager;
 import openfl.display.Tile;
+import openfl.display.TileArray;
 import openfl.display.Tilemap;
 import openfl.display.Tileset;
 import openfl._internal.renderer.RenderSession;
+
+
+@:access(openfl.display.Tilemap)
+@:access(openfl.display.TileArray)
+@:access(openfl.display.Tile)
+@:access(beardFramework.display.core.BeardVisual)
 /**
  * ...
  * @author Ludo
@@ -48,6 +55,35 @@ class BeardTileMap extends Tilemap implements ICameraDependent
 	
 	public function ForbidCamera(forbiddenCameraID:String):Void 
 	{
+		
+	}
+	
+	private function __updateTileArrayThroughCamera (camera:Camera):Void {
+		
+		if (__tiles.length > 0) {
+			
+			if (__tileArray == null) {
+				__tileArray = new BeardTileArray ();
+			}
+			
+			/*if (__tileArray.length < numTiles) {*/
+				__tileArray.length = numTiles;
+			/*//}*/
+			
+			var tile:Tile;
+			
+			for (i in 0...__tiles.length) {
+				
+				tile = __tiles[i];
+				if (tile != null) {
+					cast(tile, BeardVisual).__updateTileArrayThroughCamera(i,cast(__tileArray, BeardTileArray), __tileArrayDirty,camera);
+				}
+				
+			}
+			
+		}
+		
+		__tileArrayDirty = false;
 		
 	}
 	
@@ -126,77 +162,72 @@ class BeardTileMap extends Tilemap implements ICameraDependent
 		return tiles;
 	}
 	
-	////HERITAGE
-	//override public function addTile(tile:Tile):Tile 
-	//{
-		//widthChanged = heightChanged = true;
-		//return super.addTile(tile);
-	//}
-	//
-	//override public function addTiles(tiles:Array<Tile>):Array<Tile> 
-	//{
-		//widthChanged = heightChanged = true;
-		//return super.addTiles(tiles);
-	//}
-	//
-	//override public function addTileAt(tile:Tile, index:Int):Tile 
-	//{
-		//widthChanged = heightChanged = true;
-		//return super.addTileAt(tile, index);
-	//}
-	//
-	//override public function removeTile(tile:Tile):Tile 
-	//{
-		//widthChanged = heightChanged = true;
-		//return super.removeTile(tile);
-	//}
-	//
-	//override public function removeTileAt(index:Int):Tile 
-	//{
-		//widthChanged = heightChanged = true;
-		//return super.removeTileAt(index);
-	//}
-	//
-	//override public function removeTiles(beginIndex:Int = 0, endIndex:Int = 0x7fffffff):Void 
-	//{
-		//widthChanged = heightChanged = true;
-		//super.removeTiles(beginIndex, endIndex);
-	//}
-	//
-	//
-	//
-	//override function get_width():Float 
-	//{
-		//if (widthChanged){
-			//cachedWidth = super.get_width();
-			//widthChanged = false;
-		//}
-		//return cachedWidth;
-	//}
-	//
-	//override function get_height():Float 
-	//{
-		//if (heightChanged){
-			//cachedHeight = super.get_height();
-			//heightChanged = false;
-		//}
-		//return cachedHeight;
-	//}
-	////override function set_height(value:Float):Float 
-	////{
-		////heightChanged = true;
-		////return super.set_height(value);
-	////}
-	//override function set_scaleX(value:Float):Float 
-	//{
-		//widthChanged = true;
-		//return super.set_scaleX(value);
-	//}
-	//
-	//override function set_scaleY(value:Float):Float 
-	//{
-		//heightChanged = true;
-		//return super.set_scaleY(value);
-	//}
+	@:beta override public function getTiles ():TileArray {
+		
+		__updateTileArray ();
+		
+		if (__tileArray == null) {
+			__tileArray = new BeardTileArray ();
+		}
+		
+		return __tileArray;
+		
+	}
+	
+	override private function __updateTileArray ():Void {
+		
+		if (__tiles.length > 0) {
+			
+			if (__tileArray == null) {
+				__tileArray = new BeardTileArray ();
+			}
+			
+			//if (__tileArray.length < numTiles) {
+				__tileArray.length = numTiles;
+			//}
+			
+			var tile:Tile;
+			
+			for (i in 0...__tiles.length) {
+				
+				tile = __tiles[i];
+				if (tile != null) {
+					tile.__updateTileArray (i, __tileArray, __tileArrayDirty);
+				}
+				
+			}
+			
+		}
+		
+		__tileArrayDirty = false;
+		
+	}
+	
+	@:beta override  public function setTiles (tileArray:TileArray):Void {
+		
+		__tileArray = BeardTileArray.FromTileArray(tileArray);
+		numTiles = __tileArray.length;
+		__tileArray.__bufferDirty = true;
+		__tileArrayDirty = false;
+		__tiles.length = 0;
+		#if !flash
+		__setRenderDirty ();
+		#end
+		
+	}
+	
+	/* INTERFACE beardFramework.interfaces.ICameraDependent */
+	
+	public function RenderMaskThroughCamera(camera:Camera, renderSession:RenderSession):Void 
+	{
+		
+		for (atlasTileset in tilesets)
+		{
+			this.tileset = atlasTileset;
+			BeardGLTilemap.renderMaskThroughCamera (this, renderSession,camera);
+		}
+		
+	}
+	
 	
 }

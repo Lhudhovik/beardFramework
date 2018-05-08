@@ -78,6 +78,14 @@ class BeardBitmap extends Bitmap implements ICameraDependent
 		if (!transformOnly) widthChanged = heightChanged = true;
 	}
 	
+	
+	/* INTERFACE beardFramework.interfaces.ICameraDependent */
+	
+	public function RenderMaskThroughCamera(camera:Camera, renderSession:RenderSession):Void 
+	{
+		BeardGLBitmap.renderMaskThroughCamera(this, renderSession, camera);
+	}
+	
 	override function set_width(value:Float):Float 
 	{
 		widthChanged = true;

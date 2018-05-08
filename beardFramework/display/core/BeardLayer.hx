@@ -45,37 +45,12 @@ class BeardLayer extends DisplayObjectContainer
 		
 		for (camera in BeardGame.Get().cameras.iterator()){
 		
-			//if (!camera.needRenderUpdate) continue;
-			//
-			//camera.needRenderUpdate = false;
-			
 			renderSession.maskManager.pushRect (camera.GetRect(), camera.transform);
 			
 			for (child in __children) {
 				
-				
-				
 				if (Std.is(child, ICameraDependent) && camera.Contains(cast child)){
-					
-					
-					//if (Std.is(child, ICameraDependent)){
-						
-						//cast(child, ICameraDependent).displayingCameras.remove(camera.name);
-						//cast(child, ICameraDependent).displayingCameras.add(camera.name);
-						cast(child, ICameraDependent).RenderThroughCamera(camera, renderSession);
-		//
-					//}
-					//else{
-						//utilX = child.__transform.tx;
-						//utilY = child.__transform.ty;
-						//child.__transform.tx =  camera.viewportX + camera.viewportWidth*0.5 +  (utilX- camera.centerX) *camera.zoom;
-						//child.__transform.ty = 	camera.viewportY + camera.viewportHeight*0.5 +  (utilY- camera.centerY) *camera.zoom;
-						//child.__update(true, true);
-						//child.__renderGL (renderSession);
-						//child.__transform.tx = utilX;
-						//child.__transform.ty = utilY;
-					//
-					//}
+					cast(child, ICameraDependent).RenderThroughCamera(camera, renderSession);
 					
 				}else if (Std.is(child, ICameraDependent)){
 					
@@ -87,7 +62,6 @@ class BeardLayer extends DisplayObjectContainer
 							}
 				}
 				else {
-					//trace(child.name);
 					child.__renderGL (renderSession);
 				}
 			}
@@ -109,6 +83,90 @@ class BeardLayer extends DisplayObjectContainer
 		
 		renderSession.filterManager.popObject (this);
 		
+		
+		
+	}
+	
+	private override function __renderGLMask (renderSession:RenderSession):Void 
+	{
+		
+		if (__cacheBitmap != null && !__cacheBitmapRender) return;
+			
+		
+		for (camera in BeardGame.Get().cameras.iterator()){
+			
+			
+			if (renderSession.clearRenderDirty) {
+				
+				for (child in __children) {
+					
+					
+					if (Std.is(child, ICameraDependent) && camera.Contains(cast child)){
+						cast(child, ICameraDependent).RenderMaskThroughCamera(camera, renderSession);
+						child.__renderDirty = false;
+					
+					}else if (Std.is(child, ICameraDependent)){
+					
+						for (cam in cast(child, ICameraDependent).displayingCameras)
+							if (cam == camera.name)
+							{
+								cast(child, ICameraDependent).displayingCameras.remove(camera.name);
+								break;
+							}
+					}
+					else {
+						child.__renderGLMask (renderSession);
+						child.__renderDirty = false;
+					}
+					
+					
+				
+					
+				}
+				
+				__renderDirty = false;
+				
+			} else {
+				
+				for (child in __children) {
+					
+					if (Std.is(child, ICameraDependent) && camera.Contains(cast child)){
+						cast(child, ICameraDependent).RenderMaskThroughCamera(camera, renderSession);
+									
+					}else if (Std.is(child, ICameraDependent)){
+					
+						for (cam in cast(child, ICameraDependent).displayingCameras)
+							if (cam == camera.name)
+							{
+								cast(child, ICameraDependent).displayingCameras.remove(camera.name);
+								break;
+							}
+					}
+					else {
+						child.__renderGLMask (renderSession);
+						
+					}
+					
+					
+				}
+				
+			}
+			
+			
+			
+		}
+		
+		for (orphan in __removedChildren) {
+			
+			if (orphan.stage == null) {
+				
+				orphan.__cleanup ();
+				
+			}
+			
+		}
+		
+		__removedChildren.length = 0;
 		
 		
 	}

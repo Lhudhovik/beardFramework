@@ -1,19 +1,31 @@
 package beardFramework.display.core;
 import beardFramework.display.cameras.Camera;
+import beardFramework.display.heritage.BeardTileArray;
+import beardFramework.display.heritage.BeardTileMap;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.assets.AssetManager;
 import openfl.display.Tile;
 import openfl.geom.Matrix;
 import openfl._internal.renderer.RenderSession;
 
-
 using beardFramework.utils.SysPreciseTime;
+
+
+@:access(beardFramework.display.heritage.BeardTileArray)
+@:access(beardFramework.display.heritage.BeardTileMap)
+@:access(openfl.geom.ColorTransform)
+@:access(openfl.geom.Matrix)
+
+
 /**
  * ...
  * @author Ludo
  */
 class BeardVisual extends Tile implements ICameraDependent
 {
+	
+	//private static var _adjustedMatrix:Matrix = new Matrix();
+	
 	public var atlas(default, null):String="";
 	public var texture(default, null):String="";
 	@:isVar public var name(get, set):String;
@@ -78,9 +90,17 @@ class BeardVisual extends Tile implements ICameraDependent
 		if ( this.atlas != "" && this.texture != ""){
 			textureWidth = Math.round(AssetManager.Get().GetAtlas(this.atlas).GetTextureDimensions(this.texture).width);
 			textureHeight = Math.round(AssetManager.Get().GetAtlas(this.atlas).GetTextureDimensions(this.texture).height);
-			cachedHeight = textureHeight * __scaleY;
-			cachedWidth = textureWidth * __scaleX;
+			cachedHeight = textureHeight * scaleY;
+			cachedWidth = textureWidth * scaleX;
 		}
+		
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.ICameraDependent */
+	
+	public function RenderMaskThroughCamera(camera:Camera, renderSession:RenderSession):Void 
+	{
 		
 	}
 	function get_name():String 
@@ -91,6 +111,98 @@ class BeardVisual extends Tile implements ICameraDependent
 	function set_name(value:String):String 
 	{
 		return name = value;
+	}
+	
+	private function __updateTileArrayThroughCamera (position:Int, tileArray:BeardTileArray, forceUpdate:Bool, camera:Camera):Void {
+		
+		var cachePosition = tileArray.position;
+		tileArray.position = position;
+		
+		if (__shaderDirty || forceUpdate) {
+			
+			tileArray.shader = __shader;
+			__shaderDirty = false;
+			
+		}
+		
+		if (__colorTransformDirty || forceUpdate) {
+			
+			tileArray.colorTransform = __colorTransform;
+			__colorTransformDirty = false;
+			
+		}
+		
+		if (__visibleDirty || forceUpdate) {
+			
+			tileArray.visible = __visible;
+			tileArray.__bufferDirty = true;
+			__visibleDirty = false;
+			
+		}
+		
+		if (__alphaDirty || forceUpdate) {
+			
+			tileArray.alpha = __alpha;
+			tileArray.__bufferDirty = true;
+			__alphaDirty = false;
+			
+		}
+		
+		if (__sourceDirty || forceUpdate) {
+			
+			if (__rect == null) {
+				
+				tileArray.id = __id;
+				
+			} else {
+				
+				tileArray.rect = rect;
+				
+			}
+			
+			tileArray.tileset = __tileset;
+			tileArray.__bufferDirty = true;
+			__sourceDirty = true;
+			
+		}
+		
+		tileArray.onCamera = camera.Contains(this);
+		
+		if (camera.needRenderUpdate || __transformDirty || forceUpdate) {
+			
+			if (__originX != 0 || __originY != 0) {
+				
+						
+				Tile.__tempMatrix.a = 1 + __matrix.a * camera.zoom;
+				Tile.__tempMatrix.b = 0 + __matrix.b * camera.transform.d;
+				Tile.__tempMatrix.c = 0 + __matrix.c * camera.zoom;
+				Tile.__tempMatrix.d = 1 + __matrix.d * camera.transform.d;
+				Tile.__tempMatrix.tx = -__originX + camera.transform.tx + camera.viewportWidth*0.5 +  (__matrix.tx - camera.centerX) *camera.zoom  ;
+				Tile.__tempMatrix.ty = -__originY + camera.transform.ty + camera.viewportHeight *0.5 + (__matrix.ty - camera.centerY) *camera.zoom;
+				
+				tileArray.matrix = Tile.__tempMatrix;
+				
+			} else {
+				
+				
+				Tile.__tempMatrix.a = __matrix.a * camera.zoom;
+				Tile.__tempMatrix.b = __matrix.b * camera.transform.d;
+				Tile.__tempMatrix.c = __matrix.c * camera.zoom;
+				Tile.__tempMatrix.d = __matrix.d * camera.transform.d;
+				Tile.__tempMatrix.tx = camera.transform.tx + camera.viewportWidth*0.5 +  (__matrix.tx - camera.centerX) *camera.zoom;
+				Tile.__tempMatrix.ty = camera.transform.ty + camera.viewportHeight *0.5 + (__matrix.ty - camera.centerY) *camera.zoom;
+				
+				tileArray.matrix = Tile.__tempMatrix;
+				
+			}
+			
+			tileArray.__bufferDirty = true;
+			__transformDirty = false;
+			
+		}
+		
+		tileArray.position = cachePosition;
+		
 	}
 	
 	
