@@ -1,4 +1,4 @@
-package beardFramework.display.renderers.gl;
+package beardFramework.display.rendering.gl;
 
 import beardFramework.display.cameras.Camera;
 import openfl._internal.renderer.opengl.GLBitmap;

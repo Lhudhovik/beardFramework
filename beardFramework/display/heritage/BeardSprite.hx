@@ -1,7 +1,7 @@
 package beardFramework.display.heritage;
 
 import beardFramework.display.cameras.Camera;
-import beardFramework.display.renderers.gl.BeardGLDisplayObject;
+import beardFramework.display.rendering.gl.BeardGLDisplayObject;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.display.DisplayObject;
 import openfl.display.Graphics;

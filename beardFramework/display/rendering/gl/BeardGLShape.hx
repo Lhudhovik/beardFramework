@@ -1,4 +1,4 @@
-package beardFramework.display.renderers.gl;
+package beardFramework.display.rendering.gl;
 
 import lime.utils.Float32Array;
 import openfl._internal.renderer.cairo.CairoGraphics;

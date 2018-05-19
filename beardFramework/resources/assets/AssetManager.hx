@@ -1,5 +1,10 @@
 package beardFramework.resources.assets;
 import beardFramework.display.core.BeardVisual;
+import beardFramework.display.core.Visual;
+import beardFramework.resources.assets.Atlas;
+import haxe.ds.Vector;
+import haxe.io.Float32Array;
+import haxe.io.UInt8Array;
 import mloader.HttpLoader;
 import mloader.ImageLoader;
 import mloader.Loader.LoaderEvent;
@@ -22,8 +27,6 @@ using beardFramework.utils.SysPreciseTime;
 class AssetManager 
 {
 	
-	
-	
 	private static var instance(default, null):AssetManager;
 	
 	private var DEFAULT_LOADER_NAME(null, never):String = "DefaultName";
@@ -37,6 +40,7 @@ class AssetManager
 	private var onStart:Signal0;
 	private var onError:Signal1<LoaderErrorType>;
 	private var requestedAtlasQueue:Array<String>;
+
 	
 	public function new() 
 	{
@@ -71,6 +75,7 @@ class AssetManager
 		loaderQueue = new LoaderQueue();
 		loaderQueue.ignoreFailures = false;
 		loaderQueue.loaded.add(OnLoadingEvent);
+		
 		
 		
 	}
@@ -171,6 +176,8 @@ class AssetManager
 				}
 				requestedAtlasQueue = [];
 				
+				
+				
 				onProgress.removeAll();
 				onCancel.removeAll();
 				onError.removeAll();
@@ -203,9 +210,15 @@ class AssetManager
 		
 	}
 		
-	public function get_loading():Bool return loaderQueue.loading;
+	public function get_loading():Bool
+	{
+		return loaderQueue.loading;
+	}
 	
-	public function get_progress():Float return loaderQueue.progress;
+	public function get_progress():Float
+	{
+		return loaderQueue.progress;
+	}
 	
 	public function GetContent(loaderName:String):Dynamic
 	{
@@ -248,11 +261,17 @@ class AssetManager
 		
 	}
 	
+	public inline function GetSubTextureData(textureName:String, atlasName:String):SubTextureData
+	{
+		trace(atlasName);
+		trace(atlases);
+		return (atlases[atlasName] != null ? atlases[atlasName].GetSubTextureData(textureName) : null);
+	}
+	
 	public inline function DisposeBitmapData(textureName:String, atlasName:String):Void
 	{
 		return atlases[atlasName] != null ? atlases[atlasName].DisposeBitmapData(textureName) : null;
 	}
-	
 	
 	public function ClearAtlas(atlasName:String):Void
 	{

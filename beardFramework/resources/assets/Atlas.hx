@@ -1,6 +1,9 @@
 package beardFramework.resources.assets;
 import beardFramework.display.heritage.BeardTileset;
+import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.utils.TextureUtils;
+import lime.graphics.opengl.GL;
+import lime.graphics.opengl.GLTexture;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
 import openfl.display.Tileset;
@@ -14,18 +17,19 @@ import openfl.geom.Rectangle;
  */
 class Atlas 
 {
+	private static var atlasCount:Int = 1;
 	public var atlasBitmapData:BitmapData;
-	private var subAreas:Map<String, SubArea>;
+	private var subAreas:Map<String, SubTextureData>;
 	private var usedBitmapData:Map<String,UsedBitmapData>;
 	private var usedTileRect:Map<String,Int>;
-	public var tileSet:BeardTileset;
+	public var texture:GLTexture;
 	//public var name:String;
 	public function new(name:String, bitmapData:BitmapData, xml:Xml) 
 	{
 		
 		usedBitmapData = new Map<String, UsedBitmapData>();
 		usedTileRect = new Map<String, Int>();
-		subAreas = new Map<String, SubArea>();
+		subAreas = new Map<String, SubTextureData>();
 		atlasBitmapData = bitmapData.clone();
 		tileSet = new BeardTileset(name, atlasBitmapData);
 		bitmapData.dispose();
@@ -55,13 +59,31 @@ class Atlas
             var frameHeight:Float  = getXmlFloat(subTexture, "frameHeight");
             var rotated:Bool       = parseBool(subTexture.get("rotated"));
 			
+			//trace(name);
 		
             imageArea.setTo(x, y, width, height);
             frame.setTo(frameX, frameY, frameWidth, frameHeight);
-			subAreas[name] = new SubArea(imageArea.clone(),frameWidth > 0 && frameHeight > 0 ? frame.clone() : null , rotated);
+			subAreas[name] = new SubTextureData(imageArea.clone(),((frameWidth > 0 && frameHeight > 0) ? frame.clone() : null) , rotated, x/atlasBitmapData.width, y/atlasBitmapData.height, width/atlasBitmapData.width, height/atlasBitmapData.height );
 			subAreas[name].ID = tileSet.addRect(imageArea.clone());
             
         }
+		
+		
+		//texture = GL.createTexture();
+		//GL.bindTexture(GL.TEXTURE_2D, texture);
+		//GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);	
+		//GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
+		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+		//
+		//GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGB, atlasBitmapData.width, atlasBitmapData.height, 0, GL.RGB, GL.UNSIGNED_BYTE, atlasBitmapData);
+		//GL.activeTexture(GL.TEXTURE0 + 3 );
+		//GL.bindTexture(GL.TEXTURE_2D, texture);
+		
+		texture = atlasBitmapData.getTexture(GL.context);
+		GL.activeTexture(GL.TEXTURE0);		
+		GL.bindTexture(GL.TEXTURE_2D, texture);
+		VisualRenderer.Get().ActivateTexture();
     }
       private function getXmlFloat(xml:Xml, attributeName:String):Float
     {
@@ -140,16 +162,12 @@ class Atlas
 		
 		
 	}
-	public function ToBeardTileSet():BeardTileSet{
-		
-		var tileSet : BeardTileSet= new BeardTileSet(atlasBitmapData);
-		for (key in subAreas.keys())
-		{
-			tileSet.addTileType(key, subAreas[key].imageArea);
-		}
-			
-		return tileSet;
-		
+	
+	public inline function GetSubTextureData(textureName:String):SubTextureData
+	{
+		trace(subAreas);
+		trace(subAreas[textureName]);
+		return subAreas[textureName];
 	}
 	
 	public function Dispose():Void
@@ -186,18 +204,27 @@ class Atlas
 	
 }
 
-private class SubArea
+class SubTextureData
 {
 	public var imageArea:Rectangle;
 	public var frame:Rectangle;
 	public var rotated : Bool;
 	public var ID:Int;
-	public function new(imageArea:Rectangle, frame:Rectangle, rotated:Bool)
+	public var uvX:Float;
+	public var uvY:Float;
+	public var uvW:Float;
+	public var uvH:Float;
+	public function new(imageArea:Rectangle, frame:Rectangle, rotated:Bool, uvX:Float, uvY:Float,  uvW:Float, uvH:Float)
 	{
 		
 		this.imageArea = imageArea;
 		this.frame = frame != null? frame : new Rectangle();
 		this.rotated = rotated;
+		this.uvX = uvX;
+		this.uvY = uvY;
+		this.uvW = uvW;
+		this.uvH = uvH;
+		
 		
 	}
 	

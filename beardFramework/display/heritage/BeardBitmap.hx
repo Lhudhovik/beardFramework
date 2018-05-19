@@ -1,6 +1,6 @@
 package beardFramework.display.heritage;
 import beardFramework.display.cameras.Camera;
-import beardFramework.display.renderers.gl.BeardGLBitmap;
+import beardFramework.display.rendering.gl.BeardGLBitmap;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.display.Bitmap;
 import openfl.display.BitmapData;
