@@ -1,6 +1,5 @@
 package beardFramework.display.ui.components;
 
-import beardFramework.display.ui.components.UIBitmapComponent;
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.IButton;
 import beardFramework.utils.StringLibrary;
@@ -11,15 +10,14 @@ import openfl.display.PixelSnapping;
  * ...
  * @author Ludo
  */
-class UIBitmapButton extends UIBitmapComponent implements IButton
+class UIBitmapButton extends UIBeardVisual implements IButton
 {
 
 	public function new(texture:String = "", atlas:String  = "", pixelSnapping:PixelSnapping=null, smoothing:Bool=false) 
 	{
-		super(texture,atlas, pixelSnapping, smoothing);
+		super(texture,atlas);
 				
 		this.name = "Bitmap button " + name;
-		mouseEnabled = true;
 		
 		InputManager.Get().BindToAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
 		InputManager.Get().BindToAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
@@ -55,23 +53,23 @@ class UIBitmapButton extends UIBitmapComponent implements IButton
 	{
 		
 	}
-	override function set_name(value:String):String 
-	{
-		
-		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
-		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
-		
-		super.set_name("Bitmap button" + value);
-		
-		InputManager.Get().BindToAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().BindToAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
-		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().BindToAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
-		return this.name;
-	}
-	
+	//override function set_name(value:String):String 
+	//{
+		//
+		//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		////InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
+		//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		//
+		//super.set_name("Bitmap button" + value);
+		//
+		//InputManager.Get().BindToAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		//InputManager.Get().BindToAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		////InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
+		//InputManager.Get().BindToAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		//return this.name;
+	//}
+	//
 	override public function Clear():Void 
 	{
 		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);

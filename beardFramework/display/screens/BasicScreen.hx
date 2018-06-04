@@ -4,7 +4,6 @@ import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
-import beardFramework.display.heritage.BeardSprite;
 import beardFramework.display.ui.UIManager;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.resources.save.SaveManager;
@@ -38,6 +37,7 @@ class BasicScreen
 	private var defaultCamera:Camera;
 	private var loadingProgression(get, null):Float;
 	private var savedData:AbstractDataScreen;
+	public var ready:Bool;
 	
 
 	
@@ -49,6 +49,7 @@ class BasicScreen
 		defaultCamera = BeardGame.Get().cameras[Camera.DEFAULT];
 		name = Type.getClassName(Type.getClass(this));
 		entities = new Array<GameEntity>();
+		ready = false;
 		if (globalEntities == null) globalEntities = new Map<String,GameEntity>();
 	}
 	
@@ -78,6 +79,7 @@ class BasicScreen
 	private function Init():Void
 	{
 		savedData = null;
+		ready = true;
 		onReady.dispatch();
 	}
 	
@@ -253,7 +255,6 @@ class BasicScreen
 	{
 		if (displayLayer != null){
 			displayLayer.visible = false;
-			displayLayer.mouseEnabled = false;
 		}
 		
 	}
@@ -262,7 +263,6 @@ class BasicScreen
 	{
 		if (displayLayer != null){
 			displayLayer.visible = true;
-			displayLayer.mouseEnabled = true;
 		}
 		
 	}
@@ -291,6 +291,10 @@ class BasicScreen
 		return data;
 	}
 	
+	public function Update():Void
+	{
+		
+	}
 }
 
 

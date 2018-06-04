@@ -3,6 +3,7 @@ package beardFramework.input;
 
 import beardFramework.core.BeardGame;
 import beardFramework.input.Action.CallbackDetails;
+import beardFramework.utils.MinAllocArray;
 import beardFramework.utils.StringLibrary;
 import lime.app.Application;
 import lime.ui.Gamepad;
@@ -57,8 +58,8 @@ class InputManager
 	private var touchTargets:Map<String, String>;
 	private var currentInput:Input;
 	private var defaultActions:Map<InputType, Signal1<Input>>;
-
 	
+	private var triggeredInputs:MinAllocArray<Input>;
 	
 	private function new() 
 	{
@@ -85,7 +86,7 @@ class InputManager
 		timeCounters = new Map<String, Float>();
 		utilPoint = new Point();
 		touchTargets = new Map<String, String>();
-		
+		triggeredInputs = new MinAllocArray<Input>(25);
 		
 		#if mobile
 		
@@ -428,7 +429,7 @@ class InputManager
 			
 			timeCounters[utilString] =  Sys.preciseTime();
 			
-			var object:DisplayObject= BeardGame.Get().getTargetUnderPoint(utilPoint);
+			var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 			mouseTargetName = object != null ? object.name : "";
 			
 			handledInputs[utilString].state = InputType.MOUSE_DOWN;		
@@ -436,6 +437,7 @@ class InputManager
 			handledInputs[utilString].target = mouseTargetName;
 			
 			if (directMode) DirectResolveInput(	handledInputs[utilString]);
+			else triggeredInputs.Push(handledInputs[utilString]);
 			
 		}
 		
@@ -458,7 +460,7 @@ class InputManager
 		utilString =  GetMouseInputID(mouseButton);
 		utilPoint.setTo(mouseX, mouseY);
 		
-		var object:DisplayObject = BeardGame.Get().getTargetUnderPoint(utilPoint);
+		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 		mouseTargetName = object != null ? object.name : "";
 		
 		if (handledInputs[utilString] != null)
@@ -539,7 +541,7 @@ class InputManager
 		if (CheckInputHandled(InputTypeToString(InputType.MOUSE_OVER)) || CheckInputHandled(InputTypeToString( InputType.MOUSE_OUT)) ){
 			
 			
-			var object:DisplayObject = BeardGame.Get().getTargetUnderPoint(utilPoint);
+		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 			
 			
 			if (object != null && mouseMoveTargetName != object.name){
@@ -814,7 +816,7 @@ class InputManager
 			utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
 			timeCounters[StringLibrary.TOUCH + touch.id] =  Sys.preciseTime();
 		
-			var object:DisplayObject= BeardGame.Get().getTargetUnderPoint(utilPoint);
+			var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 		
 			touchTargets[utilString] = object != null ? object.name : "";
 			
@@ -843,7 +845,7 @@ class InputManager
 		}
 		
 		
-		var object:DisplayObject = BeardGame.Get().getTargetUnderPoint(utilPoint);
+		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 	
 		
 		if (object != null &&  touchTargets[utilString] != object.name){
@@ -897,7 +899,7 @@ class InputManager
 		utilString =  StringLibrary.TOUCH_END + touch.id;
 		utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
 			
-		var object:DisplayObject = BeardGame.Get().getTargetUnderPoint(utilPoint);
+		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 		touchTargets[utilString] = object != null ? object.name : "";
 		
 		if (handledInputs[utilString] != null)
@@ -931,15 +933,18 @@ class InputManager
 		var i:Int = 0;
 		var detail:CallbackDetails;
 		
+		
 		for (input in handledInputs)
+		//for (i in 0...triggeredInputs.length)
 		{
 			currentInput = input;
+			//currentInput = triggeredInputs[i];
 						
-			if (!input.active) continue;
+			if (!currentInput.active) continue;
 			
-			if (inputActions[input.ID] != null && inputActions[input.ID][input.state] != null)
+			if (inputActions[currentInput.ID] != null && inputActions[currentInput.ID][currentInput.state] != null)
 			{
-				for (actionID in inputActions[input.ID][input.state])
+				for (actionID in inputActions[currentInput.ID][currentInput.state])
 				{
 					
 					if (actions[actionID] != null){
@@ -952,9 +957,9 @@ class InputManager
 							{
 								detail = actions[actionID].callbackDetails[i];
 								
-								if (detail.targetName == input.target || detail.targetName == "")
+								if (detail.targetName == currentInput.target || detail.targetName == "")
 								{
-									detail.callback(input.value);
+									detail.callback(currentInput.value);
 									if (detail.once) 
 									{
 										actions[actionID].callbackDetails.remove(detail);
@@ -973,9 +978,9 @@ class InputManager
 					//trace(input.ID + "    " + input.state + "    " + input.toggle);
 			}
 			
-			if (input.state == GetToggleType(input.state)){
-				input.state = InputType.NONE;
-				input.value = 0;
+			if (currentInput.state == GetToggleType(currentInput.state)){
+				currentInput.state = InputType.NONE;
+				currentInput.value = 0;
 			}
 		}
 	
@@ -1180,144 +1185,9 @@ class InputManager
 		return toggleType;
 	}
 	
-		//public function GetActionsFromInput(inputID:String):Array<String>
-	//{
-		//
-		//
-		//
-	//}
-	//
-	//public function GetInputsFromAction(actionID:String):Array<String>
-	//{
-		//
-		//
-	//}
+	
 	
 	
 
 	
 }
-//public function Activate(window:Window):Void
-	//{
-		//if (data.get(StringLibrary.MOUSE) == "true"){
-			//
-			//BeardGame.Get().stage.window.onMouseDown.add(OnMouseDown);
-			//BeardGame.Get().stage.window.onMouseMove.add(OnMouseMove);
-			//BeardGame.Get().stage.window.onMouseUp.add(OnMouseUp);
-			//BeardGame.Get().stage.window.onMouseWheel.add(OnMouseWheel);
-			//
-			//maxMouseButtons = Std.parseInt(data.get(StringLibrary.MOUSE_BUTTONS_MAX));
-			//
-			//
-			//
-			////***********************************DEFAULT
-			//
-			////action : StringLibrary.MOUSE_OVER --> "Mouse_Over"
-			////inputID :StringLibrary.MOUSE_OVER --> "Mouse_Over"
-			//LinkActionToInput(StringLibrary.MOUSE_OVER,StringLibrary.MOUSE_OVER, InputType.MOUSE_OVER);
-			//LinkActionToInput(StringLibrary.MOUSE_OUT,StringLibrary.MOUSE_OUT, InputType.MOUSE_OUT);
-			//LinkActionToInput(StringLibrary.MOUSE_MOVE,StringLibrary.MOUSE_MOVE, InputType.MOUSE_MOVE);
-			//LinkActionToInput(StringLibrary.MOUSE_WHEEL, StringLibrary.MOUSE_WHEEL, InputType.MOUSE_WHEEL);
-			//
-			//for (i in 0...maxMouseButtons){
-				//// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
-				//// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
-				//LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
-				//LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
-				//LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
-			//}
-			//
-		//}
-		//
-		//if (data.get(StringLibrary.GAMEPAD) == "true")
-		//{
-			//for (gamepad in Gamepad.devices)
-				//OnGamepadConnect(gamepad);
-			//
-			//Gamepad.onConnect.add(OnGamepadConnect);
-				//
-			//maxGamepads = Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX));
-			////***********************************DEFAULT
-			////var gamepadButton:GamepadButton;
-			////var gamepadAxis:GamepadAxis;
-			////
-			////for (i in 0...(Std.parseInt(data.get(StringLibrary.GAMEPAD_MAX)))){
-				////
-				//////buttons
-				////for ( j in 0...15)
-				////{
-					////
-					////gamepadButton = j;
-					////utilString = gamepadButton.toString();
-					////
-					////// action : StringLibrary.GAMEPAD_BUTTON_DOWN + gamepadButton.toString() --> "gamepadButtonDownA" 
-					////// inputID : GetGamepadInputID(i) --> "gamepadA0"; 
-					////LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_DOWN + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_DOWN);
-					////LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_UP + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_UP);
-					////LinkActionToInput(StringLibrary.GAMEPAD_BUTTON_PRESS + utilString, GetGamepadInputID(i, utilString),InputType.GAMEPAD_BUTTON_PRESS);
-					////
-					////
-				////}
-				////
-				//////trigger and stick
-				////for (j in 0...6)
-				////{
-					////gamepadAxis = j;
-					////utilString = gamepadAxis.toString();
-					////LinkActionToInput( StringLibrary.GAMEPAD_AXIS_MOVE + utilString, GetGamepadInputID(i, utilString), InputType.GAMEPAD_AXIS_MOVE);
-					////
-				////}
-			////}
-			//
-		//}
-		//
-		//if (data.get(StringLibrary.KEYBOARD) == "true")
-		//{
-		//
-			//Application.current.window.onKeyDown.add(OnKeyDown);
-			//Application.current.window.onKeyUp.add(OnKeyUp);
-			//
-			//
-			////***********************************DEFAULT
-			//////var kkey : KeyCode = 0;
-			////for (key in Type.getClassFields(KeyCode))
-			////{
-				////// action : StringLibrary.KEY_PRESS + key --> "keyPressA" 
-				////// inputID : key--> "a"; 
-				////LinkActionToInput( StringLibrary.KEY_PRESS + key.toLowerCase(), key.toLowerCase(), InputType.KEY_PRESS);
-				////LinkActionToInput( StringLibrary.KEY_DOWN + key.toLowerCase(), key.toLowerCase(), InputType.KEY_DOWN);
-				////LinkActionToInput( StringLibrary.KEY_UP + key.toLowerCase(), key.toLowerCase(), InputType.KEY_UP);
-				////
-			////}
-			//
-			//
-			//
-		//}
-		//
-		//if (data.get(StringLibrary.TOUCH) == "true")
-		//{
-			//Touch.onStart.add(OnTouchStart);
-			//Touch.onMove.add(OnTouchMove);
-			//Touch.onEnd.add(OnTouchEnd);
-			//maxTouches = Std.parseInt(data.get(StringLibrary.TOUCH_MAX));
-			//
-			////***********************************DEFAULT
-			//for (i in 0...maxTouches)
-			//{
-				//
-				////LinkActionToInput(StringLibrary.TOUCH_START, StringLibrary.TOUCH + i, InputType.TOUCH_START);
-				////LinkActionToInput(StringLibrary.TOUCH_END, StringLibrary.TOUCH + i, InputType.TOUCH_END);
-				////LinkActionToInput(StringLibrary.TOUCH_MOVE, StringLibrary.TOUCH + i, InputType.TOUCH_MOVE);
-				////LinkActionToInput(StringLibrary.TOUCH_OUT, StringLibrary.TOUCH + i, InputType.TOUCH_OUT);
-				////LinkActionToInput(StringLibrary.TOUCH_OVER, StringLibrary.TOUCH + i, InputType.TOUCH_OVER);
-				////LinkActionToInput(StringLibrary.TOUCH_TAP, StringLibrary.TOUCH + i, InputType.TOUCH_TAP);
-					////
-			//}
-			//
-		//}
-//
-	//}
-
-
-
-

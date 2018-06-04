@@ -1,5 +1,5 @@
 package beardFramework.display.cameras;
-import beardFramework.display.core.BeardVisual;
+import beardFramework.display.core.Visual;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.DataCamera;
 import openfl.display.Tile;
@@ -17,6 +17,8 @@ class Camera
 	private static var utilRect:Rectangle;
 	public static var DEFAULT(default, null):String = "default";
 	public static var MINZOOM(default, null):Float = 0.00001;
+	
+		
 	@:isVar public var name(get, set):String;
 	public var zoom(get,set):Float;
 	public var viewportWidth(default, set):Float;
@@ -29,15 +31,26 @@ class Camera
 	public var needRenderUpdate:Bool;
 	public var transform(default, null):Matrix;//a : scale X, d: ScaleY
 	
+	public var viewport(default, null):ViewportRect;
 	
 	public function new(name:String, width:Float = 100, height:Float = 57, buffer : Float = 100) 
 	{
 		transform = new Matrix();
+		viewport = {
+			x:0,
+			y:0,
+			width:Math.round(width),
+			height:Math.round(height)
+			
+		}	
+		
 		this.name = name;
 		this.viewportWidth  = width;
 		this.viewportHeight  = height;
 		this.buffer = buffer;
 		needRenderUpdate = true;
+		
+		
 		
 		centerX = width * 0.5;
 		centerY = height * 0.5;
@@ -88,7 +101,7 @@ class Camera
 		
 		return utilRect;
 	}
-	
+
 	public function ContainsPoint(point:Point):Bool
 	{
 		if (utilRect == null)
@@ -104,110 +117,31 @@ class Camera
 		
 	}
 	
-	public  function Contains(object:ICameraDependent):Bool{
+	public  function Contains(visual:Visual):Bool{
 		
-		var success:Bool = (object.restrictedCameras == null || object.restrictedCameras.indexOf(name) != -1);
+		var success:Bool = (visual.restrictedCameras == null || visual.restrictedCameras.indexOf(name) != -1);
 		
-		if (success && (success = (((object.x + object.width) > (centerX - (viewportWidth*0.5) - buffer)) && (object.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((object.y + object.height) > (centerY - (viewportHeight *0.5) - buffer)) && (object.y < (centerY + (viewportHeight*0.5) + buffer)))))
+		if (success && (success = (((visual.x + visual.width) > (centerX - (viewportWidth*0.5) - buffer)) && (visual.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((visual.y + visual.height) > (centerY - (viewportHeight *0.5) - buffer)) && (visual.y < (centerY + (viewportHeight*0.5) + buffer)))))
 		{
-			if (object.displayingCameras != null){
-				for (camera in object.displayingCameras)
+			if (visual.displayingCameras != null){
+				for (camera in visual.displayingCameras)
 					if (camera == this.name) return success;
 			
-				object.displayingCameras.add(this.name);
+				visual.displayingCameras.add(this.name);
 			}
 			
 		}
-		else if (object.displayingCameras != null)
-			for (camera in object.displayingCameras)
+		else if (visual.displayingCameras != null)
+			for (camera in visual.displayingCameras)
 				if (camera == this.name){
-					object.displayingCameras.remove(this.name);
+					visual.displayingCameras.remove(this.name);
 					break;
 				}
-			
-			
-		/*if (this.id == "two"){
-			
-			if (!success) trace(object.x - this.cameraX);
-			//trace(object.name + "  " + success);
-		}
-		trace(" left " + (object.x + object.width) + " greater than " + (x - buffer));
-		trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
-		trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));
-		trace(" left " + (object.y) + " lesser than " + (y + height + buffer));
-		trace("------------------------------------------------------------------");*/
+		
+	
 		return success;
 	}
 	
-	public  function ContainsVisual(object:BeardVisual):Bool{
-		
-		var success:Bool = (object.restrictedCameras == null || object.restrictedCameras.indexOf(name) != -1);
-		
-		if (success && (success = (((object.x + object.width) > (centerX - (viewportWidth*0.5) - buffer)) && (object.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((object.y + object.height) > (centerY - (viewportHeight *0.5) - buffer)) && (object.y < (centerY + (viewportHeight*0.5) + buffer)))))
-		{
-			if (object.displayingCameras != null){
-				for (camera in object.displayingCameras)
-					if (camera == this.name) return success;
-			
-				object.displayingCameras.add(this.name);
-			}
-			
-		}
-		else if (object.displayingCameras != null)
-			for (camera in object.displayingCameras)
-				if (camera == this.name){
-					object.displayingCameras.remove(this.name);
-					break;
-				}
-			
-			
-		/*if (this.id == "two"){
-			
-			if (!success) trace(object.x - this.cameraX);
-			//trace(object.name + "  " + success);
-		}
-		trace(" left " + (object.x + object.width) + " greater than " + (x - buffer));
-		trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
-		trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));
-		trace(" left " + (object.y) + " lesser than " + (y + height + buffer));
-		trace("------------------------------------------------------------------");*/
-		return success;
-	}
-	
-	
-	//public  function ContainsVisual(visual:BeardVisual):Bool{
-		//
-		//var success:Bool = (cast(visual, ICameraDependent).restrictedCameras == null || cast(visual, ICameraDependent).restrictedCameras.indexOf(name) != -1);
-		//
-		//if (success && (success = (((visual.x + width) > (centerX - (viewportWidth*0.5) - buffer)) && (visual.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((visual.y + height) > (centerY - (viewportHeight *0.5) - buffer)) && (visual.y < (centerY + (viewportHeight*0.5) + buffer)))))
-		//{
-			//if (cast(visual, ICameraDependent).displayingCameras != null){
-				//for (camera in cast(visual, ICameraDependent).displayingCameras)
-					//if (camera == this.name) return success;
-				//
-				//cast(visual, ICameraDependent).displayingCameras.add(this.name);
-			//}
-		//}
-		//else if (cast(visual, ICameraDependent).displayingCameras != null)
-			//for (camera in cast(visual, ICameraDependent).displayingCameras)
-				//if (camera == this.name){
-					//cast(visual, ICameraDependent).displayingCameras.remove(this.name);
-					//break;
-				//}
-			//
-			//
-		///*if (this.id == "two"){
-			//
-			//if (!success) trace(object.x - this.cameraX);
-			////trace(object.name + "  " + success);
-		//}
-		//trace(" left " + (object.x + object.width) + " greater than " + (x - buffer));
-		//trace(" right " + (object.x) + " lesser than " + (x + width + buffer));
-		//trace(" top " + (object.y + object.height) + " greater than " + (y - buffer));
-		//trace(" left " + (object.y) + " lesser than " + (y + height + buffer));
-		//trace("------------------------------------------------------------------");*/
-		//return success;
-	//}
 	
 	inline function get_viewportX():Float 
 	{
@@ -216,7 +150,10 @@ class Camera
 	
 	inline function set_viewportX(value:Float):Float 
 	{
-		if (transform.tx != value) needRenderUpdate = true;
+		if (transform.tx != value){
+			needRenderUpdate = true;
+			viewport.x = Math.round(value);		
+		}
 		return transform.tx = value;
 	}
 	
@@ -227,7 +164,10 @@ class Camera
 	
 	inline function set_viewportY(value:Float):Float 
 	{
-		if (transform.ty != value) needRenderUpdate = true;
+		if (transform.ty != value){
+			needRenderUpdate = true;
+			viewport.y = Math.round(value);	
+		}
 		return transform.ty = value;
 	}
 		
@@ -298,13 +238,20 @@ class Camera
 	
 	inline function set_viewportWidth(value:Float):Float 
 	{
-		if (viewportWidth != value) needRenderUpdate = true;
+		if (viewportWidth != value){
+			needRenderUpdate = true;
+			viewport.width = Math.round(value);	
+		}
+		
 		return viewportWidth = value;
 	}
 	
 	function set_viewportHeight(value:Float):Float 
 	{
-		if (viewportHeight != value) needRenderUpdate = true;
+		if (viewportHeight != value){
+			needRenderUpdate = true;
+			viewport.height = Math.round(value);	
+		}
 		return viewportHeight = value;
 	}
 	
@@ -312,4 +259,13 @@ class Camera
 	{
 		
 	}
+}
+
+typedef ViewportRect = 
+{
+	var x:Int;
+	var y:Int;
+	var width:Int;
+	var height:Int;
+	
 }

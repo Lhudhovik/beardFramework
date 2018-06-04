@@ -1,6 +1,7 @@
 package beardFramework.utils;
 import beardFramework.resources.save.data.DataGeneric;
 import haxe.Json;
+import lime.utils.Float32Array;
 
 
 /**
@@ -19,7 +20,6 @@ class DataUtils
 		return to;
 		
 	}
-	
 	
 	static public function DataArrayToMap<T:DataGeneric>(dataArray:Array<T>):Map<String, T>
 	{
@@ -68,8 +68,7 @@ class DataUtils
 		
 		
 	}
-	
-	
+		
 	static public function MapToJson<T>(map:Map<String, T>):String
 	{
 		
@@ -92,6 +91,26 @@ class DataUtils
 		
 	}
 	
+	static public inline function FromStringToBool(value:String):Bool
+    {
+        return value != null ? value.toLowerCase() == "true" : false;
+    }
+	
+	static public function DisplayFloatArrayContent(array:Float32Array, stride:Int ):Void
+	{
+		var string:String;
+		for (i in 0...Math.round(array.length / stride))
+		{
+			string = "";
+			for (j in 0...stride)
+				string += array[i * stride +j] + ", ";
+			
+			trace(string);
+			
+		}
+		
+		
+	}
 }
 
 

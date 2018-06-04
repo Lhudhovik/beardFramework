@@ -41,7 +41,7 @@ class UICameraComponent extends Camera implements IUIComponent
 		return viewportY = value;
 	}
 	
-	@:isVar public var width(get, set):Float;
+	public var width(get, set):Float;
 	
 	function get_width():Float 
 	{
@@ -53,7 +53,7 @@ class UICameraComponent extends Camera implements IUIComponent
 		return viewportWidth = value;
 	}
 	
-	@:isVar public var height(get, set):Float;
+	public var height(get, set):Float;
 	
 	function get_height():Float 
 	{

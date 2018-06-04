@@ -1,9 +1,8 @@
 package beardFramework.gameSystem.entities.components;
 import beardFramework.core.BeardGame;
+import beardFramework.display.core.Visual;
 import beardFramework.resources.save.data.DataComponent;
 import haxe.Json;
-
-import beardFramework.display.core.BeardVisual;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.interfaces.IEntityVisual;
 
@@ -11,12 +10,12 @@ import beardFramework.interfaces.IEntityVisual;
  * ...
  * @author Ludo
  */
-class EntityVisualComponent extends BeardVisual implements IEntityVisual
+class EntityVisualComponent extends Visual implements IEntityVisual
 {
 
-	public function new(texture:String, atlas:String) 
+	public function new(texture:String, atlas:String, name:String ="" ) 
 	{
-		super(texture, atlas);
+		super(texture, atlas,name);
 		
 	}
 	
@@ -27,12 +26,12 @@ class EntityVisualComponent extends BeardVisual implements IEntityVisual
 	
 	public function Register():Void 
 	{
-		BeardGame.Get().GetContentLayer().AddVisual(this);	
+		BeardGame.Get().GetContentLayer().Add(this);	
 	}
 	
 	public function UnRegister():Void 
 	{
-		BeardGame.Get().GetContentLayer().RemoveVisual(this);		
+		BeardGame.Get().GetContentLayer().Remove(this);		
 	}
 	
 	public var parentEntity:GameEntity;

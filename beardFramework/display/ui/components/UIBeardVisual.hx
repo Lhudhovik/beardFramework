@@ -1,6 +1,6 @@
 package beardFramework.display.ui.components;
 
-import beardFramework.display.core.BeardVisual;
+import beardFramework.display.core.Visual;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.save.data.DataUIComponent;
@@ -10,13 +10,11 @@ import beardFramework.resources.save.data.DataUIVisualComponent;
  * ...
  * @author Ludo
  */
-class UIBeardVisual extends BeardVisual implements IUIComponent
+class UIBeardVisual extends Visual implements IUIComponent
 {
-	@:isVar public var width(get, set):Float;
-	@:isVar public var height(get, set):Float;
+	
 	@:isVar public var preserved(get, set):Bool;
 	@:isVar public var container(get, set):String;
-	@:isVar public var visible(get, set):Bool;
 	@:isVar public var group(get, set):String;
 	
 	public var vAlign:UInt;
@@ -35,26 +33,6 @@ class UIBeardVisual extends BeardVisual implements IUIComponent
 	
 	
 	
-	function get_width():Float 
-	{
-		return width;
-	}
-	
-	function set_width(value:Float):Float 
-	{
-		return width = value;
-	}
-		
-	function get_height():Float 
-	{
-		return height;
-	}
-	
-	function set_height(value:Float):Float 
-	{
-		return height = value;
-	}
-		
 	function get_preserved():Bool 
 	{
 		return preserved;
@@ -113,8 +91,6 @@ class UIBeardVisual extends BeardVisual implements IUIComponent
 	{
 		var img:AbstractDataUIVisualComponent = cast data;
 				
-		this.id = AssetManager.Get().GetTileID(img.texture, img.atlas);
-		
 		this.visible=img.visible;
 			
 		this.x= img.x;
@@ -133,15 +109,6 @@ class UIBeardVisual extends BeardVisual implements IUIComponent
 		this.atlas= img.atlas;
 	}
 		
-	function get_visible():Bool 
-	{
-		return visible;
-	}
-	
-	function set_visible(value:Bool):Bool 
-	{
-		return visible = value;
-	}
 	
 	function get_group():String 
 	{

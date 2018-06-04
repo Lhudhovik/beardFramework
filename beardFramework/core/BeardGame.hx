@@ -1,54 +1,38 @@
 package beardFramework.core;
 
-import beardFramework.input.InputType;
+import beardFramework.display.rendering.Shaders;
+import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.resources.options.OptionsManager;
-import beardFramework.display.screens.ScreenFlowManager;
 import beardFramework.updateProcess.UpdateProcessesManager;
 import beardFramework.updateProcess.Wait;
-import beardFramework.updateProcess.sequence.MultipleStep;
-import beardFramework.updateProcess.sequence.Sequence;
 import beardFramework.updateProcess.sequence.VoidStep;
 import beardFramework.debug.MemoryUsage;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
-import beardFramework.display.heritage.BeardSprite;
 import beardFramework.display.screens.BasicScreen;
 import beardFramework.display.screens.SplashScreen;
 import beardFramework.display.ui.UIManager;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
-import beardFramework.interfaces.ICameraDependent;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
-import beardFramework.resources.save.data.DataSave;
-import beardFramework.utils.StringLibrary;
-import haxe.Json;
-import haxe.crypto.BaseCode;
-import haxe.io.Bytes;
 import lime.app.Application;
-import openfl.system.System;
-import mloader.Loader;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
-import openfl.display.DisplayObject;
-import openfl.display.DisplayObjectContainer;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.display.StageAlign;
-import openfl.display.Window;
 import openfl.events.Event;
-import openfl.events.KeyboardEvent;
-import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import openfl.ui.Multitouch;
 import openfl.ui.MultitouchInputMode;
-import openfl._internal.renderer.RenderSession;
-import openfl._internal.renderer.opengl.GLDisplayObject;
 import sys.FileSystem;
 
 @:access(openfl.display.Graphics)
 @:access(openfl.display.Stage)
 @:access(openfl.geom.Point)
+@:access(beardFramework.debug.MemoryUsage)
+@:access(openfl.text.TextField)
 /**
  * ...
  * @author Ludo
@@ -62,11 +46,12 @@ class BeardGame extends Sprite
 	public var UI_PATH(default, never):String = "assets/UI/";
 	public var SETTINGS(default, never):String = "settings";
 	public var SPLASHSCREENS_PATH(default, never):String = "assets/splash/";
+	public var SHADERS_PATH(default, never):String = "assets/shaders/";
 	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
 	private var contentLayer:BeardLayer;
 	private var UILayer:BeardLayer;
-	private var LoadingLayer:BeardLayer;
+	private var loadingLayer:BeardLayer;
 	private var pause:Bool;
 	
 	private var splashScreen:SplashScreen;
@@ -74,11 +59,13 @@ class BeardGame extends Sprite
 	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
 	public var currentScreen:BasicScreen;
-	
+	var fps:MemoryUsage;
 	public function new() 
 	{
 		super();
 		
+		Application.current.onUpdate.add(Update);
+		Application.current.renderer.onRender.add(Render);
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
 		stage.addEventListener(Event.DEACTIVATE, Deactivate);
@@ -102,29 +89,26 @@ class BeardGame extends Sprite
 		
 		
 	
-		contentLayer = new BeardLayer("ContentLayer");
+		contentLayer = new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT);
 		contentLayer.visible = false;
-		UILayer = new BeardLayer("UILayer");
+		UILayer = new BeardLayer("UILayer", BeardLayer.DEPTH_UI);
 		UILayer.visible = false;
-		LoadingLayer = new BeardLayer("LoadingLayer");
-		LoadingLayer.visible = false;
+		loadingLayer = new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING);
+		loadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
 		
-		
-		stage.addChild(contentLayer);
-		stage.addChild(UILayer);
-		stage.addChild(LoadingLayer);
+		cameras["default"].Center(Application.current.window.width * 0.5, Application.current.window.height * 0.5);
 		
 		entities = new Array<GameEntity>();
 		
-		var fps:MemoryUsage = new MemoryUsage(10,10,0xffffff);
+		fps = new MemoryUsage(10,10,0xffffff);
 		stage.addChild(fps);
 		
 		InputManager.Get().Activate(Application.current.window);
 		
-		//
-		if (FileSystem.exists(SPLASHSCREENS_PATH)){
+				
+		if (FileSystem.exists(SPLASHSCREENS_PATH) && FileSystem.readDirectory(SPLASHSCREENS_PATH).length > 0){
 			
 			splashScreen = new SplashScreen(FileSystem.readDirectory(SPLASHSCREENS_PATH));
 			//splashScreen.completed.addOnce(LoadSettings);
@@ -134,12 +118,9 @@ class BeardGame extends Sprite
 		}
 		else 
 			LoadSettings();
-	
-		
-		
-		
 		
 	}
+	
 	
 	private inline function LoadSettings():Void
 	{
@@ -175,8 +156,9 @@ class BeardGame extends Sprite
 			{
 				AssetManager.Get().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
 			}
-			trace("*** Resources to load : " + OptionsManager.Get().resourcesToLoad);
 			
+			//trace("*** Resources to load : " + OptionsManager.Get().resourcesToLoad);
+			Shaders.LoadShaders();
 			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
 		}
 		else GameStart();
@@ -189,6 +171,8 @@ class BeardGame extends Sprite
 		
 		if (physicsEnabled)
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
+		
+		VisualRenderer.Get().Start();
 		
 	}
 	
@@ -240,10 +224,21 @@ class BeardGame extends Sprite
 
 	}
 	
-
-	override function __enterFrame(deltaTime:Int):Void 
+	public function Render():Void
 	{
 		
+		//contentLayer.PrepareForRendering();
+		//UILayer.PrepareForRendering();
+		//loadingLayer.PrepareForRendering();
+		VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
+		VisualRenderer.Get().Render();
+		
+		
+	}
+	
+	public function Update(deltaTime:Int):Void
+	{
+		//trace(deltaTime);
 		
 		if (!InputManager.directMode) InputManager.Get().Update();
 			
@@ -256,26 +251,29 @@ class BeardGame extends Sprite
 			if (physicsEnabled && PhysicsManager.Get().get_space() != null)
 				PhysicsManager.Get().Step(deltaTime);
 				
-			if (currentScreen != null)
+			if (currentScreen != null && currentScreen.ready){
+				
 				for (entity in currentScreen.entities)
 				{
 					entity.Update();
 				}
+				
+				currentScreen.Update();
+			}
 	
 		}
-
-		super.__enterFrame(deltaTime);
 		
+		trace(fps.text);
 	}
-	
+		
 	public inline function GetFPS():Float
 	{
 		return Application.current.frameRate;
 	}
 	
-	public function getTargetUnderPoint (point:Point, reverse:Bool = true):DisplayObject
+	public function getTargetUnderPoint (point:Point, reverse:Bool = true):String
 	{
-		var tempPoint:Point = Point.__pool.get ();
+		/*//var tempPoint:Point = Point.__pool.get ();
 		var stack = new Array<DisplayObject> ();
 		var hit:Bool = false;
 		var i :Int = 0;
@@ -296,17 +294,11 @@ class BeardGame extends Sprite
 			
 		}
 		
-		/*StringLibrary.utilString = "";
-		for (element in stack){
-			StringLibrary.utilString += "   -->  " + element.name;
-		}
 		
-		trace(StringLibrary.utilString);
-		*/
 		
 		if(reverse) stack.reverse ();
-		return stack != null ? stack[0] : null;
-		
+		return stack != null ? stack[0] : null;*/
+		return "";
 	}
 	
 	private function Deactivate(e:Event):Void
@@ -332,6 +324,23 @@ class BeardGame extends Sprite
 		return game;
 	}
 	
+	public inline function GetLayer(layerType:BeardLayerType):BeardLayer
+	{
+		
+		switch(layerType)
+		{
+			
+			case BeardLayerType.CONTENT : return contentLayer;
+			case BeardLayerType.LOADING : return loadingLayer;
+			case BeardLayerType.UI : return UILayer;
+			
+			
+		}
+		
+		return contentLayer;
+		
+	}
+	
 	public inline function GetContentLayer():BeardLayer
 	{
 		return contentLayer;
@@ -344,7 +353,7 @@ class BeardGame extends Sprite
 	
 	public inline function GetLoadingLayer():BeardLayer
 	{
-		return LoadingLayer;
+		return loadingLayer;
 	}
 
 }

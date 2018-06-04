@@ -1,41 +1,40 @@
 package beardFramework.display.core;
-
-import beardFramework.core.BeardGame;
-import beardFramework.display.cameras.Camera;
-import beardFramework.display.heritage.BeardTileMap;
-import beardFramework.interfaces.ICameraDependent;
-import lime.app.Application;
-import openfl._internal.renderer.RenderSession;
-import openfl._internal.renderer.opengl.GLDisplayObject;
-import openfl._internal.renderer.opengl.GLBitmap;
-import openfl.display.DisplayObject;
-import openfl.display.DisplayObjectContainer;
-import openfl.display.Tile;
-import openfl.display.Tilemap;
-import openfl.geom.Point;
-import openfl.geom.Rectangle;
-
-@:access(openfl.geom.Point)
-@:access(openfl.geom.Rectangle)
+import beardFramework.display.rendering.VisualRenderer;
+import beardFramework.resources.assets.AssetManager;
+import beardFramework.utils.MinAllocArray;
+import haxe.ds.Vector;
 
 /**
  * ...
  * @author Ludo
  */
-class BeardLayer extends DisplayObjectContainer
+class BeardLayer
 {
-	private var maps:Array<BeardTileMap>;
-	public function new(name:String) 
+	public static var DEPTH_CONTENT:Float = -0.5;
+	public static var DEPTH_UI:Float = 0;
+	public static var DEPTH_LOADING:Float = 0.5;
+	
+	public var depth:Float; 
+	public var maxVisualsCount(default, null):Int;
+	public var name:String;
+	@:isVar public var visible(get, set):Bool;
+	public var visuals:Array<Visual>;
+	public var dirtyVisuals:MinAllocArray<Int>;
+	
+	public function new(name:String, depth :Float, maxVisualsCount:Int=100000) 
 	{
-		super();
 		this.name = name;
-		maps = new Array<BeardTileMap>();
+		this.depth = depth;
+		this.maxVisualsCount = maxVisualsCount;
+		visuals = new Array<Visual>();	
+		dirtyVisuals = new MinAllocArray<Int>(50);
+		visible = true;
 		
 	}
 
-	private override function __renderGL (renderSession:RenderSession):Void 
+	public function Render ():Void 
 	{
-		
+		/*
 		if (!__renderable || __worldAlpha <= 0) return;
 		
 		var utilX:Float;
@@ -81,16 +80,16 @@ class BeardLayer extends DisplayObjectContainer
 		
 		__removedChildren.length = 0;
 		
-		renderSession.filterManager.popObject (this);
+		renderSession.filterManager.popObject (this);*/
 		
 		
 		
 	}
 	
-	private override function __renderGLMask (renderSession:RenderSession):Void 
+	public function RenderMask ():Void 
 	{
 		
-		if (__cacheBitmap != null && !__cacheBitmapRender) return;
+		/*if (__cacheBitmap != null && !__cacheBitmapRender) return;
 			
 		
 		for (camera in BeardGame.Get().cameras.iterator()){
@@ -167,161 +166,119 @@ class BeardLayer extends DisplayObjectContainer
 		}
 		
 		__removedChildren.length = 0;
+		*/
+		
+	}
+	
+	public function VisualHitTest(x:Float, y:Float):Bool
+	{
+		
+		
+		return true;
+	}
+	
+	public function AddMultiple(visuals:Array<Visual>):Void
+	{
+		
+		for (i in 0...visuals.length)
+			Add(visuals[i], false);
+			
+		VisualRenderer.Get().UpdateBufferFromVisuals(visuals);
 		
 		
 	}
 	
-	public function ChildHitTest(x:Float, y:Float, shapeFlag:Bool, stack:Array<DisplayObject>, interactiveOnly:Bool, hitObject:DisplayObject):Bool
+	public function AddMultipleOpti(addedVisuals:MinAllocArray<Visual>, updateBuffer:Bool = true):Void
 	{
-		if (!hitObject.visible || __isMask || (interactiveOnly && !mouseEnabled && !mouseChildren)) return false;
-		if (mask != null && !mask.__hitTestMask (x, y)) return false;
-		
-		if (__scrollRect != null) {
+		var visual:Visual;
+		for (i in 0...addedVisuals.length){
 			
-			var point = Point.__pool.get ();
-			point.setTo (x, y);
-			__getRenderTransform ().__transformInversePoint (point);
+			visual = addedVisuals.get(i);
+			if (visuals.indexOf(visual) == -1)
+			{
 			
-			if (!__scrollRect.containsPoint (point)) {
+				visual.layer = this;
+				visual.z = (visual.z ==-1) ? visuals.length : visual.z;
+				visual.visible = this.visible;
+				visual.bufferIndex =  VisualRenderer.Get().GetFreeBufferIndex();
+				visuals.push(visual);
 				
-				Point.__pool.release (point);
-				return false;
-				
+				AddVisualDirty(visual);
 			}
-			
-			Point.__pool.release (point);
-			
+	
 		}
 		
-		var i = __children.length;
-		if (interactiveOnly) {
+		if(updateBuffer)
+			VisualRenderer.Get().UpdateBufferFromLayer(this);
+		
+		
+	}
+	
+	public function Add(visual:Visual, updateBuffer:Bool = true):Void
+	{
+		
+		if (visuals.indexOf(visual) == -1)
+		{
 			
-			if (stack == null || !mouseChildren) {
-				
-				while (--i >= 0) {
-					
-					if (__children[i].__hitTest (x, y, shapeFlag, null, true, cast __children[i])) {
-						
-						if (stack != null) {
-							
-							stack.push (hitObject);
-							
-						}
-						
-						return true;
-						
-					}
-					
-				}
-				
-			} else if (stack != null) {
-				
-				var length = stack.length;
-				
-				var interactive = false;
-				var hitTest = false;
-				
-				while (--i >= 0) {
-					
-					interactive = __children[i].__getInteractive (null);
-					//trace(this + this.name + "     TestHit");
-					if (interactive || (mouseEnabled && !hitTest)) {
-						
-						if (__children[i].__hitTest (x, y, shapeFlag, stack, true, cast __children[i])) {
-							//trace(__children[i].name + "     Test Succeeded");
-							hitTest = true;
-							
-							//if (interactive) {
-								
-								break;
-								
-							//}
-							
-						}
-						
-					}
-					
-				}
-				
-				if (hitTest) {
-					
-					stack.insert (length, hitObject);
-					return true;
-					
-				}
-				
-			}
+			visual.layer = this;
+			visual.z = (visual.z ==-1) ? visuals.length : visual.z;
+			visual.visible = this.visible;
+			visual.bufferIndex =  VisualRenderer.Get().GetFreeBufferIndex();
 			
-		} else {
-			
-			while (--i >= 0) {
-				
-				__children[i].__hitTest (x, y, shapeFlag, stack, false, cast __children[i]);
-				
-			}
+			visuals.push(visual);
+		
+			if (updateBuffer)
+				VisualRenderer.Get().UpdateBufferFromVisuals([visual]);
 			
 		}
+	}
 		
-		return false;
+	public inline function Remove(visual:Visual):Void
+	{
+		if (visuals.indexOf(visual) != -1)
+		{
+			visuals.remove(visual);
+			
+			visual.bufferIndex = VisualRenderer.Get().FreeBufferIndex(visual.bufferIndex);
+		}
 	}
 	
-	override function set_width(value:Float):Float 
+	function get_visible():Bool 
 	{
-		for (map in maps)
-			map.width = value;
-		return super.set_width(value);
+		return visible;
 	}
 	
-	override function set_height(value:Float):Float 
+	function set_visible(value:Bool):Bool 
 	{
-		for (map in maps)
-			map.height = value;
-		return super.set_height(value);
-	}
-	override function set_scaleX(value:Float):Float 
-	{
-		super.set_scaleX(value);
-		for (map in maps)	
-			map.width = this.width;
-		return scaleX;
-	}
-	
-	override function set_scaleY(value:Float):Float 
-	{
-		super.set_scaleY(value);
-		for (map in maps)
-			map.height = this.height;
-		return scaleY;
-	}
-	
-	
-	public inline function AddVisual(visual:BeardVisual):Void
-	{
-		var existingMap:Bool = false;
-		for (map in maps)
-			if (map.HasTileset(visual.atlas)){
-				
-				map.addTile(visual);
-				existingMap = true;
-				break;
-			}
 		
-		if (!existingMap){
-			var map:BeardTileMap = new BeardTileMap(Application.current.window.width,Application.current.window.height);
-			map.addTile(visual);
-			maps.push(map);
-			this.addChild(map);
-			//trace("child map added");
+		for (visual in visuals)
+			visual.visible = value;
+		return visible = value;
+	}
+	
+	public inline function AddVisualDirty(visual:Visual):Void
+	{
+		
+		if (dirtyVisuals.IndexOf(visuals.indexOf(visual)) == -1)
+		{
+			dirtyVisuals.Push(visuals.indexOf(visual));
 		}
 		
 		
-			
 	}
 	
-	public inline function RemoveVisual(visual:BeardVisual):Void
+	public inline function PrepareForRendering():Void
 	{
-		for (map in maps)
-			if (map.contains(visual)) 
-				map.removeTile(visual);
+		VisualRenderer.Get().UpdateBufferFromVisuals(visuals);
 	}
+
+}
+
+
+enum BeardLayerType
+{
+	CONTENT;
+	UI;
+	LOADING;
+	
 }
