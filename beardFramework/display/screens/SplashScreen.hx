@@ -8,7 +8,6 @@ import beardFramework.updateProcess.sequence.MultipleStep;
 import beardFramework.updateProcess.sequence.Sequence;
 import beardFramework.updateProcess.thread.ChainThread;
 import beardFramework.updateProcess.thread.VoidThreadDetail;
-import beardFramework.display.heritage.BeardBitmap;
 import lime.app.Application;
 import openfl.Assets;
 import openfl.display.Bitmap;

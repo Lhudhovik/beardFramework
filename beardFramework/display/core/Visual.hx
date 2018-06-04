@@ -1,4 +1,6 @@
 package beardFramework.display.core;
+import beardFramework.display.cameras.Camera;
+import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import haxe.ds.Vector;
@@ -10,40 +12,49 @@ import openfl.geom.Matrix;
  * ...
  * @author 
  */
-class Visual 
+class Visual implements ICameraDependent
 {
-
-	public var bufferIndex:Int;
-	public var atlas:String;
-	public var alpha:Float;
-	public var name:String;
-	public var color:UInt;
-	public var texture:String;
-	public var textureWidth(default, null):Int;
-	public var textureHeight(default, null):Int;
-	public var visible:Bool;
+	private static var instanceCount:Int = 0;
 	
-	public var x(get, set):Float;
-	public var y(get, set):Float;
-	public var width(get, set):Float;
+	public var alpha:Float;
+	public var atlas:String;
+	public var bufferIndex:Int;
+	public var color:UInt;
+	public var displayingCameras(default, null):List<String>;
+	public var layer:BeardLayer;
+	@:isVar public var name(get, set):String;
+	public var renderDepth(default,null):Float;
+	public var restrictedCameras(default, null):Array<String>;
+	public var texture:String;
+	public var textureHeight(default, null):Int;
+	public var textureWidth(default, null):Int;
+	@:isVar public var visible(get, set):Bool;
+		
 	public var height(get, set):Float;	
 	public var rotation (get, set):Float;
 	public var scaleX (get, set):Float;
 	public var scaleY (get, set):Float;
-
-	private var cachedWidth:Float;
+	public var width(get, set):Float;
+	public var x(get, set):Float;
+	public var y(get, set):Float;
+	@:isVar public var z(get, set):Float;
+	
 	private var cachedHeight:Float;
+	private var cachedRotation:Null<Float>;
 	private var cachedScaleX:Null<Float>;
 	private var cachedScaleY:Null<Float>;
-	private var cachedRotation:Null<Float>;
+	private var cachedWidth:Float;
 	private var rotationCosine:Float;
 	private var rotationSine:Float;
 	private var transform:Matrix;
+	
+	@:isVar public var isDirty(get, set):Bool = false;
 		
-	
-	
-	public function new(texture:String, atlas:String ) 
+	public function new(texture:String, atlas:String , name:String = "") 
 	{
+	
+		if (name == "") name = "Visual_" + instanceCount;
+		instanceCount++;
 	
 		this.texture = texture;
 		this.atlas = atlas;
@@ -52,11 +63,19 @@ class Visual
 		alpha = 1;
 		color = 0xffffff;
 		
+		z = -1;
+		renderDepth = -2;
+		
 		var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
 		textureWidth = Math.round(texture.imageArea.width);
 		textureHeight = Math.round(texture.imageArea.height);
 		
+		width = textureWidth;
+		height = textureHeight;
 		
+		bufferIndex = -1;
+		
+		displayingCameras = new List<String>();
 	}
 	
 	inline function get_x():Float 
@@ -66,6 +85,7 @@ class Visual
 	
 	function set_x(value:Float):Float 
 	{
+		isDirty = true;
 		return transform.tx = value;
 	}
 	
@@ -76,6 +96,7 @@ class Visual
 	
 	function set_y(value:Float):Float 
 	{
+		isDirty = true;
 		return transform.ty = value;
 	}
 	
@@ -91,7 +112,8 @@ class Visual
 			
 		else 		
 			scaleX = 1;
-				
+		
+		isDirty = true;
 		return value;
 	}
 	
@@ -107,7 +129,8 @@ class Visual
 			
 		else 		
 			scaleY = 1;
-				
+		
+		isDirty = true;
 		return value;
 	}
 	
@@ -158,6 +181,7 @@ class Visual
 		}
 		cachedWidth = textureWidth * value;
 		
+		isDirty = true;
 		return value;
 		
 	}
@@ -209,6 +233,7 @@ class Visual
 		}
 		
 		cachedHeight = textureHeight * value;
+		isDirty = true;
 		
 		return value;
 		
@@ -259,18 +284,87 @@ class Visual
 			
 		}
 		
+		isDirty = true;
+		
 		return value;
 		
 	}
 	
-	public function ToVertexAttributes():Float32Array
+	public function AuthorizeCamera(addedCameraID:String):Void 
 	{
-		
-		return new Float32Array(null, []);
-		
+		if (restrictedCameras == null) restrictedCameras = new Array<String>();
+		if (restrictedCameras.indexOf(addedCameraID) == -1) restrictedCameras.push(addedCameraID);
+	}
+	
+	public function ForbidCamera(forbiddenCameraID:String):Void 
+	{
+		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
+	}
+	
+	public function RenderThroughCamera(camera:Camera):Void 
+	{
+		//BeardGLBitmap.renderThroughCamera(this, renderSession, camera);
+	}
+	
+	public function RenderMaskThroughCamera(camera:Camera):Void 
+	{
 		
 	}
 	
+	inline function get_z():Float 
+	{
+		return z;
+	}
+	
+	inline function set_z(value:Float):Float 
+	{
+		z = value;
+		
+		if (layer != null)
+		{
+			renderDepth = layer.depth + (z / layer.maxVisualsCount);	
+		}
+		
+		isDirty = true;
+		return z;
+	}
+	
+	function get_name():String 
+	{
+		return name;
+	}
+	
+	function set_name(value:String):String 
+	{
+		return name = value;
+	}
+	
+	function get_visible():Bool 
+	{
+		return visible;
+	}
+	
+	function set_visible(value:Bool):Bool 
+	{
+		isDirty = true;
+		return visible = value;
+	}
+	
+	public inline function GetTextureData():SubTextureData
+	{
+		return AssetManager.Get().GetSubTextureData(texture, atlas);
+	}
+	
+	function get_isDirty():Bool 
+	{
+		return isDirty;
+	}
+	
+	function set_isDirty(value:Bool):Bool 
+	{
+		if(value == true && layer != null) layer.AddVisualDirty(this);
+		return isDirty = value;
+	}
 	
 }
 

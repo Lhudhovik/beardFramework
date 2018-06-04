@@ -1,11 +1,11 @@
 package beardFramework.display.ui;
 import beardFramework.core.BeardGame;
+import beardFramework.display.core.Visual;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.updateProcess.thread.RowThreadDetail;
 import beardFramework.updateProcess.thread.Thread;
 import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.display.core.BeardLayer;
-import beardFramework.display.heritage.BeardSprite;
 import beardFramework.display.ui.components.UIContainer;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.interfaces.IUIGroupable;
@@ -80,7 +80,7 @@ class UIManager
 		if (Std.is(component, UIContainer))
 			for (element in cast(component, UIContainer).components) AddComponent(element);
 		else
-			UILayer.addChild(cast(component, DisplayObject));
+			UILayer.Add(cast(component, Visual));
 		
 		AddToGroup(component, group);
 	}
@@ -91,7 +91,7 @@ class UIManager
 			cast(component, UIContainer).visible = false;
 			for (element in cast(component, UIContainer).components)	RemoveComponent(element);
 		}
-		else UILayer.removeChild(cast(component, DisplayObject));
+		else UILayer.Remove(cast(component, Visual));
 		
 		RemoveFromGroup( component, component.group);
 	}

@@ -3,7 +3,6 @@ package beardFramework.core;
 import beardFramework.display.rendering.Shaders;
 import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.resources.options.OptionsManager;
-import beardFramework.display.screens.ScreenFlowManager;
 import beardFramework.updateProcess.UpdateProcessesManager;
 import beardFramework.updateProcess.Wait;
 import beardFramework.updateProcess.sequence.VoidStep;
@@ -20,7 +19,6 @@ import beardFramework.resources.assets.AssetManager;
 import lime.app.Application;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
-import openfl.display.DisplayObject;
 import openfl.display.Sprite;
 import openfl.display.StageScaleMode;
 import openfl.display.StageAlign;
@@ -53,7 +51,7 @@ class BeardGame extends Sprite
 	private var physicsEnabled:Bool;
 	private var contentLayer:BeardLayer;
 	private var UILayer:BeardLayer;
-	private var LoadingLayer:BeardLayer;
+	private var loadingLayer:BeardLayer;
 	private var pause:Bool;
 	
 	private var splashScreen:SplashScreen;
@@ -91,19 +89,16 @@ class BeardGame extends Sprite
 		
 		
 	
-		contentLayer = new BeardLayer("ContentLayer");
+		contentLayer = new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT);
 		contentLayer.visible = false;
-		UILayer = new BeardLayer("UILayer");
+		UILayer = new BeardLayer("UILayer", BeardLayer.DEPTH_UI);
 		UILayer.visible = false;
-		LoadingLayer = new BeardLayer("LoadingLayer");
-		LoadingLayer.visible = false;
+		loadingLayer = new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING);
+		loadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
 		
-		
-		stage.addChild(contentLayer);
-		stage.addChild(UILayer);
-		stage.addChild(LoadingLayer);
+		cameras["default"].Center(Application.current.window.width * 0.5, Application.current.window.height * 0.5);
 		
 		entities = new Array<GameEntity>();
 		
@@ -125,6 +120,7 @@ class BeardGame extends Sprite
 			LoadSettings();
 		
 	}
+	
 	
 	private inline function LoadSettings():Void
 	{
@@ -176,7 +172,7 @@ class BeardGame extends Sprite
 		if (physicsEnabled)
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
 		
-		VisualRenderer.Get().Test();
+		VisualRenderer.Get().Start();
 		
 	}
 	
@@ -231,6 +227,10 @@ class BeardGame extends Sprite
 	public function Render():Void
 	{
 		
+		//contentLayer.PrepareForRendering();
+		//UILayer.PrepareForRendering();
+		//loadingLayer.PrepareForRendering();
+		VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
 		VisualRenderer.Get().Render();
 		
 		
@@ -251,13 +251,18 @@ class BeardGame extends Sprite
 			if (physicsEnabled && PhysicsManager.Get().get_space() != null)
 				PhysicsManager.Get().Step(deltaTime);
 				
-			if (currentScreen != null)
+			if (currentScreen != null && currentScreen.ready){
+				
 				for (entity in currentScreen.entities)
 				{
 					entity.Update();
 				}
+				
+				currentScreen.Update();
+			}
 	
 		}
+		
 		trace(fps.text);
 	}
 		
@@ -266,9 +271,9 @@ class BeardGame extends Sprite
 		return Application.current.frameRate;
 	}
 	
-	public function getTargetUnderPoint (point:Point, reverse:Bool = true):DisplayObject
+	public function getTargetUnderPoint (point:Point, reverse:Bool = true):String
 	{
-		var tempPoint:Point = Point.__pool.get ();
+		/*//var tempPoint:Point = Point.__pool.get ();
 		var stack = new Array<DisplayObject> ();
 		var hit:Bool = false;
 		var i :Int = 0;
@@ -289,17 +294,11 @@ class BeardGame extends Sprite
 			
 		}
 		
-		/*StringLibrary.utilString = "";
-		for (element in stack){
-			StringLibrary.utilString += "   -->  " + element.name;
-		}
 		
-		trace(StringLibrary.utilString);
-		*/
 		
 		if(reverse) stack.reverse ();
-		return stack != null ? stack[0] : null;
-		
+		return stack != null ? stack[0] : null;*/
+		return "";
 	}
 	
 	private function Deactivate(e:Event):Void
@@ -325,6 +324,23 @@ class BeardGame extends Sprite
 		return game;
 	}
 	
+	public inline function GetLayer(layerType:BeardLayerType):BeardLayer
+	{
+		
+		switch(layerType)
+		{
+			
+			case BeardLayerType.CONTENT : return contentLayer;
+			case BeardLayerType.LOADING : return loadingLayer;
+			case BeardLayerType.UI : return UILayer;
+			
+			
+		}
+		
+		return contentLayer;
+		
+	}
+	
 	public inline function GetContentLayer():BeardLayer
 	{
 		return contentLayer;
@@ -337,7 +353,7 @@ class BeardGame extends Sprite
 	
 	public inline function GetLoadingLayer():BeardLayer
 	{
-		return LoadingLayer;
+		return loadingLayer;
 	}
 
 }

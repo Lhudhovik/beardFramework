@@ -1,7 +1,6 @@
 package beardFramework.display.screens;
 import beardFramework.core.BeardGame;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
-import beardFramework.display.ui.components.UIBitmapComponent;
 import beardFramework.display.ui.components.UIContainer;
 import beardFramework.resources.assets.AssetManager;
 

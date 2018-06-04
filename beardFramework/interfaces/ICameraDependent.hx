@@ -18,7 +18,7 @@ interface ICameraDependent
 	public var displayingCameras(default, null):List<String>;
 	public function AuthorizeCamera(addedCameraID : String):Void;
 	public function ForbidCamera(forbiddenCameraID : String):Void;
-	public function RenderThroughCamera(camera : Camera, renderSession:RenderSession):Void;
-	public function RenderMaskThroughCamera(camera : Camera, renderSession:RenderSession):Void;
+	public function RenderThroughCamera(camera : Camera):Void;
+	public function RenderMaskThroughCamera(camera : Camera):Void;
 	
 }
