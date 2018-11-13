@@ -71,35 +71,11 @@ class Atlas
         }
 		
 		
+		GL.activeTexture(GL.TEXTURE0 + index);
 		texture = atlasBitmapData.getTexture(Application.current.window.context);
-		
-		if (index == 0){
-			//var image:Image = atlasBitmapData.image;
-			//var internalFormat, format;
-		
-		
-			GL.activeTexture(GL.TEXTURE0);		
-			GL.bindTexture(GL.TEXTURE_2D, texture);
-		
-			//if (image.buffer.bitsPerPixel == 1) {
-			//
-				//internalFormat = GL.ALPHA;
-				//format = GL.ALPHA;
-			//
-			//} else {
-			//
-				//internalFormat = GL.RGB8;
-				//format = GL.RGB;
-			//
-			//}
-		//
-				
-			//GL.texImage2D(GL.TEXTURE_2D, 0, internalFormat, image.buffer.width, image.buffer.height, 0, format, GL.UNSIGNED_BYTE, image.data);
-			VisualRenderer.Get().ActivateTexture();
-		}
-		
-		
-		
+		GL.bindTexture(GL.TEXTURE_2D, texture);
+		VisualRenderer.Get().ActivateTexture(index);
+
     }
    	
 	public inline function GetTextureDimensions(name:String):Rectangle

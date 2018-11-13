@@ -34,10 +34,13 @@ class VisualRenderer extends DefaultRenderer
 		return instance;
 	}
 	
-	override public function ActivateTexture():Void
+	override public function ActivateTexture(index:Int = 0):Void
 	{
 		GL.useProgram(shaderProgram);
-		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas"), 0);
+		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas["+index+"]"), index);
+		GL.uniform1f(GL.getUniformLocation(shaderProgram, "red[2]"), 0.1);
+		GL.uniform1f(GL.getUniformLocation(shaderProgram, "red[0]"), 0.8);
+		GL.uniform1f(GL.getUniformLocation(shaderProgram, "red[1]"), 0.1);
 	
 	}
 	
@@ -110,18 +113,18 @@ class VisualRenderer extends DefaultRenderer
 				visualData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y +  quadVertices[verIndex+1] * visual.height;
 				visualData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth : -2;
 				
-				//UV
+				//UV + Texture ID
 				visualData.data[visIndex + attIndex + 3] = utilFloatArray[attIndex + 3] = visual.GetTextureData().uvX +  quadVertices[verIndex + 2] * visual.GetTextureData().uvW;
 				visualData.data[visIndex + attIndex + 4] = utilFloatArray[attIndex + 4] = visual.GetTextureData().uvY +  quadVertices[verIndex + 3] * visual.GetTextureData().uvH;
+				visualData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast(visual.GetTextureData().atlasIndex, Float);
 				
 				//color
-				visualData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = ((visual.color >> 16) & 0xff) / 255.0;
-				visualData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = ((visual.color >>  8) & 0xff) / 255.0;
-				visualData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = ( visual.color & 0xff) / 255.0;
-				visualData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = visual.alpha;		
+				visualData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = ((visual.color >> 16) & 0xff) / 255.0;
+				visualData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = ((visual.color >>  8) & 0xff) / 255.0;
+				visualData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = ( visual.color & 0xff) / 255.0;
+				visualData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.alpha;		
 				
-				//textureID
-				visualData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.GetTextureData().atlasIndex;
+				
 			}
 	
 			
@@ -211,18 +214,19 @@ class VisualRenderer extends DefaultRenderer
 				visualData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y +  quadVertices[verIndex+1] * visual.height;
 				visualData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth : -2;
 				
-				//UV
+				//UV + TextureID
 				visualData.data[visIndex + attIndex + 3] = utilFloatArray[attIndex + 3] = visual.GetTextureData().uvX +  quadVertices[verIndex + 2] * visual.GetTextureData().uvW;
 				visualData.data[visIndex + attIndex + 4] = utilFloatArray[attIndex + 4] = visual.GetTextureData().uvY +  quadVertices[verIndex + 3] * visual.GetTextureData().uvH;
+				visualData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast( visual.GetTextureData().atlasIndex, Float);
 				
 				//color
-				visualData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = ((visual.color >> 16) & 0xff) / 255.0;
-				visualData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = ((visual.color >>  8) & 0xff) / 255.0;
-				visualData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = ( visual.color & 0xff) / 255.0;
-				visualData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = visual.alpha;		
+				visualData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = ((visual.color >> 16) & 0xff) / 255.0;
+				visualData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = ((visual.color >>  8) & 0xff) / 255.0;
+				visualData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = ( visual.color & 0xff) / 255.0;
+				visualData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.alpha;		
 				
 				//textureID
-				visualData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.GetTextureData().atlasIndex;
+				
 			}
 	
 			

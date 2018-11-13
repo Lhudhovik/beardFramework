@@ -137,7 +137,7 @@ class DefaultRenderer
 			
 	}
 	
-	public function ActivateTexture():Void
+	public function ActivateTexture(index:Int = 0):Void
 	{
 		//GL.useProgram(shaderProgram);
 		//GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas"), 0);
@@ -208,16 +208,16 @@ class DefaultRenderer
 		GL.bindAttribLocation(shaderProgram, 0, "pos");
 		
 		GL.enableVertexAttribArray(1);
-		GL.vertexAttribPointer(1, 2, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 3* Float32Array.BYTES_PER_ELEMENT);
+		GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 3* Float32Array.BYTES_PER_ELEMENT);
 		GL.bindAttribLocation(shaderProgram, 1, "uv");
 		
 		GL.enableVertexAttribArray(2);
-		GL.vertexAttribPointer(2, 4, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 5 * Float32Array.BYTES_PER_ELEMENT);
+		GL.vertexAttribPointer(2, 4, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 6 * Float32Array.BYTES_PER_ELEMENT);
 		GL.bindAttribLocation(shaderProgram, 2, "color");
 		
-		GL.enableVertexAttribArray(3);
-		GL.vertexAttribPointer(3, 1, GL.UNSIGNED_SHORT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 9 * Float32Array.BYTES_PER_ELEMENT);
-		GL.bindAttribLocation(shaderProgram, 2, "textureIndex");
+		//GL.enableVertexAttribArray(3);
+		//GL.vertexAttribPointer(3, 1, GL.UNSIGNED_SHORT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 9 * Float32Array.BYTES_PER_ELEMENT);
+		//GL.bindAttribLocation(shaderProgram, 2, "atlasIndex");
 		
 		
 		GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
@@ -227,13 +227,14 @@ class DefaultRenderer
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		GL.bindVertexArray(0);
 	}
-	
-	
-	
+		
 	public function Start():Void
 	{
 		ready = true;
 		OnResize(Application.current.window.width, Application.current.window.height);
+		//Application.current.window.fullscreen = true;
+		Application.current.window.fullscreen = false;
+		
 	}
 	
 	public function OnResize(width:Int, height:Int):Void

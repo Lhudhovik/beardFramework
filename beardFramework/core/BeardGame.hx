@@ -70,7 +70,7 @@ class BeardGame extends Sprite
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
 		stage.addEventListener(Event.DEACTIVATE, Deactivate);
-		stage.addEventListener(Event.RESIZE, Resize);
+		Application.current.window.onResize.add(Resize);
 		Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
 		
 		Init();
@@ -88,8 +88,7 @@ class BeardGame extends Sprite
 		//#end
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
 		
-		
-	
+			
 		contentLayer = new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT);
 		contentLayer.visible = false;
 		UILayer = new BeardLayer("UILayer", BeardLayer.DEPTH_UI);
@@ -141,7 +140,7 @@ class BeardGame extends Sprite
 	
 	private function OnSettingsProgressing(progress:Float):Void
 	{
-		trace("Setting Loading in progress... " + progress +" %" );		
+		trace("Setting Loading in progress... " + progress*100 +" %" );		
 	}
 		
 	public function OnSettingsFailed(e:LoaderErrorType):Void
@@ -186,7 +185,7 @@ class BeardGame extends Sprite
 	private function OnResourcesProgress(progress:Float):Void
 	{
 		
-		trace("*** Resources Loading in progress... " + progress + " %");
+		trace("*** Resources Loading in progress... " + progress*100 + " %");
 		
 		
 	}
@@ -316,13 +315,13 @@ class BeardGame extends Sprite
 		
 	}
 	
-	public function Resize(e:Event):Void
+	public function Resize(width:Int, height:Int):Void
 	{
 		
 		if (cameras != null && cameras["default"] != null){
 			
-			cameras["default"].viewportWidth = stage.stageWidth;
-			cameras["default"].viewportHeight = stage.stageHeight;
+			cameras["default"].viewportWidth = width;
+			cameras["default"].viewportHeight = height;
 			trace("Default camera resized");
 		}
 	}
