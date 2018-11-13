@@ -1,9 +1,4 @@
 package beardFramework.utils;
-import lime.graphics.Image;
-import lime.graphics.opengl.GL;
-import lime.graphics.opengl.GLContextType;
-import lime.graphics.opengl.GLTexture;
-import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
 //import starling.core.Starling;
 //import starling.display.BlendMode;
@@ -72,46 +67,4 @@ class TextureUtils
 		return rect;
 	}
 	
-	public static function GetFormat(image:Image):Int
-	{
-		var imageFormat:Int = GL.RGBA;
-		if (image != null) {
-			
-												
-			if (image.buffer.bitsPerPixel == 1) {
-				
-				imageFormat = GL.ALPHA;
-				
-			} else {
-				
-											
-				var bgraExtension = null;
-				
-				#if (!js || !html5)
-				bgraExtension = GL.getExtension ("EXT_bgra");
-				if (bgraExtension == null)
-					bgraExtension = GL.getExtension ("EXT_texture_format_BGRA8888");
-				if (bgraExtension == null)
-					bgraExtension = GL.getExtension ("APPLE_texture_format_BGRA8888");
-				#end
-				
-				if (bgraExtension != null) {
-					imageFormat = bgraExtension.BGRA_EXT;
-				} 
-				else{
-					imageFormat = GL.RGBA;
-				}
-			
-			}
-			
-		}
-		
-		return imageFormat;
-		
-	}
-	//public static function GetTexture(image:Image):GLTexture
-	//{
-		//
-		//
-	//}
 }

@@ -5,7 +5,6 @@ import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
-import lime.math.Rectangle;
 import lime.utils.Float32Array;
 import openfl.geom.Matrix;
 
@@ -48,8 +47,6 @@ class Visual implements ICameraDependent
 	private var rotationCosine:Float;
 	private var rotationSine:Float;
 	private var transform:Matrix;
-	
-	//private var HitArea:HitArea
 	
 	@:isVar public var isDirty(get, set):Bool = false;
 		
