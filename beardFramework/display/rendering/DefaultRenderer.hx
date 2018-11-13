@@ -10,7 +10,6 @@ import haxe.ds.Vector;
 import lime.app.Application;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
-import lime.graphics.opengl.GLES3Context;
 import lime.graphics.opengl.GLProgram;
 import lime.graphics.opengl.GLShader;
 import lime.graphics.opengl.GLTexture;
@@ -32,7 +31,6 @@ class DefaultRenderer
 
 
 	public var drawCount(default, null):Int = 0;
-	public var context:GLES3Context;
 	private var quadVertices:Float32Array;
 	private var verticesIndices:UInt16Array;	
 	
@@ -66,14 +64,14 @@ class DefaultRenderer
 		
 		Application.current.window.onResize.add(OnResize);
 		
-		context = GL.context;
+		GL.enable(GL.DEPTH_TEST);
+		GL.enable(GL.SCISSOR_TEST);
 		
-		context.enable(context.DEPTH_TEST);
-		context.enable(context.SCISSOR_TEST);
+		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		
-		context.viewport(0, 0, Application.current.window.width, Application.current.window.height);
-		
-		projection = Matrix4.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		projection = new Matrix4();
+		projection.identity();
+		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, -1, 1);
 		view = new Matrix4();
 		model = new Matrix4();
 			
@@ -98,27 +96,29 @@ class DefaultRenderer
 			for (camera in BeardGame.Get().cameras)
 			{
 				
-				context.scissor(camera.viewport.x,Application.current.window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 				
-				context.clearColor(0.2, 0.3, 0.3, 1);
-				context.clear(context.COLOR_BUFFER_BIT);
-				context.clear(context.DEPTH_BUFFER_BIT);
+				
+				GL.scissor(camera.viewport.x,Application.current.window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
+				
+				GL.clearColor(0.2, 0.3, 0.3, 1);
+				GL.clear(GL.COLOR_BUFFER_BIT);
+				GL.clear(GL.DEPTH_BUFFER_BIT);
 				
 				
 				view.identity();
 				view.appendScale(camera.zoom, camera.zoom,0);
 				view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
 				
-				context.uniformMatrix4fv(context.getUniformLocation(shaderProgram, "view"), 1, false, view);
+				GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "view"), 1, false, view);
 			
-				context.useProgram(shaderProgram);
-				context.bindVertexArray(VAO);
-				context.drawElements(context.TRIANGLES,verticesIndices.length,context.UNSIGNED_SHORT,0);
+				GL.useProgram(shaderProgram);
+				GL.bindVertexArray(VAO);
+				GL.drawElements(GL.TRIANGLES,verticesIndices.length,GL.UNSIGNED_SHORT,0);
 				
 				drawCount++;
 		
-				context.bindVertexArray(0);
-				var error:Int = context.getError();
+				GL.bindVertexArray(0);
+				var error:Int = GL.getError();
 				if (error != 0)
 					trace(error);
 				
@@ -126,9 +126,9 @@ class DefaultRenderer
 			//var font: Font= Font.fromFile("assets/fonts/American Captain.ttf");
 			//
 			//var bitmap:BitmapData = BitmapData.fromImage(font.rendercontextyph(font.getcontextyph("a"), 50), true);
-			//var text:contextTexture = bitmap.getTexture(context.context);
-			//context.activeTexture(context.TEXTURE1);		
-			//context.bindTexture(context.TEXTURE_2D, texture);
+			//var text:contextTexture = bitmap.getTexture(GL.GL);
+			//GL.activeTexture(GL.TEXTURE1);		
+			//GL.bindTexture(GL.TEXTURE_2D, texture);
 		//VisualRenderer.Get().ActivateTexture();
 		//
 		}
@@ -139,38 +139,38 @@ class DefaultRenderer
 	
 	public function ActivateTexture():Void
 	{
-		//context.useProgram(shaderProgram);
-		//context.uniform1i(context.getUniformLocation(shaderProgram, "atlas"), 0);
+		//GL.useProgram(shaderProgram);
+		//GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas"), 0);
 	}
 	
 	public inline function InitShaders():Void
 	{
 		Shaders.LoadShaders();
 		
-		var vShader:GLShader = context.createShader(context.VERTEX_SHADER);
-		context.shaderSource(vShader, Shaders.shader[vertexShader]);
-		context.compileShader(vShader);
-		trace(context.getShaderInfoLog(vShader));
+		var vShader:GLShader = GL.createShader(GL.VERTEX_SHADER);
+		GL.shaderSource(vShader, Shaders.shader[vertexShader]);
+		GL.compileShader(vShader);
+		trace(GL.getShaderInfoLog(vShader));
 		
-		var fShader:GLShader = context.createShader(context.FRAGMENT_SHADER);
-		context.shaderSource(fShader, Shaders.shader[fragmentShader]);
-		context.compileShader(fShader);
-		trace(context.getShaderInfoLog(fShader));
+		var fShader:GLShader = GL.createShader(GL.FRAGMENT_SHADER);
+		GL.shaderSource(fShader, Shaders.shader[fragmentShader]);
+		GL.compileShader(fShader);
+		trace(GL.getShaderInfoLog(fShader));
 		
 		
-		shaderProgram = context.createProgram();
-		context.attachShader(shaderProgram, vShader);
-		context.attachShader(shaderProgram, fShader);
-		context.linkProgram(shaderProgram);
-		trace(context.getProgramInfoLog(shaderProgram));
+		shaderProgram = GL.createProgram();
+		GL.attachShader(shaderProgram, vShader);
+		GL.attachShader(shaderProgram, fShader);
+		GL.linkProgram(shaderProgram);
+		trace(GL.getProgramInfoLog(shaderProgram));
 		
-		context.deleteShader(vShader);
-		context.deleteShader(fShader);
+		GL.deleteShader(vShader);
+		GL.deleteShader(fShader);
 		
-		context.useProgram(shaderProgram);
-		context.uniformMatrix4fv(context.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
-		context.uniformMatrix4fv(context.getUniformLocation(shaderProgram, "model"), 1, false, model);
-		context.uniformMatrix4fv(context.getUniformLocation(shaderProgram, "view"), 1, false, view);
+		GL.useProgram(shaderProgram);
+		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
+		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "model"), 1, false, model);
+		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "view"), 1, false, view);
 		
 	}
 	
@@ -188,7 +188,7 @@ class DefaultRenderer
 		
 		verticesIndices = new UInt16Array([0, 1, 2, 2, 3, 0]);
 		
-		//context.uniform1fv(context.getUniformLocation(shaderProgram, "quadVertices"),1,quadVertices);
+		//GL.uniform1fv(GL.getUniformLocation(shaderProgram, "quadVertices"),1,quadVertices);
 		
 	}
 	
@@ -199,33 +199,33 @@ class DefaultRenderer
 		EBO = GLObject.fromInt(GLObjectType.BUFFER, BUFFERCOUNT++);
 		TBO = GLObject.fromInt(GLObjectType.BUFFER, BUFFERCOUNT++);
 		
-		context.bindVertexArray(VAO);
+		GL.bindVertexArray(VAO);
 		
-		context.bindBuffer(context.ARRAY_BUFFER, VBO);
+		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 				
-		context.enableVertexAttribArray(0);
-		context.vertexAttribPointer(0, 3, context.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 0);
-		context.bindAttribLocation(shaderProgram, 0, "pos");
+		GL.enableVertexAttribArray(0);
+		GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 0);
+		GL.bindAttribLocation(shaderProgram, 0, "pos");
 		
-		context.enableVertexAttribArray(1);
-		context.vertexAttribPointer(1, 2, context.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 3* Float32Array.BYTES_PER_ELEMENT);
-		context.bindAttribLocation(shaderProgram, 1, "uv");
+		GL.enableVertexAttribArray(1);
+		GL.vertexAttribPointer(1, 2, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 3* Float32Array.BYTES_PER_ELEMENT);
+		GL.bindAttribLocation(shaderProgram, 1, "uv");
 		
-		context.enableVertexAttribArray(2);
-		context.vertexAttribPointer(2, 4, context.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 5 * Float32Array.BYTES_PER_ELEMENT);
-		context.bindAttribLocation(shaderProgram, 2, "color");
+		GL.enableVertexAttribArray(2);
+		GL.vertexAttribPointer(2, 4, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 5 * Float32Array.BYTES_PER_ELEMENT);
+		GL.bindAttribLocation(shaderProgram, 2, "color");
 		
-		context.enableVertexAttribArray(3);
-		context.vertexAttribPointer(3, 1, context.UNSIGNED_SHORT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 9 * Float32Array.BYTES_PER_ELEMENT);
-		context.bindAttribLocation(shaderProgram, 2, "textureIndex");
+		GL.enableVertexAttribArray(3);
+		GL.vertexAttribPointer(3, 1, GL.UNSIGNED_SHORT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 9 * Float32Array.BYTES_PER_ELEMENT);
+		GL.bindAttribLocation(shaderProgram, 2, "textureIndex");
 		
 		
-		context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, EBO);
-		context.bufferData(context.ELEMENT_ARRAY_BUFFER,verticesIndices.byteLength, verticesIndices, context.DYNAMIC_DRAW);
+		GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
+		GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,verticesIndices.byteLength, verticesIndices, GL.DYNAMIC_DRAW);
 		
 	
-		context.bindBuffer(context.ARRAY_BUFFER, 0);
-		context.bindVertexArray(0);
+		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
+		GL.bindVertexArray(0);
 	}
 	
 	
@@ -238,9 +238,11 @@ class DefaultRenderer
 	
 	public function OnResize(width:Int, height:Int):Void
 	{
-		context.viewport(0, 0, Application.current.window.width, Application.current.window.height);
-		projection = Matrix4.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, -1, 1);
-		context.uniformMatrix4fv(context.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
+		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
+		projection.identity();
+		projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		//projection = Matrix4.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
 		
 		
 	}

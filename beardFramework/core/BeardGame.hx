@@ -17,6 +17,7 @@ import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
 import lime.app.Application;
+import lime.graphics.RenderContext;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
 import openfl.display.Sprite;
@@ -65,7 +66,7 @@ class BeardGame extends Sprite
 		super();
 		
 		Application.current.onUpdate.add(Update);
-		Application.current.renderer.onRender.add(Render);
+		Application.current.window.onRender.add(Render);
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
 		stage.addEventListener(Event.DEACTIVATE, Deactivate);
@@ -102,8 +103,8 @@ class BeardGame extends Sprite
 		
 		entities = new Array<GameEntity>();
 		
-		fps = new MemoryUsage(10,10,0xffffff);
-		stage.addChild(fps);
+		//fps = new MemoryUsage(10,10,0xffffff);
+		//stage.addChild(fps);
 		
 		InputManager.Get().Activate(Application.current.window);
 		
@@ -168,6 +169,12 @@ class BeardGame extends Sprite
 	
 	private function GameStart():Void
 	{
+		if (cameras != null && cameras["default"] != null){
+			
+			cameras["default"].viewportWidth = stage.stageWidth;
+			cameras["default"].viewportHeight = stage.stageHeight;
+			trace("Default camera resized");
+		}
 		
 		if (physicsEnabled)
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
@@ -224,7 +231,7 @@ class BeardGame extends Sprite
 
 	}
 	
-	public function Render():Void
+	public function Render(context:RenderContext):Void
 	{
 		
 		
@@ -264,12 +271,12 @@ class BeardGame extends Sprite
 	
 		}
 		
-		trace(fps.text);
+		//trace(fps.text);
 	}
 		
 	public inline function GetFPS():Float
 	{
-		return Application.current.frameRate;
+		return Application.current.window.frameRate;
 	}
 	
 	public function getTargetUnderPoint (point:Point, reverse:Bool = true):String

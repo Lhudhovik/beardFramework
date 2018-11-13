@@ -3,8 +3,9 @@ import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.utils.DataUtils;
 import beardFramework.utils.TextureUtils;
 import beardFramework.utils.XMLUtils;
+import lime.app.Application;
+import lime.graphics.Image;
 import lime.graphics.opengl.GL;
-import lime.graphics.opengl.GLES3Context;
 import lime.graphics.opengl.GLTexture;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
@@ -70,42 +71,34 @@ class Atlas
         }
 		
 		
+		texture = atlasBitmapData.getTexture(Application.current.window.context);
 		
-		texture = atlasBitmapData.getTexture(VisualRenderer.Get().context);
+		if (index == 0){
+			//var image:Image = atlasBitmapData.image;
+			//var internalFormat, format;
 		
-		if (index == 0)
-		{
+		
+			GL.activeTexture(GL.TEXTURE0);		
+			GL.bindTexture(GL.TEXTURE_2D, texture);
+		
+			//if (image.buffer.bitsPerPixel == 1) {
 			//
-			//VisualRenderer.Get().context.activeTexture(GL.TEXTURE0);
-			//var text:GLTexture = VisualRenderer.Get().context.genTextures(3)[0];
-					//
-			//VisualRenderer.Get().context.bindTexture(GL.TEXTURE_2D_ARRAY, text);
-						//
-			//VisualRenderer.Get().context.texStorage3D(VisualRenderer.Get().context.TEXTURE_2D_ARRAY,0, GL.RGBA8, 2048, 2048, 3);
-			////VisualRenderer.Get().context.texStorage3D(VisualRenderer.Get().context.TEXTURE_2D_ARRAY, 1, BitmapData.__textureInternalFormat, atlasBitmapData.image.buffer.width, atlasBitmapData.image.buffer.height, 10);
-			//VisualRenderer.Get().context.texParameteri(GL.TEXTURE_2D_ARRAY,GL.TEXTURE_MIN_FILTER,GL.LINEAR);
-			//VisualRenderer.Get().context.texParameteri(GL.TEXTURE_2D_ARRAY,GL.TEXTURE_MAG_FILTER,GL.LINEAR);
-			//VisualRenderer.Get().context.texParameteri(GL.TEXTURE_2D_ARRAY,GL.TEXTURE_WRAP_S,GL.CLAMP_TO_EDGE);
-			//VisualRenderer.Get().context.texParameteri(GL.TEXTURE_2D_ARRAY,GL.TEXTURE_WRAP_T,GL.CLAMP_TO_EDGE);	
+				//internalFormat = GL.ALPHA;
+				//format = GL.ALPHA;
 			//
-			//var error:Int = VisualRenderer.Get().context.getError();
-				//if (error != 0)
-					//trace(error);			
-			//VisualRenderer.Get().ActivateTexture();
-					VisualRenderer.Get().context.activeTexture(VisualRenderer.Get().context.TEXTURE0 + index);		
-		VisualRenderer.Get().context.bindTexture(VisualRenderer.Get().context.TEXTURE_2D, texture);
+			//} else {
+			//
+				//internalFormat = GL.RGB8;
+				//format = GL.RGB;
+			//
+			//}
 		//
+				
+			//GL.texImage2D(GL.TEXTURE_2D, 0, internalFormat, image.buffer.width, image.buffer.height, 0, format, GL.UNSIGNED_BYTE, image.data);
+			VisualRenderer.Get().ActivateTexture();
 		}
-		//
-		//
-		//VisualRenderer.Get().context.texSubImage3D(VisualRenderer.Get().context.TEXTURE_2D_ARRAY, 0, 0, 0, index,2048, 2048,1,GL.RGBA, VisualRenderer.Get().context.UNSIGNED_BYTE, atlasBitmapData.image.data);
-			//var error:Int = VisualRenderer.Get().context.getError();
-				//if (error != 0)
-					//trace(error);
 		
-		//VisualRenderer.Get().context.activeTexture(VisualRenderer.Get().context.TEXTURE0 + index);		
-		//VisualRenderer.Get().context.bindTexture(VisualRenderer.Get().context.TEXTURE_2D, texture);
-		VisualRenderer.Get().ActivateTexture();
+		
 		
     }
    	

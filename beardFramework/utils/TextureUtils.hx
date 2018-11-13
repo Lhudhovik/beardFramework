@@ -1,7 +1,6 @@
 package beardFramework.utils;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
-import lime.graphics.opengl.GLContextType;
 import lime.graphics.opengl.GLTexture;
 import openfl.display.BitmapData;
 import openfl.geom.Rectangle;
