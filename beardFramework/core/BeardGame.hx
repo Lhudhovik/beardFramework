@@ -227,6 +227,7 @@ class BeardGame extends Sprite
 	public function Render():Void
 	{
 		
+		
 		//contentLayer.PrepareForRendering();
 		//UILayer.PrepareForRendering();
 		//loadingLayer.PrepareForRendering();
@@ -308,7 +309,7 @@ class BeardGame extends Sprite
 		
 	}
 	
-	private function Resize(e:Event):Void
+	public function Resize(e:Event):Void
 	{
 		
 		if (cameras != null && cameras["default"] != null){
@@ -326,13 +327,13 @@ class BeardGame extends Sprite
 	
 	public inline function GetLayer(layerType:BeardLayerType):BeardLayer
 	{
-		
+		var layer:BeardLayer = null;
 		switch(layerType)
 		{
 			
-			case BeardLayerType.CONTENT : return contentLayer;
-			case BeardLayerType.LOADING : return loadingLayer;
-			case BeardLayerType.UI : return UILayer;
+			case BeardLayerType.CONTENT : layer=  contentLayer;
+			case BeardLayerType.LOADING : layer= loadingLayer;
+			case BeardLayerType.UI : layer =UILayer;
 			
 			
 		}
