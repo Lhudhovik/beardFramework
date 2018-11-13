@@ -77,7 +77,8 @@ class VisualRenderer
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		
-		projection = Matrix4.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		projection = new Matrix4();
+		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, -1, 1);
 		view = new Matrix4();
 		model = new Matrix4();
 		
@@ -88,9 +89,9 @@ class VisualRenderer
 		
 		visualData = new VisualDataBufferArray();
 		bufferIndices = new Array<Bool>();
-		utilCam = new Vector4();
-		utilTarget =new Vector4();
-		utilUp = new Vector4();
+		//utilCam = new Vector4();
+		//utilTarget =new Vector4();
+		//utilUp = new Vector4();
 	}
 	
 	public function Render():Void
@@ -438,7 +439,9 @@ class VisualRenderer
 	public function OnResize(width:Int, height:Int):Void
 	{
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
-		projection = Matrix4.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		projection.identity();
+		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		//projection = Matrix4.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, -1, 1);
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
 	}
 	
