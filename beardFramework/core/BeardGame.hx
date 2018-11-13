@@ -17,7 +17,6 @@ import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
 import lime.app.Application;
-import lime.graphics.RenderContext;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
 import openfl.display.Sprite;
@@ -66,7 +65,7 @@ class BeardGame extends Sprite
 		super();
 		
 		Application.current.onUpdate.add(Update);
-		Application.current.window.onRender.add(Render);
+		Application.current.renderer.onRender.add(Render);
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.align = StageAlign.TOP_LEFT;
 		stage.addEventListener(Event.DEACTIVATE, Deactivate);
@@ -225,7 +224,7 @@ class BeardGame extends Sprite
 
 	}
 	
-	public function Render(context:RenderContext):Void
+	public function Render():Void
 	{
 		
 		//contentLayer.PrepareForRendering();
@@ -269,7 +268,7 @@ class BeardGame extends Sprite
 		
 	public inline function GetFPS():Float
 	{
-		return Application.current.window.frameRate;
+		return Application.current.frameRate;
 	}
 	
 	public function getTargetUnderPoint (point:Point, reverse:Bool = true):String

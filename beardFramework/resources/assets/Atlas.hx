@@ -69,11 +69,11 @@ class Atlas
 		
 		
 		
-		//texture = atlasBitmapData.getTexture(GL.context);
-		//
-		//GL.activeTexture(GL.TEXTURE0);		
-		//GL.bindTexture(GL.TEXTURE_2D, texture);
-		//VisualRenderer.Get().ActivateTexture();
+		texture = atlasBitmapData.getTexture(GL.context);
+		
+		GL.activeTexture(GL.TEXTURE0);		
+		GL.bindTexture(GL.TEXTURE_2D, texture);
+		VisualRenderer.Get().ActivateTexture();
     }
    	
 	public inline function GetTextureDimensions(name:String):Rectangle

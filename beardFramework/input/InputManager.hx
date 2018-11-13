@@ -11,7 +11,6 @@ import lime.ui.GamepadAxis;
 import lime.ui.GamepadButton;
 import lime.ui.KeyCode;
 import lime.ui.KeyModifier;
-import lime.ui.MouseWheelMode;
 import lime.ui.Touch;
 import lime.ui.Window;
 import msignal.Signal.Signal1;
@@ -618,7 +617,7 @@ class InputManager
 		
 	}	
 	
-	public function OnMouseWheel(value:Float, axisDirection:Float, mode:MouseWheelMode):Void
+	public function OnMouseWheel(value:Float, axisDirection:Float):Void
 	{
 			handledInputs[StringLibrary.MOUSE_WHEEL].state = InputType.MOUSE_WHEEL;
 			handledInputs[StringLibrary.MOUSE_WHEEL].value = axisDirection;

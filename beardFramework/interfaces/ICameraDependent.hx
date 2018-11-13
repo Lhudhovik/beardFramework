@@ -1,6 +1,6 @@
 package beardFramework.interfaces;
 import beardFramework.display.cameras.Camera;
-
+import openfl._internal.renderer.RenderSession;
 
 /**
  * @author Ludo
