@@ -28,6 +28,7 @@ class DefaultRenderer
 {
 	private static var VAOCOUNT:Int = 1;
 	private static var BUFFERCOUNT:Int = 1;
+	private static var FREETEXTUREINDEX:Int = 0;
 
 
 	public var drawCount(default, null):Int = 0;

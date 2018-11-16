@@ -34,14 +34,19 @@ class VisualRenderer extends DefaultRenderer
 		return instance;
 	}
 	
+	public function GetFreeTextureIndex():Int
+	{
+		
+		return DefaultRenderer.FREETEXTUREINDEX;
+	}
+	
 	override public function ActivateTexture(index:Int = 0):Void
 	{
+			
 		GL.useProgram(shaderProgram);
 		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas["+index+"]"), index);
-		GL.uniform1f(GL.getUniformLocation(shaderProgram, "red[2]"), 0.1);
-		GL.uniform1f(GL.getUniformLocation(shaderProgram, "red[0]"), 0.8);
-		GL.uniform1f(GL.getUniformLocation(shaderProgram, "red[1]"), 0.1);
-	
+		
+		DefaultRenderer.FREETEXTUREINDEX++;
 	}
 	
 	public function UpdateBufferFromVisuals(visuals:Array<Visual>):Void

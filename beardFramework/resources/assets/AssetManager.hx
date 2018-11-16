@@ -1,9 +1,12 @@
 package beardFramework.resources.assets;
+import beardFramework.core.BeardGame;
 import beardFramework.display.core.Visual;
 import beardFramework.resources.assets.Atlas;
+import beardFramework.text.FontFormat;
 import haxe.ds.Vector;
 import haxe.io.Float32Array;
 import haxe.io.UInt8Array;
+import lime.text.Font;
 import mloader.HttpLoader;
 import mloader.ImageLoader;
 import mloader.Loader.LoaderEvent;
@@ -29,10 +32,12 @@ class AssetManager
 	private static var instance(default, null):AssetManager;
 	
 	private var DEFAULT_LOADER_NAME(null, never):String = "DefaultName";
+	private var FONT_ATLAS_NAME(null, never):String = "FontAtlas";
 	
 	private var loaderQueue:LoaderQueue;
 	private var loaders:Map<String, Loader<Dynamic>>;
 	private var atlases:Map<String, Atlas>;
+	private var fonts:Map<String, Font>;
 	private var onComplete:Signal0;
 	private var onProgress:Signal1<Float>;
 	private var onCancel:Signal0;
@@ -62,6 +67,7 @@ class AssetManager
 		
 		loaders = new Map<String, Loader<Dynamic>>();
 		atlases = new Map<String, Atlas>();
+		//fonts = new Map<String, Font>();
 		
 		requestedAtlasQueue = new Array<String>();
 		
@@ -248,7 +254,39 @@ class AssetManager
 		return atlases[atlasName] != null ? atlases[atlasName] : null;
 	}
 	
-	
+	public function LoadFont(fontName:String, format:FontFormat, size:Int=72, atlasName:String = null):Void
+	{
+		trace("font loading");
+		var fileExtension:String = "";
+		
+		switch (format)
+		{
+			case FontFormat.TTF : fileExtension = ".ttf";
+			case FontFormat.OTF : fileExtension = ".otf";
+			
+		}
+		
+		var font : Font = Font.fromFile(BeardGame.Get().FONT_PATH + fontName + fileExtension);
+		
+		var fontAtlas:FontAtlas;
+		
+		if (atlasName == null || atlasName == ""){
+			
+			if (atlases[fontName + size] == null)	atlases[fontName + size] = fontAtlas = new FontAtlas(fontName + size);
+			else fontAtlas = cast(atlases[fontName + size],FontAtlas);
+			
+		}
+		else{
+			
+			if (atlases[atlasName] == null) atlases[atlasName] = new FontAtlas(atlasName);
+			fontAtlas = cast( atlases[atlasName], FontAtlas);
+		}
+		
+		
+		
+		if (!fontAtlas.ContainsFont(fontName)) fontAtlas.AddFont(font, fontName, size);	
+		
+	}
 	
 	public inline function GetSubTextureData(textureName:String, atlasName:String):SubTextureData
 	{

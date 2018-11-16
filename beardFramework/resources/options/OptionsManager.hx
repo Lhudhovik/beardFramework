@@ -52,6 +52,16 @@ class OptionsManager
 				}
 			}
 			
+			//if (element.nodeName == "fonts")
+			//{
+//
+				//for (font in element.elementsNamed("font"))
+				//{
+					//
+					//resourcesToLoad.push({ type: AssetType.DATA, name : font.get("name"), url: font.get("path")+"/"+ font.get("name") + "." + font.get("fileExtension") });
+				//}
+			//}
+			
 			if (element.nodeName == "settings")
 			{
 				settings = element;

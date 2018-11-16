@@ -32,12 +32,17 @@ class Atlas
 	public function new(name:String, bitmapData:BitmapData, xml:Xml) 
 	{
 		this.name = name;
-		subAreas = new Map<String, SubTextureData>();
-		atlasBitmapData = bitmapData.clone();
-		bitmapData.dispose();
 		index = atlasCount++;
+		subAreas = new Map<String, SubTextureData>();
 		
-		parseXml(xml);
+		if (bitmapData != null) {
+			atlasBitmapData = bitmapData.clone();
+			bitmapData.dispose();
+		}
+		else
+			atlasBitmapData = new BitmapData(10, 10);
+		
+		if(xml != null)	parseXml(xml);
 		
 	}
 	
@@ -71,12 +76,38 @@ class Atlas
         }
 		
 		
-		GL.activeTexture(GL.TEXTURE0 + index);
-		texture = atlasBitmapData.getTexture(Application.current.window.context);
-		GL.bindTexture(GL.TEXTURE_2D, texture);
-		VisualRenderer.Get().ActivateTexture(index);
+		//GL.activeTexture(GL.TEXTURE0 + VisualRenderer.Get().GetFreeTextureIndex());
+		//texture = atlasBitmapData.getTexture(Application.current.window.context);
+		
+		//if (index == 0){
+			var image:Image = atlasBitmapData.image;
+			var internalFormat, format;
+		
+		
+				GL.activeTexture(GL.TEXTURE0 + VisualRenderer.Get().GetFreeTextureIndex());	
+			//GL.bindTexture(GL.TEXTURE_2D, texture);
+		
+			if (image.buffer.bitsPerPixel == 1) {
+			
+				internalFormat = GL.ALPHA;
+				format = GL.ALPHA;
+			
+			} else {
+			
+				internalFormat = GL.RGB;
+				format = GL.RGB;
+			
+			}
+		//
+				
+			GL.texImage2D(GL.TEXTURE_2D, 0, internalFormat, image.buffer.width, image.buffer.height, 0, format, GL.UNSIGNED_BYTE, image.data);
+		//}	
+		//GL.bindTexture(GL.TEXTURE_2D, texture);
+		VisualRenderer.Get().ActivateTexture(VisualRenderer.Get().GetFreeTextureIndex());
 
     }
+	
+	
    	
 	public inline function GetTextureDimensions(name:String):Rectangle
 	{

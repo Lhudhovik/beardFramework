@@ -45,6 +45,7 @@ class BeardGame extends Sprite
 	public var SETTING_PATH(default, never):String = "assets/gp.xml";
 	public var SAVE_PATH(default, never):String = "save/";
 	public var UI_PATH(default, never):String = "assets/UI/";
+	public var FONT_PATH(default, never):String = "assets/fonts/";
 	public var SETTINGS(default, never):String = "settings";
 	public var SPLASHSCREENS_PATH(default, never):String = "assets/splash/";
 	public var SHADERS_PATH(default, never):String = "assets/shaders/";
