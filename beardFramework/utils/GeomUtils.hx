@@ -8,7 +8,23 @@ import lime.math.Matrix4;
 class GeomUtils 
 {
 
-	public static var utilMatrix:Matrix4;
+	public static var utilMatrix(get, null):Matrix4;
+	public static var utilSimpleRect(get, null):SimpleRect;
+	
+	
+	
+	static function get_utilSimpleRect():SimpleRect 
+	{
+		if (utilSimpleRect == null) utilSimpleRect = {width:0, height:0, x :0 , y:0};
+		return utilSimpleRect;
+	}
+	
+	static function get_utilMatrix():Matrix4 
+	{
+		if (utilMatrix == null) utilMatrix = new Matrix4();
+		return utilMatrix;
+	}
+	
 	
 	
 	

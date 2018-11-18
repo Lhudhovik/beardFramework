@@ -34,12 +34,6 @@ class VisualRenderer extends DefaultRenderer
 		return instance;
 	}
 	
-	public function GetFreeTextureIndex():Int
-	{
-		
-		return DefaultRenderer.FREETEXTUREINDEX;
-	}
-	
 	override public function ActivateTexture(index:Int = 0):Void
 	{
 			
@@ -151,7 +145,9 @@ class VisualRenderer extends DefaultRenderer
 
 	public function UpdateBufferFromLayer(layer:BeardLayer):Void
 	{
-				
+		if (ready){
+			
+		
 		if ( layer.dirtyVisuals == null ||  layer.dirtyVisuals.length == 0) return;
 		
 		var verIndex:Int = 0;
@@ -249,7 +245,7 @@ class VisualRenderer extends DefaultRenderer
 		GL.bindVertexArray(0);
 		
 		layer.dirtyVisuals.Clean();
-		
+		}
 	}
 	
 		

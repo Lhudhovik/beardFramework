@@ -166,6 +166,8 @@ class AssetManager
 	
 	}
 	
+	
+	
 	private function OnLoadingEvent(e:LoaderEvent<Dynamic> = null):Void
 	{
 		//trace(e.type);

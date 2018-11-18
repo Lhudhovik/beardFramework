@@ -119,23 +119,24 @@ class DefaultRenderer
 				drawCount++;
 		
 				GL.bindVertexArray(0);
+					
 				var error:Int = GL.getError();
+				
 				if (error != 0)
 					trace(error);
 				
 			}
-			//var font: Font= Font.fromFile("assets/fonts/American Captain.ttf");
-			//
-			//var bitmap:BitmapData = BitmapData.fromImage(font.rendercontextyph(font.getcontextyph("a"), 50), true);
-			//var text:contextTexture = bitmap.getTexture(GL.GL);
-			//GL.activeTexture(GL.TEXTURE1);		
-			//GL.bindTexture(GL.TEXTURE_2D, texture);
-		//VisualRenderer.Get().ActivateTexture();
-		//
+			
 		}
 		
 
 			
+	}
+	
+	public function GetFreeTextureIndex():Int
+	{
+		
+		return DefaultRenderer.FREETEXTUREINDEX;
 	}
 	
 	public function ActivateTexture(index:Int = 0):Void

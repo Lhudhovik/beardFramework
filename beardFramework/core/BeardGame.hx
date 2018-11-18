@@ -16,8 +16,12 @@ import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
+import lime.graphics.opengl.GL;
+//import crashdumper.CrashDumper;
+//import crashdumper.SessionData;
 import lime.app.Application;
 import lime.graphics.RenderContext;
+import lime.utils.Assets;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
 import openfl.display.Sprite;
@@ -38,7 +42,7 @@ import sys.FileSystem;
  * ...
  * @author Ludo
  */
-class BeardGame extends Sprite
+class BeardGame extends Application
 {
 	private static var game(default, null):BeardGame;
 	
@@ -66,21 +70,25 @@ class BeardGame extends Sprite
 	{
 		super();
 		
-		Application.current.onUpdate.add(Update);
-		Application.current.window.onRender.add(Render);
-		stage.scaleMode = StageScaleMode.NO_SCALE;
-		stage.align = StageAlign.TOP_LEFT;
-		stage.addEventListener(Event.DEACTIVATE, Deactivate);
-		Application.current.window.onResize.add(Resize);
-		Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
-		
+		//Application.current.onUpdate.add(Update);
+		//Application.current.window.onRender.add(Render);
+		//stage.scaleMode = StageScaleMode.NO_SCALE;
+		//stage.align = StageAlign.TOP_LEFT;
+		//stage.addEventListener(Event.DEACTIVATE, Deactivate);
+		//Application.current.window.onResize.add(Resize);
+		//Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
+		game = this;
+	
+	}
+	override public function onPreloadComplete():Void 
+	{
 		Init();
 	}
 	
 	private function Init():Void
 	{
 	
-		game = this;
+		//game = this;
 		
 		//#if mobile
 			//
@@ -90,14 +98,18 @@ class BeardGame extends Sprite
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
 		
 			
+		
+    
+		
 		contentLayer = new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT);
 		contentLayer.visible = false;
 		UILayer = new BeardLayer("UILayer", BeardLayer.DEPTH_UI);
 		UILayer.visible = false;
+		trace("BG UI Lyaer" +UILayer);
 		loadingLayer = new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING);
 		loadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
-		AddCamera(new Camera("default", stage.stageWidth, stage.stageHeight));
+		AddCamera(new Camera("default",window.width, window.height));
 		
 		cameras["default"].Center(Application.current.window.width * 0.5, Application.current.window.height * 0.5);
 		
@@ -107,6 +119,9 @@ class BeardGame extends Sprite
 		//stage.addChild(fps);
 		
 		InputManager.Get().Activate(Application.current.window);
+		
+		
+		
 		
 				
 		if (FileSystem.exists(SPLASHSCREENS_PATH) && FileSystem.readDirectory(SPLASHSCREENS_PATH).length > 0){
@@ -169,10 +184,14 @@ class BeardGame extends Sprite
 	
 	private function GameStart():Void
 	{
+		//var unique_id:String = SessionData.generateID("BeardGame_"); 
+			//
+    //
+		//var crashDumper = new CrashDumper(unique_id); 
 		if (cameras != null && cameras["default"] != null){
 			
-			cameras["default"].viewportWidth = stage.stageWidth;
-			cameras["default"].viewportHeight = stage.stageHeight;
+			cameras["default"].viewportWidth = window.width;
+			cameras["default"].viewportHeight = window.height;
 			trace("Default camera resized");
 		}
 		
@@ -231,45 +250,55 @@ class BeardGame extends Sprite
 
 	}
 	
-	public function Render(context:RenderContext):Void
+	override public function render(context:RenderContext):Void 
 	{
 		
 		
 		//contentLayer.PrepareForRendering();
 		//UILayer.PrepareForRendering();
 		//loadingLayer.PrepareForRendering();
+		trace("prep for rendering");
 		VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
+		trace("call for rendering");
 		VisualRenderer.Get().Render();
-		
+		trace("render ended");
 		
 	}
 	
-	public function Update(deltaTime:Int):Void
+
+	override public function update(deltaTime:Int):Void 
 	{
 		//trace(deltaTime);
 		
-		if (!InputManager.directMode) InputManager.Get().Update();
+		if (preloader.complete){
+			var error:Int = GL.getError();
+					
+				if (error != 0)
+					trace(error);
+			if (!InputManager.directMode) InputManager.Get().Update();
 			
-		if (!UpdateProcessesManager.Get().IsEmpty())	UpdateProcessesManager.Get().Update();
-				
-		UIManager.Get().Update();
-	
-		if (!pause){
-			
-			if (physicsEnabled && PhysicsManager.Get().get_space() != null)
-				PhysicsManager.Get().Step(deltaTime);
-				
-			if (currentScreen != null && currentScreen.ready){
-				
-				for (entity in currentScreen.entities)
-				{
-					entity.Update();
+				if (!UpdateProcessesManager.Get().IsEmpty())	UpdateProcessesManager.Get().Update();
+						
+				UIManager.Get().Update();
+
+				if (!pause){
+					
+					if (physicsEnabled && PhysicsManager.Get().get_space() != null)
+						PhysicsManager.Get().Step(deltaTime);
+						
+					if (currentScreen != null && currentScreen.ready){
+						
+						for (entity in currentScreen.entities)
+						{
+							entity.Update();
+						}
+						
+						currentScreen.Update();
+					}
+
 				}
-				
-				currentScreen.Update();
-			}
-	
 		}
+		
 		
 		//trace(fps.text);
 	}
@@ -279,44 +308,14 @@ class BeardGame extends Sprite
 		return Application.current.window.frameRate;
 	}
 	
-	public function getTargetUnderPoint (point:Point, reverse:Bool = true):String
-	{
-		/*//var tempPoint:Point = Point.__pool.get ();
-		var stack = new Array<DisplayObject> ();
-		var hit:Bool = false;
-		var i :Int = 0;
-		for (camera in cameras){
-			
-			if (camera.ContainsPoint(point))
-			{
-				hit = false;
-				tempPoint.x = (point.x - camera.viewportX) + (camera.centerX - camera.viewportWidth *0.5) ;
-				tempPoint.y = (point.y - camera.viewportY) + (camera.centerY - camera.viewportHeight *0.5);
-				
-				//trace(tempPoint);
-				if (ScreenFlowManager.Get().transitioning)	hit = LoadingLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, LoadingLayer);
-				else if(!(hit = UILayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, UILayer)))
-					hit = contentLayer.ChildHitTest(tempPoint.x, tempPoint.y, false, stack, true, contentLayer);
-				if (hit) break;
-			}
-			
-		}
-		
-		
-		
-		if(reverse) stack.reverse ();
-		return stack != null ? stack[0] : null;*/
-		return "";
-	}
-	
 	private function Deactivate(e:Event):Void
 	{
 		
 		
 		
 	}
-	
-	public function Resize(width:Int, height:Int):Void
+
+	override public function onWindowResize(width:Int, height:Int):Void 
 	{
 		
 		if (cameras != null && cameras["default"] != null){
@@ -334,18 +333,20 @@ class BeardGame extends Sprite
 	
 	public inline function GetLayer(layerType:BeardLayerType):BeardLayer
 	{
-		var layer:BeardLayer = null;
+		var layer:BeardLayer;
 		switch(layerType)
 		{
 			
 			case BeardLayerType.CONTENT : layer=  contentLayer;
 			case BeardLayerType.LOADING : layer= loadingLayer;
-			case BeardLayerType.UI : layer =UILayer;
+			case BeardLayerType.UI : layer = UILayer;
 			
 			
 		}
 		
-		return contentLayer;
+		trace(layerType);
+		trace("returned layer : " + layer);
+		return layer;
 		
 	}
 	
@@ -356,6 +357,7 @@ class BeardGame extends Sprite
 	
 	public inline function GetUILayer():BeardLayer
 	{
+		//trace("returned layer : " + layer);
 		return UILayer;
 	}
 	

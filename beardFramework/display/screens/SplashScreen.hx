@@ -57,7 +57,7 @@ class SplashScreen extends Sequence
 	public function Skip(value:Float):Void
 	{
 		if (content != null && content.bitmapData != null){
-			BeardGame.Get().removeChild(content);
+			//BeardGame.Get().removeChild(content);
 			content.bitmapData.dispose();
 		}
 		alphaThread.Clear();
@@ -68,20 +68,20 @@ class SplashScreen extends Sequence
 	public function ShowNext(screen:String):Void
 	{
 		if (content != null && content.bitmapData != null){
-			BeardGame.Get().removeChild(content);
+			//BeardGame.Get().removeChild(content);
 			content.bitmapData.dispose();
 			alphaThread.Clear();
 		}
 		
 		content = new Bitmap(Assets.getBitmapData(BeardGame.Get().SPLASHSCREENS_PATH + screen ));
-		content.width = BeardGame.Get().stage.stageWidth;
-		content.height = BeardGame.Get().stage.stageHeight;
+		content.width = BeardGame.Get().window.width;
+		content.height = BeardGame.Get().window.height;
 		content.scaleX = content.scaleY = (content.scaleX > content.scaleY ? content.scaleY : content.scaleX);
-		content.x = (BeardGame.Get().stage.stageWidth - content.width) * 0.5;
-		content.y = (BeardGame.Get().stage.stageHeight - content.height) * 0.5;
+		content.x = (BeardGame.Get().window.width - content.width) * 0.5;
+		content.y = (BeardGame.Get().window.height - content.height) * 0.5;
 		content.alpha = 0;
 	
-		BeardGame.Get().addChild(content);
+		//BeardGame.Get().addChild(content);
 		SetCondition("splashScreensStep", false);
 		SetCondition("LoadSettings", false);
 		Display();

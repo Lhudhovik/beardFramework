@@ -814,7 +814,7 @@ class InputManager
 		
 		if (handledInputs[utilString] != null)
 		{
-			utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
+			utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			timeCounters[StringLibrary.TOUCH + touch.id] =  Sys.preciseTime();
 		
 			var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
@@ -834,7 +834,7 @@ class InputManager
 	public function OnTouchMove(touch:Touch):Void
 	{
 		utilString = StringLibrary.TOUCH_MOVE + touch.id;
-		utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
+		utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			
 		if (touchTargets[utilString] == null) touchTargets[utilString] = "";
 		
@@ -898,7 +898,7 @@ class InputManager
 	{
 		
 		utilString =  StringLibrary.TOUCH_END + touch.id;
-		utilPoint.setTo(touch.x * BeardGame.Get().stage.stageWidth, touch.y*BeardGame.Get().stage.stageHeight);
+		utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			
 		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 		touchTargets[utilString] = object != null ? object.name : "";

@@ -1,15 +1,17 @@
 package beardFramework.resources.assets;
+import beardFramework.core.BeardGame;
 import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.utils.DataUtils;
 import beardFramework.utils.TextureUtils;
 import beardFramework.utils.XMLUtils;
 import lime.app.Application;
 import lime.graphics.Image;
+import lime.graphics.WebGLRenderContext;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLTexture;
 import openfl.display.BitmapData;
-import openfl.geom.Rectangle;
-
+import lime.math.Rectangle;
+import lime._internal.graphics.ImageCanvasUtil; // TODO
 
 @:access(openfl.display.BitmapData)
 /**
@@ -26,6 +28,7 @@ class Atlas
 
 	private var defaultRect:Rectangle;
 	private var subAreas:Map<String, SubTextureData>;
+	
 	public var index(default, null):Int;
 	
 	
@@ -40,7 +43,7 @@ class Atlas
 			bitmapData.dispose();
 		}
 		else
-			atlasBitmapData = new BitmapData(10, 10);
+			atlasBitmapData = new BitmapData(0,0);
 		
 		if(xml != null)	parseXml(xml);
 		
@@ -76,36 +79,91 @@ class Atlas
         }
 		
 		
-		//GL.activeTexture(GL.TEXTURE0 + VisualRenderer.Get().GetFreeTextureIndex());
-		//texture = atlasBitmapData.getTexture(Application.current.window.context);
+		GL.activeTexture(GL.TEXTURE0 + VisualRenderer.Get().GetFreeTextureIndex());
 		
-		//if (index == 0){
-			var image:Image = atlasBitmapData.image;
-			var internalFormat, format;
+		texture = GetTexture(atlasBitmapData.image);
 		
-		
-				GL.activeTexture(GL.TEXTURE0 + VisualRenderer.Get().GetFreeTextureIndex());	
-			//GL.bindTexture(GL.TEXTURE_2D, texture);
-		
-			if (image.buffer.bitsPerPixel == 1) {
-			
-				internalFormat = GL.ALPHA;
-				format = GL.ALPHA;
-			
-			} else {
-			
-				internalFormat = GL.RGB;
-				format = GL.RGB;
-			
-			}
-		//
-				
-			GL.texImage2D(GL.TEXTURE_2D, 0, internalFormat, image.buffer.width, image.buffer.height, 0, format, GL.UNSIGNED_BYTE, image.data);
-		//}	
-		//GL.bindTexture(GL.TEXTURE_2D, texture);
+		GL.bindTexture(GL.TEXTURE_2D, texture);
 		VisualRenderer.Get().ActivateTexture(VisualRenderer.Get().GetFreeTextureIndex());
 
     }
+	
+	private function GetTexture(image:Image):GLTexture
+	{
+		var __texture:GLTexture = GL.createTexture ();
+		var __textureInternalFormat:Int = 0;
+		var __textureFormat:Int = 0;
+	
+	
+		GL.bindTexture (GL.TEXTURE_2D, __texture);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
+				
+		if (image != null) {
+			
+			var internalFormat, format;
+			
+			if (image.buffer.bitsPerPixel == 1) {
+				
+				internalFormat = GL.ALPHA;
+				format = GL.ALPHA;
+				
+			} else {
+				__textureInternalFormat = GL.RGBA;
+					
+				var bgraExtension = null;
+				#if (!js || !html5)
+				bgraExtension = GL.getExtension ("EXT_bgra");
+				if (bgraExtension == null)
+					bgraExtension = GL.getExtension ("EXT_texture_format_BGRA8888");
+				if (bgraExtension == null)
+					bgraExtension = GL.getExtension ("APPLE_texture_format_BGRA8888");
+				#end
+				
+				if (bgraExtension != null) {
+					
+					__textureFormat = bgraExtension.BGRA_EXT;
+					
+					#if (!ios && !tvos)
+					if (BeardGame.Get().window.context.type == #if (lime >= "7.0.0") OPENGLES #else GLES #end) {
+						
+						__textureInternalFormat = bgraExtension.BGRA_EXT;
+						
+					}
+					#end
+					
+				} 
+				else	__textureFormat = GL.RGBA;
+					
+				internalFormat = __textureInternalFormat;
+				format = __textureFormat;
+				
+			}
+			
+			GL.bindTexture (GL.TEXTURE_2D, __texture);
+			
+			var textureImage = image;
+			
+			if (#if openfl_power_of_two !textureImage.powerOfTwo || #end (!textureImage.premultiplied && textureImage.transparent)) {
+				
+				textureImage = textureImage.clone ();
+				textureImage.premultiplied = true;
+				#if openfl_power_of_two
+				textureImage.powerOfTwo = true;
+				#end
+				
+			}
+			
+			GL.texImage2D (GL.TEXTURE_2D, 0, internalFormat, textureImage.buffer.width, textureImage.buffer.height, 0, format, GL.UNSIGNED_BYTE, textureImage.data);
+			
+			GL.bindTexture (GL.TEXTURE_2D, null);
+						
+		}
+				
+		return __texture;
+	}
 	
 	
    	
