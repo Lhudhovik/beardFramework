@@ -37,7 +37,7 @@ class FontAtlas extends Atlas
 	
 	public function AddFont(font:Font, fontName:String, size:Int = 72):Void
 	{
-		trace("Add Font");
+		//trace("Add Font");
 		var glyphs:Map<Glyph, Image> = font.renderGlyphs(font.getGlyphs(), 32);
 		var tempBD:BitmapData;
 		var previousGlyphPosition:SubTextureData = null;
@@ -52,7 +52,7 @@ class FontAtlas extends Atlas
 			//metrics = font.getGlyphMetrics(glyph);
 		
 			currentGlyph = String.fromCharCode(glyph);
-				trace("Creating bitmap for " + fontName + "character : "  + currentGlyph);
+				//trace("Creating bitmap for " + fontName + "character : "  + currentGlyph);
 			tempBD = BitmapData.fromImage(glyphs[glyph]);
 			
 			if (previousGlyphPosition == null)
@@ -114,12 +114,12 @@ class FontAtlas extends Atlas
 		
 		fonts.push(fontData);
 		//
-		GL.activeTexture(GL.TEXTURE0 + FontRenderer.Get().GetFreeTextureIndex());
-		
-		texture = GetTexture(atlasBitmapData.image);
-		
-		GL.bindTexture(GL.TEXTURE_2D, texture);
-		FontRenderer.Get().ActivateTexture(FontRenderer.Get().GetFreeTextureIndex());
+		//GL.activeTexture(GL.TEXTURE0 + FontRenderer.Get().GetFreeTextureIndex());
+		////
+		//texture = GetTexture(atlasBitmapData.image);
+		////
+		//GL.bindTexture(GL.TEXTURE_2D, texture);
+		//FontRenderer.Get().ActivateTexture(FontRenderer.Get().GetFreeTextureIndex());
 		
 		
 	}

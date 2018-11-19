@@ -238,6 +238,7 @@ class Camera
 	
 	inline function set_viewportWidth(value:Float):Float 
 	{
+		trace("viewpotWidth changed");
 		if (viewportWidth != value){
 			needRenderUpdate = true;
 			viewport.width = Math.round(value);	

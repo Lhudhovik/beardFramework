@@ -23,6 +23,7 @@ class VisualRenderer extends DefaultRenderer
 		super();
 	}
 	
+	
 	public static inline function Get():VisualRenderer
 	{
 		if (instance == null)
@@ -34,14 +35,7 @@ class VisualRenderer extends DefaultRenderer
 		return instance;
 	}
 	
-	override public function ActivateTexture(index:Int = 0):Void
-	{
-			
-		GL.useProgram(shaderProgram);
-		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas["+index+"]"), index);
-		
-		DefaultRenderer.FREETEXTUREINDEX++;
-	}
+	
 	
 	public function UpdateBufferFromVisuals(visuals:Array<Visual>):Void
 	{

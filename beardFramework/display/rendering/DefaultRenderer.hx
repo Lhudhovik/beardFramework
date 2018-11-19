@@ -20,6 +20,8 @@ import lime.text.Font;
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 import openfl.display.BitmapData;
+
+@:access(lime.graphics.opengl.GL.GLObject)
 /**
  * ...
  * @author 
@@ -29,6 +31,7 @@ class DefaultRenderer
 	private static var VAOCOUNT:Int = 1;
 	private static var BUFFERCOUNT:Int = 1;
 	private static var FREETEXTUREINDEX:Int = 0;
+	private static var ATTRIBUTEPOINTER:Int = 0;
 
 
 	public var drawCount(default, null):Int = 0;
@@ -41,9 +44,9 @@ class DefaultRenderer
 	private var TBO:GLBuffer;
 	public var shaderProgram:GLProgram;
 	private var ready:Bool = false;
-	private var projection:Matrix4;
+	public var projection:Matrix4;
 	private var model:Matrix4;
-	private var view:Matrix4;
+	public var view:Matrix4;
 	private var fragmentShader:String = "fragmentShader";
 	private var vertexShader:String="vertexShader";
 	
@@ -99,11 +102,12 @@ class DefaultRenderer
 				
 				
 				
-				GL.scissor(camera.viewport.x,Application.current.window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 				
 				GL.clearColor(0.2, 0.3, 0.3, 1);
 				GL.clear(GL.COLOR_BUFFER_BIT);
 				GL.clear(GL.DEPTH_BUFFER_BIT);
+				
+				GL.scissor(camera.viewport.x,Application.current.window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 				
 				
 				view.identity();
@@ -141,8 +145,10 @@ class DefaultRenderer
 	
 	public function ActivateTexture(index:Int = 0):Void
 	{
-		//GL.useProgram(shaderProgram);
-		//GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas"), 0);
+		GL.useProgram(shaderProgram);
+		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas["+index+"]"), index);
+		
+		FREETEXTUREINDEX++;
 	}
 	
 	public inline function InitShaders():Void
@@ -194,38 +200,32 @@ class DefaultRenderer
 		
 	}
 	
-	public inline function InitBuffers():Void
+	public  function InitBuffers():Void
 	{
+		
 		VAO = GLObject.fromInt(GLObjectType.VERTEX_ARRAY_OBJECT, VAOCOUNT++);
 		VBO = GLObject.fromInt(GLObjectType.BUFFER, BUFFERCOUNT++);
 		EBO = GLObject.fromInt(GLObjectType.BUFFER, BUFFERCOUNT++);
-		TBO = GLObject.fromInt(GLObjectType.BUFFER, BUFFERCOUNT++);
-		
+	
 		GL.bindVertexArray(VAO);
 		
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 				
-		GL.enableVertexAttribArray(0);
-		GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 0);
-		GL.bindAttribLocation(shaderProgram, 0, "pos");
+		GL.enableVertexAttribArray(ATTRIBUTEPOINTER);
+		GL.vertexAttribPointer(ATTRIBUTEPOINTER, 3, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 0);
+		GL.bindAttribLocation(shaderProgram, ATTRIBUTEPOINTER++, "pos");
 		
-		GL.enableVertexAttribArray(1);
-		GL.vertexAttribPointer(1, 3, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 3* Float32Array.BYTES_PER_ELEMENT);
-		GL.bindAttribLocation(shaderProgram, 1, "uv");
+		GL.enableVertexAttribArray(ATTRIBUTEPOINTER);
+		GL.vertexAttribPointer(ATTRIBUTEPOINTER, 3, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 3* Float32Array.BYTES_PER_ELEMENT);
+		GL.bindAttribLocation(shaderProgram, ATTRIBUTEPOINTER++, "uv");
 		
-		GL.enableVertexAttribArray(2);
-		GL.vertexAttribPointer(2, 4, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 6 * Float32Array.BYTES_PER_ELEMENT);
-		GL.bindAttribLocation(shaderProgram, 2, "color");
-		
-		//GL.enableVertexAttribArray(3);
-		//GL.vertexAttribPointer(3, 1, GL.UNSIGNED_SHORT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 9 * Float32Array.BYTES_PER_ELEMENT);
-		//GL.bindAttribLocation(shaderProgram, 2, "atlasIndex");
-		
+		GL.enableVertexAttribArray(ATTRIBUTEPOINTER);
+		GL.vertexAttribPointer(ATTRIBUTEPOINTER, 4, GL.FLOAT, false, 10 * Float32Array.BYTES_PER_ELEMENT, 6 * Float32Array.BYTES_PER_ELEMENT);
+		GL.bindAttribLocation(shaderProgram, ATTRIBUTEPOINTER++, "color");
 		
 		GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 		GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,verticesIndices.byteLength, verticesIndices, GL.DYNAMIC_DRAW);
 		
-	
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		GL.bindVertexArray(0);
 	}
@@ -233,9 +233,9 @@ class DefaultRenderer
 	public function Start():Void
 	{
 		ready = true;
+		//BeardGame.Get().onWindowResize(Application.current.window.width, Application.current.window.height);
 		OnResize(Application.current.window.width, Application.current.window.height);
-		//Application.current.window.fullscreen = true;
-		Application.current.window.fullscreen = false;
+		
 		
 	}
 	

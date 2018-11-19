@@ -258,7 +258,7 @@ class AssetManager
 	
 	public function LoadFont(fontName:String, format:FontFormat, size:Int=72, atlasName:String = null):Void
 	{
-		trace("font loading");
+		//trace("font loading");
 		var fileExtension:String = "";
 		
 		switch (format)

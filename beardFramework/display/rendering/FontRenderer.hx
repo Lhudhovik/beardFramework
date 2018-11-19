@@ -27,7 +27,7 @@ import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 import openfl.display.BitmapData;
 
-@:access(lime.graphics.opengl.GL)
+@:access(lime.graphics.opengl.GL.GLObject)
 	
 /**
  * ...
@@ -48,16 +48,9 @@ class FontRenderer extends DefaultRenderer
 		//trace("Font Renderer Init");
 		fragmentShader = "fontFragmentShader";
 		super.Init();
-		trace("Font Renderer Init finished");
+		//trace("Font Renderer Init finished");
 	}
 	
-	override public function ActivateTexture(index:Int = 0):Void 
-	{
-		GL.useProgram(shaderProgram);
-		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas["+index+"]"), index);
-		
-		DefaultRenderer.FREETEXTUREINDEX++;
-	}
 	
 	public static inline function Get():FontRenderer
 	{

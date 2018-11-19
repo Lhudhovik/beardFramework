@@ -105,7 +105,6 @@ class BeardGame extends Application
 		contentLayer.visible = false;
 		UILayer = new BeardLayer("UILayer", BeardLayer.DEPTH_UI);
 		UILayer.visible = false;
-		trace("BG UI Lyaer" +UILayer);
 		loadingLayer = new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING);
 		loadingLayer.visible = false;
 		cameras = new Map<String,Camera>();
@@ -257,11 +256,11 @@ class BeardGame extends Application
 		//contentLayer.PrepareForRendering();
 		//UILayer.PrepareForRendering();
 		//loadingLayer.PrepareForRendering();
-		trace("prep for rendering");
+		//trace("prep for rendering");
 		VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
-		trace("call for rendering");
+		//trace("call for rendering");
 		VisualRenderer.Get().Render();
-		trace("render ended");
+		//trace("render ended");
 		
 	}
 	
@@ -271,10 +270,7 @@ class BeardGame extends Application
 		//trace(deltaTime);
 		
 		if (preloader.complete){
-			var error:Int = GL.getError();
-					
-				if (error != 0)
-					trace(error);
+			
 			if (!InputManager.directMode) InputManager.Get().Update();
 			
 				if (!UpdateProcessesManager.Get().IsEmpty())	UpdateProcessesManager.Get().Update();
@@ -344,8 +340,7 @@ class BeardGame extends Application
 			
 		}
 		
-		trace(layerType);
-		trace("returned layer : " + layer);
+		
 		return layer;
 		
 	}

@@ -14,11 +14,12 @@ class Shaders
 {
 	
 	static public var shader:Map<String,String> = new Map<String,String>();
+	static public var loaded:Bool= false;
 	
 	static public function LoadShaders():Void
 	{
 		
-		if (FileSystem.exists(BeardGame.Get().SHADERS_PATH))
+		if (!loaded && FileSystem.exists(BeardGame.Get().SHADERS_PATH))
 		{
 			for (element in FileSystem.readDirectory(BeardGame.Get().SHADERS_PATH))
 			{
@@ -34,6 +35,7 @@ class Shaders
 					//trace(shader);
 				}
 			}
+			loaded = true;
 		}
 		
 			
