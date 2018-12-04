@@ -1,13 +1,28 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <data>
 <version></version>
+	
 <atlases>
-	<atlas name="name" fileExtension="png" path="assets/atlases" />
+	<atlas name="menuHD" fileExtension="jpg" path="assets/atlases" />
+	<!--<atlas name="img001" fileExtension="jpg" path="assets/atlases" />-->
+	<atlas name="menuHD2" fileExtension="png" path="assets/atlases" />
+	<!--<atlas name="menuHD3" fileExtension="png" path="assets/atlases" />-->
+	<!--<atlas name="menuHD4" fileExtension="png" path="assets/atlases" />-->
 </atlases>
+<fonts default="American Captain">
+	<font name="American Captain" fileExtension="ttf" path="assets/fonts"/>
+	<font name="chinese rocks rg" fileExtension="ttf" path="assets/fonts"/>
+	<font name="INFECTED" fileExtension="ttf" path="assets/fonts"/>
+	<font name="Outrun future" fileExtension="otf" path="assets/fonts"/>
+	<font name="Presque Normal" fileExtension="ttf" path="assets/fonts"/>
+</fonts>
 <fx></fx>
 <soundBank></soundBank>
+	
+	
 <settings>
 	<physics enabled="true" gravityX="0" gravityY="9.81" />
+	<loading minLoadingTime="0" />
 	
 	<!-- 
 		
@@ -27,21 +42,22 @@
 		Gamepad : 	gamepadAxisMove, gamepadButtonUp, gamepadButtonDown, gamepadButtonPress;
 		Touch :		to do...
 	-->
-	<inputs keyboard="true" mouse="true" maxMouseButtons="10" gamepad="true" maxGamepads="8" touch="true" maxTouches="4" defaultAction="true" directMode="false">
+	<inputs keyboard="true" mouse="true" maxMouseButtons="5" gamepad="true" maxGamepads="4" touch="true" maxTouches="4" defaultAction="true" directMode="false">
 		<!--KEYBOARD-->
 		<input action="Validate" defaultInput="ENTER" defaultInputType="keyPress"><secondaryInput input=""/></input>
-		<input action="MoveLeft" defaultInput="q" defaultInputType="keyDown"><secondaryInput input=""/></input>
-		<input action="MoveRight" defaultInput="d" defaultInputType="keyDown"><secondaryInput input=""/></input>
+		<input action="MoveLeft" defaultInput="Q" defaultInputType="keyDown"><secondaryInput input=""/></input>
+		<input action="MoveRight" defaultInput="D" defaultInputType="keyDown"><secondaryInput input=""/></input>
 		
 		<!--MOUSE-->
 		<input action="MouseAction" defaultInput="mouse1" defaultInputType="mouseUp">
 			<secondaryInput input=""/>
-			<compatibleAction>ActionName</compatibleInput>
+			
 		</input>
 			
 			
 		<!--GAMEPAD-->
 		<input action="Validate" defaultInput="A" defaultInputType="gamepadButtonPress" gamepadID="-1"><secondaryInput input=""/></input>
+		<input action="Save" defaultInput="B" defaultInputType="gamepadButtonPress" gamepadID="-1"><secondaryInput input=""/></input>
 		<input action="HorizontalMove" defaultInput="LEFT_X" defaultInputType="gamepadAxisMove" gamepadID="-1"><secondaryInput input=""/></input>
 		<input action="VerticalMove" defaultInput="LEFT_Y" defaultInputType="gamepadAxisMove" gamepadID="-1"><secondaryInput input=""/></input>
 		<input action="CameraVertical" defaultInput="RIGHT_Y" defaultInputType="gamepadAxisMove" gamepadID="-1"><secondaryInput input=""/></input>
@@ -54,3 +70,22 @@
 	</inputs>
 </settings>
 </data>
+
+<!-- 
+		
+		DEFAULT INPUTS :
+		
+		Keyboard: 	[key] ex: a, b, c......y,z, ENTER, SPACE...
+		Mouse: 		[mouse] + [ButtonID] ex: mouse0, mouse1...
+		Gamepad:	[ButtonID] ex : A, RIGHT_SHOULDER, LEFT_X...
+					(default shared actions gamepad ID = -1, else it will be created only for one specific gamepad ex : defaultInput="Gamepad1A" defaultInputType="GAMEPAD" gamepadID="1")
+		Touch:		
+		
+		DEFAULT INPUT TYPES :
+		
+		
+		keyboard: 	keyUp,	keyDown, keyPress
+		Mouse : 	mouseDown, mouseClick, mouseUp,	mouseMove, mouseOver, mouseOut, mouseWheel
+		Gamepad : 	gamepadAxisMove, gamepadButtonUp, gamepadButtonDown, gamepadButtonPress;
+		Touch :		to do...
+	-->

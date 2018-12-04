@@ -200,7 +200,7 @@ class BeardLayer
 				visual.layer = this;
 				visual.z = (visual.z ==-1) ? visuals.length : visual.z;
 				visual.visible = this.visible;
-				visual.bufferIndex =  VisualRenderer.Get().GetFreeBufferIndex();
+				visual.bufferIndex =  VisualRenderer.Get().AllocateBufferIndex();
 				visuals.push(visual);
 				
 				AddVisualDirty(visual);
@@ -223,7 +223,7 @@ class BeardLayer
 			visual.layer = this;
 			visual.z = (visual.z ==-1) ? visuals.length : visual.z;
 			visual.visible = this.visible;
-			visual.bufferIndex =  VisualRenderer.Get().GetFreeBufferIndex();
+			visual.bufferIndex =  VisualRenderer.Get().AllocateBufferIndex();
 			
 			visuals.push(visual);
 		

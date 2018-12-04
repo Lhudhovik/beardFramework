@@ -12,7 +12,6 @@ class GeomUtils
 	public static var utilSimpleRect(get, null):SimpleRect;
 	
 	
-	
 	static function get_utilSimpleRect():SimpleRect 
 	{
 		if (utilSimpleRect == null) utilSimpleRect = {width:0, height:0, x :0 , y:0};
@@ -30,10 +29,10 @@ class GeomUtils
 	
 }
 typedef SimpleRect =
-	{
-		public var width:Float;
-		public var height:Float;
-		public var x : Float;
-		public var y:Float;
+{
+	public var width:Float;
+	public var height:Float;
+	public var x : Float;
+	public var y:Float;
 
-	}
+}

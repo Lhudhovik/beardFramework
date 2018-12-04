@@ -11,7 +11,7 @@ import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLTexture;
 import openfl.display.BitmapData;
 import lime.math.Rectangle;
-import lime._internal.graphics.ImageCanvasUtil; // TODO
+
 
 @:access(openfl.display.BitmapData)
 /**
@@ -22,7 +22,8 @@ class Atlas
 {
 	private static var atlasCount:Int = 0;
 	
-	public var atlasBitmapData:BitmapData;
+	//public var atlasBitmapData:BitmapData;
+	public var textureImage:Image;
 	public var name:String;
 	public var texture:GLTexture;
 
@@ -30,6 +31,7 @@ class Atlas
 	private var subAreas:Map<String, SubTextureData>;
 	
 	public var index(default, null):Int;
+	public var textureIndex(default, null):Int = -1;
 	
 	
 	public function new(name:String, bitmapData:BitmapData, xml:Xml) 
@@ -38,12 +40,24 @@ class Atlas
 		index = atlasCount++;
 		subAreas = new Map<String, SubTextureData>();
 		
+		
+		subAreas.set(name, {
+				imageArea:	new Rectangle(),
+				frame:		null,
+				rotated : 	false,
+				uvX: 		0,
+				uvY: 		0,
+				uvW:		1,
+				uvH:		1,
+				atlasIndex: this.index
+		});
+		
 		if (bitmapData != null) {
-			atlasBitmapData = bitmapData.clone();
+			textureImage = bitmapData.image.clone();
 			bitmapData.dispose();
 		}
 		else
-			atlasBitmapData = new BitmapData(0,0);
+			textureImage = new Image();
 		
 		if(xml != null)	parseXml(xml);
 		
@@ -70,21 +84,25 @@ class Atlas
 				imageArea:	imageArea.clone(),
 				frame:		((frame.width > 0 && frame.height > 0) ? frame.clone() : null),
 				rotated : 	DataUtils.FromStringToBool(subTexture.get("rotated")),
-				uvX: 		imageArea.x/atlasBitmapData.width,
-				uvY: 		imageArea.y/atlasBitmapData.height,
-				uvW:		imageArea.width/atlasBitmapData.width,
-				uvH:		imageArea.height/atlasBitmapData.height,
+				uvX: 		imageArea.x/textureImage.width,
+				uvY: 		imageArea.y/textureImage.height,
+				uvW:		imageArea.width/textureImage.width,
+				uvH:		imageArea.height/textureImage.height,
 				atlasIndex: this.index
 			}
         }
 		
 		
-		GL.activeTexture(GL.TEXTURE0 + VisualRenderer.Get().GetFreeTextureIndex());
+		subAreas[name].imageArea.width = textureImage.width;
+		subAreas[name].imageArea.height = textureImage.height;
 		
-		texture = GetTexture(atlasBitmapData.image);
+		textureIndex = VisualRenderer.Get().AssociateFreeTextureIndex();
+		GL.activeTexture(GL.TEXTURE0 + textureIndex);
+		
+		texture = GetTexture(textureImage);
 		
 		GL.bindTexture(GL.TEXTURE_2D, texture);
-		VisualRenderer.Get().ActivateTexture(VisualRenderer.Get().GetFreeTextureIndex());
+		VisualRenderer.Get().UpdateTexture(textureIndex);
 
     }
 	
@@ -98,8 +116,10 @@ class Atlas
 		GL.bindTexture (GL.TEXTURE_2D, __texture);
 		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
 		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
-		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
-		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
+		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
 				
 		if (image != null) {
 			
@@ -190,8 +210,7 @@ class Atlas
 		}
 		
 		subAreas = null;
-		atlasBitmapData.dispose();
-		atlasBitmapData = null;
+		textureImage = null;
 	}
 		
 }

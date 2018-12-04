@@ -2,7 +2,8 @@ package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
 import beardFramework.display.core.Visual;
 import beardFramework.resources.assets.Atlas;
-import beardFramework.text.FontFormat;
+import beardFramework.display.text.FontFormat;
+//import extension.harfbuzz.TextScript;
 import haxe.ds.Vector;
 import haxe.io.Float32Array;
 import haxe.io.UInt8Array;
@@ -32,7 +33,7 @@ class AssetManager
 	private static var instance(default, null):AssetManager;
 	
 	private var DEFAULT_LOADER_NAME(null, never):String = "DefaultName";
-	private var FONT_ATLAS_NAME(null, never):String = "FontAtlas";
+	public var FONT_ATLAS_NAME(default, never):String = "FontAtlas";
 	
 	private var loaderQueue:LoaderQueue;
 	private var loaders:Map<String, Loader<Dynamic>>;
@@ -67,7 +68,7 @@ class AssetManager
 		
 		loaders = new Map<String, Loader<Dynamic>>();
 		atlases = new Map<String, Atlas>();
-		//fonts = new Map<String, Font>();
+		fonts = new Map<String, Font>();
 		
 		requestedAtlasQueue = new Array<String>();
 		
@@ -256,7 +257,12 @@ class AssetManager
 		return atlases[atlasName] != null ? atlases[atlasName] : null;
 	}
 	
-	public function LoadFont(fontName:String, format:FontFormat, size:Int=72, atlasName:String = null):Void
+	public inline function GetFont(fontName:String):Font
+	{
+		return fonts[fontName] != null ? fonts[fontName] : null;
+	}
+	
+	public function LoadFont(fontName:String, format:FontFormat, size:Int = 72/*, script:TextScript = TextScript.ScriptLatin, language:String = ""*/, atlasName:String = null):Void
 	{
 		//trace("font loading");
 		var fileExtension:String = "";
@@ -268,14 +274,15 @@ class AssetManager
 			
 		}
 		
-		var font : Font = Font.fromFile(BeardGame.Get().FONT_PATH + fontName + fileExtension);
+		
+		if(fonts[fontName] == null) fonts[fontName] = Font.fromFile(BeardGame.Get().FONT_PATH + fontName + fileExtension);
 		
 		var fontAtlas:FontAtlas;
 		
 		if (atlasName == null || atlasName == ""){
 			
-			if (atlases[fontName + size] == null)	atlases[fontName + size] = fontAtlas = new FontAtlas(fontName + size);
-			else fontAtlas = cast(atlases[fontName + size],FontAtlas);
+			if (atlases[FONT_ATLAS_NAME] == null)	atlases[FONT_ATLAS_NAME] = fontAtlas = new FontAtlas(FONT_ATLAS_NAME);
+			else fontAtlas = cast(atlases[FONT_ATLAS_NAME],FontAtlas);
 			
 		}
 		else{
@@ -286,7 +293,7 @@ class AssetManager
 		
 		
 		
-		if (!fontAtlas.ContainsFont(fontName)) fontAtlas.AddFont(font, fontName, size);	
+		if (!fontAtlas.ContainsFont(fontName)) fontAtlas.AddFont(fonts[fontName] , fontName, size);	
 		
 	}
 	

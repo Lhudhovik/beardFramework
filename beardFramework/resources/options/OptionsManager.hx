@@ -1,5 +1,6 @@
 package beardFramework.resources.options;
 import beardFramework.display.screens.BasicLoadingScreen;
+import beardFramework.display.text.TextField;
 import beardFramework.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
 
@@ -52,15 +53,11 @@ class OptionsManager
 				}
 			}
 			
-			//if (element.nodeName == "fonts")
-			//{
-//
-				//for (font in element.elementsNamed("font"))
-				//{
-					//
-					//resourcesToLoad.push({ type: AssetType.DATA, name : font.get("name"), url: font.get("path")+"/"+ font.get("name") + "." + font.get("fileExtension") });
-				//}
-			//}
+			if (element.nodeName == "fonts")
+			{
+
+				TextField.defaultFont = element.get("default");
+			}
 			
 			if (element.nodeName == "settings")
 			{

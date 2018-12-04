@@ -1,5 +1,6 @@
 package beardFramework.core;
 
+import beardFramework.display.rendering.FontRenderer;
 import beardFramework.display.rendering.Shaders;
 import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.resources.options.OptionsManager;
@@ -24,13 +25,6 @@ import lime.graphics.RenderContext;
 import lime.utils.Assets;
 import mloader.Loader.LoaderErrorType;
 import mloader.Loader.LoaderEvent;
-import openfl.display.Sprite;
-import openfl.display.StageScaleMode;
-import openfl.display.StageAlign;
-import openfl.events.Event;
-import openfl.geom.Point;
-import openfl.ui.Multitouch;
-import openfl.ui.MultitouchInputMode;
 import sys.FileSystem;
 
 @:access(openfl.display.Graphics)
@@ -69,14 +63,6 @@ class BeardGame extends Application
 	public function new() 
 	{
 		super();
-		
-		//Application.current.onUpdate.add(Update);
-		//Application.current.window.onRender.add(Render);
-		//stage.scaleMode = StageScaleMode.NO_SCALE;
-		//stage.align = StageAlign.TOP_LEFT;
-		//stage.addEventListener(Event.DEACTIVATE, Deactivate);
-		//Application.current.window.onResize.add(Resize);
-		//Multitouch.inputMode = MultitouchInputMode.TOUCH_POINT;
 		game = this;
 	
 	}
@@ -96,11 +82,6 @@ class BeardGame extends Application
 			//
 		//#end
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
-		
-			
-		
-    
-		
 		contentLayer = new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT);
 		contentLayer.visible = false;
 		UILayer = new BeardLayer("UILayer", BeardLayer.DEPTH_UI);
@@ -119,14 +100,9 @@ class BeardGame extends Application
 		
 		InputManager.Get().Activate(Application.current.window);
 		
-		
-		
-		
-				
 		if (FileSystem.exists(SPLASHSCREENS_PATH) && FileSystem.readDirectory(SPLASHSCREENS_PATH).length > 0){
 			
 			splashScreen = new SplashScreen(FileSystem.readDirectory(SPLASHSCREENS_PATH));
-			//splashScreen.completed.addOnce(LoadSettings);
 			splashScreen.AddStep( new VoidStep("LoadSettings", LoadSettings));
 			Wait.WaitFor(3, splashScreen.Start);
 			
@@ -258,9 +234,11 @@ class BeardGame extends Application
 		//loadingLayer.PrepareForRendering();
 		//trace("prep for rendering");
 		VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
-		//trace("call for rendering");
+		
 		VisualRenderer.Get().Render();
-		//trace("render ended");
+		
+		FontRenderer.Get().Render();
+		
 		
 	}
 	
@@ -304,13 +282,10 @@ class BeardGame extends Application
 		return Application.current.window.frameRate;
 	}
 	
-	private function Deactivate(e:Event):Void
+	override public function onWindowDeactivate():Void 
 	{
 		
-		
-		
 	}
-
 	override public function onWindowResize(width:Int, height:Int):Void 
 	{
 		

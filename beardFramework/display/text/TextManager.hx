@@ -1,4 +1,4 @@
-package beardFramework.text;
+package beardFramework.display.text;
 
 /**
  * ...

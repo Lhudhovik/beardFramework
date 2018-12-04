@@ -5,7 +5,7 @@ import lime.utils.Float32Array;
  * ...
  * @author 
  */
-class VisualDataBufferArray 
+class RenderedDataBufferArray 
 {
 
 	public var visualsCount:Int=0;

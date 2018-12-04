@@ -3,7 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardLayer.BeardLayerType;
-import beardFramework.display.rendering.vertexData.VisualDataBufferArray;
+import beardFramework.display.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.DataUtils;
 import haxe.ds.Vector;
@@ -42,7 +42,7 @@ class DefaultRenderer
 	private var VBO:GLBuffer;
 	private var VAO:GLVertexArrayObject;
 	private var TBO:GLBuffer;
-	public var shaderProgram:GLProgram;
+	public static var shaderProgram:GLProgram;
 	private var ready:Bool = false;
 	public var projection:Matrix4;
 	private var model:Matrix4;
@@ -52,7 +52,7 @@ class DefaultRenderer
 	
 	
 	private var bufferIndices:Array<Bool>;
-	private var visualData:VisualDataBufferArray;
+	private var renderedData:RenderedDataBufferArray;
 	private var utilFloatArray:Float32Array;
 	
 	
@@ -69,6 +69,8 @@ class DefaultRenderer
 		Application.current.window.onResize.add(OnResize);
 		
 		GL.enable(GL.DEPTH_TEST);
+		GL.enable(GL.BLEND);
+		GL.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA); 
 		GL.enable(GL.SCISSOR_TEST);
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
@@ -83,7 +85,7 @@ class DefaultRenderer
 		InitVertices();
 		InitBuffers();		
 		
-		visualData = new VisualDataBufferArray();
+		renderedData = new RenderedDataBufferArray();
 		bufferIndices = new Array<Bool>();
 		
 		
@@ -118,12 +120,13 @@ class DefaultRenderer
 			
 				GL.useProgram(shaderProgram);
 				GL.bindVertexArray(VAO);
-				GL.drawElements(GL.TRIANGLES,verticesIndices.length,GL.UNSIGNED_SHORT,0);
-				
-				drawCount++;
-		
+				if (renderedData.visualsCount > 0){
+					GL.drawElements(GL.TRIANGLES,verticesIndices.length,GL.UNSIGNED_SHORT,0);
+					drawCount++;
+				}
+						
 				GL.bindVertexArray(0);
-					
+				
 				var error:Int = GL.getError();
 				
 				if (error != 0)
@@ -137,22 +140,30 @@ class DefaultRenderer
 			
 	}
 	
-	public function GetFreeTextureIndex():Int
-	{
-		
-		return DefaultRenderer.FREETEXTUREINDEX;
+	public function GetFreeTextureIndex():Int{
+		return FREETEXTUREINDEX;
 	}
 	
-	public function ActivateTexture(index:Int = 0):Void
+	public function AssociateFreeTextureIndex():Int
+	{
+		var index:Int = FREETEXTUREINDEX;
+		FREETEXTUREINDEX++;
+		
+		return index;
+	}
+	
+	public function UpdateTexture(index:Int = 0):Void
 	{
 		GL.useProgram(shaderProgram);
-		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas["+index+"]"), index);
-		
-		FREETEXTUREINDEX++;
+		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas[" + index + "]"), index);
 	}
 	
 	public inline function InitShaders():Void
 	{
+		if (shaderProgram == null)
+		{
+			
+		
 		Shaders.LoadShaders();
 		
 		var vShader:GLShader = GL.createShader(GL.VERTEX_SHADER);
@@ -179,7 +190,7 @@ class DefaultRenderer
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "model"), 1, false, model);
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "view"), 1, false, view);
-		
+		}
 	}
 	
 	public inline function InitVertices():Void
@@ -250,7 +261,7 @@ class DefaultRenderer
 		
 	}
 	
-	public function GetFreeBufferIndex():Int
+	public function AllocateBufferIndex():Int
 	{
 		var index:Int = -1;
 		var length:Int = bufferIndices.length;
@@ -268,6 +279,47 @@ class DefaultRenderer
 			bufferIndices.push(true);
 			index = length;
 		}
+		
+		return index;
+		
+	}
+	
+	public function AllocateBufferIndices(count:Int):Array<Int>
+	{
+		var indices:Array<Int>=new Array();
+		var length:Int = bufferIndices.length;
+		
+		for (i in 0...length)
+			if (bufferIndices[i] == false)
+			{
+				bufferIndices[i] = true;
+				indices.push(i);
+				count--;
+				
+				if (count == 0) break;
+			}
+		
+		while (count-- > 0)
+		{
+			bufferIndices.push(true);
+			indices.push(length++);
+		}
+		
+		return indices;
+		
+	}
+	
+	public function GetFreeBufferIndex():Int
+	{
+		var index:Int = -1;
+		var length:Int = bufferIndices.length;
+		
+		for (i in 0...length)
+			if (bufferIndices[i] == false)
+			{
+				index = i;
+				break;
+			}
 		
 		return index;
 		
