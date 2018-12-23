@@ -96,7 +96,7 @@ class Atlas
 		subAreas[name].imageArea.width = textureImage.width;
 		subAreas[name].imageArea.height = textureImage.height;
 		
-		textureIndex = VisualRenderer.Get().AssociateFreeTextureIndex();
+		textureIndex = VisualRenderer.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + textureIndex);
 		
 		texture = GetTexture(textureImage);

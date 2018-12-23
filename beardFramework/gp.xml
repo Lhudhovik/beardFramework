@@ -10,11 +10,11 @@
 	<!--<atlas name="menuHD4" fileExtension="png" path="assets/atlases" />-->
 </atlases>
 <fonts default="American Captain">
-	<font name="American Captain" fileExtension="ttf" path="assets/fonts"/>
-	<font name="chinese rocks rg" fileExtension="ttf" path="assets/fonts"/>
-	<font name="INFECTED" fileExtension="ttf" path="assets/fonts"/>
-	<font name="Outrun future" fileExtension="otf" path="assets/fonts"/>
-	<font name="Presque Normal" fileExtension="ttf" path="assets/fonts"/>
+	<font name="American Captain" fileExtension="ttf" path="assets/fonts" size="32,72" />
+	<font name="chinese rocks rg" fileExtension="ttf" path="assets/fonts" size="32"/>
+	<font name="INFECTED" fileExtension="ttf" path="assets/fonts" size="32,72"/>
+	<font name="Outrun future" fileExtension="otf" path="assets/fonts" size="32,72"/>
+	<font name="Presque Normal" fileExtension="ttf" path="assets/fonts" size="32,72"/>
 </fonts>
 <fx></fx>
 <soundBank></soundBank>

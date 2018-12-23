@@ -23,19 +23,13 @@ class Visual extends RenderedObject
 	{
 		super();
 		
+		
 		if (name == "") name = "Visual_" + instanceCount;
 		instanceCount++;
 	
 		this.texture = texture;
 		this.atlas = atlas;
-		transform = new Matrix();
-		visible = true;
-		alpha = 1;
-		color = 0xffffff;
-		
-		z = -1;
-		renderDepth = -2;
-		
+				
 		var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
 		textureWidth = Math.round(texture.imageArea.width);
 		textureHeight = Math.round(texture.imageArea.height);
@@ -44,9 +38,9 @@ class Visual extends RenderedObject
 		width = textureWidth;
 		height = textureHeight;
 		
-		bufferIndex = -1;
+		renderer = VisualRenderer.Get();
 		
-		displayingCameras = new List<String>();
+		
 	}
 	
 	override function set_width(value:Float):Float 
@@ -141,11 +135,7 @@ class Visual extends RenderedObject
 		return AssetManager.Get().GetSubTextureData(texture, atlas);
 	}
 	
-	override function set_isDirty(value:Bool):Bool 
-	{
-		if(value == true && layer != null) layer.AddVisualDirty(this);
-		return isDirty = value;
-	}
+	
 
 }
 

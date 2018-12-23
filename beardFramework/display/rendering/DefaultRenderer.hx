@@ -3,9 +3,11 @@ import beardFramework.core.BeardGame;
 import beardFramework.display.cameras.Camera;
 import beardFramework.display.core.BeardLayer;
 import beardFramework.display.core.BeardLayer.BeardLayerType;
+import beardFramework.display.core.RenderedObject;
 import beardFramework.display.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.DataUtils;
+import beardFramework.utils.MinAllocArray;
 import haxe.ds.Vector;
 import lime.app.Application;
 import lime.graphics.opengl.GL;
@@ -17,6 +19,8 @@ import lime.graphics.opengl.GLVertexArrayObject;
 import lime.math.Matrix4;
 import lime.math.Vector4;
 import lime.text.Font;
+import lime.utils.Bytes;
+import lime.utils.DataPointer;
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 import openfl.display.BitmapData;
@@ -52,6 +56,7 @@ class DefaultRenderer
 	
 	
 	private var bufferIndices:Array<Bool>;
+	public var dirtyObjects:MinAllocArray<RenderedObject>;
 	private var renderedData:RenderedDataBufferArray;
 	private var utilFloatArray:Float32Array;
 	
@@ -87,7 +92,7 @@ class DefaultRenderer
 		
 		renderedData = new RenderedDataBufferArray();
 		bufferIndices = new Array<Bool>();
-		
+		dirtyObjects = new MinAllocArray<RenderedObject>();
 		
 	}
 	
@@ -96,9 +101,13 @@ class DefaultRenderer
 		if (ready)
 		{
 			
+			if (dirtyObjects.length > 0) UpdateRenderedData();
+			
+			
 			drawCount = 0;
 			
-		
+			
+			
 			for (camera in BeardGame.Get().cameras)
 			{
 				
@@ -120,7 +129,7 @@ class DefaultRenderer
 			
 				GL.useProgram(shaderProgram);
 				GL.bindVertexArray(VAO);
-				if (renderedData.visualsCount > 0){
+				if (renderedData.count > 0){
 					GL.drawElements(GL.TRIANGLES,verticesIndices.length,GL.UNSIGNED_SHORT,0);
 					drawCount++;
 				}
@@ -144,7 +153,7 @@ class DefaultRenderer
 		return FREETEXTUREINDEX;
 	}
 	
-	public function AssociateFreeTextureIndex():Int
+	public function AllocateFreeTextureIndex():Int
 	{
 		var index:Int = FREETEXTUREINDEX;
 		FREETEXTUREINDEX++;
@@ -158,7 +167,7 @@ class DefaultRenderer
 		GL.uniform1i(GL.getUniformLocation(shaderProgram, "atlas[" + index + "]"), index);
 	}
 	
-	public inline function InitShaders():Void
+	private inline function InitShaders():Void
 	{
 		if (shaderProgram == null)
 		{
@@ -193,7 +202,7 @@ class DefaultRenderer
 		}
 	}
 	
-	public inline function InitVertices():Void
+	private inline function InitVertices():Void
 	{
 	
 		quadVertices = new Float32Array(null, [ 
@@ -211,7 +220,7 @@ class DefaultRenderer
 		
 	}
 	
-	public  function InitBuffers():Void
+	private  function InitBuffers():Void
 	{
 		
 		VAO = GLObject.fromInt(GLObjectType.VERTEX_ARRAY_OBJECT, VAOCOUNT++);
@@ -259,6 +268,70 @@ class DefaultRenderer
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
 		
 		
+	}
+	
+	
+	public function UpdateRenderedData():Void
+	{
+		
+	}
+	
+	public function CleanRenderedData(index:Int = -1):Void
+	{
+		var verIndex:Int = 0;
+		var attIndex:Int = 0;
+		var visIndex:Int = index*40;
+			
+		
+		GL.bindVertexArray(VAO);
+		
+		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
+					
+		if (utilFloatArray == null) utilFloatArray = new Float32Array(40);
+		for (i in 0...4)
+		{
+			verIndex = i * 4;
+			attIndex = i * 10;
+			
+			//Position
+			renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = 0;
+			renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] =0;
+			renderedData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = -2;
+			
+			//UV + TextureID
+			renderedData.data[visIndex + attIndex + 3] = utilFloatArray[attIndex + 3] = 0;
+			renderedData.data[visIndex + attIndex + 4] = utilFloatArray[attIndex + 4] = 0;
+			renderedData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = 0;
+			
+			//color
+			renderedData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = 0;
+			renderedData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = 0;
+			renderedData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = 0;
+			renderedData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = 0;		
+			
+			//textureID
+			
+		}
+	
+		GL.bufferSubData(GL.ARRAY_BUFFER, index * utilFloatArray.byteLength, utilFloatArray.byteLength, utilFloatArray); 
+			
+		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
+		GL.bindVertexArray(0); 				
+		
+	}
+	
+	
+	public inline function AddDirtyObject(object:RenderedObject):Void
+	{
+		if (dirtyObjects.IndexOf(object) == -1)
+		{
+			dirtyObjects.Push(object);
+		}
+	}
+	
+	public function RemoveDirtyObject(object:RenderedObject):Void
+	{
+		dirtyObjects.Remove(object);
 	}
 	
 	public function AllocateBufferIndex():Int
@@ -328,14 +401,18 @@ class DefaultRenderer
 	public inline function FreeBufferIndex(index:Int):Int
 	{
 		
-		if (index < bufferIndices.length)
+		if (index < bufferIndices.length && index > 0){
+			
 			bufferIndices[index] = false;
+			CleanRenderedData(index);
+		}
+		
 			
 		return -1;
 		
 	}
 	
-	public inline function GetHigherIndex():Int
+	private inline function GetHigherIndex():Int
 	{
 		return bufferIndices.length - 1;
 	}

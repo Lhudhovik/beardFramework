@@ -1,5 +1,6 @@
 package beardFramework.resources.options;
 import beardFramework.display.screens.BasicLoadingScreen;
+import beardFramework.display.text.FontFormat;
 import beardFramework.display.text.TextField;
 import beardFramework.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
@@ -14,6 +15,7 @@ class OptionsManager
 	private static var instance(default,null):OptionsManager;
 	
 	public var resourcesToLoad:Array<ResourceToLoad>;
+	public var fontsToLoad:Array<FontToLoad>;
 	private var settings(null,null):Xml;
 	private function new() 
 	{
@@ -40,6 +42,7 @@ class OptionsManager
 	{
 		
 		resourcesToLoad = new Array<ResourceToLoad>();
+		fontsToLoad = new Array<FontToLoad>();
 		xml = xml.firstElement();
 		
 		for (element in xml.elements())
@@ -57,6 +60,21 @@ class OptionsManager
 			{
 
 				TextField.defaultFont = element.get("default");
+				var size:Array<Int> = [];
+				var readSize:Array<String> = [];
+				for (font in element.elementsNamed("font"))
+				{
+					
+					size = [];
+					readSize = font.get("size").split(",");
+					for (fontSize in readSize)
+					{
+						size.push(Std.parseInt(fontSize));
+						trace(size);
+					}
+				
+					fontsToLoad.push({ format: (font.get("fileExtension") == "ttf" ?FontFormat.TTF : FontFormat.OTF), name : font.get("name"), size: size });
+				}
 			}
 			
 			if (element.nodeName == "settings")
@@ -96,5 +114,12 @@ typedef ResourceToLoad = {
 	var type : AssetType;
 	var name : String;
 	var url : String;
+	
+}
+
+typedef FontToLoad = {
+	var size : Array<Int>;
+	var format:FontFormat;
+	var name:String;
 	
 }

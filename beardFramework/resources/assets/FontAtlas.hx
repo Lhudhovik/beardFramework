@@ -1,7 +1,7 @@
 package beardFramework.resources.assets;
 
 import beardFramework.display.rendering.DefaultRenderer;
-import beardFramework.display.rendering.FontRenderer;
+import beardFramework.display.rendering.TextRenderer;
 import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.DataUtils;
@@ -41,7 +41,7 @@ class FontAtlas extends Atlas
 {
 	static private var MAXSIZE:Int = 2048;
 		
-	private var fonts:Array<AtlasFontData>;
+	public var fonts:Array<AtlasFontData>;
 	private var currentLineHeight:Float = 0;
 	
 	public function new(name:String) 
@@ -53,6 +53,7 @@ class FontAtlas extends Atlas
 		textureImage = new Image(null, 0, 0, MAXSIZE, MAXSIZE);
 		subAreas[name].imageArea.width = MAXSIZE;
 		subAreas[name].imageArea.height = MAXSIZE;
+		trace(index);
 	}
 	
 	public function AddFont(font:Font, fontName:String, size:Int = 72):Void
@@ -161,11 +162,11 @@ class FontAtlas extends Atlas
 		
 		fonts.push(fontData);
 		
-		if (textureIndex < 0) textureIndex = FontRenderer.Get().AssociateFreeTextureIndex();
+		if (textureIndex < 0) textureIndex = TextRenderer.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + textureIndex);
 		texture = GetTexture(textureImage);
 		GL.bindTexture(GL.TEXTURE_2D, texture);
-		FontRenderer.Get().UpdateTexture(textureIndex);
+		TextRenderer.Get().UpdateTexture(textureIndex);
 		
 	}
 	
@@ -180,10 +181,19 @@ class FontAtlas extends Atlas
 		return containsFont;
 	}
 	
-	public inline function GetGlyphData(font:String, glyph:String):SubTextureData
+	public inline function GetGlyphData(font:String, glyph:String, size:Int):SubTextureData
 	{
 		
-		return subAreas[font + glyph];
+		var closerSize:Int = 0;
+		if (!ContainsFont(font, size)){
+			
+			for (_font in fonts)
+				if (_font.name == font && (closerSize == 0 || Math.abs(_font.size - size) < Math.abs(closerSize -size)))
+					closerSize = _font.size;
+		}
+		else closerSize = size;
+					
+		return subAreas[font + closerSize + glyph];
 		
 	}
 	

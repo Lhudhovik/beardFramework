@@ -8,7 +8,7 @@ import lime.utils.Float32Array;
 class RenderedDataBufferArray 
 {
 
-	public var visualsCount:Int=0;
+	public var count:Int=0;
 	@:isVar public var data(get, set):Float32Array;
 	
 	
@@ -25,8 +25,8 @@ class RenderedDataBufferArray
 	function set_data(value:Float32Array):Float32Array 
 	{
 		if(value != null)
-			visualsCount = Math.round(value.length / 40)  ;
-		else	visualsCount = 0;
+			count = Math.round(value.length / 40)  ;
+		else	count = 0;
 		return data = value;
 	}
 	

@@ -1,4 +1,5 @@
 package beardFramework.display.core;
+import beardFramework.display.rendering.DefaultRenderer;
 import beardFramework.interfaces.ICameraDependent;
 import openfl.geom.Matrix;
 
@@ -14,6 +15,7 @@ class RenderedObject implements ICameraDependent
 	public var color:UInt;
 	public var displayingCameras(default, null):List<String>;
 	public var layer:BeardLayer;
+	public var renderer:DefaultRenderer;
 	@:isVar public var name(get, set):String;
 	public var renderDepth(default,null):Float;
 	public var restrictedCameras(default, null):Array<String>;
@@ -39,6 +41,21 @@ class RenderedObject implements ICameraDependent
 	
 	public function new() 
 	{
+		
+		transform = new Matrix();
+		
+		visible = true;
+		alpha = 1;
+		color = 0xffffff;
+		z = -1;
+		renderDepth = -2;
+		width = 0;
+		height = 0;
+		bufferIndex = -1;
+		
+		
+		displayingCameras = new List<String>();
+		
 		
 	}
 	
@@ -276,7 +293,7 @@ class RenderedObject implements ICameraDependent
 		
 		if (layer != null)
 		{
-			renderDepth = layer.depth + (z / layer.maxVisualsCount);	
+			renderDepth = layer.depth + (z / layer.maxObjectsCount);	
 		}
 		
 		isDirty = true;
@@ -311,15 +328,12 @@ class RenderedObject implements ICameraDependent
 	
 	function set_isDirty(value:Bool):Bool 
 	{
+		if (value == true && renderer != null) renderer.AddDirtyObject(this);
+		else if ( value == false && renderer != null) renderer.RemoveDirtyObject(this);
 		return isDirty = value;
 	}
 	
-	function UpdateBuffer():Void
-	{
-		
-		
-		
-	}
+	
 	
 	
 	

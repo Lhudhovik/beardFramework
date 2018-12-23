@@ -112,7 +112,8 @@ class AssetManager
 			case AssetType.DATA | AssetType.SOUND : 	
 				
 				loaders[loaderName] = new StringLoader(url);
-				
+			case AssetType.FONT_TTF | AssetType.FONT_OTF:
+				return;
 			case AssetType.ATLAS_PNG | AssetType.ATLAS_JPG:
 				if (requestedAtlasQueue.indexOf(loaderName) == -1){
 					requestedAtlasQueue.push(loaderName);
@@ -277,6 +278,8 @@ class AssetManager
 		
 		if(fonts[fontName] == null) fonts[fontName] = Font.fromFile(BeardGame.Get().FONT_PATH + fontName + fileExtension);
 		
+		trace(fontName);
+		trace(fonts[fontName]);
 		var fontAtlas:FontAtlas;
 		
 		if (atlasName == null || atlasName == ""){
@@ -293,13 +296,20 @@ class AssetManager
 		
 		
 		
-		if (!fontAtlas.ContainsFont(fontName)) fontAtlas.AddFont(fonts[fontName] , fontName, size);	
+		if (!fontAtlas.ContainsFont(fontName,size)) fontAtlas.AddFont(fonts[fontName] , fontName, size);	
 		
 	}
 	
 	public inline function GetSubTextureData(textureName:String, atlasName:String):SubTextureData
 	{
 		return (atlases[atlasName] != null ? atlases[atlasName].GetSubTextureData(textureName) : null);
+	}
+	
+	public inline function GetFontGlyphTextureData(font:String, char:String, size:Int = 72, atlasName:String = null):SubTextureData
+	{
+		
+		if (atlasName == null) atlasName = FONT_ATLAS_NAME;
+		return cast(atlases[atlasName], FontAtlas).GetGlyphData(font,char,size);
 	}
 	
 	public function ClearAtlas(atlasName:String):Void
@@ -325,4 +335,6 @@ enum AssetType{
 		SOUND;
 		ATLAS_PNG;
 		ATLAS_JPG;
+		FONT_TTF;
+		FONT_OTF;
 	}

@@ -1,4 +1,6 @@
 package beardFramework.display.core;
+import beardFramework.display.rendering.DefaultRenderer;
+import beardFramework.display.rendering.TextRenderer;
 import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.MinAllocArray;
@@ -15,161 +17,22 @@ class BeardLayer
 	public static var DEPTH_LOADING:Float = 0.5;
 	
 	public var depth:Float; 
-	public var maxVisualsCount(default, null):Int;
+	public var maxObjectsCount(default, null):Int;
 	public var name:String;
 	@:isVar public var visible(get, set):Bool;
-	public var visuals:Array<Visual>;
-	public var dirtyVisuals:MinAllocArray<Int>;
+	public var renderedObjects:Array<RenderedObject>;
 	
-	public function new(name:String, depth :Float, maxVisualsCount:Int=100000) 
+	
+	public function new(name:String, depth :Float, maxObjectsCount:Int=100000) 
 	{
 		this.name = name;
 		this.depth = depth;
-		this.maxVisualsCount = maxVisualsCount;
-		visuals = new Array<Visual>();	
-		dirtyVisuals = new MinAllocArray<Int>(50);
+		this.maxObjectsCount = maxObjectsCount;
+		renderedObjects = new Array<RenderedObject>();	
 		visible = true;
 		
 	}
 
-	public function Render ():Void 
-	{
-		/*
-		if (!__renderable || __worldAlpha <= 0) return;
-		
-		var utilX:Float;
-		var utilY:Float;
-	
-		renderSession.filterManager.pushObject (this);
-		
-		for (camera in BeardGame.Get().cameras.iterator()){
-		
-			renderSession.maskManager.pushRect (camera.GetRect(), camera.transform);
-			
-			for (child in __children) {
-				
-				if (Std.is(child, ICameraDependent) && camera.Contains(cast child)){
-					cast(child, ICameraDependent).RenderThroughCamera(camera, renderSession);
-					
-				}else if (Std.is(child, ICameraDependent)){
-					
-						for (cam in cast(child, ICameraDependent).displayingCameras)
-							if (cam == camera.name)
-							{
-								cast(child, ICameraDependent).displayingCameras.remove(camera.name);
-								break;
-							}
-				}
-				else {
-					child.__renderGL (renderSession);
-				}
-			}
-		
-			renderSession.maskManager.popRect ();
-		}
-		
-		for (orphan in __removedChildren) {
-				
-			if (orphan.stage == null) {
-				
-				orphan.__cleanup ();
-				
-			}
-				
-		}
-		
-		__removedChildren.length = 0;
-		
-		renderSession.filterManager.popObject (this);*/
-		
-		
-		
-	}
-	
-	public function RenderMask ():Void 
-	{
-		
-		/*if (__cacheBitmap != null && !__cacheBitmapRender) return;
-			
-		
-		for (camera in BeardGame.Get().cameras.iterator()){
-			
-			
-			if (renderSession.clearRenderDirty) {
-				
-				for (child in __children) {
-					
-					
-					if (Std.is(child, ICameraDependent) && camera.Contains(cast child)){
-						cast(child, ICameraDependent).RenderMaskThroughCamera(camera, renderSession);
-						child.__renderDirty = false;
-					
-					}else if (Std.is(child, ICameraDependent)){
-					
-						for (cam in cast(child, ICameraDependent).displayingCameras)
-							if (cam == camera.name)
-							{
-								cast(child, ICameraDependent).displayingCameras.remove(camera.name);
-								break;
-							}
-					}
-					else {
-						child.__renderGLMask (renderSession);
-						child.__renderDirty = false;
-					}
-					
-					
-				
-					
-				}
-				
-				__renderDirty = false;
-				
-			} else {
-				
-				for (child in __children) {
-					
-					if (Std.is(child, ICameraDependent) && camera.Contains(cast child)){
-						cast(child, ICameraDependent).RenderMaskThroughCamera(camera, renderSession);
-									
-					}else if (Std.is(child, ICameraDependent)){
-					
-						for (cam in cast(child, ICameraDependent).displayingCameras)
-							if (cam == camera.name)
-							{
-								cast(child, ICameraDependent).displayingCameras.remove(camera.name);
-								break;
-							}
-					}
-					else {
-						child.__renderGLMask (renderSession);
-						
-					}
-					
-					
-				}
-				
-			}
-			
-			
-			
-		}
-		
-		for (orphan in __removedChildren) {
-			
-			if (orphan.stage == null) {
-				
-				orphan.__cleanup ();
-				
-			}
-			
-		}
-		
-		__removedChildren.length = 0;
-		*/
-		
-	}
-	
 	public function VisualHitTest(x:Float, y:Float):Bool
 	{
 		
@@ -177,69 +40,61 @@ class BeardLayer
 		return true;
 	}
 	
-	public function AddMultiple(visuals:Array<Visual>):Void
+	public function AddMultiple(objects:Array<RenderedObject>):Void
 	{
 		
-		for (i in 0...visuals.length)
-			Add(visuals[i], false);
-			
-		VisualRenderer.Get().UpdateBufferFromVisuals(visuals);
-		
+		for (i in 0...objects.length)
+			Add(objects[i], false);
 		
 	}
 	
-	public function AddMultipleOpti(addedVisuals:MinAllocArray<Visual>, updateBuffer:Bool = true):Void
+	public function AddMultipleOpti(addedObjects:MinAllocArray<RenderedObject>):Void
 	{
-		var visual:Visual;
-		for (i in 0...addedVisuals.length){
+		var object:RenderedObject;
+		
+		for (i in 0...addedObjects.length){
 			
-			visual = addedVisuals.get(i);
-			if (visuals.indexOf(visual) == -1)
+			object = addedObjects.get(i);
+			
+			if (renderedObjects.indexOf(object) == -1)
 			{
 			
-				visual.layer = this;
-				visual.z = (visual.z ==-1) ? visuals.length : visual.z;
-				visual.visible = this.visible;
-				visual.bufferIndex =  VisualRenderer.Get().AllocateBufferIndex();
-				visuals.push(visual);
-				
-				AddVisualDirty(visual);
+				object.layer = this;
+				object.z = (object.z ==-1) ? renderedObjects.length : object.z;
+				object.visible = this.visible;
+				object.bufferIndex =  object.renderer.AllocateBufferIndex();
+				object.isDirty = true;
+				renderedObjects.push(object);
 			}
 	
 		}
 		
-		if(updateBuffer)
-			VisualRenderer.Get().UpdateBufferFromLayer(this);
-		
-		
 	}
 	
-	public function Add(visual:Visual, updateBuffer:Bool = true):Void
+	public function Add(object:RenderedObject, updateBuffer:Bool = true):Void
 	{
-		
-		if (visuals.indexOf(visual) == -1)
+		if (renderedObjects.indexOf(object) == -1)
 		{
 			
-			visual.layer = this;
-			visual.z = (visual.z ==-1) ? visuals.length : visual.z;
-			visual.visible = this.visible;
-			visual.bufferIndex =  VisualRenderer.Get().AllocateBufferIndex();
+			object.layer = this;
+			object.z = (object.z ==-1) ? renderedObjects.length : object.z;
+			object.visible = this.visible;
+			object.bufferIndex = object.renderer.AllocateBufferIndex();
+			object.isDirty = true;
+			renderedObjects.push(object);
 			
-			visuals.push(visual);
-		
-			if (updateBuffer)
-				VisualRenderer.Get().UpdateBufferFromVisuals([visual]);
-			
+			if (updateBuffer) object.renderer.UpdateRenderedData();
 		}
 	}
 		
-	public inline function Remove(visual:Visual):Void
+	public inline function Remove(object:RenderedObject):Void
 	{
-		if (visuals.indexOf(visual) != -1)
+		if (renderedObjects.indexOf(object) != -1)
 		{
-			visuals.remove(visual);
-			
-			visual.bufferIndex = VisualRenderer.Get().FreeBufferIndex(visual.bufferIndex);
+			trace("removeing");
+			renderedObjects.remove(object);
+			object.bufferIndex = object.renderer.FreeBufferIndex(object.bufferIndex);
+			object.isDirty = false;
 		}
 	}
 	
@@ -251,26 +106,11 @@ class BeardLayer
 	function set_visible(value:Bool):Bool 
 	{
 		
-		for (visual in visuals)
+		for (visual in renderedObjects)
 			visual.visible = value;
 		return visible = value;
 	}
 	
-	public inline function AddVisualDirty(visual:Visual):Void
-	{
-		
-		if (dirtyVisuals.IndexOf(visuals.indexOf(visual)) == -1)
-		{
-			dirtyVisuals.Push(visuals.indexOf(visual));
-		}
-		
-		
-	}
-	
-	public inline function PrepareForRendering():Void
-	{
-		VisualRenderer.Get().UpdateBufferFromVisuals(visuals);
-	}
 
 }
 

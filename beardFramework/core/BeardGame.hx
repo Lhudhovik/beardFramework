@@ -1,6 +1,6 @@
 package beardFramework.core;
 
-import beardFramework.display.rendering.FontRenderer;
+import beardFramework.display.rendering.TextRenderer;
 import beardFramework.display.rendering.Shaders;
 import beardFramework.display.rendering.VisualRenderer;
 import beardFramework.resources.options.OptionsManager;
@@ -142,7 +142,7 @@ class BeardGame extends Application
 	private inline function LoadResources():Void
 	{
 		
-		if (OptionsManager.Get().resourcesToLoad.length > 0){
+		if (OptionsManager.Get().resourcesToLoad.length > 0 || OptionsManager.Get().fontsToLoad.length > 0){
 			for (resource in OptionsManager.Get().resourcesToLoad)
 			{
 				AssetManager.Get().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
@@ -150,6 +150,14 @@ class BeardGame extends Application
 			
 			//trace("*** Resources to load : " + OptionsManager.Get().resourcesToLoad);
 			Shaders.LoadShaders();
+			for (font in OptionsManager.Get().fontsToLoad)
+			{
+				for (size in font.size)
+				{
+					AssetManager.Get().LoadFont(font.name,  font.format, size);
+				}
+			}
+			
 			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
 		}
 		else GameStart();
@@ -174,6 +182,7 @@ class BeardGame extends Application
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
 		
 		VisualRenderer.Get().Start();
+		TextRenderer.Get().Start();
 		
 	}
 	
@@ -229,15 +238,12 @@ class BeardGame extends Application
 	{
 		
 		
-		//contentLayer.PrepareForRendering();
-		//UILayer.PrepareForRendering();
-		//loadingLayer.PrepareForRendering();
+		
 		//trace("prep for rendering");
-		VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
+		//VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
 		
 		VisualRenderer.Get().Render();
-		
-		FontRenderer.Get().Render();
+		//TextRenderer.Get().Render();
 		
 		
 	}
