@@ -1,5 +1,5 @@
 package beardFramework.resources.save.data;
-import beardFramework.display.cameras.Camera;
+import beardFramework.graphics.cameras.Camera;
 
 /**
  * @author Ludo

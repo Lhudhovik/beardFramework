@@ -1,5 +1,5 @@
 package beardFramework.updateProcess;
-import beardFramework.display.screens.ScreenFlowManager;
+import beardFramework.graphics.screens.ScreenFlowManager;
 import beardFramework.updateProcess.UpdateProcess;
 
 /**

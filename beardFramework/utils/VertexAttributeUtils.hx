@@ -1,5 +1,5 @@
 package beardFramework.utils;
-import beardFramework.display.core.Visual;
+import beardFramework.graphics.core.Visual;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import lime.utils.Float32Array;

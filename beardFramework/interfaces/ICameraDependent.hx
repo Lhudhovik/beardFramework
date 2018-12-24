@@ -1,5 +1,5 @@
 package beardFramework.interfaces;
-import beardFramework.display.cameras.Camera;
+import beardFramework.graphics.cameras.Camera;
 
 
 /**

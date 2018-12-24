@@ -1,18 +1,19 @@
 package beardFramework.core;
 
-import beardFramework.display.rendering.TextRenderer;
-import beardFramework.display.rendering.Shaders;
-import beardFramework.display.rendering.VisualRenderer;
+import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.TextRenderer;
+import beardFramework.graphics.rendering.Shaders;
+import beardFramework.graphics.rendering.VisualRenderer;
 import beardFramework.resources.options.OptionsManager;
 import beardFramework.updateProcess.UpdateProcessesManager;
 import beardFramework.updateProcess.Wait;
 import beardFramework.updateProcess.sequence.VoidStep;
 import beardFramework.debug.MemoryUsage;
-import beardFramework.display.cameras.Camera;
-import beardFramework.display.core.BeardLayer;
-import beardFramework.display.screens.BasicScreen;
-import beardFramework.display.screens.SplashScreen;
-import beardFramework.display.ui.UIManager;
+import beardFramework.graphics.cameras.Camera;
+import beardFramework.graphics.core.BeardLayer;
+import beardFramework.graphics.screens.BasicScreen;
+import beardFramework.graphics.screens.SplashScreen;
+import beardFramework.graphics.ui.UIManager;
 import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
@@ -181,8 +182,8 @@ class BeardGame extends Application
 		if (physicsEnabled)
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
 		
-		VisualRenderer.Get().Start();
-		TextRenderer.Get().Start();
+		Renderer.Get().Start();
+		
 		
 	}
 	
@@ -241,9 +242,7 @@ class BeardGame extends Application
 		
 		//trace("prep for rendering");
 		//VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
-		
-		VisualRenderer.Get().Render();
-		//TextRenderer.Get().Render();
+		Renderer.Get().Render();
 		
 		
 	}

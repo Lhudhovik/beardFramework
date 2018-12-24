@@ -1,6 +1,7 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
-import beardFramework.display.rendering.VisualRenderer;
+import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.VisualRenderer;
 import beardFramework.utils.DataUtils;
 import beardFramework.utils.TextureUtils;
 import beardFramework.utils.XMLUtils;
@@ -96,14 +97,14 @@ class Atlas
 		subAreas[name].imageArea.width = textureImage.width;
 		subAreas[name].imageArea.height = textureImage.height;
 		
-		textureIndex = VisualRenderer.Get().AllocateFreeTextureIndex();
+		textureIndex = Renderer.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + textureIndex);
 		
 		texture = GetTexture(textureImage);
 		
 		GL.bindTexture(GL.TEXTURE_2D, texture);
-		VisualRenderer.Get().UpdateTexture(textureIndex);
-
+		Renderer.Get().UpdateTexture(textureIndex);
+	//trace(index);
     }
 	
 	private function GetTexture(image:Image):GLTexture

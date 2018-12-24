@@ -1,7 +1,7 @@
 package beardFramework.resources.options;
-import beardFramework.display.screens.BasicLoadingScreen;
-import beardFramework.display.text.FontFormat;
-import beardFramework.display.text.TextField;
+import beardFramework.graphics.screens.BasicLoadingScreen;
+import beardFramework.graphics.text.FontFormat;
+import beardFramework.graphics.text.TextField;
 import beardFramework.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
 
@@ -70,7 +70,7 @@ class OptionsManager
 					for (fontSize in readSize)
 					{
 						size.push(Std.parseInt(fontSize));
-						trace(size);
+						//trace(size);
 					}
 				
 					fontsToLoad.push({ format: (font.get("fileExtension") == "ttf" ?FontFormat.TTF : FontFormat.OTF), name : font.get("name"), size: size });

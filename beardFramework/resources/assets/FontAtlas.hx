@@ -1,8 +1,8 @@
 package beardFramework.resources.assets;
 
-import beardFramework.display.rendering.DefaultRenderer;
-import beardFramework.display.rendering.TextRenderer;
-import beardFramework.display.rendering.VisualRenderer;
+import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.TextRenderer;
+import beardFramework.graphics.rendering.VisualRenderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.DataUtils;
 import beardFramework.utils.GeomUtils;
@@ -53,7 +53,7 @@ class FontAtlas extends Atlas
 		textureImage = new Image(null, 0, 0, MAXSIZE, MAXSIZE);
 		subAreas[name].imageArea.width = MAXSIZE;
 		subAreas[name].imageArea.height = MAXSIZE;
-		trace(index);
+		//trace(index);
 	}
 	
 	public function AddFont(font:Font, fontName:String, size:Int = 72):Void
@@ -162,11 +162,11 @@ class FontAtlas extends Atlas
 		
 		fonts.push(fontData);
 		
-		if (textureIndex < 0) textureIndex = TextRenderer.Get().AllocateFreeTextureIndex();
+		if (textureIndex < 0) textureIndex = Renderer.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + textureIndex);
 		texture = GetTexture(textureImage);
 		GL.bindTexture(GL.TEXTURE_2D, texture);
-		TextRenderer.Get().UpdateTexture(textureIndex);
+		Renderer.Get().UpdateTexture(textureIndex);
 		
 	}
 	

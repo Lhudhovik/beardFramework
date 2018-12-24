@@ -1,8 +1,8 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
-import beardFramework.display.core.Visual;
+import beardFramework.graphics.core.Visual;
 import beardFramework.resources.assets.Atlas;
-import beardFramework.display.text.FontFormat;
+import beardFramework.graphics.text.FontFormat;
 //import extension.harfbuzz.TextScript;
 import haxe.ds.Vector;
 import haxe.io.Float32Array;
@@ -278,8 +278,8 @@ class AssetManager
 		
 		if(fonts[fontName] == null) fonts[fontName] = Font.fromFile(BeardGame.Get().FONT_PATH + fontName + fileExtension);
 		
-		trace(fontName);
-		trace(fonts[fontName]);
+		//trace(fontName);
+		//trace(fonts[fontName]);
 		var fontAtlas:FontAtlas;
 		
 		if (atlasName == null || atlasName == ""){

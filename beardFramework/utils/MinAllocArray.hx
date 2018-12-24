@@ -45,10 +45,10 @@ class MinAllocArray<T>
 				utilInt = i;
 				data[i] = null;
 				length--;
-				trace(data);
+				//trace(data);
 			}
 		}
-		trace(data);
+		//trace(data);
 		return utilInt != 0;
 		
 	}

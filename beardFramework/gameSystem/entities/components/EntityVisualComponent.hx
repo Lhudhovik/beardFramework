@@ -1,6 +1,6 @@
 package beardFramework.gameSystem.entities.components;
 import beardFramework.core.BeardGame;
-import beardFramework.display.core.Visual;
+import beardFramework.graphics.core.Visual;
 import beardFramework.resources.save.data.DataComponent;
 import haxe.Json;
 import beardFramework.gameSystem.entities.GameEntity;
