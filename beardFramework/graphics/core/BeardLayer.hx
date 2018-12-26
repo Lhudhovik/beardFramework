@@ -23,7 +23,7 @@ class BeardLayer
 	public var renderedObjects:Array<RenderedObject>;
 	
 	
-	public function new(name:String, depth :Float, maxObjectsCount:Int=100000) 
+	public function new(name:String, depth :Float, maxObjectsCount:Int=10000) 
 	{
 		this.name = name;
 		this.depth = depth;

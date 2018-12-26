@@ -1,9 +1,7 @@
 package beardFramework.core;
 
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.TextRenderer;
 import beardFramework.graphics.rendering.Shaders;
-import beardFramework.graphics.rendering.VisualRenderer;
 import beardFramework.resources.options.OptionsManager;
 import beardFramework.updateProcess.UpdateProcessesManager;
 import beardFramework.updateProcess.Wait;
@@ -18,7 +16,6 @@ import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
-import lime.graphics.opengl.GL;
 //import crashdumper.CrashDumper;
 //import crashdumper.SessionData;
 import lime.app.Application;

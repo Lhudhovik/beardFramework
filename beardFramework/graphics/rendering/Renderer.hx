@@ -19,6 +19,7 @@ import lime.graphics.opengl.GLShader;
 import lime.graphics.opengl.GLTexture;
 import lime.graphics.opengl.GLVertexArrayObject;
 import lime.math.Matrix4;
+import lime.math.Vector2;
 import lime.math.Vector4;
 import lime.text.Font;
 import lime.utils.Bytes;
@@ -61,6 +62,7 @@ class Renderer
 	private var bufferIndices:Array<Bool>;
 	public var dirtyObjects:MinAllocArray<RenderedObject>;
 	private var renderedData:RenderedDataBufferArray;
+	private var renderedDataOrdered:RenderedDataBufferArray;
 	private var utilFloatArray:Float32Array;
 	
 	
@@ -87,14 +89,18 @@ class Renderer
 		
 		GL.enable(GL.DEPTH_TEST);
 		GL.enable(GL.BLEND);
-		GL.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA); 
+	
+		//GL.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
+		GL.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
+	
+		
 		GL.enable(GL.SCISSOR_TEST);
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		
 		projection = new Matrix4();
 		projection.identity();
-		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, 1, -1);
 		view = new Matrix4();
 		model = new Matrix4();
 			
@@ -124,7 +130,7 @@ class Renderer
 			for (camera in BeardGame.Get().cameras)
 			{
 				
-				GL.clearColor(0.2, 0.3, 0.3, 1);
+				GL.clearColor(0.2, 0.3, 0.8, 1);
 				GL.clear(GL.COLOR_BUFFER_BIT);
 				GL.clear(GL.DEPTH_BUFFER_BIT);
 				
@@ -273,7 +279,7 @@ class Renderer
 	{
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		projection.identity();
-		projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, -1, 1);
+		projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 1, -1);
 		//projection = Matrix4.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, -1, 1);
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, projection);
 		
@@ -335,6 +341,7 @@ class Renderer
 			
 			var visual:Visual;
 			var textfield:TextField;
+			var center:Vector2 = new Vector2();
 			//Update data
 			for (i in  0...dirtyObjects.length)
 			{
@@ -346,7 +353,8 @@ class Renderer
 				{
 					//trace("is visual");
 					visIndex = visual.bufferIndex*40;
-			
+					center.x =  visual.width * 0.5;
+					center.y = visual.height * 0.5;
 					for (i in 0...4)
 					{
 						verIndex = i * 4;
@@ -354,8 +362,10 @@ class Renderer
 						
 						
 						//Position
-						renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = visual.x +  quadVertices[verIndex] * visual.width;
-						renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y +  quadVertices[verIndex+1] * visual.height;
+						renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = visual.x + center.x + ((quadVertices[verIndex] * visual.width)-center.x)*visual.rotationCosine -  ((quadVertices[verIndex+1] * visual.height)-center.y)*visual.rotationSine;
+						//renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = visual.x +  quadVertices[verIndex] * visual.width;
+						renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y + center.y + ((quadVertices[verIndex] * visual.width)-center.x)*visual.rotationSine +  ((quadVertices[verIndex+1] * visual.height)-center.y)*visual.rotationCosine;
+						//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y +  quadVertices[verIndex+1] * visual.height;
 						renderedData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth : -2;
 						
 						//UV + TextureID
@@ -380,20 +390,25 @@ class Renderer
 				{
 					
 					if (textfield.needLayoutUpdate)	textfield.UpdateLayout();
-											
+										center.x =  textfield.width * 0.5;
+						center.y = textfield.height * 0.5;	
 					for (data in textfield.glyphsData)
 					{
 						
 						visIndex = data.bufferIndex*40;
 					
+						
 						for (i in 0...4)
 						{
 							verIndex = i * 4;
 							attIndex = i * 10;
 							
+							
 							//Position
-							renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = textfield.x + data.x +  quadVertices[verIndex] * data.width;
-							renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = textfield.y +  data.y +  quadVertices[verIndex+1] * data.height;
+							renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = textfield.x  +  center.x + ((quadVertices[verIndex] * data.width + data.x)-center.x)*textfield.rotationCosine -  ((quadVertices[verIndex+1] * data.height + data.y)-center.y)*textfield.rotationSine;
+							//renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = textfield.x + data.x +  quadVertices[verIndex] * data.width;
+							renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] =  textfield.y + center.y + ((quadVertices[verIndex] * data.width+data.x)-center.x)*textfield.rotationSine +  ((quadVertices[verIndex+1] * data.height+data.y)-center.y)*textfield.rotationCosine;
+							//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = textfield.y +  data.y +  quadVertices[verIndex+1] * data.height;
 							renderedData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = textfield.visible ? textfield.renderDepth : -2;
 							
 							//UV + Texture ID

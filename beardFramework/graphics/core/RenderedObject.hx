@@ -10,263 +10,167 @@ import openfl.geom.Matrix;
 class RenderedObject implements ICameraDependent
 {
 	
-	public var alpha:Float;
+	@:isVar public var alpha(get, set):Float;
 	@:isVar public var bufferIndex(get, set):Int;
-	public var color:UInt;
-	public var displayingCameras(default, null):List<String>;
 	public var height(get, set):Float;	
+	public var width(get, set):Float;
 	@:isVar public var isDirty(get, set):Bool = false;
-	public var layer:BeardLayer;
 	@:isVar public var name(get, set):String;
+	@:isVar public var visible(get, set):Bool;
+	@:isVar public var rotation (get, set):Float;
+	@:isVar public var scaleX (get, set):Float;
+	@:isVar public var scaleY (get, set):Float;
+	@:isVar public var x(get, set):Float;
+	@:isVar public var y(get, set):Float;
+	@:isVar public var z(get, set):Float;
+	@:isVar public var color(get, set):UInt;
+
+	public var layer:BeardLayer;
+	public var displayingCameras(default, null):List<String>;	
 	public var renderer:Renderer;
 	public var renderDepth(default,null):Float;
 	public var restrictedCameras(default, null):Array<String>;
-	@:isVar public var visible(get, set):Bool;
-	public var rotation (get, set):Float;
-	public var scaleX (get, set):Float;
-	public var scaleY (get, set):Float;
-	public var width(get, set):Float;
-	public var x(get, set):Float;
-	public var y(get, set):Float;
-	@:isVar public var z(get, set):Float;
-	private var cachedHeight:Float;
-	private var cachedRotation:Null<Float>;
-	private var cachedScaleX:Null<Float>;
-	private var cachedScaleY:Null<Float>;
+	public var rotationCosine(default,null):Float;
+	public var rotationSine(default,null):Float;
+	
 	private var cachedWidth:Float;
-	private var rotationCosine:Float;
-	private var rotationSine:Float;
-	private var transform:Matrix;
-	
-	
+	private var cachedHeight:Float;
 	
 	public function new() 
 	{
-		
-		transform = new Matrix();
 		
 		visible = true;
 		alpha = 1;
 		color = 0xffffff;
 		z = -1;
 		renderDepth = -2;
-		width = 0;
-		height = 0;
+		scaleX = scaleY = 1;
+		cachedWidth = cachedHeight = 0;
+		rotation = 0;
+		rotationSine = Math.sin (0);
+		rotationCosine = Math.cos (0);
 		bufferIndex = -1;
-		
-		
+	
 		displayingCameras = new List<String>();
 		
 		
 	}
 	
-	inline function get_x():Float 
+	inline public function get_x():Float 
 	{
-		return transform.tx;
+		return x;
 	}
 	
-	function set_x(value:Float):Float 
+	public function set_x(value:Float):Float 
 	{
-		isDirty = true;
-		return transform.tx = value;
+		if(value != x) isDirty = true;
+		return x = value;
 	}
 	
-	inline function get_y():Float 
+	inline public function get_y():Float 
 	{
-		return transform.ty;
+		return y;
 	}
 	
-	function set_y(value:Float):Float 
+	public function set_y(value:Float):Float 
 	{
-		isDirty = true;
-		return transform.ty = value;
+		if(value != x) isDirty = true;
+		return y = value;
 	}
 	
-	function get_width():Float 
+	inline public function get_width():Float 
 	{
 		return cachedWidth;
 	}
 	
-	function set_width(value:Float):Float 
+	public function set_width(value:Float):Float 
 	{
-		if (value != cachedWidth)			
-			scaleX = value / cachedWidth;
-			
-		else 		
-			scaleX = 1;
+		if (value != cachedWidth)
+		{
+			scaleX = (value *scaleX) / cachedWidth;
+			isDirty = true;
+		}
 		
-		isDirty = true;
 		return value;
 	}
 	
-	function get_height():Float 
+	inline public function get_height():Float 
 	{
 		return cachedHeight;
 	}
 	
-	function set_height(value:Float):Float 
+	public function set_height(value:Float):Float 
 	{
 		if (value != cachedHeight)			
-			scaleY = value / cachedHeight;
-			
-		else 		
-			scaleY = 1;
+		{ 
+			scaleY = (value*scaleY) / cachedHeight;
+			isDirty = true;
+		}
 		
-		isDirty = true;
 		return value;
 	}
 	
-	private function get_scaleX ():Float 
+	inline public function get_scaleX ():Float 
 	{
 		
-		if (cachedScaleX == null) {
-			
-			if (transform.b == 0) {
-				
-				cachedScaleX = transform.a;
-				
-			} else {
-				
-				cachedScaleX = Math.sqrt (transform.a * transform.a + transform.b * transform.b);
-				
-			}
-			
-		}
-		
-		return cachedScaleX;
+		return scaleX;
 		
 	}
 	
-	private function set_scaleX (value:Float):Float 
+	public function set_scaleX (value:Float):Float 
 	{
 		
-		if (cachedScaleX != value) {
+		if (value != scaleX)
+		{
 			
-			cachedScaleX = value;
-			
-			if (transform.b == 0) {
-				
-				transform.a = value;
-				
-			} else {
-				
-				//var rotation = this.rotation;
-				
-				var a = rotationCosine * value;
-				var b = rotationSine * value;
-				
-				transform.a = a;
-				transform.b = b;
-				
-			}
-			
+			cachedWidth = (cachedWidth/scaleX) * value;	
+			scaleX = value;
+			isDirty = true;
 		}
-		cachedWidth = cachedWidth * value;
-		
-		isDirty = true;
-		return value;
-		
-	}
-	
-	private function get_scaleY ():Float 
-	{
-		
-		if (cachedScaleY == null) {
-			
-			if (transform.c == 0) {
-				
-				cachedScaleY = transform.d;
-				
-			} else {
-				
-				cachedScaleY = Math.sqrt (transform.c * transform.c + transform.d * transform.d);
-				
-			}
-			
-		}
-		
-		return cachedScaleY;
-		
-	}
-	
-	private function set_scaleY (value:Float):Float 
-	{
-		
-		if (cachedScaleY != value) {
-			
-			cachedScaleY = value;
-			
-			if (transform.c == 0) {
-				
-				transform.d = value;
-				
-			} else {
-				
-				//var rotation = this.rotation;
-				
-				var c = -rotationSine * value;
-				var d = rotationCosine * value;
-				
-				transform.c = c;
-				transform.d = d;
-				
-			}
-			
-		}
-		
-		cachedHeight = cachedHeight * value;
-		isDirty = true;
 		
 		return value;
 		
 	}
 	
-	private function get_rotation ():Float 
+	inline public function get_scaleY ():Float 
 	{
 		
-		if (cachedRotation == null) {
-		
-			if (transform.b == 0 && transform.c == 0) {
-				
-				cachedRotation = 0;
-				rotationSine = 0;
-				rotationCosine = 1;
-				
-			} else {
-				
-				var radians = Math.atan2 (transform.d, transform.c) - (Math.PI / 2);
-				
-				cachedRotation = radians * (180 / Math.PI);
-				rotationSine = Math.sin (radians);
-				rotationCosine = Math.cos (radians);
-				
-			}
-			
-		}
-		
-		return cachedRotation;
+		return scaleY;
 		
 	}
 	
-	private function set_rotation (value:Float):Float 
+	public function set_scaleY (value:Float):Float 
+	{
+		if (value != scaleY)
+		{
+			
+			cachedHeight = (cachedHeight/scaleY) * value;	
+			scaleY = value;
+			isDirty = true;
+		}
+		return value;
+		
+	}
+	
+	inline public function get_rotation ():Float 
 	{
 		
-		if (value != cachedRotation) {
+		return rotation;
+		
+	}
+	
+	public function set_rotation (value:Float):Float 
+	{
+		
+		if (value != rotation) {
 			
-			cachedRotation = value;
+			rotation = value;
 			var radians = value * (Math.PI / 180);
 			rotationSine = Math.sin (radians);
 			rotationCosine = Math.cos (radians);
-						
-			transform.a = rotationCosine * cachedScaleX;
-			transform.b = rotationSine * cachedScaleX;
-			transform.c = -rotationSine * cachedScaleY;
-			transform.d = rotationCosine * cachedScaleY;
-			
-			
+			isDirty = true;
 		}
 		
-		isDirty = true;
 		
 		return value;
 		
@@ -344,6 +248,47 @@ class RenderedObject implements ICameraDependent
 		return bufferIndex = value;
 	}
 	
+	function get_alpha():Float 
+	{
+		return alpha;
+	}
+	
+	function set_alpha(value:Float):Float 
+	{
+		return alpha = value;
+	}
+	
+	function get_color():UInt 
+	{
+		return color;
+	}
+	
+	function set_color(value:UInt):UInt 
+	{
+		isDirty = true;
+		return color = value;
+	}
+	
+	public function SetBaseWidth(value:Float):Void
+	{
+		var currentScale:Float = scaleX;
+		scaleX = 1;
+		cachedWidth = value;
+		trace(width);
+		scaleX = currentScale;
+		isDirty = true;
+		
+	}
+	
+	public function SetBaseHeight(value:Float):Void
+	{
+		var currentScale:Float = scaleY;
+		scaleY = 1;
+		cachedHeight = value;
+		scaleY = currentScale;
+		isDirty = true;
+		
+	}
 	
 	
 	

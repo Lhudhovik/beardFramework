@@ -50,7 +50,7 @@ class TextField extends RenderedObject {
 		this.text = "";
 	
 		glyphsData = new Array<RenderedGlyphData>();
-		autoAdjust = AutoAdjust.NONE;
+		autoAdjust = AutoAdjust.ADJUST_FIELD;
 		alignment = Alignment.LEFT;
 		
 		linesHeight = textSize = size;
@@ -152,7 +152,7 @@ class TextField extends RenderedObject {
 	
 	public function UpdateLayout():Void
 	{
-		trace("extfield layout update");
+	
 		var glyphMetrics:GlyphMetrics=null;
 		var glyphData:RenderedGlyphData = null;
 		var previousglyphData:RenderedGlyphData =  null;
@@ -179,8 +179,6 @@ class TextField extends RenderedObject {
 		for (i in 0...chars.length)
 		{
 			char = chars[i];
-				
-			trace(char);
 			
 			if (isEmbedded)
 			{
@@ -254,7 +252,7 @@ class TextField extends RenderedObject {
 			else if (char.charCodeAt(0) < 33)
 			{
 
-				trace("entering escape sequence");
+				
 				switch(char)
 				{
 					
@@ -263,11 +261,8 @@ class TextField extends RenderedObject {
 					case " " : space = true;
 					
 				}
+						
 				
-				
-				trace(hTab);
-				trace(carriageReturn);
-				trace(space);
 				continue;
 				
 			}
@@ -339,6 +334,15 @@ class TextField extends RenderedObject {
 				glyphData.bufferIndex = (i == 0 ? this.bufferIndex : renderer.AllocateBufferIndex());
 			}
 				
+			if (this.width == 0)
+			{
+				SetBaseWidth(glyphData.x + glyphData.width);
+			}
+			if (this.height == 0)
+			{
+				SetBaseHeight(linesHeight);
+			}
+			
 			if (previousglyphData != null)
 			{
 				
@@ -346,17 +350,18 @@ class TextField extends RenderedObject {
 				
 				
 				if (carriageReturn){
-					trace("carriagereturn");
 					glyphData.y += linesHeight + spacingV;
 					glyphData.x = 0;
 					glyphData.line = ++currentLine;
+					SetBaseHeight(((currentLine+1) * linesHeight) + (currentLine * spacingV) );
 				}
 				
-				if (this.width > 0 && (glyphData.x > this.width || glyphData.x + glyphData.width > this.width))
+				
+				if((glyphData.x > this.width || glyphData.x + glyphData.width > this.width))
 				{
 					if (autoAdjust == AutoAdjust.ADJUST_FIELD)
 					{
-						this.width = glyphData.x + glyphData.width ;
+						SetBaseWidth(glyphData.x + glyphData.width);
 					}
 					else if (autoAdjust == AutoAdjust.ADJUST_TEXT)
 					{
@@ -364,6 +369,7 @@ class TextField extends RenderedObject {
 						glyphData.y += linesHeight + spacingV;
 						glyphData.x = 0;
 						glyphData.line = ++currentLine;
+						SetBaseHeight((currentLine+1) * (linesHeight + spacingV));
 					}
 					
 				}
@@ -382,9 +388,7 @@ class TextField extends RenderedObject {
 		}
 		
 		needLayoutUpdate = false;
-		//for (data in glyphsData)
-			//trace(data);
-			
+		
 		
 	}
 	
@@ -403,10 +407,10 @@ class TextField extends RenderedObject {
 	
 	override function set_bufferIndex(value:Int):Int 
 	{
-		trace("set buiffer " + value); 
+		
 		if (glyphsData != null)
 		{
-			trace("no bulll "); 
+			
 			if (value < 0)
 			{
 				for (data in glyphsData)
@@ -418,7 +422,7 @@ class TextField extends RenderedObject {
 			{
 				for (i in 0...glyphsData.length)
 				{
-					trace(glyphsData[i].bufferIndex );
+					
 					if (glyphsData[i].bufferIndex < 0)
 					{
 						if (i == 0) glyphsData[i].bufferIndex = value;
@@ -429,8 +433,7 @@ class TextField extends RenderedObject {
 				
 			}
 			
-			for (data in glyphsData)
-			trace(data);
+		
 		}
 		
 		return super.set_bufferIndex(value);
