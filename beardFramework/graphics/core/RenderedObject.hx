@@ -1,7 +1,7 @@
 package beardFramework.graphics.core;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.interfaces.ICameraDependent;
-import openfl.geom.Matrix;
+
 
 /**
  * ...
@@ -16,6 +16,7 @@ class RenderedObject implements ICameraDependent
 	public var width(get, set):Float;
 	@:isVar public var isDirty(get, set):Bool = false;
 	@:isVar public var name(get, set):String;
+	@:isVar public var stockageID:Int;
 	@:isVar public var visible(get, set):Bool;
 	@:isVar public var rotation (get, set):Float;
 	@:isVar public var scaleX (get, set):Float;
@@ -35,6 +36,7 @@ class RenderedObject implements ICameraDependent
 	
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
+	@:isVar public var renderingBatch(get, set):String;
 	
 	public function new() 
 	{
@@ -50,9 +52,9 @@ class RenderedObject implements ICameraDependent
 		rotationSine = Math.sin (0);
 		rotationCosine = Math.cos (0);
 		bufferIndex = -1;
-	
+		stockageID = -1;
 		displayingCameras = new List<String>();
-		
+		renderingBatch = "default";
 		
 	}
 	
@@ -231,10 +233,10 @@ class RenderedObject implements ICameraDependent
 		return isDirty;
 	}
 	
-	function set_isDirty(value:Bool):Bool 
+	function  set_isDirty(value:Bool):Bool 
 	{
-		if (value == true && renderer != null && bufferIndex >= 0) renderer.AddDirtyObject(this);
-		else if ( value == false && renderer != null) renderer.RemoveDirtyObject(this);
+		if (value == true && renderer != null && bufferIndex >= 0) renderer.AddDirtyObject(this, renderingBatch);
+		else if ( value == false && renderer != null) renderer.RemoveDirtyObject(this, renderingBatch);
 		return isDirty = value;
 	}
 	
@@ -271,10 +273,10 @@ class RenderedObject implements ICameraDependent
 	
 	public function SetBaseWidth(value:Float):Void
 	{
+		//trace("base width set to " + value);
 		var currentScale:Float = scaleX;
 		scaleX = 1;
 		cachedWidth = value;
-		trace(width);
 		scaleX = currentScale;
 		isDirty = true;
 		
@@ -282,12 +284,38 @@ class RenderedObject implements ICameraDependent
 	
 	public function SetBaseHeight(value:Float):Void
 	{
+		//trace("base height set to " + value);
 		var currentScale:Float = scaleY;
 		scaleY = 1;
 		cachedHeight = value;
 		scaleY = currentScale;
 		isDirty = true;
 		
+	}
+	
+	function get_renderingBatch():String 
+	{
+		return renderingBatch;
+	}
+	
+	function set_renderingBatch(value:String):String 
+	{
+		if (value != renderingBatch)
+		{
+			if (renderer != null && bufferIndex >=0)
+			{
+				renderer.RemoveDirtyObject(this, renderingBatch);
+				renderer.FreeBufferIndex(bufferIndex, renderingBatch);
+				bufferIndex = renderer.AllocateBufferIndex(value);
+			}
+		
+			renderingBatch = value;
+			isDirty = true;
+			
+		}
+		
+		
+		return renderingBatch;
 	}
 	
 	

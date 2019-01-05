@@ -1,5 +1,6 @@
 package beardFramework.core;
 
+import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.Shaders;
 import beardFramework.resources.options.OptionsManager;
@@ -16,6 +17,7 @@ import beardFramework.gameSystem.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.utils.MinAllocArray;
 //import crashdumper.CrashDumper;
 //import crashdumper.SessionData;
 import lime.app.Application;
@@ -45,12 +47,14 @@ class BeardGame extends Application
 	public var SETTINGS(default, never):String = "settings";
 	public var SPLASHSCREENS_PATH(default, never):String = "assets/splash/";
 	public var SHADERS_PATH(default, never):String = "assets/shaders/";
+	public var CONTENTLAYER(default, never):Int = 0;
+	public var UILAYER(default, never):Int = 1;
+	public var LOADINGLAYER(default, never):Int = 3;
 	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
-	private var contentLayer:BeardLayer;
-	private var UILayer:BeardLayer;
-	private var loadingLayer:BeardLayer;
+	private var layers:MinAllocArray<BeardLayer>;
 	private var pause:Bool;
+	private var gameReady:Bool;
 	
 	private var splashScreen:SplashScreen;
 	
@@ -80,12 +84,15 @@ class BeardGame extends Application
 			//
 		//#end
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
-		contentLayer = new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT);
-		contentLayer.visible = false;
-		UILayer = new BeardLayer("UILayer", BeardLayer.DEPTH_UI);
-		UILayer.visible = false;
-		loadingLayer = new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING);
-		loadingLayer.visible = false;
+		
+		layers = new MinAllocArray(3);
+		layers.Push(new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT, 0));
+		layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,1));
+		layers.Push(new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING,2));
+	
+		for (i in 0...3)
+			layers.get(i).visible = false;
+			
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default",window.width, window.height));
 		
@@ -95,6 +102,8 @@ class BeardGame extends Application
 		
 		//fps = new MemoryUsage(10,10,0xffffff);
 		//stage.addChild(fps);
+		
+		gameReady = false;
 		
 		InputManager.Get().Activate(Application.current.window);
 		
@@ -148,6 +157,7 @@ class BeardGame extends Application
 			
 			//trace("*** Resources to load : " + OptionsManager.Get().resourcesToLoad);
 			Shaders.LoadShaders();
+			
 			for (font in OptionsManager.Get().fontsToLoad)
 			{
 				for (size in font.size)
@@ -165,10 +175,8 @@ class BeardGame extends Application
 	
 	private function GameStart():Void
 	{
-		//var unique_id:String = SessionData.generateID("BeardGame_"); 
-			//
-    //
-		//var crashDumper = new CrashDumper(unique_id); 
+		
+		gameReady = true;
 		if (cameras != null && cameras["default"] != null){
 			
 			cameras["default"].viewportWidth = window.width;
@@ -180,7 +188,7 @@ class BeardGame extends Application
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
 		
 		Renderer.Get().Start();
-		
+	
 		
 	}
 	
@@ -239,7 +247,7 @@ class BeardGame extends Application
 		
 		//trace("prep for rendering");
 		//VisualRenderer.Get().UpdateBufferFromLayer(contentLayer);
-		Renderer.Get().Render();
+		if(gameReady) Renderer.Get().Render();
 		
 		
 	}
@@ -304,38 +312,38 @@ class BeardGame extends Application
 		return game;
 	}
 	
-	public inline function GetLayer(layerType:BeardLayerType):BeardLayer
+	public inline function GetLayer(layerID:Int):BeardLayer
 	{
-		var layer:BeardLayer;
-		switch(layerType)
-		{
-			
-			case BeardLayerType.CONTENT : layer=  contentLayer;
-			case BeardLayerType.LOADING : layer= loadingLayer;
-			case BeardLayerType.UI : layer = UILayer;
-			
-			
-		}
-		
-		
-		return layer;
+		return layers.get(layerID);
 		
 	}
 	
+	public inline function GetTargetUnderPoint(x:Float, y:Float):RenderedObject
+	{
+		
+		//for (object in UILayer.renderedObjects)
+		//{
+			//
+			//
+		//}
+		//
+		return null;
+		
+	}
 	public inline function GetContentLayer():BeardLayer
 	{
-		return contentLayer;
+		return layers.get(0);
 	}
 	
 	public inline function GetUILayer():BeardLayer
 	{
 		//trace("returned layer : " + layer);
-		return UILayer;
+		return layers.get(1);
 	}
 	
 	public inline function GetLoadingLayer():BeardLayer
 	{
-		return loadingLayer;
+		return layers.get(2);
 	}
 
 }

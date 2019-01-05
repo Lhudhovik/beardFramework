@@ -1,4 +1,5 @@
 package beardFramework.graphics.cameras;
+import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.DataCamera;
@@ -117,7 +118,7 @@ class Camera
 		
 	}
 	
-	public  function Contains(visual:Visual):Bool{
+	public  function Contains(visual:RenderedObject):Bool{
 		
 		var success:Bool = (visual.restrictedCameras == null || visual.restrictedCameras.indexOf(name) != -1);
 		

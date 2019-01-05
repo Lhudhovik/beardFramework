@@ -51,7 +51,7 @@ class UIManager
 	
 	private function Init():Void
 	{
-		UILayer = BeardGame.Get().GetLayer(BeardLayerType.UI);
+		UILayer = BeardGame.Get().GetLayer(BeardGame.Get().UILAYER);
 		templates = new Array<DataSlot<DataUIGroup>>();
 		baseGroup = new UIGroup("UIBase");
 				

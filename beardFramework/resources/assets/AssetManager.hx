@@ -3,6 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.Visual;
 import beardFramework.resources.assets.Atlas;
 import beardFramework.graphics.text.FontFormat;
+import haxe.Utf8;
 //import extension.harfbuzz.TextScript;
 import haxe.ds.Vector;
 import haxe.io.Float32Array;
@@ -19,8 +20,7 @@ import mloader.StringLoader;
 import mloader.XmlLoader;
 import msignal.Signal.Signal0;
 import msignal.Signal.Signal1;
-import openfl.Assets;
-import openfl.display.BitmapData;
+
 
 using beardFramework.utils.SysPreciseTime;
 /**

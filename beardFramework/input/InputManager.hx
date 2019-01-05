@@ -2,6 +2,7 @@ package beardFramework.input;
 
 
 import beardFramework.core.BeardGame;
+import beardFramework.graphics.core.RenderedObject;
 import beardFramework.input.Action.CallbackDetails;
 import beardFramework.utils.MinAllocArray;
 import beardFramework.utils.StringLibrary;
@@ -15,11 +16,6 @@ import lime.ui.MouseWheelMode;
 import lime.ui.Touch;
 import lime.ui.Window;
 import msignal.Signal.Signal1;
-import openfl.Assets;
-import openfl.display.DisplayObject;
-import openfl.events.Event;
-import openfl.events.KeyboardEvent;
-import openfl.events.MouseEvent;
 import openfl.geom.Point;
 import openfl.ui.GameInput;
 import openfl.ui.Keyboard;
@@ -418,19 +414,19 @@ class InputManager
 		utilString = GetMouseInputID(mouseButton);
 		
 		
-		//if (defaultActionsEnabled || handledInputs[utilString] != null)
-		//{
-			//var object:DisplayObject= BeardGame.Get().getTargetUnderPoint(utilPoint);
-			//mouseTargetName = object != null ? object.name : "";
-			//
-		//}
+		if (defaultActionsEnabled || handledInputs[utilString] != null)
+		{
+			var object:RenderedObject= BeardGame.Get().GetTargetUnderPoint(mouseX,mouseY);
+			mouseTargetName = object != null ? object.name : "";
+			
+		}
 		
 		if (handledInputs[utilString] != null)
 		{
 			
 			timeCounters[utilString] =  Sys.preciseTime();
 			
-			var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+			var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 			mouseTargetName = object != null ? object.name : "";
 			
 			handledInputs[utilString].state = InputType.MOUSE_DOWN;		
@@ -461,7 +457,7 @@ class InputManager
 		utilString =  GetMouseInputID(mouseButton);
 		utilPoint.setTo(mouseX, mouseY);
 		
-		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 		mouseTargetName = object != null ? object.name : "";
 		
 		if (handledInputs[utilString] != null)
@@ -542,7 +538,7 @@ class InputManager
 		if (CheckInputHandled(InputTypeToString(InputType.MOUSE_OVER)) || CheckInputHandled(InputTypeToString( InputType.MOUSE_OUT)) ){
 			
 			
-		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 			
 			
 			if (object != null && mouseMoveTargetName != object.name){
@@ -817,7 +813,7 @@ class InputManager
 			utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			timeCounters[StringLibrary.TOUCH + touch.id] =  Sys.preciseTime();
 		
-			var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+			var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 		
 			touchTargets[utilString] = object != null ? object.name : "";
 			
@@ -846,7 +842,7 @@ class InputManager
 		}
 		
 		
-		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 	
 		
 		if (object != null &&  touchTargets[utilString] != object.name){
@@ -900,7 +896,7 @@ class InputManager
 		utilString =  StringLibrary.TOUCH_END + touch.id;
 		utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			
-		var object:DisplayObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
 		touchTargets[utilString] = object != null ? object.name : "";
 		
 		if (handledInputs[utilString] != null)

@@ -16,8 +16,7 @@ import beardFramework.resources.save.data.Test;
 import beardFramework.utils.DataUtils;
 import haxe.Json;
 import msignal.Signal.Signal0;
-import openfl.display.Sprite;
-import openfl.display.Stage;
+
 
 /**
  * ...
@@ -78,9 +77,7 @@ class BasicScreen
 		
 	private function Init():Void
 	{
-		savedData = null;
-		ready = true;
-		onReady.dispatch();
+		
 	}
 	
 	public function ParseScreenData(td:ParamThreadDetail<AbstractDataScreen>):Bool
@@ -167,17 +164,23 @@ class BasicScreen
 	
 			
 		}
-		
+		savedData = null;
 		Init();
-					
+		
+		ready = true;
+		onReady.dispatch();
+		
 		return true;		
 	
 	}
 	
+	/**
+	 * start/restart game logic
+	 * Show UI
+	 */
 	public function Play():Void
 	{
-		//start/restart game logic
-		//ShowUI
+		
 	}
 		
 	public function Clear(td:ThreadDetail):Bool
@@ -215,9 +218,13 @@ class BasicScreen
 		return true;
 	}
 	
+	/**
+	 * //do stuff to stop game Logic and prevent any error during loading etc.
+	 * @param	freeze whether or not to freeze the game
+	 */
 	public function Freeze(freeze:Bool = true):Void
 	{
-		//do stuff to stop game Logic and prevent any error during loading etc.
+		
 	}
 		
 	public function StartTransitionIn():Void
@@ -228,10 +235,13 @@ class BasicScreen
 		
 	}
 	
+	/**
+	 * Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
+	 */
 	private function TransitionIn():Void
 	{
 		onTransitionFinished.dispatch();
-		//Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
+		
 	}
 	
 	public function StartTransitionOut():Void
@@ -240,10 +250,13 @@ class BasicScreen
 		TransitionOut();
 	}
 	
+	/**
+	 * Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
+	 */
 	private function TransitionOut():Void
 	{
 		onTransitionFinished.dispatch();
-		//Do visual Stuff and don't forget to call the onTransitionFinished.dispatch function
+		
 	}
 	
 	inline function get_loadingProgression():Float 

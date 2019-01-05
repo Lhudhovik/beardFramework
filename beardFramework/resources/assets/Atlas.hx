@@ -1,10 +1,10 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.VisualRenderer;
 import beardFramework.utils.DataUtils;
 import beardFramework.utils.TextureUtils;
 import beardFramework.utils.XMLUtils;
+import haxe.Utf8;
 import lime.app.Application;
 import lime.graphics.Image;
 import lime.graphics.WebGLRenderContext;
@@ -29,7 +29,7 @@ class Atlas
 	public var texture:GLTexture;
 
 	private var defaultRect:Rectangle;
-	private var subAreas:Map<String, SubTextureData>;
+	public var subAreas:Map<String, SubTextureData>;
 	
 	public var index(default, null):Int;
 	public var textureIndex(default, null):Int = -1;

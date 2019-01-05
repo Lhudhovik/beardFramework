@@ -31,7 +31,8 @@ class MinAllocArray<T>
 		}
 	}
 	
-	public function Remove(element:Null<T>):Bool{
+	public function Remove(element:Null<T>):Bool
+	{
 		
 		utilInt = 0;
 		for (i in 0...data.length)
@@ -53,20 +54,54 @@ class MinAllocArray<T>
 		
 	}
 	
-	public function Push(element:Null<T>):Void
+	public function Insert(element:Null<T>, index:Int):Void
 	{
+		if (length == data.length) Enlarge();
 		
-		if (length == data.length)
-		{
-			var temp:Vector<Null<T>> = new Vector<Null<T>>(length + 1);
-			for (i in 0...data.length)
-				temp[i] = data[i];
+		for (i in 0...length-index) data[length-i] = data[length-1-i];
 			
-			data = temp;			
+		data[index] = element;
+		length++;
+
+	}
+	
+	public function MoveByIndex(index:Int, destination:Int):Void
+	{
+		var element:Null<T> = data[index];
+		if(index > destination)	for (i in 0...index-destination) data[index-i] = data[index-1-i];
+		else for (i in 0...destination - index) data[index + i] = data[index + i + 1];
+		
+		data[destination] = element;
+	}
+	
+	public function Move(element:Null<T>, destination:Int):Void
+	{
+		for (i in 0...data.length)
+		{
+			
+			if (data[i] == element)
+			{
+				
+				if(i > destination)	for (j in 0...i-destination) data[i-j] = data[i-1-j];
+				else for (j in 0...destination - i) data[i + j] = data[i + j + 1];
+		
+				data[destination] = element;
+				
+				break;		
+				
+			}
+			
 		}
 		
+		
+		
+	}
+	
+	public function Push(element:Null<T>):Void
+	{
+		if (length == data.length) Enlarge();
 		data[length++] = element;
-		//trace(data);
+	
 	}
 	
 	public inline function get(index:Int):Null<T>
@@ -74,13 +109,11 @@ class MinAllocArray<T>
 		return data[index];
 	}
 	
-
 	public inline function set(index:Int, value:Null<T>):Null<T>
 	{
 		data[index] = value;
 		return value;
 	}
-	
 	
 	public inline function Clean():Void
 	{
@@ -91,6 +124,17 @@ class MinAllocArray<T>
 		length = 0;	
 		
 	}
+	
+	private inline function Enlarge(addedElements:Int = 1):Void
+	{
+		var temp:Vector<Null<T>> = new Vector<Null<T>>(length + 1);
+		for (i in 0...data.length) 
+			temp[i] = data[i];
+			
+		data = temp;			
+		
+	}
+	
 	public inline function IndexOf(value:Null<T>):Int
 	{
 		var index:Int = -1;
@@ -104,6 +148,11 @@ class MinAllocArray<T>
 		
 		return index;
 		
+	}
+	
+	public function toString():String
+	{
+		return Std.string(data);
 	}
 	
 	

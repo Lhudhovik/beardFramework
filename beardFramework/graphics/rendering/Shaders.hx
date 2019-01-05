@@ -41,3 +41,10 @@ class Shaders
 			
 	}
 }
+
+typedef Shader =
+{
+	public var name:String;
+	public var type:Int;
+	
+}

@@ -1,23 +1,15 @@
 package beardFramework.resources.assets;
 
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.TextRenderer;
-import beardFramework.graphics.rendering.VisualRenderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.DataUtils;
 import beardFramework.utils.GeomUtils;
 import beardFramework.utils.GeomUtils.SimpleRect;
+import haxe.Utf8;
 import lime.graphics.ImageBuffer;
 import lime.graphics.ImageFileFormat;
 import lime.graphics.PixelFormat;
-import lime.text.harfbuzz.HBBuffer;
 import lime.utils.UInt8Array;
-//import extension.harfbuzz.OpenflHarbuzzCFFI;
-//import extension.harfbuzz.OpenflHarbuzzCFFI.GlyphAtlas;
-//import extension.harfbuzz.OpenflHarfbuzzRenderer;
-//import extension.harfbuzz.ScriptIdentificator;
-//import extension.harfbuzz.TextDirection;
-//import extension.harfbuzz.TextScript;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
 import lime.math.Rectangle;
@@ -25,13 +17,7 @@ import lime.math.Vector2;
 import lime.text.Font;
 import lime.text.Glyph;
 import lime.text.GlyphMetrics;
-import lime.text.harfbuzz.HB;
-import lime.text.harfbuzz.HBBlob;
-import lime.text.harfbuzz.HBFTFont;
-import lime.text.harfbuzz.HBFace;
-import lime.text.harfbuzz.HBFont;
-import openfl.display.BitmapData;
-import openfl.geom.Point;
+
 
 /**
  * ...
@@ -43,13 +29,13 @@ class FontAtlas extends Atlas
 		
 	public var fonts:Array<AtlasFontData>;
 	private var currentLineHeight:Float = 0;
-	
+	public var ordered:Array<String>;
 	public function new(name:String) 
 	{
 		super(name, null, null);
 		
 		fonts = new Array();
-		
+	ordered = [];
 		textureImage = new Image(null, 0, 0, MAXSIZE, MAXSIZE);
 		subAreas[name].imageArea.width = MAXSIZE;
 		subAreas[name].imageArea.height = MAXSIZE;
@@ -68,11 +54,17 @@ class FontAtlas extends Atlas
 		var glyph:Glyph;
 		var glyphDataIndex:Int;
 		var textureDataIndex:Int;
-		
+		//trace(fontName + " --------------------------------------------------------------------------");
+		//trace(fontGlyphsList);
+		var keeys:Array<String> = [];
+		var count:Int = 0;
 		for (nativeGlyph in fontGlyphsList){
+			
+			//trace(nativeGlyph.char_code);
 			char = String.fromCharCode(nativeGlyph.char_code);
 			
 			if (char != null && char != ""){
+				char = Utf8.encode(char);
 				
 				glyph = font.getGlyph(char);
 				if (glyph == 0)
@@ -82,7 +74,7 @@ class FontAtlas extends Atlas
 				
 				if (glyphImage != null)
 				{
-							
+							count++;
 					if (previousGlyphPosition == null)
 					{
 						if (fonts.length > 0){
@@ -94,7 +86,7 @@ class FontAtlas extends Atlas
 					}
 					else
 					{
-						imageArea.x = previousGlyphPosition.imageArea.x + previousGlyphPosition.imageArea.width;
+						imageArea.x = previousGlyphPosition.imageArea.x + previousGlyphPosition.imageArea.width+2;
 						imageArea.y = previousGlyphPosition.imageArea.y;				
 					}
 					
@@ -107,7 +99,7 @@ class FontAtlas extends Atlas
 						imageArea.y += currentLineHeight;										
 					}
 					
-					if (imageArea.height > currentLineHeight) currentLineHeight = imageArea.height;
+					if (imageArea.height > currentLineHeight) currentLineHeight = imageArea.height+2;
 					
 					
 					
@@ -127,14 +119,15 @@ class FontAtlas extends Atlas
 						
 					}
 					
+					ordered.push(fontName + size + char);
 					previousGlyphPosition = subAreas[fontName + size + char] = {
 						imageArea:	imageArea.clone(),
 						frame:		null,
 						rotated : 	false,
-						uvX: 		imageArea.x/MAXSIZE,
-						uvY: 		imageArea.y/MAXSIZE,
-						uvW:		imageArea.width/MAXSIZE,
-						uvH:		imageArea.height/MAXSIZE,
+						uvX: 		(imageArea.x)/MAXSIZE,
+						uvY: 		(imageArea.y)/MAXSIZE,
+						uvW:		(imageArea.width)/MAXSIZE,
+						uvH:		(imageArea.height)/MAXSIZE,
 						atlasIndex: this.index
 					}
 								
@@ -161,13 +154,13 @@ class FontAtlas extends Atlas
 		
 		
 		fonts.push(fontData);
-		
+		//trace(count);
 		if (textureIndex < 0) textureIndex = Renderer.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + textureIndex);
 		texture = GetTexture(textureImage);
 		GL.bindTexture(GL.TEXTURE_2D, texture);
 		Renderer.Get().UpdateTexture(textureIndex);
-		
+		//trace(size + " " +keeys);
 	}
 	
 	public inline function ContainsFont(fontName:String, size:Int = 32):Bool
@@ -192,7 +185,9 @@ class FontAtlas extends Atlas
 					closerSize = _font.size;
 		}
 		else closerSize = size;
-					
+		if (subAreas[font + closerSize + glyph] == null)
+		trace("null encountered " + glyph + " " +  glyph);
+		trace(glyph);
 		return subAreas[font + closerSize + glyph];
 		
 	}
@@ -209,164 +204,3 @@ typedef AtlasFontData =
 	public var lastGlyphPosition:SubTextureData;
 	
 }
-
-
-//public function AddFont(font:Font, fontName:String, size:Int = 72):Void
-	//{
-		////Get original glyph data
-		//var fontGlyphsList:Array<NativeGlyphData> = font.decompose().glyphs;
-		//var string:String = "";
-		//var char:String = "";
-		//var glyphs:Map<String, Image> = new Map();
-		//var glyphto:Array<Glyph> = new Array();
-		//var gglyph:Glyph;
-		//for (glyph in fontGlyphsList){
-			//char = String.fromCharCode(glyph.char_code);
-			//if (char != null && char != ""){
-				//
-				//gglyph = font.getGlyph(char);
-				//if (gglyph == 0)
-				//gglyph = new Glyph(glyph.char_code);
-				//var image:Image = font.renderGlyph(gglyph, 72);
-				////trace(font.getGlyph(char));
-				//if (image != null)
-				//{
-					//glyphs[char] = image;	
-					//
-					//string += String.fromCharCode(glyph.char_code);
-					//glyphto.push(font.getGlyph(char));
-				//}
-				//
-				////string += String.fromCharCode(glyph.char_code);
-			//}
-			//
-		//}
-		//
-		////extract visuals
-		////var glyphs:Map<Glyph, Image> = font.renderGlyphs(glyphto, 72);
-		//var image:Image = new Image(null, 0, 0, MAXSIZE, MAXSIZE);
-		//var buffer:ImageBuffer;
-	//
-		////for (image in glyphs){
-			////buffer = image.buffer;
-			////break;
-		////}
-		////
-		////var bufferIndex:Int;
-		////var imageIndex:Int;
-		////
-		////for (x in 0...buffer.width)
-		////{
-			////for (y in 0...buffer.height)
-			////{
-				////bufferIndex = (y * buffer.width + x);
-				////imageIndex = (y * image.width + x) * 4;
-				////
-				////image.data[imageIndex] = 255;
-				////image.data[imageIndex + 1] =255;
-				////image.data[imageIndex + 2] = 255;
-				////image.data[imageIndex + 3] = buffer.data[bufferIndex];
-				////
-			////}
-			////
-		////}
-		//
-		//var previousGlyphPosition:SubTextureData = null;
-		//var imageArea:Rectangle = new Rectangle(0,10,0,0);
-		//var fontData:AtlasFontData = {name:fontName, size:size, firstGlyph:"", firstGlyphPosition:null, lastGlyph:"", lastGlyphPosition:null};
-		//var currentGlyph:String = "";
-		////for (glyph in glyphs.keys() )
-		//for (char in glyphs.keys() )
-		//{
-			//
-			////trace(glyph + " " + String.fromCharCode(cast glyph));
-			////trace(char);
-			////currentGlyph = String.fromCharCode(glyph);
-							//
-			//if (previousGlyphPosition == null)
-			//{
-				//if (fonts.length > 0){
-					//imageArea = fonts[fonts.length - 1].lastGlyphPosition.imageArea;
-					//imageArea.x += imageArea.width;
-				//}
-			//}
-			//else
-			//{
-				//imageArea.x = previousGlyphPosition.imageArea.x + previousGlyphPosition.imageArea.width+100;
-				//imageArea.y = previousGlyphPosition.imageArea.y;				
-			//}
-			//
-			////imageArea.width = glyphs[glyph].width;
-			//imageArea.width = glyphs[char].width;
-			////imageArea.height = glyphs[glyph].height;
-			//imageArea.height = glyphs[char].height;
-			//
-			//if (imageArea.x > MAXSIZE || imageArea.x + imageArea.width > MAXSIZE)
-			//{
-				//imageArea.x = 0;
-				//imageArea.y += currentLineHeight;										
-			//}
-			//
-			//if (imageArea.height > currentLineHeight) currentLineHeight = imageArea.height;
-			//
-			//var bufferIndex:Int;
-			//var imageIndex:Int;
-			//
-			//for (x in 0...cast(imageArea.width,Int))
-			//{
-				//for (y in 0...cast(imageArea.height,Int))
-				//{
-					//bufferIndex = (y * glyphs[char].width + x);
-					//imageIndex = cast( ((y+imageArea.y) * image.width + x + imageArea.x) * 4,Int);
-				//
-					//image.data[imageIndex] = 255;
-					//image.data[imageIndex + 1] =255;
-					//image.data[imageIndex + 2] = 255;
-					//image.data[imageIndex + 3] = glyphs[char].data[bufferIndex];
-					//
-				//}
-				//
-			//}
-			//
-			////previousGlyphPosition = subAreas[fontName + currentGlyph] = {
-			//previousGlyphPosition = subAreas[fontName + char] = {
-				//imageArea:	imageArea.clone(),
-				//frame:		null,
-				//rotated : 	false,
-				//uvX: 		imageArea.x/MAXSIZE,
-				//uvY: 		imageArea.y/MAXSIZE,
-				//uvW:		imageArea.width/MAXSIZE,
-				//uvH:		imageArea.height/MAXSIZE,
-				//atlasIndex: this.index
-			//}
-			////trace(glyphs[glyph].buffer.width);
-			////trace(currentGlyph + " "+ glyphs[glyph].offsetX + " " + previousGlyphPosition);
-			//
-			//
-			//if (fontData.firstGlyphPosition == null)
-			//{
-				////fontData.firstGlyph = currentGlyph;
-				//fontData.firstGlyph = char;
-				//fontData.firstGlyphPosition = previousGlyphPosition;
-			//}
-			//if (previousGlyphPosition != null)
-			//{
-				////fontData.lastGlyph = currentGlyph;
-				//fontData.lastGlyph = char;
-				//fontData.lastGlyphPosition = previousGlyphPosition;
-			//}
-			//
-			////glyphs[glyph] = null;
-			//glyphs[char] = null;
-				//
-		//}
-		//
-				//
-		//fonts.push(fontData);
-				//
-		//GL.activeTexture(GL.TEXTURE0 + FontRenderer.Get().GetFreeTextureIndex());
-		//texture = GetTexture(image);
-		//GL.bindTexture(GL.TEXTURE_2D, texture);
-		//FontRenderer.Get().ActivateTexture(FontRenderer.Get().GetFreeTextureIndex());
-		//
-	//}

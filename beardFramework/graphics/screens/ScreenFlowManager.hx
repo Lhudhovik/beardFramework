@@ -75,6 +75,13 @@ class ScreenFlowManager
 		transitioning = false;
 	}
 	
+	/**
+	 * Start the transition to another screen
+	 * @param	screenClass
+	 * @param	loadingScreenClass
+	 * @param	dataPath
+	 * @param	reUse
+	 */
 	public function LoadScreen(screenClass:Class<BasicScreen>, loadingScreenClass:Class<BasicLoadingScreen>, dataPath:String = "", reUse:Bool = true):Void
 	{
 		trace("~~ " + screenClass + " Loading started");
@@ -134,6 +141,9 @@ class ScreenFlowManager
 		}
 	}
 	
+	/**
+	 * Launch the loading of screen data and UI data
+	 */
 	private function StartTransition():Void
 	{
 		//***********************  Load screen Data ***********************************************
@@ -174,11 +184,13 @@ class ScreenFlowManager
 		
 		
 	}
-	
+	/**
+	 * check if min loading time is reached and launch end transitions
+	 */
 	private inline function OnScreenLoaded():Void
 	{
 		
-		//***********************  check if min loading time is reached! ************************************************
+		
 		
 		if (currentLoadingScreen.CheckLoadtingTime(loadingTimeTD)){
 			loadingTimeTD.Clear();
