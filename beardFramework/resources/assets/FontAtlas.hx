@@ -4,7 +4,7 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.DataUtils;
 import beardFramework.utils.GeomUtils;
-import beardFramework.utils.GeomUtils.SimpleRect;
+import beardFramework.utils.simpleDataStruct.SRect;
 import haxe.Utf8;
 import lime.graphics.ImageBuffer;
 import lime.graphics.ImageFileFormat;
@@ -187,7 +187,7 @@ class FontAtlas extends Atlas
 		else closerSize = size;
 		if (subAreas[font + closerSize + glyph] == null)
 		trace("null encountered " + glyph + " " +  glyph);
-		trace(glyph);
+		//trace(glyph);
 		return subAreas[font + closerSize + glyph];
 		
 	}

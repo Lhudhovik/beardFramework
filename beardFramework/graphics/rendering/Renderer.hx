@@ -128,7 +128,9 @@ class Renderer
 	
 	public function InitBatch(name:String, shaderProgram:String = "", shaderList:Array<Shaders.Shader> = null, needOrdering:Bool = false ):Void
 	{
-		
+		for (i in 0...batches.length)
+			if (batches.get(i).name == name) return;
+			
 		if (shaderProgram != "" && shaderPrograms[shaderProgram] != null) shaderPrograms[name] = shaderPrograms[shaderProgram];
 		else if(shaderList != null)	InitShaders(shaderList, name);
 		else shaderPrograms[name] = shaderPrograms[DEFAULT];

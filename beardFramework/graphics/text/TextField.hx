@@ -45,11 +45,12 @@ class TextField extends RenderedObject {
 	
 	
 	
-	public function new(text:String="", font:String="", size:Int = 32 ) 
+	public function new(text:String="", font:String="", size:Int = 32, name:String = "" ) 
 	{
 		super();
 		
-		if (name == "") name = "TextField_" + instanceCount;
+		if (name == "") this.name = "TextField_" + instanceCount;
+		else this.name = name;
 		instanceCount++;
 		
 		this.text = "";
@@ -83,11 +84,13 @@ class TextField extends RenderedObject {
 	
 	public function ShowCursor():Void
 	{
-		if (layer != null)
-		layer.Add(cursor);
-		cursorIndex = 5;
-		cursor.x = this.x + glyphsData[cursorIndex].x + glyphsData[cursorIndex].width;
-		cursor.y = this.y + glyphsData[cursorIndex].line * linesHeight;
+		if (layer != null){
+			layer.Add(cursor);
+			cursorIndex = 5;
+			cursor.x = this.x + glyphsData[cursorIndex].x + glyphsData[cursorIndex].width;
+			cursor.y = this.y + glyphsData[cursorIndex].line * linesHeight;
+		}
+	
 			
 	}
 	public function RemoveText(index:Int, count:Int = 1):String
@@ -197,7 +200,7 @@ class TextField extends RenderedObject {
 			////chars.push(String.fromCharCode(Utf8.charCodeAt(text,i)));
 			//
 		//}
-		trace(chars);
+		//trace(chars);
 		var textureData:SubTextureData = null;
 		var glyphScale:Float=0;
 		var glyphHeight:Float=0;
@@ -493,10 +496,10 @@ class TextField extends RenderedObject {
 						
 						data = prevData = glyphsData[lineData[lineData.length - 1].glyph];
 						gap = this.width - data.x + (data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width);
-						trace(gap);
-						trace(this.width);
-						trace(data.x);
-						trace((data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : 0));
+						//trace(gap);
+						//trace(this.width);
+						//trace(data.x);
+						//trace((data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : 0));
 						if(data.metrics != null)
 							data.x = this.width - (gap*0.5) - (data.metrics.advance.x - data.metrics.horizontalBearing.x)*sizeRatio;
 						else
@@ -597,7 +600,7 @@ class TextField extends RenderedObject {
 	}
 	override public function set_width(value:Float):Float 
 	{
-		trace("changed");
+		//trace("changed");
 		needLayoutUpdate = isDirty = true;
 		return super.set_width(value);
 	}

@@ -1,11 +1,12 @@
 package beardFramework.graphics.screens;
 import beardFramework.core.BeardGame;
+import beardFramework.systems.aabb.AABBTree;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.ui.UIManager;
-import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.systems.entities.GameEntity;
 import beardFramework.resources.save.SaveManager;
 import beardFramework.resources.save.data.DataCamera;
 import beardFramework.resources.save.data.DataEntity;
@@ -32,23 +33,25 @@ class BasicScreen
 	public var onTransitionFinished(get, null):Signal0;
 	public var dataPath:String;
 	public var entities:Array<GameEntity>;
-	private var displayLayer:BeardLayer;
+	private var contentLayer:BeardLayer;
 	private var defaultCamera:Camera;
 	private var loadingProgression(get, null):Float;
 	private var savedData:AbstractDataScreen;
 	public var ready:Bool;
-	
-
+	public var width:Int = 0;
+	public var height:Int = 0;
+	//public var aabbTree:AABBTree;
 	
 	public function new() 
 	{
 		onReady = new Signal0();
 		onTransitionFinished = new Signal0();
-		displayLayer = BeardGame.Get().GetContentLayer();
+		contentLayer = BeardGame.Get().GetContentLayer();
 		defaultCamera = BeardGame.Get().cameras[Camera.DEFAULT];
 		name = Type.getClassName(Type.getClass(this));
 		entities = new Array<GameEntity>();
 		ready = false;
+		//aabbTree = new AABBTree();
 		if (globalEntities == null) globalEntities = new Map<String,GameEntity>();
 	}
 	
@@ -93,6 +96,9 @@ class BasicScreen
 				savedData = SaveManager.Get().GetSavedGameData(this.name, savedData);
 				screenData.cameras.reverse();
 				screenData.entitiesData.reverse();
+				width = screenData.width;
+				height = screenData.height;
+				//BeardGame.Get().grid.Resize(width, height);
 			}
 			
 			if (td.progression < (screenData.cameras.length/elementsCount))
@@ -266,16 +272,16 @@ class BasicScreen
 	
 	public inline function Hide():Void
 	{
-		if (displayLayer != null){
-			displayLayer.visible = false;
+		if (contentLayer != null){
+			contentLayer.visible = false;
 		}
 		
 	}
 	
 	public inline function Show():Void
 	{
-		if (displayLayer != null){
-			displayLayer.visible = true;
+		if (contentLayer != null){
+			contentLayer.visible = true;
 		}
 		
 	}
@@ -287,7 +293,7 @@ class BasicScreen
 	
 	public inline function isDisplayed():Bool
 	{
-		return displayLayer.visible;
+		return contentLayer.visible;
 	}
 	
 	public function ToData(complete:Bool=false):DataScreen
@@ -298,7 +304,9 @@ class BasicScreen
 			type : Type.getClassName(Type.getClass(this)),
 			cameras : [for (camera in BeardGame.Get().cameras) camera.ToData() ],
 			entitiesData : [for(entity in BeardGame.Get().entities) if(entity.isLocal && (complete || entity.requiredSave) ) entity.ToData()],
-			UITemplates:[]
+			UITemplates:[],
+			width: this.width,
+			height:this.height
 		}
 		
 		return data;

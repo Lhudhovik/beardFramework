@@ -1,4 +1,4 @@
-package beardFramework.gameSystem.entities;
+package beardFramework.systems.entities;
 import beardFramework.interfaces.IEntityComponent;
 import beardFramework.interfaces.IEntityVisual;
 import beardFramework.resources.save.data.DataEntity;

@@ -13,7 +13,7 @@ class MinAllocArray<T>
 
 	private var utilInt:Int = 0;
 	
-	public function new(?base:Array<Null<T>>, ?size:Int) 
+	public function new( ?size:Int,?base:Array<Null<T>>) 
 	{
 		if (base != null){
 			
@@ -34,10 +34,10 @@ class MinAllocArray<T>
 	public function Remove(element:Null<T>):Bool
 	{
 		
-		utilInt = 0;
+		utilInt = -1;
 		for (i in 0...data.length)
 		{
-			if (utilInt != 0){
+			if (utilInt != -1){
 				data[i - 1] = data[i];
 				if (i == length) data[i] = null;
 			}				
@@ -50,10 +50,42 @@ class MinAllocArray<T>
 			}
 		}
 		//trace(data);
-		return utilInt != 0;
+		return utilInt != -1;
 		
 	}
 	
+	public function RemoveByIndex(index:Int):Void
+	{
+		
+		
+		for (i in 0...data.length)
+		{
+			if (index < i){
+				data[i - 1] = data[i];
+				if (i == length) data[i] = null;
+			}				
+			else if (i == index)
+			{
+				data[i] = null;
+				length--;
+			}
+		}
+	
+	}
+	
+	public function Pop():Null<T>
+	{
+		
+		var element:Null<T> = null;
+		if (length > 0)
+		{
+			element = data[length - 1];
+			data[length - 1] = null;
+			length--;
+		}
+		return element;
+	}
+		
 	public function Insert(element:Null<T>, index:Int):Void
 	{
 		if (length == data.length) Enlarge();
@@ -104,13 +136,19 @@ class MinAllocArray<T>
 	
 	}
 	
-	public inline function get(index:Int):Null<T>
+	public inline function UniquePush(element:Null<T>):Void
+	{
+		if (this.IndexOf(element) == -1) Push(element);
+	}
+	
+	@:op([]) public inline function get(index:Int):Null<T>
 	{
 		return data[index];
 	}
 	
-	public inline function set(index:Int, value:Null<T>):Null<T>
+	@:op([]) public inline function set(index:Int, value:Null<T>):Null<T>
 	{
+		if (length < index) length = index+1;
 		data[index] = value;
 		return value;
 	}

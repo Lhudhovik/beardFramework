@@ -3,6 +3,7 @@ package beardFramework.core;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.Shaders;
+import beardFramework.graphics.screens.regions.RegionGrid;
 import beardFramework.resources.options.OptionsManager;
 import beardFramework.updateProcess.UpdateProcessesManager;
 import beardFramework.updateProcess.Wait;
@@ -13,7 +14,7 @@ import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.screens.BasicScreen;
 import beardFramework.graphics.screens.SplashScreen;
 import beardFramework.graphics.ui.UIManager;
-import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.systems.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
@@ -53,9 +54,9 @@ class BeardGame extends Application
 	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
 	private var layers:MinAllocArray<BeardLayer>;
-	private var pause:Bool;
+	private var pause(default,null):Bool;
 	private var gameReady:Bool;
-	
+	//public var grid(default,null):RegionGrid;
 	private var splashScreen:SplashScreen;
 	
 	public var entities:Array<GameEntity>;
@@ -90,13 +91,14 @@ class BeardGame extends Application
 		layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,1));
 		layers.Push(new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING,2));
 	
+		
 		for (i in 0...3)
 			layers.get(i).visible = false;
 			
 		cameras = new Map<String,Camera>();
 		AddCamera(new Camera("default",window.width, window.height));
 		
-		cameras["default"].Center(Application.current.window.width * 0.5, Application.current.window.height * 0.5);
+		cameras["default"].Center(window.width * 0.5,window.height * 0.5);
 		
 		entities = new Array<GameEntity>();
 		
@@ -188,7 +190,8 @@ class BeardGame extends Application
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
 		
 		Renderer.Get().Start();
-	
+		
+		//grid = new RegionGrid(window.width, window.height,5);
 		
 	}
 	
@@ -296,6 +299,7 @@ class BeardGame extends Application
 	{
 		
 	}
+	
 	override public function onWindowResize(width:Int, height:Int):Void 
 	{
 		
@@ -318,18 +322,18 @@ class BeardGame extends Application
 		
 	}
 	
-	public inline function GetTargetUnderPoint(x:Float, y:Float):RenderedObject
+	public function GetTargetUnderPoint(x:Float, y:Float):RenderedObject
 	{
-		
-		//for (object in UILayer.renderedObjects)
+		var object:RenderedObject = null;
+		//if (grid != null)
 		//{
-			//
-			//
+			//object = grid.TestPointCollision(Std.int(x), Std.int(y));
 		//}
-		//
-		return null;
+		
+		return object;
 		
 	}
+	
 	public inline function GetContentLayer():BeardLayer
 	{
 		return layers.get(0);

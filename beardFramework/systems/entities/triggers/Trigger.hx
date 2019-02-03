@@ -1,6 +1,6 @@
-package gameSystem.entities.triggers;
+package systems.entities.triggers;
 
-import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.systems.entities.GameEntity;
 import beardFramework.physics.PhysicsManager;
 import nape.phys.Body;
 import nape.shape.Polygon;

@@ -12,8 +12,9 @@ typedef DataScreen =
 	var cameras:Array<DataCamera>;
 	var entitiesData:Array<DataEntity>;
 	var UITemplates:Array<String>;
+	var width:Int;
+	var height:Int;
 	
-
 }
 
 @:forward

@@ -1,7 +1,7 @@
-package beardFramework.gameSystem.entities.components;
+package beardFramework.systems.entities.components;
 
 import beardFramework.core.BeardGame;
-import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.systems.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.IEntityComponent;
 import beardFramework.resources.save.SaveManager;

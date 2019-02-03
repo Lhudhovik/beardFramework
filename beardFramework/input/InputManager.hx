@@ -55,7 +55,7 @@ class InputManager
 	private var touchTargets:Map<String, String>;
 	private var currentInput:Input;
 	private var defaultActions:Map<InputType, Signal1<Input>>;
-	
+	public var focusedObject:String = "";
 	private var triggeredInputs:MinAllocArray<Input>;
 	
 	private function new() 
@@ -414,20 +414,17 @@ class InputManager
 		utilString = GetMouseInputID(mouseButton);
 		
 		
-		if (defaultActionsEnabled || handledInputs[utilString] != null)
-		{
-			var object:RenderedObject= BeardGame.Get().GetTargetUnderPoint(mouseX,mouseY);
-			mouseTargetName = object != null ? object.name : "";
+		var object:RenderedObject= BeardGame.Get().GetTargetUnderPoint(mouseX,mouseY);
+		mouseTargetName = object != null ? object.name : "";
 			
-		}
-		
+			
 		if (handledInputs[utilString] != null)
 		{
 			
 			timeCounters[utilString] =  Sys.preciseTime();
 			
-			var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
-			mouseTargetName = object != null ? object.name : "";
+			//var object:RenderedObject = BeardGame.Get().getTargetUnderPoint(utilPoint); // !Update!
+			//mouseTargetName = object != null ? object.name : "";
 			
 			handledInputs[utilString].state = InputType.MOUSE_DOWN;		
 			
@@ -455,11 +452,11 @@ class InputManager
 	{
 		//Mouse UP
 		utilString =  GetMouseInputID(mouseButton);
-		utilPoint.setTo(mouseX, mouseY);
+		//utilPoint.setTo(mouseX, mouseY);
 		
-		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+		var object:RenderedObject = BeardGame.Get().GetTargetUnderPoint(mouseX,mouseY);
 		mouseTargetName = object != null ? object.name : "";
-		
+		trace("mouse targetr:" + mouseTargetName);
 		if (handledInputs[utilString] != null)
 		{
 			
@@ -537,8 +534,7 @@ class InputManager
 		
 		if (CheckInputHandled(InputTypeToString(InputType.MOUSE_OVER)) || CheckInputHandled(InputTypeToString( InputType.MOUSE_OUT)) ){
 			
-			
-		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+			var object:RenderedObject = BeardGame.Get().GetTargetUnderPoint(mouseX, mouseY);
 			
 			
 			if (object != null && mouseMoveTargetName != object.name){
@@ -639,7 +635,7 @@ class InputManager
 	{
 		
 		//Key Up
-		utilString = String.fromCharCode(key);
+		utilString = String.fromCharCode(key) + focusedObject;
 		//trace(utilString);
 		modifier.capsLock = modifier.numLock = false;
 		
@@ -668,7 +664,7 @@ class InputManager
 		
 		//Check Key Pressed
 		
-		utilString = String.fromCharCode(key); 
+		utilString = String.fromCharCode(key) + focusedObject; 
 		
 		if ( Sys.preciseTime() - timeCounters[utilString] <= KEY_PRESS_DELAY){
 			
@@ -704,7 +700,7 @@ class InputManager
 	
 	public function OnKeyDown(key:KeyCode, modifier:KeyModifier):Void
 	{
-		utilString = String.fromCharCode(key);
+		utilString = String.fromCharCode(key) + focusedObject;
 		//trace(String.fromCharCode(key));
 		if( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] = Sys.preciseTime();
 		
@@ -733,7 +729,7 @@ class InputManager
 	
 	public function OnGamepadAxisMove(gamepadID:Int, axis:GamepadAxis, value:Float):Void
 	{
-		utilString = GetGamepadInputID(gamepadID, axis.toString());
+		utilString = GetGamepadInputID(gamepadID, axis.toString()) + focusedObject;
 		if (handledInputs[utilString] != null){
 				
 			handledInputs[utilString].state = InputType.GAMEPAD_AXIS_MOVE;
@@ -746,7 +742,7 @@ class InputManager
 	
 	public function OnGamepadButtonUp(gamepadID:Int, button:GamepadButton):Void
 	{
-		utilString = GetGamepadInputID(gamepadID, button.toString());
+		utilString = GetGamepadInputID(gamepadID, button.toString()) + focusedObject;
 		if (handledInputs[utilString] != null){
 				
 			handledInputs[utilString].state = InputType.GAMEPAD_BUTTON_UP;
@@ -770,7 +766,7 @@ class InputManager
 	
 	public function OnGamepadButtonDown(gamepadID:Int,button:GamepadButton):Void
 	{
-		utilString = GetGamepadInputID(gamepadID, button.toString());
+		utilString = GetGamepadInputID(gamepadID, button.toString()) + focusedObject;
 	
 		
 		if ( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] =  Sys.preciseTime();

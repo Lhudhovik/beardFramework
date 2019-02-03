@@ -22,7 +22,8 @@ class Visual extends RenderedObject
 		super();
 		
 		
-		if (name == "") name = "Visual_" + instanceCount;
+		if (name == "") this.name = "Visual_" + instanceCount;
+		else this.name = name;
 		instanceCount++;
 	
 		this.texture = texture;

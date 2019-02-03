@@ -1,4 +1,5 @@
 package beardFramework.graphics.core;
+import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.interfaces.ICameraDependent;
 
@@ -16,7 +17,6 @@ class RenderedObject implements ICameraDependent
 	public var width(get, set):Float;
 	@:isVar public var isDirty(get, set):Bool = false;
 	@:isVar public var name(get, set):String;
-	@:isVar public var stockageID:Int;
 	@:isVar public var visible(get, set):Bool;
 	@:isVar public var rotation (get, set):Float;
 	@:isVar public var scaleX (get, set):Float;
@@ -26,6 +26,7 @@ class RenderedObject implements ICameraDependent
 	@:isVar public var z(get, set):Float;
 	@:isVar public var color(get, set):UInt;
 
+	public var onAABBTree:Bool;
 	public var layer:BeardLayer;
 	public var displayingCameras(default, null):List<String>;	
 	public var renderer:Renderer;
@@ -52,10 +53,9 @@ class RenderedObject implements ICameraDependent
 		rotationSine = Math.sin (0);
 		rotationCosine = Math.cos (0);
 		bufferIndex = -1;
-		stockageID = -1;
 		displayingCameras = new List<String>();
 		renderingBatch = "default";
-		
+		onAABBTree = false;
 	}
 	
 	inline public function get_x():Float 

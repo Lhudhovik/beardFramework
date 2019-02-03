@@ -1,5 +1,5 @@
 package beardFramework.interfaces;
-import beardFramework.gameSystem.entities.GameEntity;
+import beardFramework.systems.entities.GameEntity;
 import beardFramework.resources.save.data.DataComponent;
 
 /**
