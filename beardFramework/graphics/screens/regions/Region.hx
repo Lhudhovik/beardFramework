@@ -33,17 +33,17 @@ class Region
 		stockedObjects = new MinAllocArray();
 		regionChildren = new MinAllocArray(4);
 		#if debug
-		if(level >= 1){
-		visual = new Visual("objectiv_button_play_freeround_over_hd","menuHD" );
-		visual.x = this.x;
-		visual.y = this.y;
-		visual.width = this.width;
-		visual.height = this.height;
-		visual.renderingBatch = "grid" + level;
-		BeardGame.Get().GetLayer(BeardGame.Get().CONTENTLAYER).Add(visual);
-		visual.z = -level;
-		
-		}
+		//if(level >= 1){
+		//visual = new Visual("objectiv_button_play_freeround_over_hd","menuHD" );
+		//visual.x = this.x;
+		//visual.y = this.y;
+		//visual.width = this.width;
+		//visual.height = this.height;
+		////visual.renderingBatch = "grid" + level;
+		//BeardGame.Get().GetLayer(BeardGame.Get().CONTENTLAYER).Add(visual);
+		//visual.z = -level;
+		//
+		//}
 		#end
 	}
 	

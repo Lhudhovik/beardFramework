@@ -2,8 +2,8 @@ package beardFramework.resources.assets;
 
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
-import beardFramework.utils.DataUtils;
-import beardFramework.utils.GeomUtils;
+import beardFramework.utils.DataU;
+import beardFramework.utils.MathU;
 import beardFramework.utils.simpleDataStruct.SRect;
 import haxe.Utf8;
 import lime.graphics.ImageBuffer;

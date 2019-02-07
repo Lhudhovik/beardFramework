@@ -14,7 +14,7 @@ import beardFramework.resources.save.data.DataGeneric;
 import beardFramework.resources.save.data.DataScreen;
 import beardFramework.interfaces.IEntityVisual;
 import beardFramework.resources.save.data.Test;
-import beardFramework.utils.DataUtils;
+import beardFramework.utils.DataU;
 import haxe.Json;
 import msignal.Signal.Signal0;
 
@@ -105,7 +105,7 @@ class BasicScreen
 			{
 				
 				var cameraData:DataCamera;
-				var savedCameras:Map<String, DataCamera> = (savedData != null ? DataUtils.DataArrayToMap(savedData.cameras) : null);
+				var savedCameras:Map<String, DataCamera> = (savedData != null ? DataU.DataArrayToMap(savedData.cameras) : null);
 				
 				while (	screenData.cameras.length > 0)
 				{
@@ -141,7 +141,7 @@ class BasicScreen
 			
 			
 			var entityData:DataEntity;
-			var savedEntities:Map<String, DataEntity> = (savedData != null? DataUtils.DataArrayToMap(savedData.entitiesData) : null);
+			var savedEntities:Map<String, DataEntity> = (savedData != null? DataU.DataArrayToMap(savedData.entitiesData) : null);
 			
 			while (screenData.entitiesData.length > 0)
 			{

@@ -46,12 +46,12 @@ class RegionGrid
 		cellsHeight[0] = this.height;
 		log2 = Math.log(2);
 		
-		#if debug
-		for (i in 0...maxLevel+1)
-			Renderer.Get().InitBatch("grid" + i,"", [{name:"vertexShader", type:GL.VERTEX_SHADER}, {name:"fragmentShader", type:GL.FRAGMENT_SHADER}]);
-			
-			
-		#end
+		//#if debug
+		//for (i in 0...maxLevel+1)
+			//Renderer.Get().InitBatch("grid" + i,"", [{name:"vertexShader", type:GL.VERTEX_SHADER}, {name:"fragmentShader", type:GL.FRAGMENT_SHADER}]);
+			//
+			//
+		//#end
 		GenerateRegionChildren(regions.get(0));
 		
 	}
@@ -117,9 +117,9 @@ class RegionGrid
 	public function AddObject(renderedObject:RenderedObject):Void
 	{
 		//First select the level
-		#if debug
-		if (renderedObject.renderingBatch.substr(0,4) == "grid") return;
-		#end
+		//#if debug
+		//if (renderedObject.renderingBatch.substr(0,4) == "grid") return;
+		//#end
 		widthLevel =  Std.int( Math.log(width/renderedObject.width)/log2);
 		heightLevel = Std.int(Math.log(height / renderedObject.height)/log2);
 				

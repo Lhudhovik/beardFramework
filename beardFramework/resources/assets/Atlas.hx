@@ -1,9 +1,9 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.utils.DataUtils;
-import beardFramework.utils.TextureUtils;
-import beardFramework.utils.XMLUtils;
+import beardFramework.utils.DataU;
+import beardFramework.utils.TextureU;
+import beardFramework.utils.XMLU;
 import haxe.Utf8;
 import lime.app.Application;
 import lime.graphics.Image;
@@ -77,14 +77,14 @@ class Atlas
         {
 			
 			
-			imageArea.setTo(XMLUtils.GetXmlFloat(subTexture, "x"), XMLUtils.GetXmlFloat(subTexture, "y"), XMLUtils.GetXmlFloat(subTexture, "width"), XMLUtils.GetXmlFloat(subTexture, "height"));
-            frame.setTo(XMLUtils.GetXmlFloat(subTexture, "frameX"), XMLUtils.GetXmlFloat(subTexture, "frameY"), XMLUtils.GetXmlFloat(subTexture, "frameWidth"), XMLUtils.GetXmlFloat(subTexture, "frameHeight"));
+			imageArea.setTo(XMLU.GetXmlFloat(subTexture, "x"), XMLU.GetXmlFloat(subTexture, "y"), XMLU.GetXmlFloat(subTexture, "width"), XMLU.GetXmlFloat(subTexture, "height"));
+            frame.setTo(XMLU.GetXmlFloat(subTexture, "frameX"), XMLU.GetXmlFloat(subTexture, "frameY"), XMLU.GetXmlFloat(subTexture, "frameWidth"), XMLU.GetXmlFloat(subTexture, "frameHeight"));
 			
 			
 			subAreas[subTexture.get("name")] = {
 				imageArea:	imageArea.clone(),
 				frame:		((frame.width > 0 && frame.height > 0) ? frame.clone() : null),
-				rotated : 	DataUtils.FromStringToBool(subTexture.get("rotated")),
+				rotated : 	DataU.FromStringToBool(subTexture.get("rotated")),
 				uvX: 		imageArea.x/textureImage.width,
 				uvY: 		imageArea.y/textureImage.height,
 				uvW:		imageArea.width/textureImage.width,

@@ -1,9 +1,13 @@
 package beardFramework.resources.options;
+import beardFramework.graphics.rendering.Shaders.Shader;
+import beardFramework.graphics.rendering.batches.BatchData;
+import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.graphics.screens.BasicLoadingScreen;
 import beardFramework.graphics.text.FontFormat;
 import beardFramework.graphics.text.TextField;
 import beardFramework.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
+import lime.graphics.opengl.GL;
 
 /**
  * ...
@@ -16,6 +20,7 @@ class OptionsManager
 	
 	public var resourcesToLoad:Array<ResourceToLoad>;
 	public var fontsToLoad:Array<FontToLoad>;
+	public var batchesToCreate:Array<BatchData>;
 	private var settings(null,null):Xml;
 	private function new() 
 	{
@@ -43,6 +48,7 @@ class OptionsManager
 		
 		resourcesToLoad = new Array<ResourceToLoad>();
 		fontsToLoad = new Array<FontToLoad>();
+		batchesToCreate = new Array<BatchData>();
 		xml = xml.firstElement();
 		
 		for (element in xml.elements())
@@ -56,7 +62,7 @@ class OptionsManager
 				}
 			}
 			
-			if (element.nodeName == "fonts")
+			else if (element.nodeName == "fonts")
 			{
 
 				TextField.defaultFont = element.get("default");
@@ -77,7 +83,77 @@ class OptionsManager
 				}
 			}
 			
-			if (element.nodeName == "settings")
+			else if (element.nodeName == "renderingBatches")
+			{
+				
+				var shaders:Array<Shader> = [];
+				var vertexAttributes:Array<VertexAttribute> = [];
+				var verticesIndices:Array<Int> = [];
+				var vertices:Array<Float> = [];
+				var vertexStride:Int;
+				var type:Int = GL.VERTEX_SHADER;
+				var drawMode:Int = GL.TRIANGLES;
+							
+				for (batch in element.elementsNamed("batch"))
+				{
+					vertexStride = 0;
+					shaders = [];
+					vertexAttributes = [];
+					verticesIndices = [];
+					vertices = [];
+					
+					
+					for (indice in batch.get("verticesIndices").split(",")){
+						if (indice != "")
+							verticesIndices.push(Std.parseInt(indice));
+					}
+					
+					
+					for (shader in batch.elementsNamed("shader")){
+					
+						
+						switch(shader.get("type"))
+						{
+							
+							case "VERTEX_SHADER": type = GL.VERTEX_SHADER;
+							case "FRAGMENT_SHADER": type = GL.FRAGMENT_SHADER;							
+							
+						}
+						shaders.push({name: shader.get("name") , type :type});
+							
+					}
+					for (vertex in batch.elementsNamed("vertex"))
+					{
+						for (value in vertex.get("data").split(","))
+							vertices.push(Std.parseInt(value));
+					}
+				
+					for (attribute in batch.elementsNamed("vertexAttribute")){
+						vertexAttributes.push({ name: attribute.get("name") , size:Std.parseInt(attribute.get("size")) , index:Std.parseInt(attribute.get("index")) }) ;
+						vertexStride += Std.parseInt(attribute.get("size"));
+					}
+							
+					switch(batch.get("drawMode"))
+					{
+						
+						case "POINTS" : drawMode = GL.POINTS;
+						case "LINES" : drawMode = GL.LINES;
+						case "LINE_LOOP" : drawMode = GL.LINE_LOOP;
+						case "LINE_STRIP" : drawMode = GL.LINE_STRIP;
+						case "TRIANGLES" : drawMode = GL.TRIANGLES;
+						case "TRIANGLE_STRIP" : drawMode = GL.TRIANGLE_STRIP;
+						case "TRIANGLE_FAN" : drawMode = GL.TRIANGLE_FAN;
+								
+					}
+					
+					batchesToCreate.push({name: batch.get("name"), type: batch.get("type"), needOrdering: (batch.get("needOrdering") == "true"), drawMode: drawMode, shaders:shaders, indices:verticesIndices, vertices: vertices, vertexAttributes: vertexAttributes, vertexStride : vertexStride, vertexPerObject: Std.parseInt(batch.get("vertexPerObject"))});
+					
+					
+				}
+				
+			}
+			
+			else if (element.nodeName == "settings")
 			{
 				settings = element;
 				InputManager.Get().ParseInputSettings(settings.elementsNamed("inputs").next());
@@ -123,3 +199,4 @@ typedef FontToLoad = {
 	var name:String;
 	
 }
+

@@ -4,7 +4,7 @@ package beardFramework.utils;
  * ...
  * @author 
  */
-class XMLUtils 
+class XMLU 
 {
 
 	static public inline function GetXmlFloat(xml:Xml, attributeName:String):Float

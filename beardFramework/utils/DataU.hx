@@ -9,7 +9,7 @@ import lime.utils.Float32Array;
  * @author Ludo
  */
 
-class DataUtils 
+class DataU 
 {
 
 

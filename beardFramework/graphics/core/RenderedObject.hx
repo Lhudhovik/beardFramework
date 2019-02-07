@@ -1,7 +1,10 @@
 package beardFramework.graphics.core;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.batches.Batch;
+import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.interfaces.ICameraDependent;
+import beardFramework.utils.ColorU;
 
 
 /**
@@ -29,7 +32,6 @@ class RenderedObject implements ICameraDependent
 	public var onAABBTree:Bool;
 	public var layer:BeardLayer;
 	public var displayingCameras(default, null):List<String>;	
-	public var renderer:Renderer;
 	public var renderDepth(default,null):Float;
 	public var restrictedCameras(default, null):Array<String>;
 	public var rotationCosine(default,null):Float;
@@ -37,14 +39,14 @@ class RenderedObject implements ICameraDependent
 	
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
-	@:isVar public var renderingBatch(get, set):String;
+	@:isVar public var renderingBatch(get, set):RenderedObjectBatch;
 	
 	public function new() 
 	{
 		
 		visible = true;
 		alpha = 1;
-		color = 0xffffff;
+		color = ColorU.WHITE;
 		z = -1;
 		renderDepth = -2;
 		scaleX = scaleY = 1;
@@ -54,7 +56,7 @@ class RenderedObject implements ICameraDependent
 		rotationCosine = Math.cos (0);
 		bufferIndex = -1;
 		displayingCameras = new List<String>();
-		renderingBatch = "default";
+		renderingBatch =  cast(Renderer.Get().GetBatch(Renderer.Get().DEFAULT), RenderedObjectBatch);
 		onAABBTree = false;
 	}
 	
@@ -235,8 +237,8 @@ class RenderedObject implements ICameraDependent
 	
 	function  set_isDirty(value:Bool):Bool 
 	{
-		if (value == true && renderer != null && bufferIndex >= 0) renderer.AddDirtyObject(this, renderingBatch);
-		else if ( value == false && renderer != null) renderer.RemoveDirtyObject(this, renderingBatch);
+		if (value == true && renderingBatch != null && bufferIndex >= 0) renderingBatch.AddDirtyObject(this);
+		else if ( value == false && renderingBatch != null) renderingBatch.RemoveDirtyObject(this);
 		return isDirty = value;
 	}
 	
@@ -293,23 +295,29 @@ class RenderedObject implements ICameraDependent
 		
 	}
 	
-	function get_renderingBatch():String 
+	function get_renderingBatch():RenderedObjectBatch 
 	{
 		return renderingBatch;
 	}
 	
-	function set_renderingBatch(value:String):String 
+	function set_renderingBatch(value:RenderedObjectBatch):RenderedObjectBatch 
 	{
 		if (value != renderingBatch)
 		{
-			if (renderer != null && bufferIndex >=0)
+			if (renderingBatch != null)
 			{
-				renderer.RemoveDirtyObject(this, renderingBatch);
-				renderer.FreeBufferIndex(bufferIndex, renderingBatch);
-				bufferIndex = renderer.AllocateBufferIndex(value);
+				renderingBatch.RemoveDirtyObject(this);
+				renderingBatch.FreeBufferIndex(bufferIndex);
+			}
+			
+			renderingBatch = value;
+			
+			if (renderingBatch != null && bufferIndex >=0)
+			{
+				bufferIndex = renderingBatch.AllocateBufferIndex();
 			}
 		
-			renderingBatch = value;
+			
 			isDirty = true;
 			
 		}

@@ -15,7 +15,7 @@ import openfl.geom.Rectangle;
  * ...
  * @author Ludo
  */
-class TextureUtils
+class TextureU
 {
 
 	//public static var mergedBitmapData = { };

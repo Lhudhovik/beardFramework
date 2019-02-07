@@ -1,4 +1,6 @@
 package beardFramework.systems.aabb;
+import beardFramework.debug.DebugDraw;
+import beardFramework.utils.ColorU;
 import haxe.ds.Vector;
 
 /**
@@ -13,11 +15,17 @@ class Node
 	public var childrenCrossed:Bool;
 	public var aabbFat:AABB;
 	public var aabbLeaf:AABB;
+	#if debug
+	private var debugFat:Int;
+	private var debugLeaf:Int;
 	
+	#end
 	public function new() 
 	{
 		children = new Vector<Node>(2);
 		aabbFat = new AABB();
+		debugFat = -1;
+		debugLeaf = -1;
 	}
 	
 	public inline function IsLeaf():Bool
@@ -41,6 +49,17 @@ class Node
 		children[1] = null;
 			
 		aabbLeaf = aabb;
+		
+		if (debugLeaf >= 0)
+		{
+			DebugDraw.RemoveWireFrameRectangle(debugLeaf);
+			
+		}
+		
+		
+		debugLeaf = DebugDraw.DrawWireFrameRectangle(aabbLeaf.topLeft.x, aabbLeaf.topLeft.y, aabbLeaf.bottomRight.x - aabbLeaf.topLeft.x, aabbLeaf.bottomRight.y - aabbLeaf.topLeft.y,ColorU.BLUE );
+		
+		
 	}
 	
 	public function UpdateAABB(margin:Float):Void
@@ -54,7 +73,17 @@ class Node
 		}
 		else
 			aabbFat.Combine(children[0].aabbFat , children[0].aabbFat);
-				
+		
+			
+		if (debugFat >= 0)
+		{
+			DebugDraw.RemoveWireFrameRectangle(debugFat);
+			
+		}
+		
+		
+		debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,ColorU.RED );
+		
 	}
 	
 	public function GetSibling():Node

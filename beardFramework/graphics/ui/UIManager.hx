@@ -15,7 +15,7 @@ import beardFramework.resources.save.data.DataUIComponent;
 import beardFramework.resources.save.data.DataUIGroup;
 import beardFramework.resources.save.DataSlot;
 import beardFramework.utils.Crypto;
-import beardFramework.utils.DataUtils;
+import beardFramework.utils.DataU;
 import beardFramework.utils.StringLibrary;
 import haxe.Json;
 import openfl.display.DisplayObject;
@@ -184,8 +184,8 @@ class UIManager
 	public function LoadTemplate(td:RowThreadDetail<AbstractDataUIGroup>):Bool
 	{
 		var templateData:DataUIGroup = td.parameter;
-		var savedGroups:Map<String,DataUIGroup> = (savedData != null? DataUtils.DataArrayToMap(savedData.subGroupsData) : null);
-		var savedComponents:Map<String,DataUIComponent> = (savedData != null? DataUtils.DataArrayToMap(savedData.componentsData) : null);
+		var savedGroups:Map<String,DataUIGroup> = (savedData != null? DataU.DataArrayToMap(savedData.subGroupsData) : null);
+		var savedComponents:Map<String,DataUIComponent> = (savedData != null? DataU.DataArrayToMap(savedData.componentsData) : null);
 		
 		var componentData :DataUIComponent;
 		var groupData:DataUIGroup;

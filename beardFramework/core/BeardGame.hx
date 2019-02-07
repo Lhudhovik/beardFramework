@@ -3,6 +3,8 @@ package beardFramework.core;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.Shaders;
+import beardFramework.graphics.rendering.batches.Batch;
+import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.screens.regions.RegionGrid;
 import beardFramework.resources.options.OptionsManager;
 import beardFramework.updateProcess.UpdateProcessesManager;
@@ -151,7 +153,7 @@ class BeardGame extends Application
 	private inline function LoadResources():Void
 	{
 		
-		if (OptionsManager.Get().resourcesToLoad.length > 0 || OptionsManager.Get().fontsToLoad.length > 0){
+		if (OptionsManager.Get().resourcesToLoad.length > 0 || OptionsManager.Get().fontsToLoad.length > 0 || OptionsManager.Get().batchesToCreate.length > 0){
 			for (resource in OptionsManager.Get().resourcesToLoad)
 			{
 				AssetManager.Get().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
@@ -166,6 +168,14 @@ class BeardGame extends Application
 				{
 					AssetManager.Get().LoadFont(font.name,  font.format, size);
 				}
+			}
+			
+			for (batch in OptionsManager.Get().batchesToCreate)
+			{
+				
+				Renderer.Get().AddBatch(Batch.CreateBatch(batch));
+							
+				
 			}
 			
 			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
@@ -188,6 +198,8 @@ class BeardGame extends Application
 		
 		if (physicsEnabled)
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
+		
+			
 		
 		Renderer.Get().Start();
 		

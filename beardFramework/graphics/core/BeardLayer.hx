@@ -1,5 +1,6 @@
 package beardFramework.graphics.core;
 import beardFramework.core.BeardGame;
+import beardFramework.graphics.rendering.Renderer;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.systems.aabb.AABBTree;
 import beardFramework.utils.MinAllocArray;
@@ -69,7 +70,7 @@ class BeardLayer
 				object.layer = this;
 				object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 				object.visible = this.visible;
-				object.bufferIndex =  object.renderer.AllocateBufferIndex(object.renderingBatch);
+				object.bufferIndex =  object.renderingBatch.AllocateBufferIndex();
 				object.isDirty = true;
 				renderedObjects.set(object.name, object);
 			}
@@ -86,7 +87,7 @@ class BeardLayer
 			object.layer = this;
 			object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 			object.visible =  this.visible;
-			object.bufferIndex = object.renderer.AllocateBufferIndex(object.renderingBatch);
+			object.bufferIndex = object.renderingBatch.AllocateBufferIndex();
 			object.isDirty = true;
 			renderedObjects.set(object.name, object);
 			
@@ -104,7 +105,10 @@ class BeardLayer
 				
 			}
 			
-			if (updateBuffer) object.renderer.UpdateRenderedData(object.renderingBatch);
+			if (updateBuffer){
+				
+				object.renderingBatch.UpdateRenderedData();
+			}
 			
 		}
 	}
@@ -114,7 +118,7 @@ class BeardLayer
 		if (!renderedObjects.exists(object.name))
 		{
 			renderedObjects.remove(object.name);
-			object.bufferIndex = object.renderer.FreeBufferIndex(object.bufferIndex, object.renderingBatch);
+			object.bufferIndex = object.renderingBatch.FreeBufferIndex(object.bufferIndex);
 			object.isDirty = false;
 			if (object.onAABBTree && aabbs[object.name] != null){
 				

@@ -8,7 +8,7 @@ import lime.utils.Float32Array;
  * ...
  * @author 
  */
-class VertexAttributeUtils 
+class VertexAttributeU 
 {
 
 	public static function GenerateVertexAttributesFromVisual(visual:Visual):Float32Array

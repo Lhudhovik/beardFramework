@@ -1,4 +1,5 @@
 package beardFramework.systems.aabb;
+import beardFramework.utils.MathU;
 import beardFramework.utils.MinAllocArray;
 import beardFramework.utils.simpleDataStruct.SVec2;
 
@@ -64,15 +65,15 @@ class AABBTree
 				
 				for (i in 0...invalidNodes.length)
 				{
-					parent = invalidNodes[i].parent;
-					sibling = invalidNodes[i].GetSibling();
+					parent = invalidNodes.get(i).parent;
+					sibling = invalidNodes.get(i).GetSibling();
 					sibling.parent = parent.parent;
 					
 					parent = null;
-					invalidNodes[i].parent = null;
+					invalidNodes.get(i).parent = null;
 					
-					invalidNodes[i].UpdateAABB(margin);
-					InsertNode(invalidNodes[i])	;							
+					invalidNodes.get(i).UpdateAABB(margin);
+					InsertNode(invalidNodes.get(i),root)	;							
 					
 				}
 				invalidNodes.Clean();
@@ -241,9 +242,9 @@ class AABBTree
 	{
 		var nodes:List<Node> = new List();
 		var node: Node;
-		var collider:AABB;
-		var result:RayCastResult = {hit:false, collider:null, hitPos:{x:0, y:0}, normal:{x:0, y:0}	}
-				
+		var currentResult:RayCastResult = {hit:false, collider:null, hitPos:{x:0, y:0}, normal:{x:0, y:0}, fraction:-1	}
+		var bestResult:RayCastResult = {hit:false, collider:null, hitPos:{x:0, y:0}, normal:{x:0, y:0}, fraction:MathU.MAX	}
+		
 		if (root != null)
 		{
 			nodes.add(root);
@@ -251,34 +252,51 @@ class AABBTree
 			while (nodes.length > 0)
 			{
 				
+				currentResult.hit = false;
+				
 				node = nodes.pop();
-				
-				collider = (node.IsLeaf()? node.aabbLeaf : node.aabbFat);
-				
-				if (collider.Raycast(ray, result))
+								
+				if (node.IsLeaf())
 				{
-					
-					if (result.hit)
+					if (node.aabbLeaf.Raycast(ray, currentResult))
 					{
-						
-						
+						if (currentResult.fraction < bestResult.fraction)
+						{
+							bestResult.hit = true;
+							bestResult.collider = node.aabbLeaf;
+							bestResult.hitPos = currentResult.hitPos;
+							bestResult.normal = currentResult.normal;
+							bestResult.fraction = currentResult.fraction;					
+							
+						}						
 					}
-					else
-					{
-						
-						
-					}
-					
-					
-					
 				}
-				
-				
-				
+				else
+				{
+					if (node.aabbFat.Raycast(ray, currentResult))
+					{
+						
+						if (currentResult.fraction < bestResult.fraction)
+						{
+							nodes.add(node.children[0]);
+							nodes.add(node.children[1]);
+						}						
+					}
+					
+				}				
 			}			
 		}
 			
-		return result;		
+		#if debug
+		
+		
+		
+		
+		#end
+		
+		
+		
+		return bestResult;		
 	}
 	public function Query(aabb:AABB):MinAllocArray<AABB>
 	{
@@ -345,7 +363,7 @@ class AABBTree
 			
 			if (parent != root)
 			{
-				newParent.parent = p.parent;
+				newParent.parent = parent.parent;
 				if (parent == newParent.parent.children[0]) newParent.parent.children[0] = newParent;
 				else  newParent.parent.children[1] = newParent;
 			}

@@ -7,7 +7,7 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
-import beardFramework.utils.ColorUtils;
+import beardFramework.utils.ColorU;
 import beardFramework.utils.MinAllocArray;
 import haxe.Json;
 import haxe.Utf8;
@@ -73,8 +73,7 @@ class TextField extends RenderedObject {
 		cursor.visible = false;
 		cursor.width = 5;
 		cursor.height = linesHeight;
-		renderer = Renderer.Get();
-		
+				
 		letterSpacing = textSize/50; //to adjust with format
 		lineSpacing = textSize / 10;
 		tabSpacing = textSize;
@@ -105,7 +104,7 @@ class TextField extends RenderedObject {
 			for (i in 0...count)
 			{
 				if (glyphsData.length-1 >= i && glyphsData[glyphsData.length-i-1] != null)
-				glyphsData[glyphsData.length-1-i].bufferIndex = renderer.FreeBufferIndex(glyphsData[glyphsData.length-1-i].bufferIndex,renderingBatch);
+				glyphsData[glyphsData.length-1-i].bufferIndex = renderingBatch.FreeBufferIndex(glyphsData[glyphsData.length-1-i].bufferIndex);
 			}
 			
 		}
@@ -352,12 +351,12 @@ class TextField extends RenderedObject {
 			glyphData.y = (!isEmbedded? line * linesHeight  + (line+1)* metrics.fAsc + ( metrics.fAsc - metrics.gHbY) : glyphHeight * line );
 			glyphData.width = glyphHeight / glyphScale;
 			glyphData.height = glyphHeight;
-			glyphData.color = (isEmbedded ? (embedded.color >= 0 ? embedded.color : ColorUtils.WHITE) : ( attribute != null ? attribute.color : this.color));
+			glyphData.color = (isEmbedded ? (embedded.color >= 0 ? embedded.color : ColorU.WHITE) : ( attribute != null ? attribute.color : this.color));
 			glyphData.line = line;
 			glyphData.textureData = textureData;
 			glyphData.metrics = glyphMetrics;
 			
-			if (glyphData.bufferIndex < 0 && bufferIndex >= 0) glyphData.bufferIndex = (i == 0 ? this.bufferIndex : renderer.AllocateBufferIndex(renderingBatch));
+			if (glyphData.bufferIndex < 0 && bufferIndex >= 0) glyphData.bufferIndex = (i == 0 ? this.bufferIndex : renderingBatch.AllocateBufferIndex());
 			//TO change
 			if (this.width == 0) SetBaseWidth(glyphData.x + glyphData.width);
 			if (this.height == 0)	SetBaseHeight(textSize);
@@ -556,7 +555,7 @@ class TextField extends RenderedObject {
 			{
 				for (data in glyphsData)
 				{
-					if (data.bufferIndex > 0) renderer.FreeBufferIndex(data.bufferIndex,renderingBatch);
+					if (data.bufferIndex > 0) renderingBatch.FreeBufferIndex(data.bufferIndex);
 				}
 			}
 			else
@@ -567,7 +566,7 @@ class TextField extends RenderedObject {
 					if (glyphsData[i].bufferIndex < 0)
 					{
 						if (i == 0) glyphsData[i].bufferIndex = value;
-						else glyphsData[i].bufferIndex = renderer.AllocateBufferIndex(renderingBatch);
+						else glyphsData[i].bufferIndex = renderingBatch.AllocateBufferIndex();
 						
 					}
 				}

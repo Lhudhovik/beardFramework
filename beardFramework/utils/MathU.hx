@@ -7,13 +7,14 @@ import lime.math.Matrix4;
  * ...
  * @author 
  */
-class GeomUtils 
+class MathU 
 {
 
 	public static var utilMatrix(get, null):Matrix4;
 	public static var utilSimpleRect(get, null):SRect;
 	public static var utilSimplePoint(get, null):SVec2;
-	
+	public static var MAX : Float =  1.7976931348623158e+308;
+	public static var MIN : Float =  2.2250738585072014e-308;
 	
 	static function get_utilSimpleRect():SRect 
 	{
@@ -47,14 +48,11 @@ class GeomUtils
 		
 	}
 	
-	private static inline function GetMinValue ():Float {
+	public static inline function Abs(val1:Float):Float
+	{
 		
-		return 2.2250738585072014e-308;
-	}
-	
-	
-	private static inline function GetMaxValue ():Float {
-		return 1.7976931348623158e+308;
+		return val1 < 0 ? val1 * -1 : val1;
+		
 	}
 	
 	

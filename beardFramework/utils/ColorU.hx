@@ -5,37 +5,37 @@ import haxe.ds.Vector;
  * ...
  * @author 
  */
-class ColorUtils 
+class ColorU 
 {
 
-	 public static inline var WHITE:UInt   = 0xffffff;
-    public static inline var SILVER:UInt  = 0xc0c0c0;
-    public static inline var GRAY:UInt    = 0x808080;
-    public static inline var BLACK:UInt   = 0x000000;
-    public static inline var RED:UInt     = 0xff0000;
-    public static inline var MAROON:UInt  = 0x800000;
-    public static inline var YELLOW:UInt  = 0xffff00;
-    public static inline var OLIVE:UInt   = 0x808000;
-    public static inline var LIME:UInt    = 0x00ff00;
-    public static inline var GREEN:UInt   = 0x008000;
-    public static inline var AQUA:UInt    = 0x00ffff;
-    public static inline var TEAL:UInt    = 0x008080;
-    public static inline var BLUE:UInt    = 0x0000ff;
-    public static inline var NAVY:UInt    = 0x000080;
-    public static inline var FUCHSIA:UInt = 0xff00ff;
-    public static inline var PURPLE:UInt  = 0x800080;
+	 public static inline var WHITE:UInt  = 0xffffffff;
+    public static inline var SILVER:UInt  = 0xc0c0c0ff;
+    public static inline var GRAY:UInt    = 0x808080ff;
+    public static inline var BLACK:UInt   = 0x000000ff;
+    public static inline var RED:UInt     = 0xff0000ff;
+    public static inline var MAROON:UInt  = 0x800000ff;
+    public static inline var YELLOW:UInt  = 0xffff00ff;
+    public static inline var OLIVE:UInt   = 0x808000ff;
+    public static inline var LIME:UInt    = 0x00ff00ff;
+    public static inline var GREEN:UInt   = 0x008000ff;
+    public static inline var AQUA:UInt    = 0x00ffffff;
+    public static inline var TEAL:UInt    = 0x008080ff;
+    public static inline var BLUE:UInt    = 0x0000ffff;
+    public static inline var NAVY:UInt    = 0x000080ff;
+    public static inline var FUCHSIA:UInt = 0xff00ffff;
+    public static inline var PURPLE:UInt  = 0x800080ff;
 
     
-    public static function getAlpha(color:UInt):Int { return (color >> 24) & 0xff; }
+    public static function getAlpha(color:UInt):Int { return color & 0xff; }
 
    
-    public static function getRed(color:UInt):Int   { return (color >> 16) & 0xff; }
+    public static function getRed(color:UInt):Int   { return (color >> 24) & 0xff; }
 
     
-    public static function getGreen(color:UInt):Int { return (color >>  8) & 0xff; }
+    public static function getGreen(color:UInt):Int { return (color >>  16) & 0xff; }
 
    
-    public static function getBlue(color:UInt):Int  { return  color        & 0xff; }
+    public static function getBlue(color:UInt):Int  { return  (color >> 8)  & 0xff; }
 
    
     public static function setAlpha(color:UInt, alpha:Int):UInt

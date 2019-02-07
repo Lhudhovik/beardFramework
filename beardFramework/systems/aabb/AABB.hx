@@ -1,5 +1,5 @@
 package beardFramework.systems.aabb;
-import beardFramework.utils.GeomUtils;
+import beardFramework.utils.MathU;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import lime.math.Vector2;
 
@@ -46,132 +46,126 @@ class AABB
 	public function Raycast(ray:Ray, result:RayCastResult):Bool
 	{
 	
-		Math.
-		var tmin:Float = -B2Math.MAX_VALUE;
-		var tmax:Float = B2Math.MAX_VALUE;
+		var tmin:Float = -MathU.MAX;
+		var tmax:Float = MathU.MAX;
 		
-		var pX:Float = input.p1.x;
-		var pY:Float = input.p1.y;
-		var dX:Float = input.p2.x - input.p1.x;
-		var dY:Float = input.p2.y - input.p1.y;
-		var absDX:Float = Math.abs(dX);
-		var absDY:Float = Math.abs(dY);
-		
-		var normal:B2Vec2 = output.normal;
-		
+		var pX:Float = ray.start.x;
+		var pY:Float = ray.start.y;
+		var dX:Float = ray.dir.x * ray.length;
+		var dY:Float = ray.dir.y * ray.length;
+		var absDX:Float = MathU.Abs(dX);
+		var absDY:Float = MathU.Abs(dY);
+				
 		var inv_d:Float;
 		var t1:Float;
 		var t2:Float;
 		var t3:Float;
 		var s:Float;
 		
-		//x
+		
+		if (absDX < MathU.MIN)
 		{
-			if (absDX < B2Math.MIN_VALUE)
-			{
-				// Parallel.
-				if (pX < lowerBound.x || upperBound.x < pX)
-					return false;
-			}
-			else
-			{
-				inv_d = 1.0 / dX;
-				t1 = (lowerBound.x - pX) * inv_d;
-				t2 = (upperBound.x - pX) * inv_d;
-				
-				// Sign of the normal vector
-				s = -1.0;
-				
-				if (t1 > t2)
-				{
-					t3 = t1;
-					t1 = t2;
-					t2 = t3;
-					s = 1.0;
-				}
-				
-				// Push the min up
-				if (t1 > tmin)
-				{
-					normal.x = s;
-					normal.y = 0;
-					tmin = t1;
-				}
-				
-				// Pull the max down
-				tmax = Math.min(tmax, t2);
-				
-				if (tmin > tmax)
-					return false;
-			}
+			if (pX < topLeft.x || bottomRight.x < pX)
+				return false;
 		}
-		//y
+		else
 		{
-			if (absDY < B2Math.MIN_VALUE)
+			inv_d = 1.0 / dX;
+			t1 = (topLeft.x - pX) * inv_d;
+			t2 = (bottomRight.x - pX) * inv_d;
+			
+			s = -1.0;
+			
+			if (t1 > t2)
 			{
-				// Parallel.
-				if (pY < lowerBound.y || upperBound.y < pY)
-					return false;
+				t3 = t1;
+				t1 = t2;
+				t2 = t3;
+				s = 1.0;
 			}
-			else
+			
+			if (t1 > tmin)
 			{
-				inv_d = 1.0 / dY;
-				t1 = (lowerBound.y - pY) * inv_d;
-				t2 = (upperBound.y - pY) * inv_d;
-				
-				// Sign of the normal vector
-				s = -1.0;
-				
-				if (t1 > t2)
-				{
-					t3 = t1;
-					t1 = t2;
-					t2 = t3;
-					s = 1.0;
-				}
-				
-				// Push the min up
-				if (t1 > tmin)
-				{
-					normal.y = s;
-					normal.x = 0;
-					tmin = t1;
-				}
-				
-				// Pull the max down
-				tmax = Math.min(tmax, t2);
-				
-				if (tmin > tmax)
-					return false;
+				result.normal.x = s;
+				result.normal.y = 0;
+				tmin = t1;
 			}
+			
+			
+			tmax = MathU.Min(tmax, t2);
+			
+			if (tmin > tmax)
+				return false;
+		}
+	
+		if (absDY < MathU.MIN)
+		{
+				if (pY < topLeft.y || bottomRight.y < pY)
+				return false;
+		}
+		else
+		{
+			inv_d = 1.0 / dY;
+			t1 = (topLeft.y - pY) * inv_d;
+			t2 = (bottomRight.y - pY) * inv_d;
+			
+			s = -1.0;
+			
+			if (t1 > t2)
+			{
+				t3 = t1;
+				t1 = t2;
+				t2 = t3;
+				s = 1.0;
+			}
+			
+			if (t1 > tmin)
+			{
+				result.normal.y = s;
+				result.normal.x = 0;
+				tmin = t1;
+			}
+			
+			tmax = MathU.Min(tmax, t2);
+			
+			if (tmin > tmax)
+				return false;
 		}
 		
-		output.fraction = tmin;
+		
+		result.hitPos.x = pX + tmin * dX;
+		result.hitPos.y = pY + tmin * dY;
+		result.fraction = tmin;
+		result.hit = true;
+		result.collider = this;
+		
 		return true;
 		
 		
-		var t1 = (topLeft.x - ray.start.x) / ray.dir.x;
-		var t2 = (bottomRight.x - ray.start.x) / ray.dir.x;
-		var t3 = (topLeft.y - ray.start.y) / ray.dir.y;
-		var t4 = (bottomRight.y - ray.start.y) / ray.dir.y;
 		
-		var aMin = t1 < t2 ? t1 : t2;
-		var bMin = t3 < t4 ? t3 : t4;
-		
-		var aMax = t1 > t2 ? t1 : t2;
-		var bMax = t3 > t4 ? t3 : t4;
-		
-		var  fMin = aMin > bMin ? aMin : bMin;
-		var  fMax = aMax < bMax ? aMax : bMax;
-		
-		var fraction = (fMax <0 || fMin > fMax) ? -1 : fMin;
-		
-		
-		result.hitPos.x = ray.start.x + fraction * ray.dir.x * ray.length;
-		result.hitPos.y = ray.start.y + fraction * ray.dir.y * ray.length;
-		result.normal = 	
-		
-		return (fraction != -1);
+		//
+		//var t1 = (topLeft.x - ray.start.x) / ray.dir.x;
+		//var t2 = (bottomRight.x - ray.start.x) / ray.dir.x;
+		//var t3 = (topLeft.y - ray.start.y) / ray.dir.y;
+		//var t4 = (bottomRight.y - ray.start.y) / ray.dir.y;
+		//
+		//var aMin = t1 < t2 ? t1 : t2;
+		//var bMin = t3 < t4 ? t3 : t4;
+		//
+		//var aMax = t1 > t2 ? t1 : t2;
+		//var bMax = t3 > t4 ? t3 : t4;
+		//
+		//var  fMin = aMin > bMin ? aMin : bMin;
+		//var  fMax = aMax < bMax ? aMax : bMax;
+		//
+		//var fraction = (fMax <0 || fMin > fMax) ? -1 : fMin;
+		//
+		//
+		//result.hitPos.x = ray.start.x + fraction * ray.dir.x * ray.length;
+		//result.hitPos.y = ray.start.y + fraction * ray.dir.y * ray.length;
+		//result.normal = 	
+		//
+		//return (fraction != -1);
 		//
 		//
 		//

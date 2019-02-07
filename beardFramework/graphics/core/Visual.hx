@@ -33,9 +33,7 @@ class Visual extends RenderedObject
 		
 		SetBaseWidth(texture.imageArea.width);
 		SetBaseHeight(texture.imageArea.height);
-			
-		
-		renderer = Renderer.Get();
+	
 		
 		
 	}

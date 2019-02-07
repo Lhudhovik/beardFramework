@@ -6,7 +6,7 @@ import beardFramework.resources.save.data.DataSave;
 import beardFramework.resources.save.data.DataScreen;
 import beardFramework.resources.save.data.Test;
 import beardFramework.utils.Crypto;
-import beardFramework.utils.DataUtils;
+import beardFramework.utils.DataU;
 import beardFramework.utils.StringLibrary;
 import haxe.Json;
 import sys.FileSystem;
