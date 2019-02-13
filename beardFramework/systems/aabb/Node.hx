@@ -64,25 +64,52 @@ class Node
 	
 	public function UpdateAABB(margin:Float):Void
 	{
+		if (debugFat >= 0)
+		{
+			DebugDraw.RemoveWireFrameRectangle(debugFat);
+			
+		}
 		if (IsLeaf())
 		{
 			aabbFat.topLeft.x = aabbLeaf.topLeft.x - margin;
 			aabbFat.topLeft.y = aabbLeaf.topLeft.y - margin;
 			aabbFat.bottomRight.x = aabbLeaf.bottomRight.x + margin;
 			aabbFat.bottomRight.y = aabbLeaf.bottomRight.y + margin;
+			debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,ColorU.BLUE );
+		
 		}
-		else
-			aabbFat.Combine(children[0].aabbFat , children[0].aabbFat);
+		else{
+			
+			aabbFat.Combine(children[0].aabbFat , children[1].aabbFat);
+			
+			aabbFat.topLeft.x -= margin;
+			aabbFat.topLeft.y -= margin;
+			aabbFat.bottomRight.x += margin;
+			aabbFat.bottomRight.y +=  margin;
+			debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,ColorU.RED );
+		
+		}
 		
 			
+		
+		
+		
+		
+	}
+	public inline function Dispose():Void
+	{
 		if (debugFat >= 0)
 		{
 			DebugDraw.RemoveWireFrameRectangle(debugFat);
 			
 		}
 		
+		if (debugLeaf >= 0)
+		{
+			DebugDraw.RemoveWireFrameRectangle(debugLeaf);
+			
+		}
 		
-		debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,ColorU.RED );
 		
 	}
 	

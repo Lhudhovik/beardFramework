@@ -103,13 +103,13 @@ class RenderedObjectBatch extends Batch
 			var center:Vector2 = new Vector2();
 			
 			//Update data
-			for (i in  0...dirtyObjects.length)
+			while (dirtyObjects.length > 0)
 			{
 				
 				
-				if (dirtyObjects.get(i) == null) continue;
+				if (dirtyObjects.get(0) == null) continue;
 				
-				else if ( Std.is(dirtyObjects.get(i), Visual) && (visual = cast(dirtyObjects.get(i), Visual)) != null)
+				else if ( Std.is(dirtyObjects.get(0), Visual) && (visual = cast(dirtyObjects.get(0), Visual)) != null)
 				{
 					
 					visIndex = visual.bufferIndex*40;
@@ -135,9 +135,9 @@ class RenderedObjectBatch extends Batch
 						verticesData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast( visual.GetTextureData().atlasIndex, Float);
 						
 						//color
-						verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRed(visual.color);
-						verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreen(visual.color);
-						verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBlue(visual.color);
+						verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRed(visual.color)/255;
+						verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreen(visual.color)/255;
+						verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBlue(visual.color)/255;
 						verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.alpha;		
 						
 					}
@@ -147,7 +147,7 @@ class RenderedObjectBatch extends Batch
 					GL.bufferSubData(GL.ARRAY_BUFFER, visual.bufferIndex * utilFloatArray.byteLength, utilFloatArray.byteLength, utilFloatArray); 
 								
 				}
-				else if (Std.is(dirtyObjects.get(i), TextField) && (textfield = cast(dirtyObjects.get(i), TextField)) != null)
+				else if (Std.is(dirtyObjects.get(0), TextField) && (textfield = cast(dirtyObjects.get(0), TextField)) != null)
 				{
 					
 					if (textfield.needLayoutUpdate)	textfield.UpdateLayout();
@@ -179,9 +179,9 @@ class RenderedObjectBatch extends Batch
 							verticesData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast(data.textureData.atlasIndex, Float);
 							
 							//color
-							verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = ColorU.getRed(data.color);
-							verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = ColorU.getGreen(data.color);
-							verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = ColorU.getBlue(data.color);
+							verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = ColorU.getRed(data.color)/255;
+							verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = ColorU.getGreen(data.color)/255;
+							verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = ColorU.getBlue(data.color)/255;
 							verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = textfield.alpha;		
 							
 						}
@@ -200,7 +200,7 @@ class RenderedObjectBatch extends Batch
 			dirtyObjects.Clean();
 			
 			//var visu:Array<Float> = [];
-			//for (i in 0...verticesData.data.length)
+			//for (i in 0...verticesData.vertexStride)
 				//visu.push(verticesData.data[i]);
 			//trace(visu);
 			needUpdate = false;
@@ -213,6 +213,7 @@ class RenderedObjectBatch extends Batch
 		if (dirtyObjects.IndexOf(object) == -1)
 		{
 			dirtyObjects.Push(object);
+			needUpdate = true;
 		}
 	}
 	

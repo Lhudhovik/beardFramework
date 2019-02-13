@@ -35,7 +35,7 @@ class BeardLayer
 		this.maxObjectsCount = maxObjectsCount;
 		renderedObjects = new Map();	
 		aabbs = new Map();
-		aabbTree = new AABBTree();
+		aabbTree = new AABBTree(5);
 		visible = true;
 		
 		
@@ -81,6 +81,7 @@ class BeardLayer
 	
 	public function Add(object:RenderedObject, updateBuffer:Bool = true):Void
 	{
+		trace(object.name);
 		if (!renderedObjects.exists(object.name))
 		{
 			if(object.name == null)		trace(object.layer.id);
@@ -88,7 +89,6 @@ class BeardLayer
 			object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 			object.visible =  this.visible;
 			object.bufferIndex = object.renderingBatch.AllocateBufferIndex();
-			object.isDirty = true;
 			renderedObjects.set(object.name, object);
 			
 			if (object.onAABBTree){
@@ -102,8 +102,10 @@ class BeardLayer
 				aabbs[object.name].bottomRight.y = object.y + object.height;
 				
 				aabbTree.Add(aabbs[object.name]);
-				
+				//trace(aabbs);
 			}
+			
+			object.isDirty = true;
 			
 			if (updateBuffer){
 				
@@ -112,14 +114,14 @@ class BeardLayer
 			
 		}
 	}
-		
+	
 	public inline function Remove(object:RenderedObject):Void
 	{
 		if (!renderedObjects.exists(object.name))
 		{
 			renderedObjects.remove(object.name);
 			object.bufferIndex = object.renderingBatch.FreeBufferIndex(object.bufferIndex);
-			object.isDirty = false;
+			//object.isDirty = false;
 			if (object.onAABBTree && aabbs[object.name] != null){
 				
 				aabbTree.Remove(aabbs[object.name]);
@@ -129,6 +131,7 @@ class BeardLayer
 			
 		}
 	}
+	
 	
 	function get_visible():Bool 
 	{

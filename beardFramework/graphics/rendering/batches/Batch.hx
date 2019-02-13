@@ -332,15 +332,16 @@ class Batch
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		GL.bindVertexArray(0);
 			
-		var visu:Array<Float> = [];
-			for (i in 0...verticesData.data.length)
-				visu.push(verticesData.data[i]);
-			trace(visu);
+		//var visu:Array<Float> = [];
+			//for (i in 0...verticesData.data.length)
+				//visu.push(verticesData.data[i]);
+			//trace(visu);
 		
 	}
 	
 	public function AllocateBufferIndex():Int
 	{
+		trace(bufferIndices);
 		var index:Int = -1;
 		var length:Int = bufferIndices.length;
 		
@@ -357,7 +358,7 @@ class Batch
 			bufferIndices.push(true);
 			index = length;
 		}
-		//trace("allocated index : " + index);
+		trace("allocated index : " + index);
 		verticesData.activeDataCount++;
 		return index;
 		
@@ -440,6 +441,15 @@ class Batch
 		return verticesData.activeDataCount == 0;
 	}
 	
+	public function ToString():String
+	{
+		var visu:Array<Float> = [];
+			for (i in 0...verticesData.data.length)
+				visu.push(verticesData.data[i]);
+			
+		return visu.toString();
+		
+	}
 	
 	
 	public function Render():Int
@@ -496,7 +506,7 @@ class Batch
 			}
 			else
 			{
-				trace(verticesData.activeDataCount);
+				//trace(verticesData.activeDataCount);
 				
 				GL.drawArrays(drawMode, 0, verticesData.activeDataCount*verticesData.vertexPerObject);
 			}

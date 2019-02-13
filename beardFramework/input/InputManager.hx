@@ -512,6 +512,10 @@ class InputManager
 		//
 		utilString = StringLibrary.MOUSE_MOVE;
 		utilPoint.setTo(mouseX, mouseY);
+		BeardGame.Get().mousePos.previous.x = BeardGame.Get().mousePos.current.x;
+		BeardGame.Get().mousePos.previous.y = BeardGame.Get().mousePos.current.y;
+		BeardGame.Get().mousePos.current.x = mouseX;
+		BeardGame.Get().mousePos.current.y = mouseY;
 		
 		if (handledInputs[utilString] != null)
 		{

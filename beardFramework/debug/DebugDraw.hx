@@ -112,11 +112,10 @@ class DebugDraw
 		
 	}
 	
-	public static function Flush(x:Float, y:Float, width:Float, height:Float, color:UInt = 0x000000ff):Void
+	public static function Flush():Void
 	{
-		
-		linesBatch.Flush();
-		rectsBatch.Flush();
+		if(linesBatch != null)	linesBatch.Flush();
+		if(rectsBatch != null) rectsBatch.Flush();
 			
 	}
 	

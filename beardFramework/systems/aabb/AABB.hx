@@ -1,5 +1,6 @@
 package beardFramework.systems.aabb;
 import beardFramework.utils.MathU;
+import beardFramework.utils.Tags;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import lime.math.Vector2;
 
@@ -16,6 +17,8 @@ class AABB
 	public var owner:String;
 	public var layer:Int;
 	public var node:Node;
+	public var tags:UInt;
+	public var needUpdate:Bool;
 	
 	public function new() 
 	{
@@ -24,6 +27,8 @@ class AABB
 		owner = "";
 		layer = -1;
 		node = null;
+		tags = 0;
+		needUpdate = false;
 	}
 	
 	public function GetCenter():SVec2
@@ -45,14 +50,13 @@ class AABB
 	
 	public function Raycast(ray:Ray, result:RayCastResult):Bool
 	{
-	
 		var tmin:Float = -MathU.MAX;
 		var tmax:Float = MathU.MAX;
 		
 		var pX:Float = ray.start.x;
 		var pY:Float = ray.start.y;
-		var dX:Float = ray.dir.x * ray.length;
-		var dY:Float = ray.dir.y * ray.length;
+		var dX:Float = ray.dir.x * MathU.Abs(ray.length);
+		var dY:Float = ray.dir.y * MathU.Abs(ray.length);
 		var absDX:Float = MathU.Abs(dX);
 		var absDY:Float = MathU.Abs(dY);
 				
@@ -61,76 +65,99 @@ class AABB
 		var t2:Float;
 		var t3:Float;
 		var s:Float;
-		
-		
-		if (absDX < MathU.MIN)
+				
+		if (pX > topLeft.x && pX < bottomRight.x && pY > topLeft.y && pY < bottomRight.y)
 		{
-			if (pX < topLeft.x || bottomRight.x < pX)
-				return false;
+			
+			tmin = 0;
+			result.normal.x = 0;
+			result.normal.y = 0;
+			
 		}
-		else
-		{
-			inv_d = 1.0 / dX;
-			t1 = (topLeft.x - pX) * inv_d;
-			t2 = (bottomRight.x - pX) * inv_d;
+		else{
 			
-			s = -1.0;
-			
-			if (t1 > t2)
+			if (absDX < MathU.MIN)
 			{
-				t3 = t1;
-				t1 = t2;
-				t2 = t3;
-				s = 1.0;
+				if (pX < topLeft.x || bottomRight.x < pX)
+					return false;
 			}
-			
-			if (t1 > tmin)
+			else
 			{
-				result.normal.x = s;
-				result.normal.y = 0;
-				tmin = t1;
+				inv_d = 1.0 / dX;
+				t1 = (topLeft.x - pX) * inv_d;
+				t2 = (bottomRight.x - pX) * inv_d;
+				s = -1.0;
+				
+				
+		
+				if (t1 > t2)
+				{
+					t3 = t1;
+					t1 = t2;
+					t2 = t3;
+					s = 1.0;
+				}
+				
+				
+				if (t1 > tmin)
+				{
+					result.normal.x = s;
+					result.normal.y = 0;
+					tmin = t1;
+				}
+							
+				tmax = MathU.Min(tmax, t2);
+								
+				if (tmin > tmax)
+					return false;
 			}
-			
-			
-			tmax = MathU.Min(tmax, t2);
-			
-			if (tmin > tmax)
-				return false;
-		}
 	
-		if (absDY < MathU.MIN)
-		{
-				if (pY < topLeft.y || bottomRight.y < pY)
-				return false;
-		}
-		else
-		{
-			inv_d = 1.0 / dY;
-			t1 = (topLeft.y - pY) * inv_d;
-			t2 = (bottomRight.y - pY) * inv_d;
-			
-			s = -1.0;
-			
-			if (t1 > t2)
+			if (absDY < MathU.MIN)
 			{
-				t3 = t1;
-				t1 = t2;
-				t2 = t3;
-				s = 1.0;
+					if (pY < topLeft.y || bottomRight.y < pY)
+					return false;
+			}
+			else
+			{
+				inv_d = 1.0 / dY;
+				t1 = (topLeft.y - pY) * inv_d;
+				t2 = (bottomRight.y - pY) * inv_d;
+				s = -1.0;
+				
+				if (t1 > t2)
+				{
+					t3 = t1;
+					t1 = t2;
+					t2 = t3;
+					s = 1.0;
+				}
+				
+				if (t1 > tmin)
+				{
+					result.normal.y = s;
+					result.normal.x = 0;
+					tmin = t1;
+				}
+					
+				tmax = MathU.Min(tmax, t2);
+				
+				if (tmin > tmax)
+					return false;
 			}
 			
-			if (t1 > tmin)
+			if (ray.length > 0)
 			{
-				result.normal.y = s;
-				result.normal.x = 0;
-				tmin = t1;
+				
+				if (MathU.Abs(tmin) > 1) return false;
+				else if (tmin < 0 && ( pX < topLeft.x || pX> bottomRight.x || pY < topLeft.y || pY > bottomRight.y ) )
+					return false;
+				
 			}
-			
-			tmax = MathU.Min(tmax, t2);
-			
-			if (tmin > tmax)
-				return false;
+			else if(tmin < 0) tmin = tmax;
 		}
+		
+		
+		
 		
 		
 		result.hitPos.x = pX + tmin * dX;
@@ -140,64 +167,6 @@ class AABB
 		result.collider = this;
 		
 		return true;
-		
-		
-		
-		//
-		//var t1 = (topLeft.x - ray.start.x) / ray.dir.x;
-		//var t2 = (bottomRight.x - ray.start.x) / ray.dir.x;
-		//var t3 = (topLeft.y - ray.start.y) / ray.dir.y;
-		//var t4 = (bottomRight.y - ray.start.y) / ray.dir.y;
-		//
-		//var aMin = t1 < t2 ? t1 : t2;
-		//var bMin = t3 < t4 ? t3 : t4;
-		//
-		//var aMax = t1 > t2 ? t1 : t2;
-		//var bMax = t3 > t4 ? t3 : t4;
-		//
-		//var  fMin = aMin > bMin ? aMin : bMin;
-		//var  fMax = aMax < bMax ? aMax : bMax;
-		//
-		//var fraction = (fMax <0 || fMin > fMax) ? -1 : fMin;
-		//
-		//
-		//result.hitPos.x = ray.start.x + fraction * ray.dir.x * ray.length;
-		//result.hitPos.y = ray.start.y + fraction * ray.dir.y * ray.length;
-		//result.normal = 	
-		//
-		//return (fraction != -1);
-		//
-		//
-		//
-		//
-		//var dir : Vector2 = ray.dir.clone();
-		//dir.normalize(1);
-		//var endpoint:Vector2 = new Vector2(ray.start.x + dir.x * ray.length, ray.start.y + dir.y * ray.length);
-		//
-		//if (Hit(ray.start.x, ray.start.y))
-		//{
-			//result.hitPos.x = ray.start.x;
-			//result.hitPos.y = ray.start.y;
-			//return true;
-		//}
-		//
-		//
-		//var t1:Float = (topLeft.x - ray.start.x) * ray.dir_inv.x;
-		//var t2:Float = (bottomRight.x - ray.start.x) * ray.dir_inv.x;
-		//
-		//var tmin : Float = (t1 < t2 ? t1:t2);
-		//var tmax : Float = (t1 > t2 ? t1:t2);
-		//
-		//var ty1:Float = (topLeft.y - ray.start.y) * ray.dir_inv.y;
-		//var ty2:Float = (bottomRight.y - ray.start.y) * ray.dir_inv.y;
-		//
-		//tmin = GeomUtils.Max(tmin, GeomUtils.Min(ty1, ty2));
-		//tmax = GeomUtils.Min(tmax, GeomUtils.Max(ty1, ty2));
-		//
-		//result.hitPos = 
-		//
-		
-		
 		
 	}
 	public inline function Overlaps(aabb:AABB):Bool
@@ -216,5 +185,12 @@ class AABB
 	public inline function Surface():Float
 	{
 		return (bottomRight.x - topLeft.x) * (bottomRight.y - topLeft.y);
+	}
+	
+	public inline function ToString():String
+	{
+		
+		return "x : " + topLeft.x + " y : " + topLeft.y + " width : " + (bottomRight.x - topLeft.x) + " height : " + (bottomRight.y - topLeft.y);
+		
 	}
 }

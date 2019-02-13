@@ -325,6 +325,7 @@ class TextField extends RenderedObject {
 					width:0,
 					height:0,
 					color:0,
+					colorChanged:false,
 					line:0,
 					textureData: null,
 					bufferIndex: -1,
@@ -351,7 +352,25 @@ class TextField extends RenderedObject {
 			glyphData.y = (!isEmbedded? line * linesHeight  + (line+1)* metrics.fAsc + ( metrics.fAsc - metrics.gHbY) : glyphHeight * line );
 			glyphData.width = glyphHeight / glyphScale;
 			glyphData.height = glyphHeight;
-			glyphData.color = (isEmbedded ? (embedded.color >= 0 ? embedded.color : ColorU.WHITE) : ( attribute != null ? attribute.color : this.color));
+			
+			if (isEmbedded && embedded.color >= 0 )
+			{
+				glyphData.colorChanged = true;
+				glyphData.color = embedded.color;
+				
+			}
+			else if (attribute != null && attribute.color >= 0 )
+			{
+				glyphData.colorChanged = true;
+				glyphData.color = attribute.color;
+				
+			}
+			else {
+				
+				glyphData.colorChanged = false;
+				glyphData.color = this.color;
+			}
+			
 			glyphData.line = line;
 			glyphData.textureData = textureData;
 			glyphData.metrics = glyphMetrics;
@@ -570,7 +589,7 @@ class TextField extends RenderedObject {
 						
 					}
 				}
-				
+			
 			}
 			
 		
@@ -591,6 +610,21 @@ class TextField extends RenderedObject {
 		needLayoutUpdate = true;
 		return super.set_scaleY(value);
 	}
+	override function set_color(value:UInt):UInt 
+	{
+		if (glyphsData != null)
+		{
+			for (data in glyphsData)
+			{
+				if (!data.colorChanged)
+				data.color = value;
+				
+			}
+		}
+		
+		return super.set_color(value);
+	}
+	
 	
 	override public function set_height(value:Float):Float 
 	{
@@ -632,6 +666,7 @@ typedef RenderedGlyphData =
 	public var width:Float;
 	public var height:Float;
 	public var color:Int;
+	public var colorChanged:Bool;
 	public var line:Int;
 	public var textureData:SubTextureData;
 	public var bufferIndex:Int;

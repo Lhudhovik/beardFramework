@@ -101,45 +101,6 @@ class Renderer
 		
 	}
 	
-	//#if debug
-	//private function InitDebugBatch():Void
-	//{
-		//InitShaders([{name:debugVertexShader, type:GL.VERTEX_SHADER}, {name:debugFragmentShader, type:GL.FRAGMENT_SHADER}], DEBUG);
-	//
-		//GL.useProgram(shaderPrograms[DEBUG]);
-		//
-		//VAOs[DEBUG] = GLObject.fromInt(GLObjectType.VERTEX_ARRAY_OBJECT, VAOCOUNT++);
-		////trace(VAOs);
-		//GL.bindVertexArray(VAOs[DEBUG]);
-		//
-		//VBOs[DEBUG]  = GLObject.fromInt(GLObjectType.VERTEX_ARRAY_OBJECT, BUFFERCOUNT++);
-		//GL.bindBuffer(GL.ARRAY_BUFFER, VBOs[DEBUG]);
-		////trace(VBOs[batch] );
-		//GL.enableVertexAttribArray(0);
-		//GL.vertexAttribPointer(0, 2, GL.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 0);
-		//GL.bindAttribLocation(shaderPrograms[DEBUG], 0, "pos");
-			//
-		//GL.enableVertexAttribArray(1);
-		//GL.vertexAttribPointer(1, 4, GL.FLOAT, false, 6 * Float32Array.BYTES_PER_ELEMENT, 2 * Float32Array.BYTES_PER_ELEMENT);
-		//GL.bindAttribLocation(shaderPrograms[DEBUG],1, "color");
-		//
-		//
-		//GL.bindBuffer(GL.ARRAY_BUFFER, 0);
-		//GL.bindVertexArray(0);
-		//
-		//renderedData[DEBUG] = new RenderedDataBufferArray();
-		//bufferIndices[DEBUG] = new Array<Bool>();
-		//dirtyObjects[DEBUG] = new MinAllocArray<RenderedObject>();
-	//
-		//batches.Push({name:DEBUG, needOrdering:false});
-		//
-	//
-	//}
-	//
-	//
-	//
-	//#end
-	
 	public function AddBatch(batch:Batch ):Void
 	{
 		for (i in 0...batches.length)
@@ -166,8 +127,8 @@ class Renderer
 		
 		if (ready)
 		{
-			//GL.scissor(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
-			GL.clearColor(1, 1, 1, 1);
+			GL.scissor(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
+			GL.clearColor(1, 0, 1, 1);
 			GL.clear(GL.COLOR_BUFFER_BIT);
 			GL.clear(GL.DEPTH_BUFFER_BIT);
 			
@@ -190,7 +151,7 @@ class Renderer
 			
 			}
 			
-			trace(drawCount);
+			//trace(drawCount);
 		}
 		
 

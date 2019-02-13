@@ -1,0 +1,30 @@
+#version 460
+
+in vec3 TexCoord;
+in vec4 Spritecolor;
+
+out vec4 FragColor;
+
+
+uniform sampler2D atlas[10];
+
+void main()
+{
+	//if(TexCoord.z >= 0){
+		
+	vec4 texColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * Spritecolor;
+	//vec4 texColor =  vec4(vec3(gl_FragCoord.z), 1.0);
+	
+
+	/*if(texColor.a < 0.01){
+		discard;
+	}*/
+	FragColor =texColor;
+	//FragColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * Spritecolor;
+	/*}
+	else
+	{
+		FragColor = Spritecolor;
+	}*/
+	
+} 

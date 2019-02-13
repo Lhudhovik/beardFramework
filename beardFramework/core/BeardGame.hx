@@ -6,7 +6,9 @@ import beardFramework.graphics.rendering.Shaders;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.screens.regions.RegionGrid;
+import beardFramework.input.MousePos;
 import beardFramework.resources.options.OptionsManager;
+import beardFramework.systems.aabb.AABB;
 import beardFramework.updateProcess.UpdateProcessesManager;
 import beardFramework.updateProcess.Wait;
 import beardFramework.updateProcess.sequence.VoidStep;
@@ -50,9 +52,9 @@ class BeardGame extends Application
 	public var SETTINGS(default, never):String = "settings";
 	public var SPLASHSCREENS_PATH(default, never):String = "assets/splash/";
 	public var SHADERS_PATH(default, never):String = "assets/shaders/";
-	public var CONTENTLAYER(default, never):Int = 0;
+	public var CONTENTLAYER(default, never):Int = 2;
 	public var UILAYER(default, never):Int = 1;
-	public var LOADINGLAYER(default, never):Int = 3;
+	public var LOADINGLAYER(default, never):Int = 0;
 	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
 	private var layers:MinAllocArray<BeardLayer>;
@@ -64,6 +66,7 @@ class BeardGame extends Application
 	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
 	public var currentScreen:BasicScreen;
+	public var mousePos:MousePos;
 	var fps:MemoryUsage;
 	public function new() 
 	{
@@ -89,9 +92,9 @@ class BeardGame extends Application
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
 		
 		layers = new MinAllocArray(3);
-		layers.Push(new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT, 0));
-		layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,1));
-		layers.Push(new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING,2));
+		layers.Push(new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING,0));
+				layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,1));
+		layers.Push(new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT, 2));
 	
 		
 		for (i in 0...3)
@@ -108,6 +111,8 @@ class BeardGame extends Application
 		//stage.addChild(fps);
 		
 		gameReady = false;
+		
+		mousePos = {current: {x:0, y:0}, previous: {x:0, y:0}};
 		
 		InputManager.Get().Activate(Application.current.window);
 		
@@ -276,26 +281,32 @@ class BeardGame extends Application
 			
 			if (!InputManager.directMode) InputManager.Get().Update();
 			
-				if (!UpdateProcessesManager.Get().IsEmpty())	UpdateProcessesManager.Get().Update();
+			if (!UpdateProcessesManager.Get().IsEmpty())	UpdateProcessesManager.Get().Update();
 						
-				UIManager.Get().Update();
-
-				if (!pause){
+			if (!pause){
 					
-					if (physicsEnabled && PhysicsManager.Get().get_space() != null)
+				if (physicsEnabled && PhysicsManager.Get().get_space() != null)
 						PhysicsManager.Get().Step(deltaTime);
 						
-					if (currentScreen != null && currentScreen.ready){
+				if (currentScreen != null && currentScreen.ready){
 						
-						for (entity in currentScreen.entities)
-						{
-							entity.Update();
-						}
-						
-						currentScreen.Update();
+					for (entity in currentScreen.entities)
+					{
+						entity.Update();
 					}
-
+						
+					currentScreen.Update();
 				}
+				
+				
+
+			}
+			
+			for (i in 0...layers.length)
+				layers.get(i).aabbTree.UpdateTree();
+			
+			UIManager.Get().Update();
+			
 		}
 		
 		
@@ -337,10 +348,28 @@ class BeardGame extends Application
 	public function GetTargetUnderPoint(x:Float, y:Float):RenderedObject
 	{
 		var object:RenderedObject = null;
-		//if (grid != null)
-		//{
-			//object = grid.TestPointCollision(Std.int(x), Std.int(y));
-		//}
+		var testObject:RenderedObject = null;
+		
+		var aabbs:MinAllocArray<AABB>;
+		for (i in 0...layers.length)
+		{
+			aabbs = layers.get(layers.length - 1 - i).aabbTree.Hit(x, y);
+			if (aabbs != null && aabbs.length > 0)
+			{
+				for (j in 0...aabbs.length)
+				{
+					testObject = layers.get(layers.length - 1 - i).renderedObjects[aabbs.get(j).owner];
+					if (testObject != null && (object == null || object.z > testObject.z) )
+						object = testObject;
+				}
+				
+				
+			}
+			
+			if (object != null) break;
+		}
+		
+		
 		
 		return object;
 		

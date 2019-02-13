@@ -4,6 +4,7 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.interfaces.ICameraDependent;
+import beardFramework.systems.aabb.AABB;
 import beardFramework.utils.ColorU;
 
 
@@ -67,7 +68,14 @@ class RenderedObject implements ICameraDependent
 	
 	public function set_x(value:Float):Float 
 	{
-		if(value != x) isDirty = true;
+		if (value != x){
+			isDirty = true;
+			if (onAABBTree){
+				layer.aabbs[this.name].topLeft.x = value;
+				layer.aabbs[this.name].bottomRight.x = value+width;
+				layer.aabbs[this.name].needUpdate = true;
+			}
+		}
 		return x = value;
 	}
 	
@@ -78,7 +86,14 @@ class RenderedObject implements ICameraDependent
 	
 	public function set_y(value:Float):Float 
 	{
-		if(value != x) isDirty = true;
+		if (value != y){
+			isDirty = true;
+			if (onAABBTree){
+				layer.aabbs[this.name].topLeft.y = value;
+				layer.aabbs[this.name].bottomRight.y = value+height;
+				layer.aabbs[this.name].needUpdate = true;
+			}
+		}
 		return y = value;
 	}
 	
@@ -130,6 +145,13 @@ class RenderedObject implements ICameraDependent
 			cachedWidth = (cachedWidth/scaleX) * value;	
 			scaleX = value;
 			isDirty = true;
+			
+			if (onAABBTree)	{
+				layer.aabbs[this.name].bottomRight.x = this.x + this.width;
+				layer.aabbs[this.name].needUpdate = true;
+			}
+			
+			
 		}
 		
 		return value;
@@ -151,6 +173,10 @@ class RenderedObject implements ICameraDependent
 			cachedHeight = (cachedHeight/scaleY) * value;	
 			scaleY = value;
 			isDirty = true;
+			if (onAABBTree){
+				layer.aabbs[this.name].bottomRight.y = this.y + this.height;
+				layer.aabbs[this.name].needUpdate = true;
+			}
 		}
 		return value;
 		
@@ -307,7 +333,7 @@ class RenderedObject implements ICameraDependent
 			if (renderingBatch != null)
 			{
 				renderingBatch.RemoveDirtyObject(this);
-				renderingBatch.FreeBufferIndex(bufferIndex);
+				if(bufferIndex >= 0) renderingBatch.FreeBufferIndex(bufferIndex);
 			}
 			
 			renderingBatch = value;
