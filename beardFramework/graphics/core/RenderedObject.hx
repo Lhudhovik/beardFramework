@@ -5,7 +5,7 @@ import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.systems.aabb.AABB;
-import beardFramework.utils.ColorU;
+import beardFramework.utils.graphics.ColorU;
 
 
 /**
@@ -30,7 +30,7 @@ class RenderedObject implements ICameraDependent
 	@:isVar public var z(get, set):Float;
 	@:isVar public var color(get, set):UInt;
 
-	public var onAABBTree:Bool;
+	public var onAABBTree(default, set):Bool;
 	public var layer:BeardLayer;
 	public var displayingCameras(default, null):List<String>;	
 	public var renderDepth(default,null):Float;
@@ -228,7 +228,10 @@ class RenderedObject implements ICameraDependent
 		
 		if (layer != null)
 		{
-			renderDepth = layer.depth + (z / layer.maxObjectsCount);	
+			renderDepth = layer.depth + (z / layer.maxObjectsCount);
+			trace(layer.name);
+			trace(z);
+			trace(layer.depth);
 		}
 		
 		isDirty = true;
@@ -350,6 +353,17 @@ class RenderedObject implements ICameraDependent
 		
 		
 		return renderingBatch;
+	}
+	
+	function set_onAABBTree(value:Bool):Bool 
+	{
+		if (value != onAABBTree && layer!= null)
+		{
+			if (value == true) layer.AddAABB(this);
+			else	layer.RemoveAABB(this);
+			
+		}
+		return onAABBTree = value;
 	}
 	
 	

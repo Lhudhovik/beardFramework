@@ -1,5 +1,5 @@
 package beardFramework.resources.save;
-import beardFramework.resources.save.data.DataSave;
+import beardFramework.resources.save.data.StructDataSave;
 
 
 /**

@@ -4,7 +4,7 @@ import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.resources.MinAllocArray;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -90,7 +90,7 @@ class Batch
 		indicesData = new UInt16Array(indices);
 		this.indices = Vector.fromArrayCopy(indices);
 		indicesPerObject = (indices != null? indices.length : 0);
-		trace(indices);
+		//trace(indices);
 		this.vertices = Vector.fromArrayCopy(vertices);
 	
 	}
@@ -341,7 +341,7 @@ class Batch
 	
 	public function AllocateBufferIndex():Int
 	{
-		trace(bufferIndices);
+		//trace(bufferIndices);
 		var index:Int = -1;
 		var length:Int = bufferIndices.length;
 		
@@ -358,7 +358,7 @@ class Batch
 			bufferIndices.push(true);
 			index = length;
 		}
-		trace("allocated index : " + index);
+		//trace("allocated index : " + index);
 		verticesData.activeDataCount++;
 		return index;
 		
@@ -490,13 +490,14 @@ class Batch
 		{
 	
 			var camera:Camera = BeardGame.Get().cameras[batchCam];
-			
+			//trace(camera.name);
 			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 			
 			
 			renderer.view.identity();
-			renderer.view.appendScale(camera.zoom, camera.zoom,0);
-			renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
+			renderer.view.appendScale(camera.zoom, camera.zoom,1);
+			//renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
+			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth *0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight *0.5) - camera.centerY, 0);
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
 		
 			

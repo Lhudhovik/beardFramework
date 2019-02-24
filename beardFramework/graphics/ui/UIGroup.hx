@@ -3,8 +3,8 @@ package beardFramework.graphics.ui;
 import beardFramework.graphics.ui.components.UIContainer;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.interfaces.IUIGroupable;
-import beardFramework.resources.save.data.DataUIComponent;
-import beardFramework.resources.save.data.DataUIGroup;
+import beardFramework.resources.save.data.StructDataUIComponent;
+import beardFramework.resources.save.data.StructDataUIGroup;
 
 /**
  * ...
@@ -59,10 +59,10 @@ class UIGroup implements IUIGroupable
 		
 	}
 	
-	public function ToData():DataUIGroup
+	public function ToData():StructDataUIGroup
 	{
 		
-		var componentsData:Array <DataUIComponent> = [];
+		var componentsData:Array <StructDataUIComponent> = [];
 		for (member in members)
 			if (!Std.is(member, UIGroup)){ 
 				if (Std.is(member, UIContainer)) componentsData = componentsData.concat(cast(member, UIContainer).ToDeepData());
@@ -71,7 +71,7 @@ class UIGroup implements IUIGroupable
 			}
 		
 		
-		var data:DataUIGroup = 
+		var data:StructDataUIGroup = 
 		{
 			name : this.name,
 			type: Type.getClassName(Type.getClass(this)),

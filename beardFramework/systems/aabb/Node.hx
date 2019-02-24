@@ -1,6 +1,6 @@
 package beardFramework.systems.aabb;
 import beardFramework.debug.DebugDraw;
-import beardFramework.utils.ColorU;
+import beardFramework.utils.graphics.ColorU;
 import haxe.ds.Vector;
 
 /**

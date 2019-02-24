@@ -3,9 +3,9 @@ package beardFramework.resources.save.data;
 /**
  * @author Ludo
  */
-typedef DataUIComponent =
+typedef StructDataUIComponent =
 {
-	>DataAbstractUI,
+	>StructDataAbstractUI,
 	
 	var x:Float;
 	var y:Float;
@@ -29,8 +29,8 @@ typedef DataUIComponent =
 	
 }
 @:forward
-abstract AbstractDataUIComponent(DataUIComponent) from DataUIComponent to DataUIComponent {
-  inline public function new(data:DataUIComponent) {
+abstract DataUIComponent(StructDataUIComponent) from StructDataUIComponent to StructDataUIComponent {
+  inline public function new(data:StructDataUIComponent) {
     this = data;
   }
 }

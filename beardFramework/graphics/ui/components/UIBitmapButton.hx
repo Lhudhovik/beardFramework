@@ -2,7 +2,7 @@ package beardFramework.graphics.ui.components;
 
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.IButton;
-import beardFramework.utils.StringLibrary;
+import beardFramework.utils.libraries.StringLibrary;
 import openfl.display.BitmapData;
 import openfl.display.PixelSnapping;
 
@@ -19,10 +19,10 @@ class UIBitmapButton extends UIBeardVisual implements IButton
 				
 		this.name = "Bitmap button " + name;
 		
-		InputManager.Get().BindToAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().BindToAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		//InputManager.Get().BindToAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		//InputManager.Get().BindToAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().RegisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().BindToAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		//InputManager.Get().BindToAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		
 		
 		
@@ -72,9 +72,9 @@ class UIBitmapButton extends UIBeardVisual implements IButton
 	//
 	override public function Clear():Void 
 	{
-		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
-		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
+		//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
+		//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OUT, OnOut, this.name);
 		//InputManager.get_instance().UnregisterActionCallback(StringLibrary.MOUSE_MOVE, OnMove);
-		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
+		//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 	}
 }

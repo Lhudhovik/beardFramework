@@ -5,7 +5,7 @@ import beardFramework.systems.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.interfaces.IEntityComponent;
 import beardFramework.resources.save.SaveManager;
-import beardFramework.resources.save.data.DataComponent;
+import beardFramework.resources.save.data.StructDataComponent;
 
 /**
  * ...
@@ -92,9 +92,9 @@ class MovementComponent implements IEntityComponent
 	
 	/* INTERFACE beardFramework.interfaces.IEntityComponent */
 	
-	public function ToData():DataComponent 
+	public function ToData():StructDataComponent 
 	{
-		var data:DataComponent = 
+		var data:StructDataComponent = 
 		{
 			name:this.name,
 			type:Type.getClassName(MovementComponent),
@@ -109,7 +109,7 @@ class MovementComponent implements IEntityComponent
 	
 	/* INTERFACE beardFramework.interfaces.IEntityComponent */
 	
-	public function ParseData(data:DataComponent):Void 
+	public function ParseData(data:StructDataComponent):Void 
 	{
 		
 	}

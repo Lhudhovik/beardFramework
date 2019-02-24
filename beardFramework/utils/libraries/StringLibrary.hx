@@ -1,4 +1,4 @@
-package beardFramework.utils;
+package beardFramework.utils.libraries;
 
 /**
  * ...
@@ -9,12 +9,15 @@ class StringLibrary
 	
 	public static inline var ACTION:String 					= "action";
 	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
+	public static inline var ANY:String 					= "any";
 	public static inline var DIRECT_MODE:String 			= "directMode";
 	public static inline var GAMEPAD:String 				= "gamepad";
 	public static inline var GAMEPAD_AXIS_MOVE:String 		= "gamepadAxisMove";
 	public static inline var GAMEPAD_BUTTON_DOWN:String 	= "gamepadButtonDown";
 	public static inline var GAMEPAD_BUTTON_PRESS:String 	= "gamepadButtonPress";
 	public static inline var GAMEPAD_BUTTON_UP:String 		= "gamepadButtonUp";
+	public static inline var GAMEPAD_CONNECT:String 		= "gamepadConnect";
+	public static inline var GAMEPAD_DISCONNECT:String 		= "gamepadDisconnect";
 	public static inline var GAMEPAD_ID:String 				= "gamepadID";
 	public static inline var GAMEPAD_MAX:String 			= "maxGamepads";
 	public static inline var INPUT:String 					= "input";

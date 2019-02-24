@@ -1,14 +1,15 @@
 package beardFramework.graphics.ui.components;
 
-import beardFramework.graphics.heritage.BeardTextField;
+
+import beardFramework.graphics.text.TextField;
 import beardFramework.interfaces.IUIComponent;
-import beardFramework.resources.save.data.DataUIComponent;
+import beardFramework.resources.save.data.StructDataUIComponent;
 
 /**
  * ...
  * @author Ludo
  */
-class UITextFieldComponent extends BeardTextField implements IUIComponent
+class UITextFieldComponent extends TextField implements IUIComponent
 {
 
 	public var vAlign:UInt;
@@ -20,9 +21,9 @@ class UITextFieldComponent extends BeardTextField implements IUIComponent
 	@:isVar public var container(get, set):String;
 	
 	
-	public function new() 
+	public function new(text:String="", font:String="", size:Int = 32, name:String = "" ) 
 	{
-		super();
+		super(text, font, size, name);
 		
 	}
 	
@@ -36,9 +37,9 @@ class UITextFieldComponent extends BeardTextField implements IUIComponent
 		
 	}
 	
-	public function ToData():DataUIComponent 
+	public function ToData():StructDataUIComponent 
 	{
-		var data:DataUIComponent = 
+		var data:StructDataUIComponent = 
 		{
 			visible:this.visible,
 			name:this.name,
@@ -63,7 +64,7 @@ class UITextFieldComponent extends BeardTextField implements IUIComponent
 		return data;
 	}
 	
-	public function ParseData(data:DataUIComponent):Void 
+	public function ParseData(data:StructDataUIComponent):Void 
 	{
 		
 	}

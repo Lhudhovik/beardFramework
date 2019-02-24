@@ -3,7 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.systems.aabb.AABBTree;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.resources.MinAllocArray;
 
 
 /**
@@ -93,15 +93,7 @@ class BeardLayer
 			
 			if (object.onAABBTree){
 				
-				aabbs[object.name] = new AABB();
-				aabbs[object.name].owner = object.name;
-				aabbs[object.name].layer = this.id;
-				aabbs[object.name].topLeft.x = object.x;
-				aabbs[object.name].topLeft.y = object.y;
-				aabbs[object.name].bottomRight.x = object.x + object.width;
-				aabbs[object.name].bottomRight.y = object.y + object.height;
-				
-				aabbTree.Add(aabbs[object.name]);
+				AddAABB(object);
 				//trace(aabbs);
 			}
 			
@@ -132,6 +124,28 @@ class BeardLayer
 		}
 	}
 	
+	public function AddAABB(object:RenderedObject):Void
+	{
+		if(aabbs[object.name] == null) 	aabbs[object.name] = new AABB();
+		aabbs[object.name].owner = object.name;
+		aabbs[object.name].layer = this.id;
+		aabbs[object.name].topLeft.x = object.x;
+		aabbs[object.name].topLeft.y = object.y;
+		aabbs[object.name].bottomRight.x = object.x + object.width;
+		aabbs[object.name].bottomRight.y = object.y + object.height;
+		
+		aabbTree.Add(aabbs[object.name]);
+	}
+	
+	public function RemoveAABB(object:RenderedObject):Void
+	{
+		if (aabbs[object.name] != null)
+		{
+			aabbTree.Remove(aabbs[object.name]);
+			aabbs[object.name] = null;
+		}
+		
+	}
 	
 	function get_visible():Bool 
 	{

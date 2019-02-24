@@ -1,4 +1,4 @@
-package beardFramework.utils;
+package beardFramework.resources;
 import haxe.ds.Vector;
 
 /**

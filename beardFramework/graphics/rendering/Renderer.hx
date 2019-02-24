@@ -7,8 +7,9 @@ import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.BatchData;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.text.TextField;
-import beardFramework.utils.DataU;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.graphics.ui.UIManager;
+import beardFramework.utils.data.DataU;
+import beardFramework.resources.MinAllocArray;
 import lime.app.Application;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -37,6 +38,7 @@ class Renderer
 
 	
 	public var DEFAULT(default, never):String = "default";
+	public var UI(default, never):String = "UI";
 	#if debug	
 	public var DEBUG(default, never):String = "debug";
 	#end
@@ -111,6 +113,7 @@ class Renderer
 		#if debug
 		MoveBatchToLast(DEBUG);
 		#end
+		MoveBatchToLast(UI);
 	}
 	
 	public function Start():Void
@@ -136,9 +139,10 @@ class Renderer
 			
 			drawCount = 0;
 			
-			
+			//trace(batches.toString());
 			for (i in 0...batches.length)
 			{
+			
 				
 				batch = batches.get(i);
 				
@@ -226,7 +230,8 @@ class Renderer
 		{
 			if (batches.get(i).name == batch)
 			{
-				batches.MoveByIndex(i, batches.length-1);
+				batches.MoveByIndex(i, batches.length - 1);
+				trace("moved");
 				break;
 			}
 		}

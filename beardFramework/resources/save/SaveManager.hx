@@ -1,13 +1,13 @@
 package beardFramework.resources.save;
 import beardFramework.core.BeardGame;
-import beardFramework.resources.save.data.DataGeneric;
-import beardFramework.resources.save.data.DataPlayer;
-import beardFramework.resources.save.data.DataSave;
-import beardFramework.resources.save.data.DataScreen;
+import beardFramework.resources.save.data.StructDataGeneric;
+import beardFramework.resources.save.data.StructDataPlayer;
+import beardFramework.resources.save.data.StructDataSave;
+import beardFramework.resources.save.data.StructDataScreen;
 import beardFramework.resources.save.data.Test;
-import beardFramework.utils.Crypto;
-import beardFramework.utils.DataU;
-import beardFramework.utils.StringLibrary;
+import beardFramework.utils.data.Crypto;
+import beardFramework.utils.data.DataU;
+import beardFramework.utils.libraries.StringLibrary;
 import haxe.Json;
 import sys.FileSystem;
 import sys.io.File;
@@ -22,8 +22,8 @@ class SaveManager
 	private static var instance(default, null):SaveManager;
 	
 	
-	private var saveSlots:Map<String, DataSlot<DataSave>>;
-	public var currentSave:DataSave;
+	private var saveSlots:Map<String, DataSlot<StructDataSave>>;
+	public var currentSave:StructDataSave;
 	
 	private function new() 
 	{
@@ -44,7 +44,7 @@ class SaveManager
 	private function Init():Void
 	{
 		
-		saveSlots = new Map<String, DataSlot<DataSave>>();
+		saveSlots = new Map<String, DataSlot<StructDataSave>>();
 		
 		if (!FileSystem.exists(BeardGame.Get().SAVE_PATH)) FileSystem.createDirectory(BeardGame.Get().SAVE_PATH);
 		for (element in FileSystem.readDirectory(BeardGame.Get().SAVE_PATH))
@@ -52,9 +52,9 @@ class SaveManager
 			if (element.indexOf(StringLibrary.SAVE_EXTENSION) != -1){
 				
 				#if debug
-				var saveData:DataSave = haxe.Json.parse(File.getContent(BeardGame.Get().SAVE_PATH + element));
+				var saveData:StructDataSave = haxe.Json.parse(File.getContent(BeardGame.Get().SAVE_PATH + element));
 				#else
-				var saveData:DataSave = Crypto.DecodedData(File.getContent(BeardGame.Get().SAVE_PATH + element));	
+				var saveData:StructDataSave = Crypto.DecodedData(File.getContent(BeardGame.Get().SAVE_PATH + element));	
 				#end
 				
 				saveSlots[saveData.name] = {
@@ -106,7 +106,7 @@ class SaveManager
 		return success;
 	}
 	
-	public function GetSave(saveName:String):DataSave
+	public function GetSave(saveName:String):StructDataSave
 	{
 		
 		if (saveSlots[saveName] != null){
@@ -117,7 +117,7 @@ class SaveManager
 		return null;
 	}
 	
-	public function Save(saveName:String = "", data:DataSave = null):Bool
+	public function Save(saveName:String = "", data:StructDataSave = null):Bool
 	{
 		var success : Bool = false;
 		if (saveName == "" && currentSave != null){
@@ -147,10 +147,10 @@ class SaveManager
 		return success;
 	}
 	
-	public function GetSavedPlayerData(name:String):DataPlayer
+	public function GetSavedPlayerData(name:String):StructDataPlayer
 	{
 		
-		var playerData:DataPlayer = null;
+		var playerData:StructDataPlayer = null;
 		if (currentSave != null && currentSave.playersData != null)
 			for (data in currentSave.playersData)
 				if (data.name == name) playerData = cast data;

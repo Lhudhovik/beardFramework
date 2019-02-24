@@ -2,7 +2,7 @@ package beardFramework.resources.assets;
 
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
-import beardFramework.utils.DataU;
+import beardFramework.utils.data.DataU;
 import beardFramework.utils.MathU;
 import beardFramework.utils.simpleDataStruct.SRect;
 import haxe.Utf8;

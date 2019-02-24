@@ -1,4 +1,4 @@
-package beardFramework.utils;
+package beardFramework.utils.graphics;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLTexture;

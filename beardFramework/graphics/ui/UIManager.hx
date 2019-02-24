@@ -1,6 +1,10 @@
 package beardFramework.graphics.ui;
 import beardFramework.core.BeardGame;
+import beardFramework.graphics.cameras.Camera;
+import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.updateProcess.thread.RowThreadDetail;
 import beardFramework.updateProcess.thread.Thread;
@@ -10,13 +14,14 @@ import beardFramework.graphics.ui.components.UIContainer;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.interfaces.IUIGroupable;
 import beardFramework.resources.save.SaveManager;
-import beardFramework.resources.save.data.DataComponent;
-import beardFramework.resources.save.data.DataUIComponent;
-import beardFramework.resources.save.data.DataUIGroup;
+import beardFramework.resources.save.data.StructDataComponent;
+import beardFramework.resources.save.data.StructDataUIComponent;
+import beardFramework.resources.save.data.StructDataUIGroup;
 import beardFramework.resources.save.DataSlot;
-import beardFramework.utils.Crypto;
-import beardFramework.utils.DataU;
-import beardFramework.utils.StringLibrary;
+import beardFramework.utils.data.Crypto;
+import beardFramework.utils.data.DataU;
+import beardFramework.resources.MinAllocArray;
+import beardFramework.utils.libraries.StringLibrary;
 import haxe.Json;
 import openfl.display.DisplayObject;
 import openfl.display.Sprite;
@@ -29,11 +34,13 @@ import sys.io.File;
  */
 class UIManager 
 {
+	public static var CAMERANAME(default, never):String = "UICamera";
 	private static var instance(default,null):UIManager;
 	private var UILayer:BeardLayer;
 	private var baseGroup:UIGroup;
-	private var templates:Array<DataSlot<DataUIGroup>>;
-	private var savedData:AbstractDataUIGroup;
+	private var templates:Array<DataSlot<StructDataUIGroup>>;
+	private var savedData:DataUIGroup;
+	public var cameras:MinAllocArray<String>;
 	
 	private function new() 
 	{
@@ -52,17 +59,23 @@ class UIManager
 	private function Init():Void
 	{
 		UILayer = BeardGame.Get().GetLayer(BeardGame.Get().UILAYER);
-		templates = new Array<DataSlot<DataUIGroup>>();
+		templates = new Array<DataSlot<StructDataUIGroup>>();
 		baseGroup = new UIGroup("UIBase");
-				
+		cameras = new MinAllocArray<String>();
+		cameras.Push(CAMERANAME+0);
+		BeardGame.Get().AddCamera(new Camera(CAMERANAME+0, BeardGame.Get().window.width, BeardGame.Get().window.height,0,0,100,true));
+		
+		Renderer.Get().GetBatch(Renderer.Get().UI).cameras.add(CAMERANAME+0);
+		Renderer.Get().GetBatch(Renderer.Get().UI).cameras.remove("default");
+		
 		if (!FileSystem.exists(BeardGame.Get().UI_PATH)) FileSystem.createDirectory(BeardGame.Get().UI_PATH);
 		for (element in FileSystem.readDirectory(BeardGame.Get().UI_PATH))
 		{
 			if (element.indexOf(StringLibrary.SAVE_EXTENSION) != -1){
 				#if debug
-				var groupData:DataUIGroup = haxe.Json.parse(File.getContent(BeardGame.Get().UI_PATH + element));
+				var groupData:StructDataUIGroup = haxe.Json.parse(File.getContent(BeardGame.Get().UI_PATH + element));
 				#else
-				var groupData:DataUIGroup = Crypto.DecodedData(File.getContent(BeardGame.Get().UI_PATH + element));	
+				var groupData:StructDataUIGroup = Crypto.DecodedData(File.getContent(BeardGame.Get().UI_PATH + element));	
 				#end
 				
 				templates.push({
@@ -79,8 +92,10 @@ class UIManager
 	{
 		if (Std.is(component, UIContainer))
 			for (element in cast(component, UIContainer).components) AddComponent(element);
-		else
-			UILayer.Add(cast(component, Visual));
+		else{
+			cast(component, RenderedObject).renderingBatch = cast(Renderer.Get().GetBatch(Renderer.Get().UI), RenderedObjectBatch);
+			UILayer.Add(cast(component, RenderedObject));
+		}
 		
 		AddToGroup(component, group);
 	}
@@ -145,7 +160,7 @@ class UIManager
 		UILayer.visible = true;		
 	}
 	
-	public function GetTemplateData(templateID:String):DataUIGroup
+	public function GetTemplateData(templateID:String):StructDataUIGroup
 	{
 		
 		if (templateID != null && templateID != "")
@@ -166,13 +181,13 @@ class UIManager
 	public function AddTemplate(templateID:String):Thread
 	{
 		
-		var templateData:DataUIGroup = GetTemplateData(templateID);
+		var templateData:StructDataUIGroup = GetTemplateData(templateID);
 		
 		if (templateData != null)
 		{
 			
 			var thread:Thread = new Thread("TemplateLoad");
-			thread.Add(new RowThreadDetail<AbstractDataUIGroup>(LoadTemplate, [templateData]));
+			thread.Add(new RowThreadDetail<DataUIGroup>(LoadTemplate, [templateData]));
 			thread.Start();
 			return thread;
 		}
@@ -181,14 +196,14 @@ class UIManager
 		
 	}
 
-	public function LoadTemplate(td:RowThreadDetail<AbstractDataUIGroup>):Bool
+	public function LoadTemplate(td:RowThreadDetail<DataUIGroup>):Bool
 	{
-		var templateData:DataUIGroup = td.parameter;
-		var savedGroups:Map<String,DataUIGroup> = (savedData != null? DataU.DataArrayToMap(savedData.subGroupsData) : null);
-		var savedComponents:Map<String,DataUIComponent> = (savedData != null? DataU.DataArrayToMap(savedData.componentsData) : null);
+		var templateData:StructDataUIGroup = td.parameter;
+		var savedGroups:Map<String,StructDataUIGroup> = (savedData != null? DataU.DataArrayToMap(savedData.subGroupsData) : null);
+		var savedComponents:Map<String,StructDataUIComponent> = (savedData != null? DataU.DataArrayToMap(savedData.componentsData) : null);
 		
-		var componentData :DataUIComponent;
-		var groupData:DataUIGroup;
+		var componentData :StructDataUIComponent;
+		var groupData:StructDataUIGroup;
 		var group:UIGroup;
 		
 		if (td.progression == 0)
@@ -257,9 +272,9 @@ class UIManager
 		return true;		
 	}
 	
-	public function RegisterTemplate(templateData:DataUIGroup, save:Bool=false):Void
+	public function RegisterTemplate(templateData:StructDataUIGroup, save:Bool=false):Void
 	{
-		var slot:DataSlot<DataUIGroup> = null;
+		var slot:DataSlot<StructDataUIGroup> = null;
 		for (dataSlot in templates)
 			if (dataSlot.name == templateData.name)
 				slot = dataSlot;

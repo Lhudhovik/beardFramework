@@ -1,6 +1,6 @@
-package beardFramework.utils;
-import beardFramework.resources.save.data.AbstractData;
-import beardFramework.resources.save.data.DataSave;
+package beardFramework.utils.data;
+import beardFramework.resources.save.data.StructAbstractData;
+import beardFramework.resources.save.data.StructDataSave;
 import haxe.Json;
 import haxe.crypto.Base64;
 import haxe.io.Bytes;
@@ -20,7 +20,7 @@ class Crypto
 		
 	}
 	
-	public static inline function EncodeData(data:AbstractData):String
+	public static inline function EncodeData(data:StructAbstractData):String
 	{
 		
 		return  Base64.encode(Bytes.ofString(haxe.Json.stringify(data)));

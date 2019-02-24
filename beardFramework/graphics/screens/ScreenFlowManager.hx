@@ -9,13 +9,13 @@ import beardFramework.graphics.screens.BasicLoadingScreen;
 import beardFramework.graphics.screens.BasicScreen;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.resources.assets.AssetManager;
-import beardFramework.resources.save.data.DataCamera;
-import beardFramework.resources.save.data.DataEntity;
-import beardFramework.resources.save.data.DataScreen;
-import beardFramework.resources.save.data.DataUIGroup;
-import beardFramework.utils.Crypto;
-import beardFramework.utils.DataU;
-import beardFramework.utils.StringLibrary;
+import beardFramework.resources.save.data.StructDataCamera;
+import beardFramework.resources.save.data.StructDataEntity;
+import beardFramework.resources.save.data.StructDataScreen;
+import beardFramework.resources.save.data.StructDataUIGroup;
+import beardFramework.utils.data.Crypto;
+import beardFramework.utils.data.DataU;
+import beardFramework.utils.libraries.StringLibrary;
 import haxe.Json;
 import mloader.Loader.LoaderEvent;
 
@@ -34,8 +34,8 @@ class ScreenFlowManager
 	private var existingScreens:Map<String, BasicScreen>;
 	private var screenClearTD:ThreadDetail;
 	private var UIClearTD:ThreadDetail;
-	private var screenLoadTD: ParamThreadDetail<AbstractDataScreen>;
-	private var UILoadTD: RowThreadDetail<AbstractDataUIGroup>;
+	private var screenLoadTD: ParamThreadDetail<DataScreen>;
+	private var UILoadTD: RowThreadDetail<DataUIGroup>;
 	private var loadingTimeTD: ParamThreadDetail<Float>;
 	private var transitionThread(get, null):ChainThread;
 	private var nextScreenData:NextScreenData;
@@ -65,8 +65,8 @@ class ScreenFlowManager
 		
 		screenClearTD = new ThreadDetail(null);
 		UIClearTD = new ThreadDetail(null);
-		screenLoadTD = new ParamThreadDetail<AbstractDataScreen>(null, null);
-		UILoadTD = new RowThreadDetail<AbstractDataUIGroup>(null, null);
+		screenLoadTD = new ParamThreadDetail<DataScreen>(null, null);
+		UILoadTD = new RowThreadDetail<DataUIGroup>(null, null);
 		loadingTimeTD = new ParamThreadDetail<Float>(null, 0);
 		transitionThread = new ChainThread("transition",5);
 		loadingScreens = new Map<String, BasicLoadingScreen>();
@@ -147,7 +147,7 @@ class ScreenFlowManager
 	private function StartTransition():Void
 	{
 		//***********************  Load screen Data ***********************************************
-		var data:AbstractDataScreen = null;
+		var data:DataScreen = null;
 		
 		if (AssetManager.Get().HasContent(nextScreenData.screen.dataPath)){
 			#if (debug)

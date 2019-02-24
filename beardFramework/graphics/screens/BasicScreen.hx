@@ -8,13 +8,13 @@ import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.systems.entities.GameEntity;
 import beardFramework.resources.save.SaveManager;
-import beardFramework.resources.save.data.DataCamera;
-import beardFramework.resources.save.data.DataEntity;
-import beardFramework.resources.save.data.DataGeneric;
-import beardFramework.resources.save.data.DataScreen;
+import beardFramework.resources.save.data.StructDataCamera;
+import beardFramework.resources.save.data.StructDataEntity;
+import beardFramework.resources.save.data.StructDataGeneric;
+import beardFramework.resources.save.data.StructDataScreen;
 import beardFramework.interfaces.IEntityVisual;
 import beardFramework.resources.save.data.Test;
-import beardFramework.utils.DataU;
+import beardFramework.utils.data.DataU;
 import haxe.Json;
 import msignal.Signal.Signal0;
 
@@ -36,7 +36,7 @@ class BasicScreen
 	private var contentLayer:BeardLayer;
 	private var defaultCamera:Camera;
 	private var loadingProgression(get, null):Float;
-	private var savedData:AbstractDataScreen;
+	private var savedData:DataScreen;
 	public var ready:Bool;
 	public var width:Int = 0;
 	public var height:Int = 0;
@@ -83,11 +83,11 @@ class BasicScreen
 		
 	}
 	
-	public function ParseScreenData(td:ParamThreadDetail<AbstractDataScreen>):Bool
+	public function ParseScreenData(td:ParamThreadDetail<DataScreen>):Bool
 	{
 		if (td != null && td.parameter != null){
 			
-			var screenData:AbstractDataScreen = td.parameter;
+			var screenData:DataScreen = td.parameter;
 			var elementsCount:Int = screenData.entitiesData.length + screenData.cameras.length;
 			
 			
@@ -104,8 +104,8 @@ class BasicScreen
 			if (td.progression < (screenData.cameras.length/elementsCount))
 			{
 				
-				var cameraData:DataCamera;
-				var savedCameras:Map<String, DataCamera> = (savedData != null ? DataU.DataArrayToMap(savedData.cameras) : null);
+				var cameraData:StructDataCamera;
+				var savedCameras:Map<String, StructDataCamera> = (savedData != null ? DataU.DataArrayToMap(savedData.cameras) : null);
 				
 				while (	screenData.cameras.length > 0)
 				{
@@ -140,8 +140,8 @@ class BasicScreen
 			}
 			
 			
-			var entityData:DataEntity;
-			var savedEntities:Map<String, DataEntity> = (savedData != null? DataU.DataArrayToMap(savedData.entitiesData) : null);
+			var entityData:StructDataEntity;
+			var savedEntities:Map<String, StructDataEntity> = (savedData != null? DataU.DataArrayToMap(savedData.entitiesData) : null);
 			
 			while (screenData.entitiesData.length > 0)
 			{
@@ -296,9 +296,9 @@ class BasicScreen
 		return contentLayer.visible;
 	}
 	
-	public function ToData(complete:Bool=false):DataScreen
+	public function ToData(complete:Bool=false):StructDataScreen
 	{
-		var data:DataScreen =
+		var data:StructDataScreen =
 		{
 			name : this.name,
 			type : Type.getClassName(Type.getClass(this)),

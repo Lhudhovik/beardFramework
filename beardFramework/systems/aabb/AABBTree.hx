@@ -1,9 +1,9 @@
 package beardFramework.systems.aabb;
 import beardFramework.core.BeardGame;
 import beardFramework.debug.DebugDraw;
-import beardFramework.utils.ColorU;
+import beardFramework.utils.graphics.ColorU;
 import beardFramework.utils.MathU;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.Tags;
 import beardFramework.utils.simpleDataStruct.SVec2;
 

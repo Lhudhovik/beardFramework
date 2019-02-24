@@ -1,6 +1,6 @@
 package beardFramework.interfaces;
 import beardFramework.interfaces.IUIGroupable;
-import beardFramework.resources.save.data.DataUIComponent;
+import beardFramework.resources.save.data.StructDataUIComponent;
 
 
 /**
@@ -25,6 +25,6 @@ interface IUIComponent extends IUIGroupable
 
 	
 	public function UpdateVisual():Void;
-	public function ToData():DataUIComponent;
-	public function ParseData(data:DataUIComponent):Void;
+	public function ToData():StructDataUIComponent;
+	public function ParseData(data:StructDataUIComponent):Void;
 }

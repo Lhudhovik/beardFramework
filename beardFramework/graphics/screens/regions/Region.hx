@@ -3,7 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.resources.MinAllocArray;
 
 /**
  * ...

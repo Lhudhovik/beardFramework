@@ -4,11 +4,17 @@ import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.input.InputManager;
+import beardFramework.input.InputType;
+import beardFramework.input.data.InputData;
+import beardFramework.input.data.KeyboardInputData;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
-import beardFramework.utils.ColorU;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.utils.graphics.ColorU;
+import beardFramework.resources.MinAllocArray;
+import beardFramework.utils.libraries.StringLibrary;
 import haxe.Json;
 import haxe.Utf8;
 import lime.text.Font;
@@ -24,14 +30,15 @@ class TextField extends RenderedObject {
 	private static var instanceCount:Int = 0;
 	public static var defaultFont:String="";
 	
-	
-	public var alignment(default, set):Alignment;
 	@:isVar public var atlas(get, set):String;
-	public var autoAdjust:AutoAdjust;
 	@:isVar public var font(get, set):String;
+	@:isVar public var isInteractive(get, set):Bool = false;
+	public var alignment(default, set):Alignment;
+	public var autoAdjust:AutoAdjust;
 	public var glyphsData:Array<RenderedGlyphData>;
 	//public var lines:Array<Array<LineGlyphData>>;
 	public var needLayoutUpdate(default, null):Bool = false;
+
 	public var lineSpacing(default, set):Float = 0;
 	public var letterSpacing(default, set):Float = 0;
 	public var tabSpacing(default, set):Float = 0;
@@ -45,7 +52,7 @@ class TextField extends RenderedObject {
 	
 	
 	
-	public function new(text:String="", font:String="", size:Int = 32, name:String = "" ) 
+	public function new(text:String="", font:String="", size:Int = 32,name:String = "" ) 
 	{
 		super();
 		
@@ -60,7 +67,7 @@ class TextField extends RenderedObject {
 		alignment = Alignment.LEFT;
 		autoAdjust = AutoAdjust.ADJUST_FIELD;
 		
-		
+		isInteractive = false;
 		linesHeight = textSize = size;
 		
 		if (font != "") this.font = font;
@@ -84,6 +91,7 @@ class TextField extends RenderedObject {
 	public function ShowCursor():Void
 	{
 		if (layer != null){
+			
 			layer.Add(cursor);
 			cursorIndex = 5;
 			cursor.x = this.x + glyphsData[cursorIndex].x + glyphsData[cursorIndex].width;
@@ -92,6 +100,7 @@ class TextField extends RenderedObject {
 	
 			
 	}
+	
 	public function RemoveText(index:Int, count:Int = 1):String
 	{
 		
@@ -150,7 +159,15 @@ class TextField extends RenderedObject {
  		return this.text;
 		
 	}
-	
+	public function AppendTextAtCursor( value:InputData):Void
+	{
+		trace(value);
+		
+		var data:KeyboardInputData = cast value;
+		AppendText(String.fromCharCode(data.keyCode), cursorIndex);
+		cursorIndex++;
+		
+	}
 	inline function get_font():String 
 	{
 		return font;
@@ -598,6 +615,48 @@ class TextField extends RenderedObject {
 		return super.set_bufferIndex(value);
 	}
 	
+	override function set_renderingBatch(value:RenderedObjectBatch):RenderedObjectBatch 
+	{
+	
+		if (value != renderingBatch)
+		{
+			if (renderingBatch != null)
+			{
+				renderingBatch.RemoveDirtyObject(this);
+				if (bufferIndex >= 0){
+					for (data in glyphsData)
+					{
+						if (data.bufferIndex > 0) renderingBatch.FreeBufferIndex(data.bufferIndex);
+					}
+				}
+				
+				if (cursor != null && cursor.renderingBatch != null)
+				{
+					cursor.renderingBatch.RemoveDirtyObject(cursor);
+					cursor.renderingBatch.FreeBufferIndex(cursor.bufferIndex);
+				}
+				
+			}
+			
+			renderingBatch = value;
+			
+			if (renderingBatch != null && bufferIndex >=0)
+			{
+				bufferIndex = renderingBatch.AllocateBufferIndex();
+				
+			}
+			if (cursor != null && cursor.renderingBatch != value) cursor.renderingBatch = value;
+		
+			
+			isDirty = true;
+			
+		}
+		
+		
+		return renderingBatch;
+	
+	}
+	
 	override function set_scaleX(value:Float):Float 
 	{
 		
@@ -610,6 +669,7 @@ class TextField extends RenderedObject {
 		needLayoutUpdate = true;
 		return super.set_scaleY(value);
 	}
+	
 	override function set_color(value:UInt):UInt 
 	{
 		if (glyphsData != null)
@@ -625,12 +685,12 @@ class TextField extends RenderedObject {
 		return super.set_color(value);
 	}
 	
-	
 	override public function set_height(value:Float):Float 
 	{
 		needLayoutUpdate = true;
 		return super.set_height(value);
 	}
+
 	override public function set_width(value:Float):Float 
 	{
 		//trace("changed");
@@ -650,6 +710,35 @@ class TextField extends RenderedObject {
 		return spaceSpacing = value;
 	}
 	
+	function get_isInteractive():Bool 
+	{
+		return isInteractive;
+	}
+	
+	function set_isInteractive(value:Bool):Bool 
+	{
+		
+		if (isInteractive != value)
+		{
+			if (value == true)
+			{
+				onAABBTree = true;
+				InputManager.Get().BindToInput(StringLibrary.ANY, InputType.MOUSE_CLICK,GetFocus, this.name);
+				//InputManager.Get().BindToAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);
+			}
+			else
+			//{InputManager.Get().BindToAction(InputManager.GetDefaultInputActionID(InputManager.GetMouseInputID(0), InputType.MOUSE_CLICK), GetFocus, this.name);
+			{
+				onAABBTree = false;
+				//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);
+				
+			}
+			
+		}
+		
+		return isInteractive = value;
+	}
+	
 	function set_alignment(value:Alignment):Alignment 
 	{
 		autoAdjust = AutoAdjust.ADJUST_TEXT;
@@ -657,6 +746,15 @@ class TextField extends RenderedObject {
 	
 		return alignment = value;
 	}
+	
+	private function GetFocus(value:InputData):Void
+	{
+		InputManager.Get().focusedObject = this.name;
+		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
+		ShowCursor();
+		trace("focused!");
+	}
+	
 }
 
 typedef RenderedGlyphData =

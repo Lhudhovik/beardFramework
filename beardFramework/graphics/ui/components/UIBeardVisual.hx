@@ -3,8 +3,8 @@ package beardFramework.graphics.ui.components;
 import beardFramework.graphics.core.Visual;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.resources.assets.AssetManager;
-import beardFramework.resources.save.data.DataUIComponent;
-import beardFramework.resources.save.data.DataUIVisualComponent;
+import beardFramework.resources.save.data.StructDataUIComponent;
+import beardFramework.resources.save.data.StructDataUIVisualComponent;
 
 /**
  * ...
@@ -58,9 +58,9 @@ class UIBeardVisual extends Visual implements IUIComponent
 		
 	}
 	
-	public function ToData():DataUIComponent 
+	public function ToData():StructDataUIComponent 
 	{
-		var data:DataUIVisualComponent = 
+		var data:StructDataUIVisualComponent = 
 		{
 			visible:this.visible,
 			type:Type.getClassName(Type.getClass(this)),
@@ -87,9 +87,9 @@ class UIBeardVisual extends Visual implements IUIComponent
 		return data;
 	}
 	
-	public function ParseData(data:DataUIComponent):Void 
+	public function ParseData(data:StructDataUIComponent):Void 
 	{
-		var img:AbstractDataUIVisualComponent = cast data;
+		var img:DataUIVisualComponent = cast data;
 				
 		this.visible=img.visible;
 			

@@ -10,7 +10,7 @@ class InstanceManager
 
 	private static var instance:InstanceManager;
 	
-	private var pools:Map<String, InstancePool<Dynamic>>;
+	private var pools:Map<String, ArrayPool<Dynamic>>;
 	
 	private function new() 
 	{
@@ -28,7 +28,7 @@ class InstanceManager
 	}
 	private function Init():Void
 	{
-		pools = new Map<String, InstancePool<Dynamic>>();
+		pools = new Map<String, ArrayPool<Dynamic>>();
 			
 	}
 	
@@ -37,7 +37,7 @@ class InstanceManager
 		
 		if (pools[name] == null){
 			
-			pools[name] = new InstancePool<T>(size);
+			pools[name] = new ArrayPool<T>(size);
 			
 			pools[name].Populate(elements);
 			

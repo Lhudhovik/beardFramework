@@ -1,4 +1,4 @@
-package beardFramework.utils;
+package beardFramework.utils.graphics;
 import beardFramework.graphics.core.Visual;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;

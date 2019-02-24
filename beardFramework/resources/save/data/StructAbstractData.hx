@@ -3,7 +3,7 @@ package beardFramework.resources.save.data;
 /**
  * @author Ludo
  */
-typedef AbstractData =
+typedef StructAbstractData =
 {
 	var name:String;	
 }

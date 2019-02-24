@@ -1,6 +1,6 @@
 package beardFramework.graphics.ui.components;
 import beardFramework.interfaces.IUIComponent;
-import beardFramework.resources.save.data.DataUIComponent;
+import beardFramework.resources.save.data.StructDataUIComponent;
 import openfl.display.DisplayObject;
 
 /**
@@ -168,10 +168,10 @@ class UIContainer implements IUIComponent
 		
 	}	
 	
-	public function ToData():DataUIComponent 
+	public function ToData():StructDataUIComponent 
 	{
 		
-		var data:DataUIComponent = 
+		var data:StructDataUIComponent = 
 		{
 			visible:this.visible,
 			type:Type.getClassName(Type.getClass(this)),
@@ -196,9 +196,9 @@ class UIContainer implements IUIComponent
 		return data;
 	}
 	
-	public function ToDeepData(parent:String = ""):Array<DataUIComponent>
+	public function ToDeepData(parent:String = ""):Array<StructDataUIComponent>
 	{
-		var data:Array<DataUIComponent> = [ToData()];
+		var data:Array<StructDataUIComponent> = [ToData()];
 		
 		for (component in components){
 			if (Std.is(component, UIContainer)) data = data.concat(cast(component, UIContainer).ToDeepData());
@@ -208,7 +208,7 @@ class UIContainer implements IUIComponent
 		return data;
 	}
 	
-	public function ParseData(data:DataUIComponent):Void 
+	public function ParseData(data:StructDataUIComponent):Void 
 	{
 		
 		this.visible=data.visible;

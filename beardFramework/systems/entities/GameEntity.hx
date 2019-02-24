@@ -1,7 +1,7 @@
 package beardFramework.systems.entities;
 import beardFramework.interfaces.IEntityComponent;
 import beardFramework.interfaces.IEntityVisual;
-import beardFramework.resources.save.data.DataEntity;
+import beardFramework.resources.save.data.StructDataEntity;
 /* ...
  * @author Ludo
  */
@@ -134,10 +134,10 @@ class GameEntity
 		//re-add listeners if needed
 	}
 	
-	public function ToData():DataEntity
+	public function ToData():StructDataEntity
 	{
 		
-		var data:DataEntity =
+		var data:StructDataEntity =
 		{
 			
 			name:this.name,
@@ -157,7 +157,7 @@ class GameEntity
 		
 	}
 	
-	public function ParseData(data:DataEntity):Void
+	public function ParseData(data:StructDataEntity):Void
 	{
 		this.name = data.name;
 		this.x = data.x;

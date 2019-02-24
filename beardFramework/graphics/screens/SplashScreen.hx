@@ -37,7 +37,7 @@ class SplashScreen extends Sequence
 		alphaThread = new ChainThread("alphaThread", 0);
 		increasAlphaTD = new VoidThreadDetail(null);
 		decreaseAlphaTD = new VoidThreadDetail(null);
-		InputManager.Get().BindToInput("a", InputType.KEY_PRESS, Skip);
+		//InputManager.Get().BindToInput("a", InputType.KEY_PRESS, Skip);
 		AddStep(step);
 		
 		
@@ -134,7 +134,7 @@ class SplashScreen extends Sequence
 	override public function Clear():Void 
 	{
 		super.Clear();
-		InputManager.Get().UnbindFromInput("a", InputType.KEY_PRESS, Skip);
+		//InputManager.Get().UnbindFromInput("a", InputType.KEY_PRESS, Skip);
 	}
 	
 	

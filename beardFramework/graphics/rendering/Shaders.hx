@@ -1,7 +1,7 @@
 package beardFramework.graphics.rendering;
 import beardFramework.core.BeardGame;
-import beardFramework.utils.Crypto;
-import beardFramework.utils.StringLibrary;
+import beardFramework.utils.data.Crypto;
+import beardFramework.utils.libraries.StringLibrary;
 import mloader.Loader.LoaderEvent;
 import sys.FileSystem;
 import sys.io.File;

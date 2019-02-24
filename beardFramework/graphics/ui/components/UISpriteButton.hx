@@ -5,7 +5,7 @@ import beardFramework.input.InputManager;
 import beardFramework.input.InputType;
 import beardFramework.interfaces.IButton;
 import beardFramework.resources.assets.AssetManager;
-import beardFramework.utils.StringLibrary;
+import beardFramework.utils.libraries.StringLibrary;
 import openfl.display.BitmapData;
 import openfl.display.DisplayObject;
 import openfl.display.PixelSnapping;

@@ -1,7 +1,7 @@
 package beardFramework.systems.entities.components;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.Visual;
-import beardFramework.resources.save.data.DataComponent;
+import beardFramework.resources.save.data.StructDataComponent;
 import haxe.Json;
 import beardFramework.systems.entities.GameEntity;
 import beardFramework.interfaces.IEntityVisual;
@@ -42,9 +42,9 @@ class EntityVisualComponent extends Visual implements IEntityVisual
 		this.y = parentEntity.y;
 	}
 	
-	public function ToData():DataComponent 
+	public function ToData():StructDataComponent 
 	{
-		var data:DataComponent = 
+		var data:StructDataComponent = 
 		{
 			name:this.name,
 			type:Type.getClassName(EntityVisualComponent),
@@ -56,7 +56,7 @@ class EntityVisualComponent extends Visual implements IEntityVisual
 		return data;
 	}
 	
-	public function ParseData(data:DataComponent):Void 
+	public function ParseData(data:StructDataComponent):Void 
 	{
 		
 	}

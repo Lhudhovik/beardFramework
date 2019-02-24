@@ -1,5 +1,5 @@
 package beardFramework.physics;
-import beardFramework.resources.pool.InstancePool;
+import beardFramework.resources.pool.ArrayPool;
 import nape.geom.Vec2;
 import nape.phys.Body;
 import nape.phys.Material;
@@ -18,11 +18,11 @@ class PhysicsManager
 	
 	private var space(get,null):Space;
 	private var GRAVITY(get, null):Vec2;
-	private var bodyPool:InstancePool<Body>;
-	private var polygonPool:InstancePool<Polygon>;
-	private var circlePool:InstancePool<Circle>;
+	private var bodyPool:ArrayPool<Body>;
+	private var polygonPool:ArrayPool<Polygon>;
+	private var circlePool:ArrayPool<Circle>;
 	private var sharedShapes:Map<String, Shape>;
-	private var materialPool:InstancePool<Material>;
+	private var materialPool:ArrayPool<Material>;
 	
 	public function new() 
 	{
@@ -44,16 +44,16 @@ class PhysicsManager
 		GRAVITY = Vec2.get(Std.parseFloat(spaceOptions.get("gravityX")),Std.parseFloat(spaceOptions.get("gravityY")));
 		space = new Space(GRAVITY);
 		if (bodyPoolSize > 0){
-			bodyPool = new InstancePool<Body>(bodyPoolSize);
+			bodyPool = new ArrayPool<Body>(bodyPoolSize);
 		}
 		if (polygonPoolSize > 0){
-			polygonPool = new InstancePool<Polygon>(polygonPoolSize);
+			polygonPool = new ArrayPool<Polygon>(polygonPoolSize);
 		}
 		if (circlePoolSize > 0){
-			circlePool = new InstancePool<Circle>(circlePoolSize);
+			circlePool = new ArrayPool<Circle>(circlePoolSize);
 		}
 		if (materialPoolSize > 0){
-			materialPool = new InstancePool<Material>(materialPoolSize);
+			materialPool = new ArrayPool<Material>(materialPoolSize);
 		}
 		sharedShapes = new Map<String, Shape>();
 	}
@@ -72,7 +72,7 @@ class PhysicsManager
 	{
 		if (bodyPool == null)
 		{
-			bodyPool = new InstancePool<Body>(5);
+			bodyPool = new ArrayPool<Body>(5);
 			bodyPool.Populate([for (i in 0...5) new Body()]);
 		}
 		return bodyPool.Get();
@@ -91,7 +91,7 @@ class PhysicsManager
 	{
 		if (circlePool == null)
 		{
-			circlePool = new InstancePool<Circle>(5);
+			circlePool = new ArrayPool<Circle>(5);
 			circlePool.Populate([for (i in 0...5) new Circle(50)]);
 		}
 		return circlePool.Get();
@@ -101,7 +101,7 @@ class PhysicsManager
 	{
 		if (polygonPool == null)
 		{
-			polygonPool = new InstancePool<Polygon>(5);
+			polygonPool = new ArrayPool<Polygon>(5);
 			polygonPool.Populate([for (i in 0...5) new Polygon(Polygon.rect(0,0,100,100))]);
 		}
 		return polygonPool.Get();
@@ -132,7 +132,7 @@ class PhysicsManager
 	{
 		if (materialPool == null)
 		{
-			materialPool = new InstancePool<Material>(5);
+			materialPool = new ArrayPool<Material>(5);
 			materialPool.Populate([for (i in 0...5) new Material()]);
 		}
 		return materialPool.Get();

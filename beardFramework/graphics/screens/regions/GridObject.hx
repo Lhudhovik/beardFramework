@@ -1,5 +1,5 @@
 package beardFramework.graphics.screens.regions;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.resources.MinAllocArray;
 
 /**
  * @author 

@@ -22,7 +22,7 @@ import beardFramework.systems.entities.GameEntity;
 import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
-import beardFramework.utils.MinAllocArray;
+import beardFramework.resources.MinAllocArray;
 //import crashdumper.CrashDumper;
 //import crashdumper.SessionData;
 import lime.app.Application;
@@ -92,9 +92,9 @@ class BeardGame extends Application
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
 		
 		layers = new MinAllocArray(3);
-		layers.Push(new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING,0));
-				layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,1));
-		layers.Push(new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT, 2));
+		layers.Push(new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING,LOADINGLAYER));
+		layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,UILAYER));
+		layers.Push(new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT, CONTENTLAYER));
 	
 		
 		for (i in 0...3)
@@ -182,7 +182,6 @@ class BeardGame extends Application
 							
 				
 			}
-			
 			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
 		}
 		else GameStart();
@@ -208,6 +207,7 @@ class BeardGame extends Application
 		
 		Renderer.Get().Start();
 		
+		UIManager.Get();
 		//grid = new RegionGrid(window.width, window.height,5);
 		
 	}
@@ -282,30 +282,35 @@ class BeardGame extends Application
 			if (!InputManager.directMode) InputManager.Get().Update();
 			
 			if (!UpdateProcessesManager.Get().IsEmpty())	UpdateProcessesManager.Get().Update();
-						
-			if (!pause){
-					
-				if (physicsEnabled && PhysicsManager.Get().get_space() != null)
-						PhysicsManager.Get().Step(deltaTime);
-						
-				if (currentScreen != null && currentScreen.ready){
-						
-					for (entity in currentScreen.entities)
-					{
-						entity.Update();
-					}
-						
-					currentScreen.Update();
-				}
-				
-				
-
-			}
 			
-			for (i in 0...layers.length)
+			if (gameReady)
+			{
+				if (!pause){
+				
+					for (camera in cameras.keys())
+						cameras[camera].Update();
+					
+					if (physicsEnabled && PhysicsManager.Get().get_space() != null)
+							PhysicsManager.Get().Step(deltaTime);
+							
+					if (currentScreen != null && currentScreen.ready){
+							
+						for (entity in currentScreen.entities)
+						{
+							entity.Update();
+						}
+							
+						currentScreen.Update();
+					}
+				}
+			
+				for (i in 0...layers.length)
 				layers.get(i).aabbTree.UpdateTree();
 			
-			UIManager.Get().Update();
+				UIManager.Get().Update();
+				
+			}
+			
 			
 		}
 		
@@ -326,10 +331,10 @@ class BeardGame extends Application
 	override public function onWindowResize(width:Int, height:Int):Void 
 	{
 		
-		if (cameras != null && cameras["default"] != null){
+		if (cameras != null){
+			for (camera in cameras.keys())
+				cameras[camera].AdjustResize();
 			
-			cameras["default"].viewportWidth = width;
-			cameras["default"].viewportHeight = height;
 			trace("Default camera resized");
 		}
 	}
@@ -377,18 +382,18 @@ class BeardGame extends Application
 	
 	public inline function GetContentLayer():BeardLayer
 	{
-		return layers.get(0);
+		return layers.get(CONTENTLAYER);
 	}
 	
 	public inline function GetUILayer():BeardLayer
 	{
 		//trace("returned layer : " + layer);
-		return layers.get(1);
+		return layers.get(UILAYER);
 	}
 	
 	public inline function GetLoadingLayer():BeardLayer
 	{
-		return layers.get(2);
+		return layers.get(LOADINGLAYER);
 	}
 
 }

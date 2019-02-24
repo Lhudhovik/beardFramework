@@ -1,5 +1,5 @@
-package beardFramework.utils;
-import beardFramework.resources.save.data.DataGeneric;
+package beardFramework.utils.data;
+import beardFramework.resources.save.data.StructDataGeneric;
 import haxe.Json;
 import lime.utils.Float32Array;
 
@@ -13,7 +13,7 @@ class DataU
 {
 
 
-	static public function Convert<T>(data:DataGeneric, to:T):T
+	static public function Convert<T>(data:StructDataGeneric, to:T):T
 	{
 		
 		to = haxe.Json.parse(haxe.Json.stringify(data));
@@ -21,7 +21,7 @@ class DataU
 		
 	}
 	
-	static public function DataArrayToMap<T:DataGeneric>(dataArray:Array<T>):Map<String, T>
+	static public function DataArrayToMap<T:StructDataGeneric>(dataArray:Array<T>):Map<String, T>
 	{
 		
 		var map:Map<String, T> = new Map<String, T>();
@@ -36,7 +36,7 @@ class DataU
 		
 	}
 	
-	static public function DataListToMap<T:DataGeneric>(dataList:List<T>):Map<String, T>
+	static public function DataListToMap<T:StructDataGeneric>(dataList:List<T>):Map<String, T>
 	{
 		
 		var map:Map<String, T> = new Map<String, T>();

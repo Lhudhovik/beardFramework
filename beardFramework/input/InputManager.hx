@@ -4,8 +4,19 @@ package beardFramework.input;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.input.Action.CallbackDetails;
-import beardFramework.utils.MinAllocArray;
-import beardFramework.utils.StringLibrary;
+import beardFramework.input.Action.ResolvedAction;
+import beardFramework.input.data.InputData;
+import beardFramework.input.data.AxisInputData;
+import beardFramework.input.data.ButtonInputData;
+import beardFramework.input.data.AbstractGamepadInputData;
+import beardFramework.input.data.GamepadInputData;
+import beardFramework.input.data.KeyboardInputData;
+import beardFramework.input.data.MouseInputData;
+import beardFramework.input.data.WheelInputData;
+import beardFramework.resources.MinAllocArray;
+import beardFramework.resources.pool.ListPool;
+import beardFramework.resources.save.data.StructDataUIComponent;
+import beardFramework.utils.libraries.StringLibrary;
 import lime.app.Application;
 import lime.ui.Gamepad;
 import lime.ui.GamepadAxis;
@@ -42,9 +53,9 @@ class InputManager
 	public static inline var GAMEPAD_AXIS_MOVEMENT_CEIL:Float = 0.1;
 	
 
-	private var inputActions:Map<String, Map<InputType, Array<String>>>;
+	private var controls:Map<Input,MinAllocArray<String>>;
 	private var actions:Map<String, Action>;
-	private var handledInputs:Map<String, Input>;
+	private var resolveQueue:List<ResolvedAction>;
 	private var touches:Map<Int, Touch>;
 	private var timeCounters:Map<String, Float>;
 	private var utilPoint:Point;
@@ -53,10 +64,21 @@ class InputManager
 	private var mouseMoveTargetName:String;
 	private var mouseTargetName:String;
 	private var touchTargets:Map<String, String>;
-	private var currentInput:Input;
-	private var defaultActions:Map<InputType, Signal1<Input>>;
 	public var focusedObject:String = "";
-	private var triggeredInputs:MinAllocArray<Input>;
+	
+	private var mouseInputData:ListPool<MouseInputData>;
+	private var wheelInputData:ListPool<WheelInputData>;
+	private var keyboardInputData:ListPool<KeyboardInputData>;
+	private var gamepadInputData:ListPool<GamepadInputData>;
+	private var buttonInputData:ListPool<ButtonInputData>;
+	private var axisInputData:ListPool<AxisInputData>;
+	
+	private var MIDUtil:MouseInputData;
+	private var WIDUtil:WheelInputData;
+	private var KIDUtil:KeyboardInputData;
+	private var GIDUtil:GamepadInputData;
+	private var BIDUtil:ButtonInputData;
+	private var AIDUtil:AxisInputData;
 	
 	private function new() 
 	{
@@ -76,15 +98,26 @@ class InputManager
 	
 	private function Init():Void
 	{
-		actions = new Map<String,Action>();
-		handledInputs = new Map<String, Input>();
+		actions = new Map<String, Action>();
+		controls = new Map<Input,MinAllocArray<String>>();
 		touches = new Map<Int, Touch>();
-		inputActions = new Map<String, Map<InputType, Array<String>>>();
 		timeCounters = new Map<String, Float>();
 		utilPoint = new Point();
 		touchTargets = new Map<String, String>();
-		triggeredInputs = new MinAllocArray<Input>(25);
-		
+		resolveQueue = new List();
+			
+		mouseInputData = new ListPool(4);
+		mouseInputData.Populate([for (i in 0...4) {type:InputType.MOUSE_CLICK, target:"", buttonID:0}]);
+		wheelInputData = new ListPool(2);
+		wheelInputData.Populate([for (i in 0...2) {type:InputType.MOUSE_WHEEL, target:"", value:0.0, axisDirection:0.0, wheelMode:MouseWheelMode.LINES}]);
+		keyboardInputData = new ListPool(4);
+		keyboardInputData.Populate([for (i in 0...4) {type:InputType.KEY_DOWN, target:"", keyCode:0, modifier:0}]);
+		gamepadInputData = new ListPool(4);
+		gamepadInputData.Populate([for (i in 0...4) {type:InputType.GAMEPAD_CONNECT, target:"", gamepad:null}]);
+		buttonInputData = new ListPool(4);
+		buttonInputData.Populate([for (i in 0...4) {type:InputType.GAMEPAD_BUTTON_UP, target:"", gamepadID:0, button:0}]);
+		axisInputData = new ListPool(4);
+		axisInputData.Populate([for (i in 0...4) {type:InputType.GAMEPAD_AXIS_MOVE, target:"", gamepadID:0, axis:0, value:0.0}]);
 		#if mobile
 		
 		//directMode = true;
@@ -100,22 +133,6 @@ class InputManager
 		window.onMouseUp.add(OnMouseUp);
 		window.onMouseWheel.add(OnMouseWheel);
 			
-		//action : StringLibrary.MOUSE_OVER --> "Mouse_Over"
-		//inputID :StringLibrary.MOUSE_OVER --> "Mouse_Over"
-		LinkActionToInput(StringLibrary.MOUSE_OVER,StringLibrary.MOUSE_OVER, InputType.MOUSE_OVER);
-		LinkActionToInput(StringLibrary.MOUSE_OUT,StringLibrary.MOUSE_OUT, InputType.MOUSE_OUT);
-		LinkActionToInput(StringLibrary.MOUSE_MOVE,StringLibrary.MOUSE_MOVE, InputType.MOUSE_MOVE);
-		LinkActionToInput(StringLibrary.MOUSE_WHEEL, StringLibrary.MOUSE_WHEEL, InputType.MOUSE_WHEEL);
-		
-		for (i in 0...3){
-			// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
-			// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
-			LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
-			LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
-			LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
-		}
-			
-		
 		for (gamepad in Gamepad.devices)
 			OnGamepadConnect(gamepad);
 			
@@ -126,7 +143,7 @@ class InputManager
 			
 		Touch.onStart.add(OnTouchStart);
 		Touch.onMove.add(OnTouchMove);
-		Touch.onEnd.add(OnTouchEnd);			
+		Touch.onEnd.add(OnTouchEnd);	
 		
 	}
 	
@@ -144,10 +161,10 @@ class InputManager
 			
 					// action : StringLibrary.MOUSE_CLICK+i --> "Mouse_Click" + i 
 					// inputID : GetMouseInputID(i) --> "MouseButton" + i; 
-					LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
-					LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
-					LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
-					
+					//LinkActionToInput(StringLibrary.MOUSE_CLICK+i, GetMouseInputID(i), InputType.MOUSE_CLICK);
+					//LinkActionToInput(StringLibrary.MOUSE_DOWN+i, GetMouseInputID(i), InputType.MOUSE_DOWN);
+					//LinkActionToInput(StringLibrary.MOUSE_UP+i, GetMouseInputID(i), InputType.MOUSE_UP);
+					//
 				}
 			}
 		}
@@ -191,51 +208,31 @@ class InputManager
 	public function LinkActionToInput(actionID : String, inputID:String, inputType:InputType, ?compatibleActionsIDs : Array<String> = null):Void 
 	{
 		//create the input if not existing
+		utilInput = Input.FromInputData(inputID, inputType);
 		
-		if (handledInputs[inputID] == null){
-			var input:Input = {ID:inputID, state:InputType.NONE, value:0, target:"", toggle:GetToggleType(inputType), active:true};
-			handledInputs[inputID] = input;
-		}
+		if (actions[actionID] == null)	actions[actionID] = {ID:actionID, active:true, callbackDetails:new MinAllocArray()};	
+	
+		if (controls[utilInput] == null) controls[utilInput] = new MinAllocArray<String>();
 		
-		//create the action if not existing
-		if(actions[actionID] == null ) actions[actionID] = { ID:actionID, active:true, callbackDetails:[]};	
-		
-		//create the link if not existing
-		if (inputActions[inputID] == null) inputActions[inputID] = new Map<InputType, Array<String>>();
-		if (inputActions[inputID][inputType] == null) inputActions[inputID][inputType] = new Array<String>();
-		
-		if(inputActions[inputID][inputType].indexOf(actionID) == -1) inputActions[inputID][inputType].push(actionID);
-		
-		
-		//trace(actionID + " linked to " + inputID + "  on " + InputTypeToString(inputType) );
+		controls[utilInput].Push(actionID);
+	
 	}
 		
 	public function UnlinkActionFromInput(actionID:String, inputID:String, inputType:InputType):Void 
 	{
-		
-		if (inputActions[inputID] != null && inputActions[inputID][inputType] != null && inputActions[inputID][inputType].indexOf(actionID) != -1)
-		{
-			inputActions[inputID][inputType].remove(actionID);
-		
-		}
-		
-		
+		controls[Input.FromInputData(inputID, inputType)].Remove(actionID);		
 	}
 	
-	public function BindToAction(actionID : String, callback:Float -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
+	public function BindToAction(actionID : String, callback:InputData -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
 	{
-		//trace(actionID);
-		//for (key in actions.keys())
-			//if(key == actionID ) trace(key);
+		
 		if (actions[actionID] == null){
-			actions[actionID] = { ID:actionID, active:true, callbackDetails:[]};	
-			
-			trace("/!\\ New action created via BindAction");
+			actions[actionID] = { ID:actionID, active:true, callbackDetails:new MinAllocArray()};	
 		}
 		
 		if (!CheckDetailExisting(actions[actionID] , callback, targetName))
 		{
-			actions[actionID].callbackDetails.push({ callback:callback, targetName:targetName,once:once });
+			actions[actionID].callbackDetails.Push({ callback:callback, target:targetName,once:once });
 			
 			
 		}
@@ -243,262 +240,99 @@ class InputManager
 		actions[actionID].active = active;
 		
 		
+		
 	}
 	
-	public function BindToInput(inputID:String, inputType:InputType, callback:Float -> Void, targetName:String="", once:Bool = false, active : Bool = true):Void
+	public function BindToInput(inputID:String, inputType:InputType, callback:InputData -> Void, targetName:String="", once:Bool = false, active : Bool = true):Void
 	{
 		
-		var inputToBind:Array<String> = [];
-		var specificInput:Bool = false;
-		if (InputTypeToString(inputType).indexOf(StringLibrary.GAMEPAD) != -1)
-		{
-			
-			for (i in 0...maxGamepads)
-				if (inputID.indexOf(Std.string(i)) != -1){
-					specificInput = true;
-					break;
-				}
-			
-			if(!specificInput)
-				for (i in 0...maxGamepads)
-					inputToBind.push(GetGamepadInputID(i, inputID));
-			else
-				inputToBind.push(inputID);
-			
-			
-		}
-		else if (InputTypeToString(inputType).indexOf(StringLibrary.TOUCH) != -1)
-		{
-			
-			for (i in 0...maxTouches)
-				inputToBind.push(InputTypeToString(inputType) + i);
-			
-		}
-		else if (InputTypeToString(inputType).indexOf(StringLibrary.MOUSE) != -1 && (inputType == InputType.MOUSE_CLICK || inputType == InputType.MOUSE_DOWN || inputType == InputType.MOUSE_UP))
-		{
-			for (i in 0...maxMouseButtons)
-				if (inputID.indexOf(Std.string(i)) != -1){
-					specificInput = true;
-					break;
-				}
-			
-			if(!specificInput)
-				for (i in 0...maxMouseButtons)
-					inputToBind.push(GetMouseInputID(i));
-			else
-				inputToBind.push(inputID);
-			
-		}
-		else
-			inputToBind.push(inputID);
+		BindToAction(Input.FromInputData(inputID, inputType), callback, targetName, once, active);
 		
-		for (ID in inputToBind)
-		{
-			
-			utilString = GetDefaultInputActionID(ID, inputType);
-	
-			if (handledInputs[ID] == null || actions[utilString] == null){
-				LinkActionToInput(utilString, ID, inputType);
-			}
-				
-			if (!CheckDetailExisting(actions[utilString] , callback, targetName))
-			{
-				actions[utilString].callbackDetails.push({ callback:callback, targetName:targetName,once:once });
-			}
-			
-			actions[utilString].active = active;
-			
-			
-		}
 		
 	} 
 		
-	public function UnbindFromAction(actionID : String, callback:Float -> Void = null, targetName:String = ""):Void
+	public function UnbindFromAction(actionID : String, callback:InputData -> Void = null, targetName:String = ""):Void
 	{
-		
+		var detail:CallbackDetails;
 		if (actions[actionID] != null)	
-			for (detail in actions[actionID].callbackDetails)
-				if (detail.callback == callback && detail.targetName == targetName)
+			for (i in 0...actions[actionID].callbackDetails.length){
+				
+				detail = actions[actionID].callbackDetails.get(i); 
+				if (detail.callback == callback && detail.target == targetName)
 				{
+			
 					
-					actions[actionID].callbackDetails.remove(detail);
+					actions[actionID].callbackDetails.Remove(detail);
 					
 					detail.callback = null;
 					detail = null;
+					break;
 				}
+			
+			}
 	}
 	
-	public function UnbindFromInput(inputID:String, inputType:InputType, callback:Float -> Void = null, targetName:String = ""):Void
+	public function UnbindFromInput(inputID:String, inputType:InputType, callback:InputData -> Void = null, targetName:String = ""):Void
 	{
+		UnbindFromAction(Input.FromInputData(inputID, inputType), callback, targetName);
 		
-		var inputToUnbind:Array<String> = [];
-		var specificInput:Bool = false;
-		if (InputTypeToString(inputType).indexOf(StringLibrary.GAMEPAD) != -1)
-		{
-			
-			for (i in 0...maxGamepads)
-				if (inputID.indexOf(Std.string(i)) != -1){
-					specificInput = true;
-					break;
-				}
-			
-			if(!specificInput)
-				for (i in 0...maxGamepads)
-					inputToUnbind.push(GetGamepadInputID(i, inputID));
-			else
-				inputToUnbind.push(inputID);
-			
-			
-		}
-		else if (InputTypeToString(inputType).indexOf(StringLibrary.TOUCH) != -1)
-		{
-			
-			for (i in 0...maxTouches)
-				inputToUnbind.push(InputTypeToString(inputType) + i);			
-		}
-		else if (InputTypeToString(inputType).indexOf(StringLibrary.MOUSE) != -1 && (inputType == InputType.MOUSE_CLICK || inputType == InputType.MOUSE_DOWN || inputType == InputType.MOUSE_UP))
-		{
-			for (i in 0...maxMouseButtons)
-				if (inputID.indexOf(Std.string(i)) != -1){
-					specificInput = true;
-					break;
-				}
-			
-			if(!specificInput)
-				for (i in 0...maxMouseButtons)
-					inputToUnbind.push(GetMouseInputID(i));
-			else
-				inputToUnbind.push(inputID);
-			
-		}
-		else
-			inputToUnbind.push(inputID);
-		
-		for (ID in inputToUnbind)
-		{
-		
-			utilString = GetDefaultInputActionID(ID, inputType);
-			
-			if (actions[utilString] != null){
-				
-				for (detail in actions[utilString].callbackDetails)
-					if (detail.callback == callback && detail.targetName == targetName)
-					{
-			
-						
-						actions[utilString].callbackDetails.remove(detail);
-						
-						detail.callback = null;
-						detail = null;
-					}
-					
-					
-				if (actions[utilString].callbackDetails.length == 0){
-					actions[utilString].callbackDetails = null;
-					actions[utilString] = null;
-					actions.remove(utilString);
-				}
-			}
-		}
 	}
 	
 	public function ActivateAction(actionID:String, activate : Bool):Void
 	{
 		
-		
+		if (actions[actionID] != null) actions[actionID].active = activate;
 	}
 		
 	public function OnMouseDown(mouseX:Float, mouseY:Float, mouseButton:Int):Void
 	{
 		
 		utilString = GetMouseInputID(mouseButton);
-		
-		
+				
 		var object:RenderedObject= BeardGame.Get().GetTargetUnderPoint(mouseX,mouseY);
 		mouseTargetName = object != null ? object.name : "";
-			
-			
-		if (handledInputs[utilString] != null)
-		{
-			
-			timeCounters[utilString] =  Sys.preciseTime();
-			
-			//var object:RenderedObject = BeardGame.Get().getTargetUnderPoint(utilPoint); // !Update!
-			//mouseTargetName = object != null ? object.name : "";
-			
-			handledInputs[utilString].state = InputType.MOUSE_DOWN;		
-			
-			handledInputs[utilString].target = mouseTargetName;
-			
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);
-			else triggeredInputs.Push(handledInputs[utilString]);
-			
-		}
+				
+		MIDUtil = mouseInputData.Get();
+		MIDUtil.buttonID = mouseButton;
+		MIDUtil.target = mouseTargetName;
+		MIDUtil.type = InputType.MOUSE_DOWN;
 		
-		//if (defaultActionsEnabled)
-		//{
-			//
-			//utilInput.ID = utilString;
-			//utilInput.state = InputType.MOUSE_DOWN;
-			//utilInput.target = mouseTargetName;
-			//utilInput.value = 0;
-		//
-			//defaultActions[InputType.MOUSE_DOWN].dispatch(utilInput);
-		//}
+		//MIDUtil = {type:InputType.MOUSE_DOWN, target:mouseTargetName, buttonID:mouseButton};
+		FetchActions(utilString, MIDUtil);
 		
+		timeCounters[utilString] =  Sys.preciseTime();
+		
+		
+
+
 	}
 	
 	public function OnMouseUp(mouseX:Float, mouseY:Float, mouseButton:Int):Void
 	{
 		//Mouse UP
-		utilString =  GetMouseInputID(mouseButton);
-		//utilPoint.setTo(mouseX, mouseY);
+		utilString = GetMouseInputID(mouseButton);
 		
-		var object:RenderedObject = BeardGame.Get().GetTargetUnderPoint(mouseX,mouseY);
+		var object:RenderedObject= BeardGame.Get().GetTargetUnderPoint(mouseX,mouseY);
 		mouseTargetName = object != null ? object.name : "";
-		trace("mouse targetr:" + mouseTargetName);
-		if (handledInputs[utilString] != null)
+		
+		MIDUtil = mouseInputData.Get();
+		MIDUtil.buttonID = mouseButton;
+		MIDUtil.target = mouseTargetName;
+		MIDUtil.type = InputType.MOUSE_UP;
+		
+		
+		//MIDUtil = {type:InputType.MOUSE_UP, target:mouseTargetName, buttonID:mouseButton};
+		FetchActions(utilString, MIDUtil);
+		
+		if ( Sys.preciseTime() - timeCounters[utilString]  <= CLICK_DELAY )
 		{
 			
-			handledInputs[utilString].state = InputType.MOUSE_UP;		
-			
-			handledInputs[utilString].target = mouseTargetName;
-			
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);
-			
-		}
-		
-		//
-		//if (defaultActionsEnabled)
-		//{
-			//
-			//utilInput.ID = utilString;
-			//utilInput.state = InputType.MOUSE_UP;
-			//utilInput.target = mouseTargetName;
-			//utilInput.value = 0;
-		//
-			//defaultActions[InputType.MOUSE_CLICK].dispatch(utilInput);
-		//}
-		//
-	//
-		
-		//Mouse Click
-		
-		if ( Sys.preciseTime() - timeCounters[utilString]  <= CLICK_DELAY && 	handledInputs[utilString] != null )
-		{
-			handledInputs[utilString].state = InputType.MOUSE_CLICK;		
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);
-			
-			//if (defaultActionsEnabled)
-			//{
-			//
-				//utilInput.ID = utilString;
-				//utilInput.state = InputType.MOUSE_CLICK;
-				//utilInput.target = mouseTargetName;
-				//utilInput.value = 0;
-			//
-				//defaultActions[InputType.MOUSE_CLICK].dispatch(utilInput);
-			//}
+			MIDUtil = mouseInputData.Get();
+			MIDUtil.buttonID = mouseButton;
+			MIDUtil.target = mouseTargetName;
+			MIDUtil.type = InputType.MOUSE_CLICK;
+				//MIDUtil = {type:InputType.MOUSE_CLICK, target:mouseTargetName, buttonID:mouseButton};
+			FetchActions(utilString, MIDUtil);			
 		
 		}
 		
@@ -510,102 +344,59 @@ class InputManager
 	{
 		
 		//
-		utilString = StringLibrary.MOUSE_MOVE;
-		utilPoint.setTo(mouseX, mouseY);
+		utilString = StringLibrary.MOUSE;
+	
 		BeardGame.Get().mousePos.previous.x = BeardGame.Get().mousePos.current.x;
 		BeardGame.Get().mousePos.previous.y = BeardGame.Get().mousePos.current.y;
 		BeardGame.Get().mousePos.current.x = mouseX;
 		BeardGame.Get().mousePos.current.y = mouseY;
 		
-		if (handledInputs[utilString] != null)
-		{
+		var object:RenderedObject = BeardGame.Get().GetTargetUnderPoint(mouseX, mouseY);
+		
+		MIDUtil = mouseInputData.Get();
+		MIDUtil.buttonID = 0;
+		MIDUtil.target = (object != null? object.name : "") ;
+		MIDUtil.type = InputType.MOUSE_MOVE;
+		
+		//MIDUtil = {type:InputType.MOUSE_MOVE, target:mouseTargetName, buttonID:0};
+		
+		FetchActions(utilString, MIDUtil);
 			
-			handledInputs[utilString].state = InputType.MOUSE_MOVE;		
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);
-		}
-		
-		//if (defaultActionsEnabled)
-		//{
-			//
-			//utilInput.ID = utilString;
-			//utilInput.state = InputType.MOUSE_MOVE;
-			//utilInput.target = "";
-			//utilInput.value = 0;
-		//
-			//defaultActions[InputType.MOUSE_MOVE].dispatch(utilInput);
-		//}
-		
-		
-		if (CheckInputHandled(InputTypeToString(InputType.MOUSE_OVER)) || CheckInputHandled(InputTypeToString( InputType.MOUSE_OUT)) ){
+		if (actions[Input.FromInputData(utilString, InputType.MOUSE_OVER)] != null || actions[Input.FromInputData(utilString, InputType.MOUSE_OUT)] != null  ){
 			
-			var object:RenderedObject = BeardGame.Get().GetTargetUnderPoint(mouseX, mouseY);
+			
 			
 			
 			if (object != null && mouseMoveTargetName != object.name){
 				
-				//trace("previous  " +mouseMoveTargetName);
-				//trace("new " +objects[0].name);
-				handledInputs[StringLibrary.MOUSE_OVER].state = InputType.MOUSE_OVER;
-				handledInputs[StringLibrary.MOUSE_OVER].target = object.name;
-				
-				
-				handledInputs[StringLibrary.MOUSE_OUT].state = InputType.MOUSE_OUT;
-				handledInputs[StringLibrary.MOUSE_OUT].target = mouseMoveTargetName;
-		
-				
-				//if (defaultActionsEnabled)
-				//{
-					//
-					//utilInput.ID = StringLibrary.MOUSE_OVER;
-					//utilInput.state = InputType.MOUSE_OVER;
-					//utilInput.target = object.name;
-					//utilInput.value = 0;
+				MIDUtil = mouseInputData.Get();
+				MIDUtil.buttonID = 0;
+				MIDUtil.target = object.name ;
+				MIDUtil.type = InputType.MOUSE_OVER;
+				//MIDUtil = {type:InputType.MOUSE_OVER, target:object.name, buttonID:0};
+				FetchActions(utilString, MIDUtil);
 				//
-					//defaultActions[InputType.MOUSE_OVER].dispatch(utilInput);
-					//
-					//utilInput.ID = StringLibrary.MOUSE_OUT;
-					//utilInput.state = InputType.MOUSE_OUT;
-					//utilInput.target = mouseMoveTargetName;
-					//utilInput.value = 0;
-				//
-					//defaultActions[InputType.MOUSE_OUT].dispatch(utilInput);
-					//
-					//
-				//}
-				
-				
-				mouseMoveTargetName = object.name;
-				
-				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.MOUSE_OVER]);
-				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.MOUSE_OUT]);
-				
-				
-				
+				MIDUtil = mouseInputData.Get();
+				MIDUtil.buttonID = 0;
+				MIDUtil.target = mouseMoveTargetName ;
+				MIDUtil.type = InputType.MOUSE_OUT;
+				//MIDUtil = {type:InputType.MOUSE_OUT, target:mouseMoveTargetName, buttonID:0};
+				FetchActions(utilString, MIDUtil);
+						
+				mouseMoveTargetName = object.name;	
 				
 			}
 			else if (object == null){
 				
-				handledInputs[StringLibrary.MOUSE_OUT].state = InputType.MOUSE_OUT;
-				handledInputs[StringLibrary.MOUSE_OUT].target = mouseMoveTargetName;
-				
-				//if (defaultActionsEnabled)
-				//{
-					//
-					//utilInput.ID = StringLibrary.MOUSE_OUT;
-					//utilInput.state = InputType.MOUSE_OUT;
-					//utilInput.target = mouseMoveTargetName;
-					//utilInput.value = 0;
-					//defaultActions[InputType.MOUSE_OUT].dispatch(utilInput);
-					//
-				//}
 				//
-				//
-				
+				MIDUtil = mouseInputData.Get();
+				MIDUtil.buttonID = 0;
+				MIDUtil.target = mouseMoveTargetName ;
+				MIDUtil.type = InputType.MOUSE_OUT;
+				//MIDUtil = {type:InputType.MOUSE_OUT, target:mouseMoveTargetName, buttonID:0};
+				FetchActions(utilString, MIDUtil);
+								
 				mouseMoveTargetName = "";
-				
-				
-				
-				if (directMode) DirectResolveInput(	handledInputs[StringLibrary.MOUSE_OUT]);
 			}
 			
 			
@@ -616,82 +407,55 @@ class InputManager
 	
 	public function OnMouseWheel(value:Float, axisDirection:Float, mode:MouseWheelMode):Void
 	{
-			handledInputs[StringLibrary.MOUSE_WHEEL].state = InputType.MOUSE_WHEEL;
-			handledInputs[StringLibrary.MOUSE_WHEEL].value = axisDirection;
-			handledInputs[StringLibrary.MOUSE_WHEEL].target = mouseMoveTargetName;
-			if (directMode) DirectResolveInput(	handledInputs[StringLibrary.MOUSE_WHEEL]);
 			
+		
+		WIDUtil = wheelInputData.Get();
+		WIDUtil.value = value;
+		WIDUtil.target = mouseMoveTargetName ;
+		WIDUtil.axisDirection = axisDirection;
+		WIDUtil.wheelMode = mode;
+		
+		//WIDUtil = {type:InputType.MOUSE_WHEEL, target:mouseMoveTargetName, value:value, axisDirection:axisDirection, wheelMode:mode};
+		FetchActions(StringLibrary.MOUSE, WIDUtil);
 			
-			//if (defaultActionsEnabled)
-			//{
-				//
-				//utilInput.ID = StringLibrary.MOUSE_WHEEL;
-				//utilInput.state = InputType.MOUSE_WHEEL;
-				//utilInput.target = "";
-				//utilInput.value = axisDirection;
-				//defaultActions[InputType.MOUSE_WHEEL].dispatch(utilInput);
-				//
-			//}
-			//
 	}
 		
 	public function OnKeyUp(key:KeyCode, modifier:KeyModifier):Void
 	{
 		
 		//Key Up
-		utilString = String.fromCharCode(key) + focusedObject;
-		//trace(utilString);
+		utilString = String.fromCharCode(key);
+		
 		modifier.capsLock = modifier.numLock = false;
+		
 		
 		if (cast(modifier,Int) > 0) utilString += modifier;
 		
+		KIDUtil = keyboardInputData.Get();
+		KIDUtil.keyCode = key;
+		KIDUtil.modifier = modifier;
+		KIDUtil.type = InputType.KEY_UP;
+		KIDUtil.target = focusedObject;
+		//KIDUtil = {type:InputType.KEY_UP, target:focusedObject, keyCode:key, modifier:modifier};
+		FetchActions(utilString, KIDUtil);
 		
-		if (handledInputs[utilString] != null){
-			
-			handledInputs[utilString].state = InputType.KEY_UP;
-			handledInputs[utilString].value = 0;
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);
-		}
-	
-		
-		//if (defaultActionsEnabled)
-			//{
-				//
-				//utilInput.ID = utilString;
-				//utilInput.state = InputType.KEY_UP;
-				//utilInput.target = "";
-				//utilInput.value = 0;
-				//defaultActions[InputType.KEY_UP].dispatch(utilInput);
-				//
-			//}
-		//
 		
 		//Check Key Pressed
 		
-		utilString = String.fromCharCode(key) + focusedObject; 
+		utilString = String.fromCharCode(key); 
 		
 		if ( Sys.preciseTime() - timeCounters[utilString] <= KEY_PRESS_DELAY){
 			
 			modifier.capsLock = modifier.numLock = false;
 			if (cast(modifier,Int) > 0) utilString += modifier;
 		
-			if (handledInputs[utilString] != null){
-			
-				handledInputs[utilString].state = InputType.KEY_PRESS;
-				handledInputs[utilString].value = 0.5;
-				if (directMode) DirectResolveInput(	handledInputs[utilString]);
-			}
-			
-			//if (defaultActionsEnabled)
-			//{
-				//
-				//utilInput.ID = utilString;
-				//utilInput.state = InputType.KEY_PRESS;
-				//utilInput.target = "";
-				//utilInput.value = 0;
-				//defaultActions[InputType.KEY_PRESS].dispatch(utilInput);
-				//
-			//}
+			KIDUtil = keyboardInputData.Get();
+			KIDUtil.keyCode = key;
+			KIDUtil.modifier = modifier;
+			KIDUtil.type = InputType.KEY_PRESS;
+			KIDUtil.target = focusedObject;
+			//KIDUtil = {type:InputType.KEY_PRESS, target:focusedObject, keyCode:key, modifier:modifier};
+			FetchActions(utilString, KIDUtil);
 			
 			
 		}
@@ -704,64 +468,61 @@ class InputManager
 	
 	public function OnKeyDown(key:KeyCode, modifier:KeyModifier):Void
 	{
-		utilString = String.fromCharCode(key) + focusedObject;
-		//trace(String.fromCharCode(key));
+		utilString = String.fromCharCode(key) ;
+		//utilString = String.fromCharCode(key) + focusedObject;
+	
 		if( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] = Sys.preciseTime();
 		
 		modifier.capsLock = modifier.numLock = false;
 		if (cast(modifier,Int) > 0)utilString += modifier;
 		
-		if (handledInputs[utilString] != null){
-			
-			handledInputs[utilString].state = InputType.KEY_DOWN;
-			handledInputs[utilString].value = 1;
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);
-		}
-		
-		//if (defaultActionsEnabled)
-			//{
-				//
-				//utilInput.ID = utilString;
-				//utilInput.state = InputType.KEY_DOWN;
-				//utilInput.target = "";
-				//utilInput.value = 0;
-				//defaultActions[InputType.KEY_DOWN].dispatch(utilInput);
-				//
-			//}
+		KIDUtil = keyboardInputData.Get();
+		KIDUtil.keyCode = key;
+		KIDUtil.modifier = modifier;
+		KIDUtil.type = InputType.KEY_DOWN;
+		KIDUtil.target = focusedObject;
+		//KIDUtil = {type:InputType.KEY_DOWN, target:focusedObject, keyCode:key, modifier:modifier};
+		FetchActions(utilString, KIDUtil);
 		
 	}
 	
 	public function OnGamepadAxisMove(gamepadID:Int, axis:GamepadAxis, value:Float):Void
 	{
-		utilString = GetGamepadInputID(gamepadID, axis.toString()) + focusedObject;
-		if (handledInputs[utilString] != null){
-				
-			handledInputs[utilString].state = InputType.GAMEPAD_AXIS_MOVE;
-			handledInputs[utilString].value = value;
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);	
-		}
+		utilString = GetGamepadInputID(gamepadID, axis.toString());
+		
+		AIDUtil = axisInputData.Get();
+		AIDUtil.value = value;
+		AIDUtil.axis = axis ;
+		AIDUtil.gamepadID = gamepadID;
+		AIDUtil.target = focusedObject;
+		AIDUtil.type = InputType.GAMEPAD_AXIS_MOVE;
+		//AIDUtil = {type:InputType.GAMEPAD_AXIS_MOVE, target:focusedObject, gamepadID:gamepadID, axis:axis, value:value}
+		FetchActions(utilString, AIDUtil);
 		//trace(utilString);
 		
 	}
 	
 	public function OnGamepadButtonUp(gamepadID:Int, button:GamepadButton):Void
 	{
-		utilString = GetGamepadInputID(gamepadID, button.toString()) + focusedObject;
-		if (handledInputs[utilString] != null){
-				
-			handledInputs[utilString].state = InputType.GAMEPAD_BUTTON_UP;
-			handledInputs[utilString].value = 0;
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);
-		}
+		utilString = GetGamepadInputID(gamepadID, button.toString());
+		
+		BIDUtil = buttonInputData.Get();
+		BIDUtil.button = button;
+		BIDUtil.gamepadID = gamepadID;
+		BIDUtil.target = focusedObject;
+		BIDUtil.type = InputType.GAMEPAD_BUTTON_UP;
+		//BIDUtil = {type:InputType.GAMEPAD_BUTTON_UP, target:focusedObject, gamepadID:gamepadID, button:button};
+		FetchActions(utilString, BIDUtil);
 		
 		if ( Sys.preciseTime() - timeCounters[utilString] <= GAMEPAD_PRESS_DELAY){
 		
-			if (handledInputs[utilString] != null){
-			
-				handledInputs[utilString].state = InputType.GAMEPAD_BUTTON_PRESS;
-				handledInputs[utilString].value = 0.5;
-				if (directMode) DirectResolveInput(	handledInputs[utilString]);
-			}
+			BIDUtil = buttonInputData.Get();
+			BIDUtil.button = button;
+			BIDUtil.gamepadID = gamepadID;
+			BIDUtil.target = focusedObject;
+			BIDUtil.type = InputType.GAMEPAD_BUTTON_PRESS;
+			//BIDUtil = {type:InputType.GAMEPAD_BUTTON_PRESS, target:focusedObject, gamepadID:gamepadID, button:button};
+			FetchActions(utilString, BIDUtil);
 		}
 	
 		timeCounters[utilString] = 0;
@@ -770,17 +531,18 @@ class InputManager
 	
 	public function OnGamepadButtonDown(gamepadID:Int,button:GamepadButton):Void
 	{
-		utilString = GetGamepadInputID(gamepadID, button.toString()) + focusedObject;
+		utilString = GetGamepadInputID(gamepadID, button.toString());
 	
 		
 		if ( timeCounters[utilString] == null || timeCounters[utilString] == 0) timeCounters[utilString] =  Sys.preciseTime();
 		
-		if (handledInputs[utilString] != null){
-				
-			handledInputs[utilString].state = InputType.GAMEPAD_BUTTON_DOWN;
-			handledInputs[utilString].value = 1;
-			if (directMode) DirectResolveInput(	handledInputs[utilString]);	
-		}
+		BIDUtil = buttonInputData.Get();
+		BIDUtil.button = button;
+		BIDUtil.gamepadID = gamepadID;
+		BIDUtil.target = focusedObject;
+		BIDUtil.type = InputType.GAMEPAD_BUTTON_DOWN;
+		//BIDUtil = {type:InputType.GAMEPAD_BUTTON_DOWN, target:focusedObject, gamepadID:gamepadID, button:button};
+		FetchActions(utilString, BIDUtil);
 		
 		
 	}
@@ -792,6 +554,11 @@ class InputManager
 		gamepad.onButtonUp.add(gamepad.ButtonUp);
 		gamepad.onDisconnect.add(gamepad.Disconnect);
 		
+		GIDUtil = gamepadInputData.Get();
+		GIDUtil.gamepad = gamepad;
+		GIDUtil.type = InputType.GAMEPAD_CONNECT;
+		//GIDUtil = {type:InputType.GAMEPAD_CONNECT, target:"", gamepad:gamepad};
+		FetchActions(StringLibrary.GAMEPAD, GIDUtil);
 	}
 	
 	public function OnGamepadDisconnect(gamepad:Gamepad):Void
@@ -802,18 +569,23 @@ class InputManager
 		gamepad.onButtonUp.remove(gamepad.ButtonUp);
 		gamepad.onDisconnect.remove(gamepad.Disconnect);
 		
+		GIDUtil = gamepadInputData.Get();
+		GIDUtil.gamepad = gamepad;
+		GIDUtil.type = InputType.GAMEPAD_DISCONNECT;
+		//GIDUtil = {type:InputType.GAMEPAD_DISCONNECT, target:"", gamepad:gamepad};
+		FetchActions(StringLibrary.GAMEPAD, GIDUtil);
 	}
 	
 	public function OnTouchStart(touch:Touch):Void
 	{
-		utilString = StringLibrary.TOUCH_START + touch.id;
+		/*utilString = StringLibrary.TOUCH_START + touch.id;
 		
 		if (handledInputs[utilString] != null)
 		{
 			utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			timeCounters[StringLibrary.TOUCH + touch.id] =  Sys.preciseTime();
 		
-			var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+			var object:RenderedObject = null;//BeardGame.Get().getTargetUnderPoint(utilPoint); // !Update!
 		
 			touchTargets[utilString] = object != null ? object.name : "";
 			
@@ -823,13 +595,13 @@ class InputManager
 			
 			if (directMode) DirectResolveInput(	handledInputs[utilString]);
 			
-		}
+		}*/
 		
 	}
 	
 	public function OnTouchMove(touch:Touch):Void
 	{
-		utilString = StringLibrary.TOUCH_MOVE + touch.id;
+		/*utilString = StringLibrary.TOUCH_MOVE + touch.id;
 		utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			
 		if (touchTargets[utilString] == null) touchTargets[utilString] = "";
@@ -842,7 +614,7 @@ class InputManager
 		}
 		
 		
-		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+		var object:RenderedObject = null;//BeardGame.Get().getTargetUnderPoint(utilPoint); // !Update!
 	
 		
 		if (object != null &&  touchTargets[utilString] != object.name){
@@ -886,17 +658,17 @@ class InputManager
 	
 			
 		
-		
+		*/
 		
 	}
 	
 	public function OnTouchEnd(touch:Touch):Void
 	{
 		
-		utilString =  StringLibrary.TOUCH_END + touch.id;
+		/*utilString =  StringLibrary.TOUCH_END + touch.id;
 		utilPoint.setTo(touch.x * BeardGame.Get().window.width, touch.y*BeardGame.Get().window.height);
 			
-		var object:RenderedObject = null;/*BeardGame.Get().getTargetUnderPoint(utilPoint);*/ // !Update!
+		var object:RenderedObject = null;//BeardGame.Get().getTargetUnderPoint(utilPoint); // !Update!
 		touchTargets[utilString] = object != null ? object.name : "";
 		
 		if (handledInputs[utilString] != null)
@@ -920,128 +692,122 @@ class InputManager
 			if(directMode) DirectResolveInput(handledInputs[utilString]);
 		}
 		
-		timeCounters[StringLibrary.TOUCH + touch.id] = 0;
+		timeCounters[StringLibrary.TOUCH + touch.id] = 0;*/
 		
 	}
 	
 	public function Update():Void
 	{
 		
-		var i:Int = 0;
-		var detail:CallbackDetails;
+		var resolve:ResolvedAction;
 		
-		
-		for (input in handledInputs)
-		//for (i in 0...triggeredInputs.length)
+		while (resolveQueue.length > 0)
 		{
-			currentInput = input;
-			//currentInput = triggeredInputs[i];
-						
-			if (!currentInput.active) continue;
-			
-			if (inputActions[currentInput.ID] != null && inputActions[currentInput.ID][currentInput.state] != null)
-			{
-				for (actionID in inputActions[currentInput.ID][currentInput.state])
-				{
-					
-					if (actions[actionID] != null){
-						if (actions[actionID].active)
-						{
-							
-							i = actions[actionID].callbackDetails.length;
-							
-							while (--i >= 0)
-							{
-								detail = actions[actionID].callbackDetails[i];
-								
-								if (detail.targetName == currentInput.target || detail.targetName == "")
-								{
-									detail.callback(currentInput.value);
-									if (detail.once) 
-									{
-										actions[actionID].callbackDetails.remove(detail);
-										detail = null;
-									}
-									
-								}
-								
-							}
-							
-						}
-					}
-					
-					
-				}
-					//trace(input.ID + "    " + input.state + "    " + input.toggle);
-			}
-			
-			if (currentInput.state == GetToggleType(currentInput.state)){
-				currentInput.state = InputType.NONE;
-				currentInput.value = 0;
-			}
+			resolve = resolveQueue.pop();
+			resolve.callback(resolve.data);		
+			FreeData(resolve.data);
 		}
 	
+	
+	
+
 		
 	}
 	
-	private function DirectResolveInput(input:Input):Void
+		
+	private inline function FetchActions(inputId:String, inputData:InputData):Void
 	{
-		//trace("direct");
-		if (input.active){
-			currentInput = input;
-			
-			var i:Int = 0;
-			var detail:CallbackDetails;
-			if (inputActions[input.ID] != null && inputActions[input.ID][input.state] != null)
+		utilInput = Input.FromInputData(inputId, inputData.type);
+		var detail:CallbackDetails;
+		var j:Int = 0;
+		var success:Bool = false;
+		if (controls[utilInput] != null)
+		{
+			for (i in 0...controls[utilInput].length)
 			{
-				for (actionID in inputActions[input.ID][input.state])
+				utilString = controls[utilInput].get(i);
+				if (actions[utilString] != null)
 				{
-					
-					if (actions[actionID] != null){
-						if (actions[actionID].active)
-						{
-							
-							i = actions[actionID].callbackDetails.length;
-							while (--i >= 0)
-							{
-								detail = actions[actionID].callbackDetails[i];
-								
-								if (detail.targetName == input.target || detail.targetName == "")
-								{
-									detail.callback(input.value);
-									if (detail.once) 
-									{
-										actions[actionID].callbackDetails.remove(detail);
-										detail = null;
-									}
-									
-								}
-								
-							}
+					j = actions[utilString].callbackDetails.length-1;
+					while (j >= 0)
+					{
+						detail = actions[utilString].callbackDetails.get(j);
+						if (detail != null && detail.target == inputData.target){
+							success = true;
+							if (directMode) detail.callback(inputData);
+							resolveQueue.add({callback:detail.callback, data:inputData});
+							if (detail.once == true) actions[utilString].callbackDetails.Remove(detail);
 							
 						}
+						
+						j--;
 					}
-					
-					
 				}
 			}
-			//trace(input.ID + "    " + input.state + "    " + input.toggle);
-			if (input.state == GetToggleType(input.state)){
-				input.state = InputType.NONE;
-				input.value = 0;
-			}
+			
 		}
+		
+		if (actions[utilInput] != null)
+		{
+			trace("not empty");
+			
+			j = actions[utilInput].callbackDetails.length-1;
+			while (j >= 0)
+			{
+				detail = actions[utilInput].callbackDetails.get(j);
+				if(detail != null) trace(detail.target);
+				if (detail != null && detail.target == inputData.target){
+					success = true;
+					resolveQueue.add({callback:detail.callback, data:inputData});
+					if (directMode) detail.callback(inputData);
+					if (detail.once == true) actions[utilInput].callbackDetails.Remove(detail);
+					
+				}
+				
+				j--;
+			}
+			
+		}
+		
+		utilInput = Input.FromInputData(StringLibrary.ANY, inputData.type);
+		if (actions[utilInput] != null)
+		{
+			
+			j = actions[utilInput].callbackDetails.length-1;
+			
+			while (j >= 0)
+			{
+				
+				detail = actions[utilInput].callbackDetails.get(j);
+				if (detail != null && detail.target == inputData.target){
+					success = true;
+					resolveQueue.add({callback:detail.callback, data:inputData});
+					if (directMode) detail.callback(inputData);
+					if (detail.once == true) actions[utilInput].callbackDetails.Remove(detail);
+					
+				}
+				
+				j--;
+			}
+			
+		}
+		if (success == false)
+		{
+			FreeData(inputData);
+		}
+		
+		
 	}
 		
-	private inline function  CheckDetailExisting(action:Action, callback:Float->Void, target:String):Bool
+	private inline function  CheckDetailExisting(action:Action, callback:InputData->Void, target:String):Bool
 	{
 		var exist:Bool = false;
 	
 		
-		for (detail in action.callbackDetails)
+		for (i in 0...action.callbackDetails.length)
 		{
 			
-			if ( exist = (detail.callback == callback && detail.targetName == target)) 
+			if ( exist = (action.callbackDetails.get(i).callback == callback && action.callbackDetails.get(i).target == target)) 
 				break;
 			
 		}
@@ -1050,21 +816,9 @@ class InputManager
 		
 	}
 	
-	private inline function CheckInputHandled(inputID:String):Bool
-	{
-		return handledInputs[inputID] != null;
-	}
-		
 	public static inline function GetMouseInputID(button : Int):String
 	{
 		return  StringLibrary.MOUSE + button;
-	}
-	
-	public static inline function GetCallingInput():Input
-	{
-		return instance.currentInput;
-		
-		
 	}
 	
 	public static inline function GetGamepadInputID(gamepadID:Int, inputID : String):String
@@ -1075,13 +829,6 @@ class InputManager
 	public static inline function GetTouchInputID(touchID:Int, type:InputType):String
 	{
 		return "";
-	}
-	
-	public static inline function GetDefaultInputActionID(inputID:String, inputType:InputType):String
-	{
-		
-		return InputTypeToString(inputType) + inputID;
-		
 	}
 	
 	public static inline function StringToInputType(type:String):InputType
@@ -1104,6 +851,8 @@ class InputManager
 			case StringLibrary.GAMEPAD_BUTTON_UP: 		inputType = InputType.GAMEPAD_BUTTON_UP;
 			case StringLibrary.GAMEPAD_BUTTON_DOWN: 	inputType = InputType.GAMEPAD_BUTTON_DOWN;
 			case StringLibrary.GAMEPAD_BUTTON_PRESS: 	inputType = InputType.GAMEPAD_BUTTON_PRESS;
+			case StringLibrary.GAMEPAD_CONNECT: 		inputType = InputType.GAMEPAD_CONNECT;
+			case StringLibrary.GAMEPAD_DISCONNECT: 		inputType = InputType.GAMEPAD_DISCONNECT;
 			case StringLibrary.TOUCH_END: 				inputType = InputType.TOUCH_END;
 			case StringLibrary.TOUCH_MOVE: 				inputType = InputType.TOUCH_MOVE;
 			case StringLibrary.TOUCH_OUT: 				inputType = InputType.TOUCH_OUT;
@@ -1136,6 +885,8 @@ class InputManager
 			case InputType.GAMEPAD_BUTTON_UP: 		string = StringLibrary.GAMEPAD_BUTTON_UP;
 			case InputType.GAMEPAD_BUTTON_DOWN: 	string = StringLibrary.GAMEPAD_BUTTON_DOWN;
 			case InputType.GAMEPAD_BUTTON_PRESS: 	string = StringLibrary.GAMEPAD_BUTTON_PRESS;
+			case InputType.GAMEPAD_DISCONNECT: 		string = StringLibrary.GAMEPAD_DISCONNECT;
+			case InputType.GAMEPAD_CONNECT: 		string = StringLibrary.GAMEPAD_CONNECT;
 			case InputType.NONE: 					string = StringLibrary.NONE;
 			case InputType.TOUCH_END: 				string = StringLibrary.TOUCH_END;
 			case InputType.TOUCH_MOVE: 				string = StringLibrary.TOUCH_MOVE;
@@ -1149,40 +900,37 @@ class InputManager
 		return string;
 	}
 	
-	public static inline function GetToggleType(type:InputType):InputType
+	private inline function FreeData(data:InputData):Void
 	{
-		var toggleType :InputType = InputType.NONE;
-		switch(type)
+		switch(data.type)
 		{
-			
-			case InputType.MOUSE_DOWN: 				toggleType = InputType.MOUSE_UP ; 
-			case InputType.MOUSE_CLICK: 			toggleType = InputType.MOUSE_CLICK ; 
-			case InputType.MOUSE_UP: 				toggleType = InputType.MOUSE_UP;
-			case InputType.MOUSE_MOVE: 				toggleType = InputType.MOUSE_MOVE;
-			case InputType.MOUSE_OUT: 				toggleType = InputType.MOUSE_OUT;
-			case InputType.MOUSE_OVER:				toggleType = InputType.MOUSE_OVER;
-			case InputType.MOUSE_WHEEL:				toggleType = InputType.MOUSE_WHEEL;
-			case InputType.KEY_UP:					toggleType = InputType.KEY_UP;
-			case InputType.KEY_PRESS: 				toggleType = InputType.KEY_PRESS;
-			case InputType.KEY_DOWN:				toggleType = InputType.KEY_UP;
-			case InputType.GAMEPAD_AXIS_MOVE:		toggleType = InputType.NONE;
-			case InputType.GAMEPAD_BUTTON_UP: 		toggleType = InputType.GAMEPAD_BUTTON_UP;
-			case InputType.GAMEPAD_BUTTON_DOWN: 	toggleType = InputType.GAMEPAD_BUTTON_UP;
-			case InputType.GAMEPAD_BUTTON_PRESS: 	toggleType = InputType.GAMEPAD_BUTTON_PRESS;
-			case InputType.NONE: 					toggleType = InputType.NONE;
-			case InputType.TOUCH_END: 				toggleType = InputType.TOUCH_END;
-			case InputType.TOUCH_MOVE: 				toggleType = InputType.TOUCH_MOVE;
-			case InputType.TOUCH_OUT: 				toggleType = InputType.TOUCH_OUT;
-			case InputType.TOUCH_OVER: 				toggleType = InputType.TOUCH_OVER;
-			case InputType.TOUCH_START: 			toggleType = InputType.TOUCH_START;
-			case InputType.TOUCH_TAP: 				toggleType = InputType.TOUCH_TAP;
+			case InputType.MOUSE_DOWN: 				mouseInputData.Release(cast data) ; 
+			case InputType.MOUSE_CLICK: 			mouseInputData.Release(cast data) ;  
+			case InputType.MOUSE_UP: 				mouseInputData.Release(cast data) ; 
+			case InputType.MOUSE_MOVE: 				mouseInputData.Release(cast data) ; 
+			case InputType.MOUSE_OUT: 				mouseInputData.Release(cast data) ; 
+			case InputType.MOUSE_OVER:				mouseInputData.Release(cast data) ; 
+			case InputType.MOUSE_WHEEL:				wheelInputData.Release(cast data) ; 
+			case InputType.KEY_UP:					keyboardInputData.Release(cast data) ; 
+			case InputType.KEY_PRESS: 				keyboardInputData.Release(cast data) ; 
+			case InputType.KEY_DOWN:				keyboardInputData.Release(cast data) ; 
+			case InputType.GAMEPAD_AXIS_MOVE:		axisInputData.Release(cast data);
+			case InputType.GAMEPAD_BUTTON_UP: 		buttonInputData.Release(cast data);
+			case InputType.GAMEPAD_BUTTON_DOWN: 	buttonInputData.Release(cast data);
+			case InputType.GAMEPAD_BUTTON_PRESS: 	buttonInputData.Release(cast data);
+			case InputType.GAMEPAD_DISCONNECT: 		gamepadInputData.Release(cast data);
+			case InputType.GAMEPAD_CONNECT: 		gamepadInputData.Release(cast data);
+			case InputType.NONE: 					
+			case InputType.TOUCH_END: 				
+			case InputType.TOUCH_MOVE: 				
+			case InputType.TOUCH_OUT: 				
+			case InputType.TOUCH_OVER: 				
+			case InputType.TOUCH_START: 			
+			case InputType.TOUCH_TAP: 				
 			
 			
 		}
-		return toggleType;
 	}
-	
-	
 	
 	
 

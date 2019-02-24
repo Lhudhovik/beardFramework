@@ -1,9 +1,9 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.utils.DataU;
-import beardFramework.utils.TextureU;
-import beardFramework.utils.XMLU;
+import beardFramework.utils.data.DataU;
+import beardFramework.utils.graphics.TextureU;
+import beardFramework.utils.data.XMLU;
 import haxe.Utf8;
 import lime.app.Application;
 import lime.graphics.Image;

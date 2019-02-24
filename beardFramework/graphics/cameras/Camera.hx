@@ -1,8 +1,10 @@
 package beardFramework.graphics.cameras;
+import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
 import beardFramework.interfaces.ICameraDependent;
-import beardFramework.resources.save.data.DataCamera;
+import beardFramework.resources.save.data.StructDataCamera;
+import beardFramework.utils.simpleDataStruct.SRect;
 import openfl.display.Tile;
 import openfl.geom.Matrix;
 import openfl.geom.Point;
@@ -31,32 +33,62 @@ class Camera
 	public var buffer(default, set):Float;
 	public var needRenderUpdate:Bool;
 	public var transform(default, null):Matrix;//a : scale X, d: ScaleY
+	public var keepRatio:Bool;
+	public var ratios:SRect;
 	
 	public var viewport(default, null):ViewportRect;
+	private var attachedObject:RenderedObject;
 	
-	public function new(name:String, width:Float = 100, height:Float = 57, buffer : Float = 100) 
+	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = false) 
 	{
 		transform = new Matrix();
-		viewport = {
+			viewport = {
 			x:0,
 			y:0,
-			width:Math.round(width),
-			height:Math.round(height)
-			
+			width:0,
+			height:0
 		}	
 		
 		this.name = name;
-		this.viewportWidth  = width;
-		this.viewportHeight  = height;
+		this.viewportWidth  = viewPortWidth;
+		this.viewportHeight  = viewPortHeight;
+		this.viewportX = viewPortX;
+		this.viewportY = viewPortY;
 		this.buffer = buffer;
 		needRenderUpdate = true;
+		this.keepRatio = keepRatio;
+		if (keepRatio == true)
+		{
+			ratios = {
+				x: viewportX / BeardGame.Get().window.width,
+				y:  viewportY / BeardGame.Get().window.height,
+				width: viewportWidth / BeardGame.Get().window.width,
+				height: viewportHeight / BeardGame.Get().window.height
+			}
+		}else ratios = {x:0, y:0, width:0, height:0 };
 		
 		
 		
-		centerX = width * 0.5;
-		centerY = height * 0.5;
+		centerX = 0;
+		centerY = 0;
 	}
+	
+	public function SetViewportRatios(x:Float, y: Float, width:Float, height:Float):Void
+	{
+		keepRatio = true;
 		
+		ratios.x=x;
+		ratios.y=y;
+		ratios.width=width;
+		ratios.height=height;
+		
+		viewportX = BeardGame.Get().window.width * x;
+		viewportY = BeardGame.Get().window.height * y;
+		viewportWidth = BeardGame.Get().window.width * width;
+		viewportHeight = BeardGame.Get().window.height * height;
+		
+	}
+	
 	public inline function get_zoom():Float return transform.a;
 	
 	public function set_zoom(newZoom:Float):Float{
@@ -75,6 +107,12 @@ class Camera
 	{
 		this.centerX = centerX;
 		this.centerY = centerY;	
+	}
+	
+	public function Attach(object:RenderedObject):Void
+	{
+		attachedObject = object;
+		
 	}
 	
 	public function GetRect():Rectangle
@@ -182,7 +220,7 @@ class Camera
 		return name = value;
 	}
 	
-	public function ToData():DataCamera
+	public function ToData():StructDataCamera
 	{
 		
 		return {
@@ -196,14 +234,19 @@ class Camera
 			centerY:this.centerY,
 			viewportX:transform.tx,
 			viewportY:transform.ty,
-			buffer:this.buffer
+			buffer:this.buffer,
+			keepRatio:this.keepRatio,
+			ratioX:ratios.x,
+			ratioY:ratios.y,
+			ratioWidth:ratios.width,
+			ratioHeight:ratios.height
 			
 			
 		}
 		
 	}
 	
-	public function ParseData(data:DataCamera):Void
+	public function ParseData(data:StructDataCamera):Void
 	{
 		this.name = data.name;
 		zoom = data.zoom;
@@ -214,8 +257,9 @@ class Camera
 		transform.tx = data.viewportX;
 		transform.ty = data.viewportY;
 		buffer = data.buffer;
+		keepRatio = data.keepRatio;
+		if (keepRatio)	SetViewportRatios(data.ratioX, data.ratioY, data.ratioWidth, data.ratioHeight);
 	
-		
 	}
 	
 	//To Do : update depending on the zoom
@@ -259,8 +303,23 @@ class Camera
 	
 	public function AdjustResize():Void
 	{
+		if (keepRatio)
+		{
+			viewportX = BeardGame.Get().window.width * ratios.x;
+			viewportY = BeardGame.Get().window.height * ratios.y;
+			viewportWidth = BeardGame.Get().window.width * ratios.width;
+			viewportHeight = BeardGame.Get().window.height * ratios.height;
+			
+		}
+	}
+	
+	public function Update():Void
+	{
+		if (attachedObject != null)
+			Center(attachedObject.x + attachedObject.width * 0.5, attachedObject.y + attachedObject.height * 0.5);
 		
 	}
+	
 }
 
 typedef ViewportRect = 
