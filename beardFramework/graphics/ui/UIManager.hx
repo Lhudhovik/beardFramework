@@ -65,6 +65,7 @@ class UIManager
 		cameras.Push(CAMERANAME+0);
 		BeardGame.Get().AddCamera(new Camera(CAMERANAME+0, BeardGame.Get().window.width, BeardGame.Get().window.height,0,0,100,true));
 		
+		trace(Renderer.Get().GetBatch(Renderer.Get().UI));
 		Renderer.Get().GetBatch(Renderer.Get().UI).cameras.add(CAMERANAME+0);
 		Renderer.Get().GetBatch(Renderer.Get().UI).cameras.remove("default");
 		

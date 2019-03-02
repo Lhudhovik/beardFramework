@@ -177,10 +177,9 @@ class BeardGame extends Application
 			
 			for (batch in OptionsManager.Get().batchesToCreate)
 			{
-				
-				Renderer.Get().AddBatch(Batch.CreateBatch(batch));
-							
-				
+				trace(batch);
+				Renderer.Get().CreateBatch(batch.name, batch.template);
+			
 			}
 			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
 		}
@@ -304,8 +303,10 @@ class BeardGame extends Application
 					}
 				}
 			
-				for (i in 0...layers.length)
-				layers.get(i).aabbTree.UpdateTree();
+				for (i in 0...layers.length){
+					layers.get(i).Update();
+				}
+				
 			
 				UIManager.Get().Update();
 				

@@ -5,7 +5,7 @@ import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 /**
  * @author 
  */
-typedef BatchData =
+typedef BatchTemplateData =
 {
 	var shaders:Array<Shader>;
 	var indices:Array<Int>;

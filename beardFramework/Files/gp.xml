@@ -18,7 +18,7 @@
 	<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>
 </fonts>
 <renderingBatches>
-	<batch name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" needOrdering="false">
+	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" needOrdering="false">
 		<shader name="vertexShader" type="VERTEX_SHADER"/>
 		<shader name="fragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
@@ -28,16 +28,16 @@
 		<vertex data="1,1,1.0,1.0"/>
 		<vertex data="1,0,1.0,0.0"/>
 		<vertex data="0,0,0.0,0.0"/>
-	</batch>
-	<batch name="debugLine" vertexPerObject="2" drawMode="LINES" type="Batch" needOrdering="false">
+	</template>
+	<template name="debugLine" vertexPerObject="2" drawMode="LINES" type="Batch" needOrdering="false">
 		<shader name="debugVertexShader" type="VERTEX_SHADER"/>
 		<shader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="color" size="4" index="1" />
 		<vertex data="0,1"/>
 		<vertex data="1,1"/>
-	</batch>
-	<batch name="debugRect" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="Batch" needOrdering="false">
+	</template>
+	<template name="debugRect" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="Batch" needOrdering="false">
 		<shader name="debugVertexShader" type="VERTEX_SHADER"/>
 		<shader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
@@ -46,18 +46,13 @@
 		<vertex data="1,1"/>
 		<vertex data="1,0"/>
 		<vertex data="0,0"/>
-	</batch>
-	<batch name="transparent" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" needOrdering="false">
-		<shader name="vertexShader" type="VERTEX_SHADER"/>
-		<shader name="fragmentShader" type="FRAGMENT_SHADER"/>
-		<vertexAttribute name="pos" size="3" index="0" />
-		<vertexAttribute name="uv" size="3" index="1" />
-		<vertexAttribute name="color" size="4" index="2" />
-		<vertex data="0,1,0.0,1.0"/>
-		<vertex data="1,1,1.0,1.0"/>
-		<vertex data="1,0,1.0,0.0"/>
-		<vertex data="0,0,0.0,0.0"/>
-	</batch>
+	</template>
+	<batch name="UI" template="default"/>
+	<batch name="transparent" template="default"/>
+	<batch name="default" template="default"/>
+	<batch name="debugLine" template="debugLine"/>
+	<batch name="debugRect" template="debugRect"/>
+	
 </renderingBatches>
 <fx></fx>
 <soundBank></soundBank>

@@ -17,13 +17,22 @@ class Wait extends UpdateProcess
 		
 	}
 	
-	public static inline function WaitFor(durationInSec:Float, onComplete:Void->Void):Void
+	public static inline function WaitFor(durationInSec:Float, onComplete:Void->Void, name:String="Wait"):Void
 	{
 		var wait:Wait = GetWait();
+		wait.name = name;
 		wait.timePerUpdate = Sys.preciseTime();
 		wait.duration = durationInSec*1000;
 		wait.completed.addOnce(onComplete);
 		wait.Start();		
+	}
+	public static inline function ClearWait(name:String = "Wait"):Void
+	{
+		if (waits == null) waits = new Array<Wait>();
+		for (wait in waits)
+			if (wait.name == name)
+				wait.Clear();
+			
 	}
 	
 	private static function GetWait():Wait

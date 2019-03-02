@@ -181,7 +181,7 @@ class FontAtlas extends Atlas
 		if (!ContainsFont(font, size)){
 			
 			for (_font in fonts)
-				if (_font.name == font && (closerSize == 0 || Math.abs(_font.size - size) < Math.abs(closerSize -size)))
+				if (_font.name == font && (closerSize == 0 || MathU.Abs(_font.size - size) < MathU.Abs(closerSize -size)))
 					closerSize = _font.size;
 		}
 		else closerSize = size;
@@ -189,6 +189,20 @@ class FontAtlas extends Atlas
 		trace("null encountered " + glyph + " " +  glyph);
 		//trace(glyph);
 		return subAreas[font + closerSize + glyph];
+		
+	}
+	public inline function GetGlyphDataName(font:String, glyph:String, size:Int):String
+	{
+		
+		var closerSize:Int = 0;
+		if (!ContainsFont(font, size)){
+			
+			for (_font in fonts)
+				if (_font.name == font && (closerSize == 0 || MathU.Abs(_font.size - size) < MathU.Abs(closerSize -size)))
+					closerSize = _font.size;
+		}
+		else closerSize = size;
+		return font + closerSize + glyph;
 		
 	}
 	

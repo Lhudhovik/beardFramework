@@ -614,6 +614,10 @@ class AABBTree
 		}
 	}
 	
+	public inline function IsEmpty():Bool
+	{
+		return root == null;
+	}
 	
 	
 }

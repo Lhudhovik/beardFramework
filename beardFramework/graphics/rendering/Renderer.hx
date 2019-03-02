@@ -4,10 +4,11 @@ import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.batches.Batch;
-import beardFramework.graphics.rendering.batches.BatchData;
+import beardFramework.graphics.rendering.batches.BatchTemplateData;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.text.TextField;
 import beardFramework.graphics.ui.UIManager;
+import beardFramework.interfaces.IBatch;
 import beardFramework.utils.data.DataU;
 import beardFramework.resources.MinAllocArray;
 import lime.app.Application;
@@ -49,7 +50,8 @@ class Renderer
 	
 	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
-	private var batches:MinAllocArray<Batch>;
+	private var batches:MinAllocArray<IBatch>;
+	private var batchTemplates:Map<String, BatchTemplateData>;
 	private	var pointer:Int;
 	
 	
@@ -94,6 +96,7 @@ class Renderer
 		model = new Matrix4();
 			
 		batches = new MinAllocArray();
+		batchTemplates = new Map();
 		
 		
 		#if debug
@@ -102,8 +105,22 @@ class Renderer
 		//InitBatch(DEFAULT);
 		
 	}
-	
-	public function AddBatch(batch:Batch ):Void
+	public function CreateBatch(name:String, template:String = "default" ,addToBatchList:Bool = true):IBatch
+	{
+		var batch:IBatch = null;
+		if (batchTemplates[template] != null)
+		{
+			batch = cast Type.createInstance(Type.resolveClass("beardFramework.graphics.rendering.batches."+batchTemplates[template].type), []);
+			batch.Init(batchTemplates[template]);
+			batch.name = name;
+			if (addToBatchList) AddBatch(batch);
+		}
+		
+		return batch;
+		
+	}
+
+	public function AddBatch(batch:IBatch ):Void
 	{
 		for (i in 0...batches.length)
 			if (batches.get(i).name == batch.name) return;
@@ -114,6 +131,14 @@ class Renderer
 		MoveBatchToLast(DEBUG);
 		#end
 		MoveBatchToLast(UI);
+	}
+	
+	public inline function AddTemplate(templateData:BatchTemplateData):Void
+	{
+		if (templateData != null)
+		{
+			batchTemplates[templateData.name] = templateData;
+		}
 	}
 	
 	public function Start():Void
@@ -135,7 +160,7 @@ class Renderer
 			GL.clear(GL.COLOR_BUFFER_BIT);
 			GL.clear(GL.DEPTH_BUFFER_BIT);
 			
-			var batch:Batch;
+			var batch:IBatch;
 			
 			drawCount = 0;
 			
@@ -264,7 +289,7 @@ class Renderer
 		
 	}
 		
-	public function GetBatch(name:String):Batch
+	public function GetBatch(name:String):IBatch
 	{
 		for (i in 0...batches.length)
 			if (batches.get(i).name == name) return batches.get(i);

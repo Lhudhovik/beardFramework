@@ -24,7 +24,7 @@ class RenderedObjectBatch extends Batch
 		super();
 		
 	}
-	override function Init(batchData:BatchData ):Void
+	override function Init(batchData:BatchTemplateData ):Void
 	{
 		super.Init(batchData);
 		dirtyObjects = new MinAllocArray<RenderedObject>();
@@ -155,7 +155,7 @@ class RenderedObjectBatch extends Batch
 						center.y = textfield.height * 0.5;	
 					for (data in textfield.glyphsData)
 					{
-						
+						if (data.textureData == null) continue;
 						visIndex = data.bufferIndex*40;
 					
 						

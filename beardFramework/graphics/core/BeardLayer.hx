@@ -147,6 +147,12 @@ class BeardLayer
 		
 	}
 	
+	public function Update():Void
+	{
+		if (!aabbTree.IsEmpty()) aabbTree.UpdateTree();
+		
+	}
+	
 	function get_visible():Bool 
 	{
 		return visible;
@@ -159,6 +165,7 @@ class BeardLayer
 			object.visible = value;
 		return visible = value;
 	}
+	
 	
 
 }

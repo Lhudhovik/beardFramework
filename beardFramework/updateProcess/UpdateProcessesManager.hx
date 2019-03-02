@@ -1,5 +1,6 @@
 package beardFramework.updateProcess;
 import beardFramework.graphics.screens.ScreenFlowManager;
+import beardFramework.resources.MinAllocArray;
 import beardFramework.updateProcess.UpdateProcess;
 
 /**
@@ -10,7 +11,7 @@ class UpdateProcessesManager
 {
 
 	private static var instance(default, null):UpdateProcessesManager;
-	private var updateProcesses:Array<UpdateProcess>;
+	private var updateProcesses:MinAllocArray<UpdateProcess>;
 	
 	
 	public static inline function Get():UpdateProcessesManager
@@ -31,25 +32,19 @@ class UpdateProcessesManager
 	
 	private function Init():Void
 	{
-		updateProcesses = new Array<UpdateProcess>();
+		updateProcesses = new MinAllocArray<UpdateProcess>();
 	}
 	
 	public function Update():Void
 	{
-		for (process in updateProcesses)
-				process.Proceed();
+		for (i in 0...updateProcesses.length){
+			if(updateProcesses.get(i) != null)	updateProcesses.get(i).Proceed();
+		}
 	}
 	
 	public function AddUpdateProcess(updateProcess:UpdateProcess):Void
 	{
-		var exist:Bool = false;
-		for (process in updateProcesses)
-		{
-			if (process.name == updateProcess.name) return;
-		}
-		
-		
-		updateProcesses.push(updateProcess);
+		updateProcesses.UniquePush(updateProcess);
 
 		
 	}
@@ -57,11 +52,11 @@ class UpdateProcessesManager
 	public function RemoveUpdateProcess(name:String):Void
 	{
 		
-		for (process in updateProcesses)
+		for (i in 0...updateProcesses.length)
 		{
-			if (process.name == name){
-				updateProcesses.remove(process);
-				
+			if (updateProcesses.get(i).name == name){
+				updateProcesses.Remove(updateProcesses.get(i));
+				break;				
 			}
 		}
 	}
@@ -70,10 +65,10 @@ class UpdateProcessesManager
 	{
 		
 		var updateProcess:UpdateProcess = null;
-		for (process in updateProcesses)
+		for (i in 0...updateProcesses.length)
 		{
-			if (process.name == name){
-				updateProcess = process;
+			if (updateProcesses.get(i).name == name){
+				updateProcess = updateProcesses.get(i);
 				break;
 			}
 		}

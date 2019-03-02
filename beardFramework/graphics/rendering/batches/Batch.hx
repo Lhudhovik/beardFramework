@@ -4,6 +4,7 @@ import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
+import beardFramework.interfaces.IBatch;
 import beardFramework.resources.MinAllocArray;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
@@ -18,12 +19,12 @@ import lime.utils.UInt16Array;
  * ...
  * @author 
  */
-class Batch 
+class Batch implements IBatch
 {
 
+	@:isVar public var name(get, set):String;
 	public var needUpdate:Bool;
 	public var cameras:List<String>;
-	public var name:String;
 	public var shaderProgram(default, null):GLProgram;
 	public var drawMode:Int;
 	
@@ -47,23 +48,15 @@ class Batch
 	private var drawCount:Int = 0;
 
 	
-	public static function CreateBatch(batchData:BatchData):Batch
-	{
-		
-		var batch:Batch = Type.createInstance(Type.resolveClass("beardFramework.graphics.rendering.batches."+batchData.type), []);
-		batch.Init(batchData);
-		return batch;
-		
-	}
+	
 	
 	public function new() 
 	{
 	
 	}
 	
-	private function Init(batchData:BatchData):Void
+	public function Init( batchData:BatchTemplateData):Void
 	{
-		name = batchData.name;
 		needOrdering = batchData.needOrdering;
 		renderer = Renderer.Get();
 		drawMode = batchData.drawMode;
@@ -525,5 +518,15 @@ class Batch
 		GL.bindVertexArray(0);
 		
 		return drawCount;
+	}
+	
+	inline function get_name():String 
+	{
+		return name;
+	}
+	
+	inline function set_name(value:String):String 
+	{
+		return name = value;
 	}
 }

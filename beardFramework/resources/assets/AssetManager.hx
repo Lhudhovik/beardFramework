@@ -312,6 +312,13 @@ class AssetManager
 		return cast(atlases[atlasName], FontAtlas).GetGlyphData(font,char,size);
 	}
 	
+	public inline function GetFontGlyphTextureName(font:String, char:String, size:Int = 72, atlasName:String = null):String
+	{
+		
+		if (atlasName == null) atlasName = FONT_ATLAS_NAME;
+		return cast(atlases[atlasName], FontAtlas).GetGlyphDataName(font,char,size);
+	}
+	
 	public function ClearAtlas(atlasName:String):Void
 	{
 		if ( atlases[atlasName] != null ){

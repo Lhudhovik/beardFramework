@@ -31,7 +31,7 @@ class DebugDraw
 	public static function DrawLine(start:SVec2, end:SVec2, color: UInt = 0x000000ff/*persistent:Bool = false*/):Int
 	{
 		if (linesBatch == null){
-			linesBatch = Renderer.Get().GetBatch("debugLine");
+			linesBatch = cast Renderer.Get().GetBatch("debugLine");
 			lines = new List();
 		}
 		
@@ -50,7 +50,7 @@ class DebugDraw
 	{
 		
 		if (rectsBatch == null){
-			rectsBatch = Renderer.Get().GetBatch("debugRect");
+			rectsBatch = cast Renderer.Get().GetBatch("debugRect");
 			rects = new List();
 		}
 	
@@ -77,7 +77,7 @@ class DebugDraw
 	{
 	
 		if (linesBatch == null){
-			linesBatch = Renderer.Get().GetBatch("debugLine");
+			linesBatch = cast Renderer.Get().GetBatch("debugLine");
 			lines = new List();
 		}
 		if( wireFrameRects == null) wireFrameRects = new Map();

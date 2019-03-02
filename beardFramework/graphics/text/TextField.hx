@@ -1,4 +1,5 @@
 package beardFramework.graphics.text;
+import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.core.RenderedObject;
@@ -12,6 +13,9 @@ import beardFramework.input.data.KeyboardInputData;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
+import beardFramework.updateProcess.UpdateProcess;
+import beardFramework.updateProcess.UpdateProcessesManager;
+import beardFramework.updateProcess.Wait;
 import beardFramework.utils.graphics.ColorU;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.libraries.StringLibrary;
@@ -76,16 +80,18 @@ class TextField extends RenderedObject {
 		if(text != "") AppendText(text);
 		
 		this.atlas = AssetManager.Get().FONT_ATLAS_NAME;
-		cursor = new Visual("facebook_button_normal_fr_hd", "menuHD", "cursor" + instanceCount);
+		cursor = new Visual(AssetManager.Get().GetFontGlyphTextureName(this.font, "|",Std.int(this.textSize)), this.atlas, "cursor" + instanceCount);
+	
 		cursor.visible = false;
-		cursor.width = 5;
-		cursor.height = linesHeight;
+		cursor.width =  5;
+		cursor.height = linesHeight ;
 				
 		letterSpacing = textSize/50; //to adjust with format
 		lineSpacing = textSize / 10;
 		tabSpacing = textSize;
 		spaceSpacing = textSize;
 		needLayoutUpdate = true;
+		cursorIndex = 0;
 	}
 	
 	public function ShowCursor():Void
@@ -93,13 +99,22 @@ class TextField extends RenderedObject {
 		if (layer != null){
 			
 			layer.Add(cursor);
-			cursorIndex = 5;
-			cursor.x = this.x + glyphsData[cursorIndex].x + glyphsData[cursorIndex].width;
-			cursor.y = this.y + glyphsData[cursorIndex].line * linesHeight;
+			cursor.visible = true;
+			Wait.WaitFor(0.5, HideCursor,this.name );
 		}
 	
 			
 	}
+	
+	private function HideCursor():Void
+	{
+		cursor.visible = false;
+		if (InputManager.Get().focusedObject == this.name) 
+			Wait.WaitFor(0.5, ShowCursor, this.name);
+		
+	}
+	
+	
 	
 	public function RemoveText(index:Int, count:Int = 1):String
 	{
@@ -159,6 +174,7 @@ class TextField extends RenderedObject {
  		return this.text;
 		
 	}
+	
 	public function AppendTextAtCursor( value:InputData):Void
 	{
 		trace(value);
@@ -167,7 +183,9 @@ class TextField extends RenderedObject {
 		AppendText(String.fromCharCode(data.keyCode), cursorIndex);
 		cursorIndex++;
 		
+		
 	}
+	
 	inline function get_font():String 
 	{
 		return font;
@@ -224,8 +242,7 @@ class TextField extends RenderedObject {
 		var sizeRatio:Float = this.textSize / currFont.height;
 		var carriageReturn:Bool = false;
 		var endOfLineReached:Bool = false;
-		var space:Bool = false;
-		var hTab:Bool = false;
+		var isSpecialChar:Bool = false;
 		
 		metrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0}
 		prevMetrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0}
@@ -270,18 +287,17 @@ class TextField extends RenderedObject {
 			}
 			else if (char.charCodeAt(0) < 33 && char.charCodeAt(0) > 0)
 			{
-				switch(char)
+				
+				currWord.Clean();
+				if (char != "\t" && char != "\n" && char != " ")
+					continue
+				else isSpecialChar = true;
+				
+				if (char == "\n")
 				{
-					
-					case "\t" : hTab = true;
-					case "\n" : carriageReturn = true;
 					line++;
 					lines.push(new Array<LineGlyphData>());
-					case " " : space = true;
-					
 				}
-				currWord.Clean();
-				continue;
 			}
 			
 			if (isEmbedded = (char == "{" && chars[i + 1] == "\""))
@@ -320,20 +336,21 @@ class TextField extends RenderedObject {
 					metrics.fAsc = currFont.ascender * sizeRatio;
 				
 				}
-				else
+				else if (!isSpecialChar){
+					
 					textureData = AssetManager.Get().GetFontGlyphTextureData(font, char, Math.round(textSize), atlas);
+					if ( textureData == null){
+							
+						trace("Embedded visual or glyph" + char + " doesn't exist " );
+						continue;
+					}	
+			
+					
+				}
 				
 			}
 			
-			
-	
-			if (textureData == null){
 					
-				trace("Embedded visual or glyph" + char+ " doesn't exist " );
-					continue;
-			}	
-			
-		
 			if (glyphsData.length > glyphDataIndex)		glyphData = glyphsData[glyphDataIndex];
 			else {
 					glyphData = {
@@ -353,8 +370,8 @@ class TextField extends RenderedObject {
 			}
 			
 			
-			glyphMetrics = (!isEmbedded? currFont.getGlyphMetrics(currFont.getGlyph(char)):null);	
-			
+			glyphMetrics = ((!isEmbedded && !isSpecialChar)? currFont.getGlyphMetrics(currFont.getGlyph(char)):null);	
+		
 			if (glyphMetrics != null)
 			{
 				metrics.gHbX = glyphMetrics.horizontalBearing.x * sizeRatio;
@@ -363,13 +380,8 @@ class TextField extends RenderedObject {
 			}
 			else metrics.gHbX = metrics.gHbY = metrics.gAdvX = 0;
 			
-						
-			glyphScale = textureData.uvH / textureData.uvW;
-			glyphHeight = (!isEmbedded ? glyphMetrics.height * sizeRatio : (embedded.height > 0 ? embedded.height : this.textSize));
-			glyphData.y = (!isEmbedded? line * linesHeight  + (line+1)* metrics.fAsc + ( metrics.fAsc - metrics.gHbY) : glyphHeight * line );
-			glyphData.width = glyphHeight / glyphScale;
-			glyphData.height = glyphHeight;
-			
+			glyphData.metrics = glyphMetrics;
+				
 			if (isEmbedded && embedded.color >= 0 )
 			{
 				glyphData.colorChanged = true;
@@ -388,16 +400,55 @@ class TextField extends RenderedObject {
 				glyphData.color = this.color;
 			}
 			
-			glyphData.line = line;
-			glyphData.textureData = textureData;
-			glyphData.metrics = glyphMetrics;
 			
-			if (glyphData.bufferIndex < 0 && bufferIndex >= 0) glyphData.bufferIndex = (i == 0 ? this.bufferIndex : renderingBatch.AllocateBufferIndex());
+			
+			
+			
+			
+			if (!isSpecialChar)
+			{
+				if (isEmbedded)
+				{
+					glyphHeight =  (embedded.height > 0 ? embedded.height : this.textSize);
+					glyphData.y =  glyphHeight * line ;
+					
+				}
+				else
+				{
+					glyphHeight = ((glyphMetrics != null) ? glyphMetrics.height * sizeRatio : this.textSize);
+					glyphData.y = line * linesHeight  + (line+1)* metrics.fAsc + ( metrics.fAsc - metrics.gHbY) ;
+					
+				}
+				
+				glyphScale = textureData.uvH / textureData.uvW;
+				glyphData.height = glyphHeight;
+				glyphData.width = glyphHeight / glyphScale;
+				glyphData.textureData = textureData;
+				if (glyphData.bufferIndex < 0 && bufferIndex >= 0) glyphData.bufferIndex = (i == 0 ? this.bufferIndex : renderingBatch.AllocateBufferIndex());
+		
+			}
+			else
+			{
+				glyphData.textureData = null;
+				switch(char)
+				{
+					case "\n": glyphData.width = 0;
+					case "\t": glyphData.width = tabSpacing;
+					case " ": glyphData.width = spaceSpacing;
+				}
+				
+				glyphData.height = this.textSize;
+				glyphData.y = glyphHeight * line ;
+				
+			}
+					
+			glyphData.line = line;
+					
 			//TO change
 			if (this.width == 0) SetBaseWidth(glyphData.x + glyphData.width);
 			if (this.height == 0)	SetBaseHeight(textSize);
 			
-			if (prevglyphData != null && carriageReturn == false)
+			if (prevglyphData != null )
 			{
 				if (prevglyphData.metrics != null)
 				{
@@ -407,11 +458,10 @@ class TextField extends RenderedObject {
 				}
 				else prevMetrics.gHbX = prevMetrics.gHbY = prevMetrics.gAdvX = 0;
 							
-				glyphData.x = (glyphMetrics != null? metrics.gHbX : 0)  + prevglyphData.x + (prevglyphData.metrics != null? prevMetrics.gAdvX - prevMetrics.gHbX : prevglyphData.width + letterSpacing)  + (space ? spaceSpacing : 0) +(hTab ? tabSpacing : 0);
+				glyphData.x = metrics.gHbX  + prevglyphData.x + (prevglyphData.metrics != null? prevMetrics.gAdvX - prevMetrics.gHbX : prevglyphData.width /*+ letterSpacing*/);
 			}
 			else	glyphData.x = (glyphMetrics != null? metrics.gHbX : 0);
 			
-					
 			switch(autoAdjust)
 			{
 				case AutoAdjust.ADJUST_FIELD | AutoAdjust.NONE:
@@ -482,15 +532,14 @@ class TextField extends RenderedObject {
 			}
 			
 			
-			if (hTab == true || space == true) currWord.Clean();
-			if(isEmbedded == false) currWord.Push(glyphDataIndex);	
+			if(!isEmbedded && !isSpecialChar) currWord.Push(glyphDataIndex);	
 			
-			lines[glyphData.line].push({glyph:glyphDataIndex, tab:hTab, space:space});
+			lines[glyphData.line].push({glyph:glyphDataIndex, tab:false, space:false});
 			
 			prevglyphData = glyphData;
 			glyphDataIndex++;
 			
-			carriageReturn = space = hTab = endOfLineReached = false;	
+			isSpecialChar = false;	
 		}
 		
 		
@@ -515,7 +564,7 @@ class TextField extends RenderedObject {
 						for (i in 1...lineData.length)
 						{
 							data = glyphsData[lineData[lineData.length - 1 - i].glyph];
-							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing) - ( lineData[lineData.length - i].space ? spaceSpacing : 0) - (lineData[lineData.length - i].tab ? tabSpacing : 0 );				
+							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing);				
 							prevData = data;
 						}
 							
@@ -542,7 +591,7 @@ class TextField extends RenderedObject {
 							
 						for (i in 1...lineData.length){
 							data = glyphsData[lineData[lineData.length - 1 - i].glyph];
-							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing) - ( lineData[lineData.length -i].space ? spaceSpacing : 0) - (lineData[lineData.length -i].tab ? tabSpacing : 0 );				
+							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing);				
 							prevData = data;
 						}
 						
@@ -561,7 +610,11 @@ class TextField extends RenderedObject {
 			}
 			
 		}
-	
+		if (cursor != null){
+			cursor.x = this.x + glyphsData[cursorIndex].x - cursor.width;
+			cursor.y = this.y + glyphsData[cursorIndex].line * linesHeight ;	
+		}
+		
 		needLayoutUpdate = false;
 		
 		
@@ -599,8 +652,10 @@ class TextField extends RenderedObject {
 				for (i in 0...glyphsData.length)
 				{
 					
-					if (glyphsData[i].bufferIndex < 0)
+					if (glyphsData[i].bufferIndex < 0 && glyphsData[i].textureData !=null)
 					{
+						trace(i);
+						trace(glyphsData[i].textureData);
 						if (i == 0) glyphsData[i].bufferIndex = value;
 						else glyphsData[i].bufferIndex = renderingBatch.AllocateBufferIndex();
 						
@@ -724,13 +779,13 @@ class TextField extends RenderedObject {
 			{
 				onAABBTree = true;
 				InputManager.Get().BindToInput(StringLibrary.ANY, InputType.MOUSE_CLICK,GetFocus, this.name);
-				//InputManager.Get().BindToAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);
+				/*//InputManager.Get().BindToAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);*/
 			}
 			else
-			//{InputManager.Get().BindToAction(InputManager.GetDefaultInputActionID(InputManager.GetMouseInputID(0), InputType.MOUSE_CLICK), GetFocus, this.name);
+			/*//{InputManager.Get().BindToAction(InputManager.GetDefaultInputActionID(InputManager.GetMouseInputID(0), InputType.MOUSE_CLICK), GetFocus, this.name);*/
 			{
 				onAABBTree = false;
-				//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);
+				/*//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);*/
 				
 			}
 			
@@ -738,7 +793,7 @@ class TextField extends RenderedObject {
 		
 		return isInteractive = value;
 	}
-	
+		
 	function set_alignment(value:Alignment):Alignment 
 	{
 		autoAdjust = AutoAdjust.ADJUST_TEXT;
@@ -751,8 +806,15 @@ class TextField extends RenderedObject {
 	{
 		InputManager.Get().focusedObject = this.name;
 		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
+		cursor.height = linesHeight + AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);
+		cursor.x = this.x + glyphsData[cursorIndex].x - cursor.width;
+		cursor.y = this.y + glyphsData[cursorIndex].line * linesHeight  + (glyphsData[cursorIndex].line)* AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);	
+			
+		cursorIndex ++;
+		Wait.ClearWait(this.name);
 		ShowCursor();
 		trace("focused!");
+		trace(glyphsData[cursorIndex].line);
 	}
 	
 }
