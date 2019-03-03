@@ -12,7 +12,6 @@ typedef BatchTemplateData =
 	var vertices:Array<Float>;
 	var vertexAttributes:Array<VertexAttribute>;
 	var drawMode:Int;
-	var needOrdering:Bool;
 	var name:String;
 	var type:String;
 	var vertexStride:Int;

@@ -147,14 +147,14 @@ class OptionsManager
 								
 					}
 					
-					Renderer.Get().AddTemplate({name: template.get("name"), type: template.get("type"), needOrdering: (template.get("needOrdering") == "true"), drawMode: drawMode, shaders:shaders, indices:verticesIndices, vertices: vertices, vertexAttributes: vertexAttributes, vertexStride : vertexStride, vertexPerObject: Std.parseInt(template.get("vertexPerObject"))});
+					Renderer.Get().AddTemplate({name: template.get("name"), type: template.get("type"), drawMode: drawMode, shaders:shaders, indices:verticesIndices, vertices: vertices, vertexAttributes: vertexAttributes, vertexStride : vertexStride, vertexPerObject: Std.parseInt(template.get("vertexPerObject"))});
 					
 					
 				}
 				
 				for (batch in element.elementsNamed("batch"))
 				{
-					batchesToCreate.push({name: batch.get("name"), template: batch.get("template")});
+					batchesToCreate.push({name: batch.get("name"), template: batch.get("template"),needOrdering: (batch.get("needOrdering") == "true")});
 				}
 				
 			}
@@ -209,4 +209,5 @@ typedef FontToLoad = {
 typedef BatchToCreate = {
 	var name : String;
 	var template:String;
+	var needOrdering:Bool;
 }

@@ -15,6 +15,7 @@ class BeardLayer
 	public static var DEPTH_CONTENT:Float = 0.5;
 	public static var DEPTH_UI:Float = 0;
 	public static var DEPTH_LOADING:Float = -0.5;
+	public static var DEPTH_DEBUG:Float = -0.5;
 	
 	public var depth:Float; 
 	public var maxObjectsCount(default, null):Int;

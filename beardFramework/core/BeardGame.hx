@@ -52,9 +52,10 @@ class BeardGame extends Application
 	public var SETTINGS(default, never):String = "settings";
 	public var SPLASHSCREENS_PATH(default, never):String = "assets/splash/";
 	public var SHADERS_PATH(default, never):String = "assets/shaders/";
-	public var CONTENTLAYER(default, never):Int = 2;
-	public var UILAYER(default, never):Int = 1;
-	public var LOADINGLAYER(default, never):Int = 0;
+	public var CONTENTLAYER(default, never):Int = 3;
+	public var UILAYER(default, never):Int = 2;
+	public var LOADINGLAYER(default, never):Int = 1;
+	public var DEBUGLAYER(default, never):Int = 0;
 	//public var code(default, null):BaseCode;
 	private var physicsEnabled:Bool;
 	private var layers:MinAllocArray<BeardLayer>;
@@ -91,13 +92,14 @@ class BeardGame extends Application
 		//#end
 		//code = new haxe.crypto.BaseCode(haxe.io.Bytes.ofString("LUDO"));
 		
-		layers = new MinAllocArray(3);
+		layers = new MinAllocArray(4);
+		layers.Push(new BeardLayer("Debug", BeardLayer.DEPTH_DEBUG,DEBUGLAYER));
 		layers.Push(new BeardLayer("LoadingLayer", BeardLayer.DEPTH_LOADING,LOADINGLAYER));
 		layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,UILAYER));
 		layers.Push(new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT, CONTENTLAYER));
 	
 		
-		for (i in 0...3)
+		for (i in 0...4)
 			layers.get(i).visible = false;
 			
 		cameras = new Map<String,Camera>();
@@ -107,7 +109,7 @@ class BeardGame extends Application
 		
 		entities = new Array<GameEntity>();
 		
-		//fps = new MemoryUsage(10,10,0xffffff);
+		
 		//stage.addChild(fps);
 		
 		gameReady = false;
@@ -177,8 +179,7 @@ class BeardGame extends Application
 			
 			for (batch in OptionsManager.Get().batchesToCreate)
 			{
-				trace(batch);
-				Renderer.Get().CreateBatch(batch.name, batch.template);
+				Renderer.Get().CreateBatch(batch.name, batch.template,batch.needOrdering);
 			
 			}
 			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
@@ -207,6 +208,13 @@ class BeardGame extends Application
 		Renderer.Get().Start();
 		
 		UIManager.Get();
+		
+		fps = new MemoryUsage(10, 10, 0xffffffff);
+	
+		fps.renderingBatch = cast Renderer.Get().GetBatch(Renderer.Get().UI);
+		
+		GetDebugLayer().Add(fps);
+		GetDebugLayer().visible = true;
 		//grid = new RegionGrid(window.width, window.height,5);
 		
 	}
@@ -310,6 +318,7 @@ class BeardGame extends Application
 			
 				UIManager.Get().Update();
 				
+				if(fps!= null) fps.UpdateFPS();
 			}
 			
 			
@@ -395,6 +404,10 @@ class BeardGame extends Application
 	public inline function GetLoadingLayer():BeardLayer
 	{
 		return layers.get(LOADINGLAYER);
+	}
+	public inline function GetDebugLayer():BeardLayer
+	{
+		return layers.get(DEBUGLAYER);
 	}
 
 }

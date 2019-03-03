@@ -9,6 +9,7 @@ interface IBatch
 {
   	public var name(get, set):String;
 	public var needUpdate:Bool;
+	public var needOrdering:Bool;
 	public var shaderProgram(default, null):GLProgram;
 	public var cameras:List<String>;
 	

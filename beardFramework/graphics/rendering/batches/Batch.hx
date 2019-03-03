@@ -2,6 +2,7 @@ package beardFramework.graphics.rendering.batches;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IBatch;
@@ -12,6 +13,7 @@ import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLProgram;
 import lime.graphics.opengl.GLShader;
 import lime.graphics.opengl.GLVertexArrayObject;
+import lime.math.Vector4;
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 
@@ -22,8 +24,10 @@ import lime.utils.UInt16Array;
 class Batch implements IBatch
 {
 
+	private static var nullPtr:Float32Array = null;
 	@:isVar public var name(get, set):String;
 	public var needUpdate:Bool;
+	public var needOrdering:Bool;
 	public var cameras:List<String>;
 	public var shaderProgram(default, null):GLProgram;
 	public var drawMode:Int;
@@ -31,25 +35,20 @@ class Batch implements IBatch
 	private var vertices:Vector<Float>; //implement as you like on each batch class
 	private var indices:Vector<Int>;
 	private var vertexAttributes:Vector<VertexAttribute>;
-	private var bufferIndices:Array<Bool>;
+	private var bufferIndices:Array<BufferIndexData>;
 	private var EBO:GLBuffer;
 	private var VBO:GLBuffer;
 	private var VAO:GLVertexArrayObject;
 	private var verticesData:RenderedDataBufferArray;
 	private var indicesData:UInt16Array;
-	private var verticesDataOrdered:RenderedDataBufferArray;
-
+	
 	private var utilFloatArray:Float32Array;
 	private var utilUIntArray:UInt16Array;
 	private	var pointer:Int;
 	private	var indicesPerObject:Int;
-	private var needOrdering:Bool;
 	private var renderer:Renderer;
 	private var drawCount:Int = 0;
 
-	
-	
-	
 	public function new() 
 	{
 	
@@ -57,14 +56,14 @@ class Batch implements IBatch
 	
 	public function Init( batchData:BatchTemplateData):Void
 	{
-		needOrdering = batchData.needOrdering;
 		renderer = Renderer.Get();
 		drawMode = batchData.drawMode;
 		needUpdate = false;
 		indicesPerObject = 0;
 		
 		verticesData = new RenderedDataBufferArray(batchData.vertexStride, batchData.vertexPerObject);
-		bufferIndices = new Array<Bool>();
+		bufferIndices = new Array<BufferIndexData>();
+		
 		
 		InitVertices(batchData.vertices, batchData.indices);
 		InitShaders(batchData.shaders);
@@ -175,7 +174,7 @@ class Batch implements IBatch
 			EBO  = renderer.GenerateBuffer();
 		
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.STREAM_DRAW);
 		}
 	
 		
@@ -191,6 +190,11 @@ class Batch implements IBatch
 		
 	}
 	
+	public function OrderVerticesData():Void
+	{
+				
+	}
+	
 	public function CleanRenderedData(index:Int):Void
 	{
 		if (index >= 0)
@@ -198,7 +202,7 @@ class Batch implements IBatch
 			
 	
 			var attIndex:Int = 0;
-			var visIndex:Int = index*verticesData.objectStride;
+			var visIndex:Int = bufferIndices[index].bufferIndex *verticesData.objectStride;
 				
 			
 			GL.bindVertexArray(VAO);
@@ -219,7 +223,7 @@ class Batch implements IBatch
 				
 			}
 		
-			GL.bufferSubData(GL.ARRAY_BUFFER, index * utilFloatArray.byteLength, utilFloatArray.byteLength, utilFloatArray); 
+			GL.bufferSubData(GL.ARRAY_BUFFER, bufferIndices[index].bufferIndex * utilFloatArray.byteLength, utilFloatArray.byteLength, utilFloatArray); 
 			if(verticesData.activeDataCount >0)  verticesData.activeDataCount --;
 		}
 		else
@@ -315,7 +319,7 @@ class Batch implements IBatch
 		
 		if (utilFloatArray == null) utilFloatArray = new Float32Array(verticesData.objectStride);
 		
-		dataIndex = index * verticesData.objectStride;
+		dataIndex = bufferIndices[index].bufferIndex * verticesData.objectStride;
 		
 		for (i in 0...data.length)
 			verticesData.data[dataIndex + i] = utilFloatArray[i] = data[i];
@@ -332,25 +336,35 @@ class Batch implements IBatch
 		
 	}
 	
-	public function AllocateBufferIndex():Int
+	public function AllocateBufferIndex(index:Int = -1):Int
 	{
-		//trace(bufferIndices);
-		var index:Int = -1;
+	
+		
 		var length:Int = bufferIndices.length;
 		
-		for (i in 0...length)
-			if (bufferIndices[i] == false)
-			{
-				bufferIndices[i] = true;
-				index = i;
-				break;
-			}
-		
-		if (index == -1)
-		{
-			bufferIndices.push(true);
-			index = length;
+		if (index > -1 ){
+			
+			if (index < bufferIndices.length)	bufferIndices[index].used = true;
+			else return -1;
 		}
+		else
+		{
+			for (i in 0...length)
+				if (bufferIndices[i].used == false)
+				{
+					bufferIndices[i].used = true;
+					index = i;
+					break;
+				}
+		
+			if (index == -1)
+			{
+				bufferIndices.push({used:true, bufferIndex:length});
+				index = length;
+			}
+			
+		}
+			
 		//trace("allocated index : " + index);
 		verticesData.activeDataCount++;
 		return index;
@@ -363,9 +377,9 @@ class Batch implements IBatch
 		var length:Int = bufferIndices.length;
 		
 		for (i in 0...length)
-			if (bufferIndices[i] == false)
+			if (bufferIndices[i].used == false)
 			{
-				bufferIndices[i] = true;
+				bufferIndices[i].used = true;
 				indices.push(i);
 				count--;
 				
@@ -374,8 +388,9 @@ class Batch implements IBatch
 		
 		while (count-- > 0)
 		{
-			bufferIndices.push(true);
-			indices.push(length++);
+			bufferIndices.push({used:true, bufferIndex:length});
+			indices.push(length);
+			length++;
 		}
 		
 		return indices;
@@ -388,7 +403,7 @@ class Batch implements IBatch
 		var length:Int = bufferIndices.length;
 		
 		for (i in 0...length)
-			if (bufferIndices[i] == false)
+			if (bufferIndices[i].used == false)
 			{
 				index = i;
 				break;
@@ -403,18 +418,19 @@ class Batch implements IBatch
 		
 		if (index < bufferIndices.length && index >= 0){
 			
-			bufferIndices[index] = false;
+			bufferIndices[index].used = false;
 			CleanRenderedData(index);
 			
-		}
-		else if (index < 0)
-		{
-			for (i in 0...bufferIndices.length)
-			bufferIndices[i] = false;
 		}
 			
 		return -1;
 		
+	}
+	
+	public inline function FreeAllBufferIndices():Void
+	{
+		for (i in 0...bufferIndices.length)
+			bufferIndices[i].used = false;
 	}
 	
 	public function Flush():Void
@@ -424,6 +440,7 @@ class Batch implements IBatch
 		CleanRenderedData( -1);
 		
 	}
+	
 	private inline function GetHigherIndex():Int
 	{
 		return bufferIndices.length - 1;
@@ -443,7 +460,6 @@ class Batch implements IBatch
 		return visu.toString();
 		
 	}
-	
 	
 	public function Render():Int
 	{
@@ -490,13 +506,15 @@ class Batch implements IBatch
 			renderer.view.identity();
 			renderer.view.appendScale(camera.zoom, camera.zoom,1);
 			//renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
-			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth *0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight *0.5) - camera.centerY, 0);
+			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, 0);
+			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
 		
 			
 			if (indicesPerObject> 0){
 				//trace(verticesData.activeDataCount);
 				GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
+			
 			}
 			else
 			{
@@ -529,4 +547,10 @@ class Batch implements IBatch
 	{
 		return name = value;
 	}
+}
+
+typedef BufferIndexData =
+{
+	public var used:Bool;
+	public var bufferIndex:Int;
 }

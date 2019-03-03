@@ -1,5 +1,5 @@
 package beardFramework.systems.aabb;
-import beardFramework.utils.MathU;
+import beardFramework.utils.math.MathU;
 import beardFramework.utils.Tags;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import lime.math.Vector2;

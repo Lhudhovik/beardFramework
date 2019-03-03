@@ -6,6 +6,7 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.text.TextField;
 import beardFramework.utils.graphics.ColorU;
 import beardFramework.resources.MinAllocArray;
+import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
 import lime.math.Vector2;
 import lime.utils.Float32Array;
@@ -44,6 +45,7 @@ class RenderedObjectBatch extends Batch
 		//
 		//
 	//}
+	
 	override public function UpdateRenderedData():Void
 	{
 		if (renderer.ready){
@@ -54,7 +56,7 @@ class RenderedObjectBatch extends Batch
 			var verIndex:Int = 0;
 			var attIndex:Int = 0;
 			var visIndex:Int = 0;
-			
+			var depthChange:Bool = false;
 			
 			GL.bindVertexArray(VAO);
 	
@@ -88,9 +90,11 @@ class RenderedObjectBatch extends Batch
 				GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 				
 				GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-				GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.DYNAMIC_DRAW);
+				GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.STREAM_DRAW);
 				
 				GL.bindBuffer(GL.ARRAY_BUFFER, 0);
+				
+				depthChange = true;
 			}
 			
 			
@@ -111,8 +115,10 @@ class RenderedObjectBatch extends Batch
 				
 				else if ( Std.is(dirtyObjects.get(0), Visual) && (visual = cast(dirtyObjects.get(0), Visual)) != null)
 				{
+					//trace(visual.bufferIndex);
+					//trace(bufferIndices);
 					
-					visIndex = visual.bufferIndex*40;
+					visIndex = bufferIndices[visual.bufferIndex].bufferIndex *40;
 					center.x =  visual.width * 0.5;
 					center.y = visual.height * 0.5;
 					for (i in 0...4)
@@ -126,6 +132,10 @@ class RenderedObjectBatch extends Batch
 						//renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = visual.x +  quadVertices[verIndex] * visual.width;
 						verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y + center.y + ((vertices[verIndex] * visual.width)-center.x)*visual.rotationSine +  ((vertices[verIndex+1] * visual.height)-center.y)*visual.rotationCosine;
 						//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y +  quadVertices[verIndex+1] * visual.height;
+						if (verticesData.data[visIndex + attIndex + 2] != (visual.visible ? visual.renderDepth : -2)){
+							depthChange = true;
+							trace("difference");
+						}
 						verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth : -2;
 								
 						
@@ -144,8 +154,8 @@ class RenderedObjectBatch extends Batch
 						
 					visual.isDirty = false;
 				
-					GL.bufferSubData(GL.ARRAY_BUFFER, visual.bufferIndex * utilFloatArray.byteLength, utilFloatArray.byteLength, utilFloatArray); 
-								
+					GL.bufferSubData(GL.ARRAY_BUFFER, bufferIndices[visual.bufferIndex].bufferIndex * utilFloatArray.byteLength, utilFloatArray.byteLength, utilFloatArray); 
+							
 				}
 				else if (Std.is(dirtyObjects.get(0), TextField) && (textfield = cast(dirtyObjects.get(0), TextField)) != null)
 				{
@@ -155,8 +165,9 @@ class RenderedObjectBatch extends Batch
 						center.y = textfield.height * 0.5;	
 					for (data in textfield.glyphsData)
 					{
-						if (data.textureData == null) continue;
-						visIndex = data.bufferIndex*40;
+						if (data.textureData == null || data.bufferIndex < 0) continue;
+						
+						visIndex = bufferIndices[data.bufferIndex].bufferIndex*40;
 					
 						
 						for (i in 0...4)
@@ -170,6 +181,10 @@ class RenderedObjectBatch extends Batch
 							//renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = textfield.x + data.x +  quadVertices[verIndex] * data.width;
 							verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] =  textfield.y + center.y + ((vertices[verIndex] * data.width+data.x)-center.x)*textfield.rotationSine +  ((vertices[verIndex+1] * data.height+data.y)-center.y)*textfield.rotationCosine;
 							//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = textfield.y +  data.y +  quadVertices[verIndex+1] * data.height;
+							if (verticesData.data[visIndex + attIndex + 2] != (textfield.visible ? textfield.renderDepth : -2)){
+								depthChange = true;
+								trace("difference");
+							}
 							verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = textfield.visible ? textfield.renderDepth : -2;
 							
 							
@@ -186,7 +201,7 @@ class RenderedObjectBatch extends Batch
 							
 						}
 						
-						GL.bufferSubData(GL.ARRAY_BUFFER, data.bufferIndex * utilFloatArray.byteLength ,utilFloatArray.byteLength, utilFloatArray); 
+						GL.bufferSubData(GL.ARRAY_BUFFER, bufferIndices[data.bufferIndex].bufferIndex * utilFloatArray.byteLength ,utilFloatArray.byteLength, utilFloatArray); 
 						
 					}
 					
@@ -203,9 +218,66 @@ class RenderedObjectBatch extends Batch
 			//for (i in 0...verticesData.vertexStride)
 				//visu.push(verticesData.data[i]);
 			//trace(visu);
+			
+			if (needOrdering && depthChange) OrderVerticesData();
 			needUpdate = false;
 		}
 		
+	}
+	
+	override public function OrderVerticesData():Void 
+	{
+			trace(bufferIndices);
+		//var ordered:Array<Int> = [];
+		var ordered:Vector<DepthOrderingData> = new Vector(bufferIndices.length);
+		var z:Float = 0;
+		
+		for (i in 0...ordered.length)
+		{
+			ordered[i] = { z: verticesData.data[bufferIndices[i].bufferIndex *40 + 2], bufferIndex : bufferIndices[i].bufferIndex}   ;
+		}
+		
+		trace(ordered);
+		ordered.sort(DepthSorting);
+		trace(ordered);
+		var newBufferData:Float32Array = new Float32Array(verticesData.data.length);
+		
+		for (i in 0...ordered.length)
+		{
+			
+			for (j in 0...40)
+			{
+				newBufferData[i * 40 + j] = verticesData.data[bufferIndices[ordered[i].bufferIndex].bufferIndex * 40 + j];
+			}
+			bufferIndices[ordered[i].bufferIndex].bufferIndex = i;
+			
+		}
+		
+		trace(bufferIndices);
+		var visu:Array<Float> = [];
+			for (i in 0...verticesData.data.length)
+				visu.push(verticesData.data[i]);
+			trace(visu);
+		
+		verticesData.data = newBufferData;
+		
+		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
+		GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.STREAM_DRAW);
+		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
+		visu = [];
+		for (i in 0...verticesData.data.length)
+			visu.push(verticesData.data[i]);
+		trace(visu);
+		
+	}
+	private inline function DepthSorting(data1:DepthOrderingData, data2:DepthOrderingData):Int
+	{
+		var result:Int = 0;
+		if (data1.z < data2.z) result = 1;
+		else if (data1.z > data2.z) result = -1;
+		else result = 0;
+		
+		return result;		
 	}
 	
 	public inline function AddDirtyObject(object:RenderedObject):Void
@@ -227,4 +299,10 @@ class RenderedObjectBatch extends Batch
 		super.Flush();
 		dirtyObjects.Clean();
 	}
+}
+
+typedef DepthOrderingData = 
+{
+	var z:Float;
+	var bufferIndex:Int;
 }

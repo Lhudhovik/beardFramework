@@ -1,4 +1,4 @@
-package beardFramework.utils;
+package beardFramework.utils.math;
 import beardFramework.utils.simpleDataStruct.SRect;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import lime.math.Matrix4;

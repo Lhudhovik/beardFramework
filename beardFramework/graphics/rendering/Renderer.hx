@@ -105,7 +105,7 @@ class Renderer
 		//InitBatch(DEFAULT);
 		
 	}
-	public function CreateBatch(name:String, template:String = "default" ,addToBatchList:Bool = true):IBatch
+	public function CreateBatch(name:String, template:String = "default" , needOrdering:Bool = false, addToBatchList:Bool = true):IBatch
 	{
 		var batch:IBatch = null;
 		if (batchTemplates[template] != null)
@@ -113,6 +113,7 @@ class Renderer
 			batch = cast Type.createInstance(Type.resolveClass("beardFramework.graphics.rendering.batches."+batchTemplates[template].type), []);
 			batch.Init(batchTemplates[template]);
 			batch.name = name;
+			batch.needOrdering = needOrdering;
 			if (addToBatchList) AddBatch(batch);
 		}
 		

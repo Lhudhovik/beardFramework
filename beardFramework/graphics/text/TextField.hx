@@ -131,6 +131,7 @@ class TextField extends RenderedObject {
 				glyphsData[glyphsData.length-1-i].bufferIndex = renderingBatch.FreeBufferIndex(glyphsData[glyphsData.length-1-i].bufferIndex);
 			}
 			
+			if (bufferIndex >= 0 && renderingBatch != null) renderingBatch.AllocateBufferIndex(bufferIndex);
 		}
 		
 		UpdateLayout();
@@ -160,6 +161,8 @@ class TextField extends RenderedObject {
 	{
 		
 		isDirty = true;
+		//if (bufferIndex <0 && addedText.length > 0 && renderingBatch != null ) bufferIndex = renderingBatch.AllocateBufferIndex();
+			
 		
 		if (index == -1 || index > text.length)
 			this.text += addedText;
@@ -175,6 +178,13 @@ class TextField extends RenderedObject {
 		
 	}
 	
+	public function SetText(text:String):String
+	{
+		RemoveText(this.text.length - 1, this.text.length);
+		AppendText(text);
+		
+		return text;
+	}
 	public function AppendTextAtCursor( value:InputData):Void
 	{
 		trace(value);
@@ -439,7 +449,7 @@ class TextField extends RenderedObject {
 				
 				glyphData.height = this.textSize;
 				glyphData.y = glyphHeight * line ;
-				
+				if (glyphData.bufferIndex >= 0) glyphData.bufferIndex = renderingBatch.FreeBufferIndex(glyphData.bufferIndex);
 			}
 					
 			glyphData.line = line;
@@ -448,7 +458,7 @@ class TextField extends RenderedObject {
 			if (this.width == 0) SetBaseWidth(glyphData.x + glyphData.width);
 			if (this.height == 0)	SetBaseHeight(textSize);
 			
-			if (prevglyphData != null )
+			if (prevglyphData != null && char != "\n" )
 			{
 				if (prevglyphData.metrics != null)
 				{
@@ -457,7 +467,6 @@ class TextField extends RenderedObject {
 					prevMetrics.gAdvX = prevglyphData.metrics.advance.x * sizeRatio;
 				}
 				else prevMetrics.gHbX = prevMetrics.gHbY = prevMetrics.gAdvX = 0;
-							
 				glyphData.x = metrics.gHbX  + prevglyphData.x + (prevglyphData.metrics != null? prevMetrics.gAdvX - prevMetrics.gHbX : prevglyphData.width /*+ letterSpacing*/);
 			}
 			else	glyphData.x = (glyphMetrics != null? metrics.gHbX : 0);
@@ -685,7 +694,7 @@ class TextField extends RenderedObject {
 					}
 				}
 				
-				if (cursor != null && cursor.renderingBatch != null)
+				if (cursor != null && cursor.renderingBatch != null && cursor.bufferIndex >= 0)
 				{
 					cursor.renderingBatch.RemoveDirtyObject(cursor);
 					cursor.renderingBatch.FreeBufferIndex(cursor.bufferIndex);
@@ -816,6 +825,8 @@ class TextField extends RenderedObject {
 		trace("focused!");
 		trace(glyphsData[cursorIndex].line);
 	}
+	
+	
 	
 }
 
