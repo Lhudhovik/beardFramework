@@ -11,6 +11,9 @@ import beardFramework.graphics.ui.UIManager;
 import beardFramework.interfaces.IBatch;
 import beardFramework.utils.data.DataU;
 import beardFramework.resources.MinAllocArray;
+import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.simpleDataStruct.SVec2;
+import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.app.Application;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -50,6 +53,8 @@ class Renderer
 	
 	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
+	public var lightColor:UInt = ColorU.WHITE;
+	public var lightPosition:SVec3;
 	private var batches:MinAllocArray<IBatch>;
 	private var batchTemplates:Map<String, BatchTemplateData>;
 	private	var pointer:Int;
@@ -98,6 +103,7 @@ class Renderer
 		batches = new MinAllocArray();
 		batchTemplates = new Map();
 		
+		lightPosition = {x:0, y:0, z:-100};
 		
 		#if debug
 		//InitDebugBatch();
@@ -157,7 +163,7 @@ class Renderer
 		if (ready)
 		{
 			GL.scissor(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
-			GL.clearColor(1, 0, 1, 1);
+			GL.clearColor(0, 0, 0,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
 			GL.clear(GL.DEPTH_BUFFER_BIT);
 			

@@ -2,29 +2,31 @@
 
 in vec3 TexCoord;
 in vec4 Spritecolor;
+in vec3 Normal;
+in vec3 FragmentPosition;
 
 out vec4 FragColor;
 
 
 uniform sampler2D atlas[10];
+uniform vec3 lightColor ;
+uniform vec3 lightPosition ;
 
 void main()
 {
-	//if(TexCoord.z >= 0){
-		
-	vec4 texColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * Spritecolor;
-	//vec4 texColor =  vec4(vec3(gl_FragCoord.z), 1.0);
+	float ambientStrength = 0.1f;
+    vec4 ambient = vec4( lightColor * ambientStrength , 1.0f) ;
 	
-
-	/*if(texColor.a < 0.01){
-		discard;
-	}*/
-	FragColor =texColor;
-	//FragColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * Spritecolor;
-	/*}
-	else
-	{
-		FragColor = Spritecolor;
-	}*/
+	vec3 normal = normalize(Normal);
+	vec3 lightDirection = normalize(lightPosition - FragmentPosition);
+	
+	vec4 diffuse = vec4(max(dot(normal, lightDirection), 0.0) * lightColor, 1.0);
+	
+	
+	vec4 texColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * (ambient +diffuse)  * Spritecolor;
+	FragColor = texColor;
+	
+	
+	
 	
 } 

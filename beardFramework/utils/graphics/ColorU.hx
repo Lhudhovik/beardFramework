@@ -38,12 +38,23 @@ class ColorU
     public static function getBlue(color:UInt):Int  { return  (color >> 8)  & 0xff; }
 
    
+   
+	public static function getAlphaf(color:UInt):Float { return (color & 0xff)/255; }
+
+   
+    public static function getRedf(color:UInt):Float   { return ((color >> 24) & 0xff)/255; }
+
+    
+    public static function getGreenf(color:UInt):Float { return ((color >>  16) & 0xff)/255; }
+
+   
+    public static function getBluef(color:UInt):Float  { return  ((color >> 8)  & 0xff)/255; }
+
     public static function setAlpha(color:UInt, alpha:Int):UInt
     {
         return (color & 0x00ffffff) | (alpha & 0xff) << 24;
     }
-
-   
+    
     public static function setRed(color:UInt, red:Int):UInt
     {
         return (color & 0xff00ffff) | (red & 0xff) << 16;

@@ -7,6 +7,7 @@ import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IBatch;
 import beardFramework.resources.MinAllocArray;
+import beardFramework.utils.graphics.ColorU;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -509,7 +510,9 @@ class Batch implements IBatch
 			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, 0);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-		
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "lightColor"), ColorU.getRedf(renderer.lightColor), ColorU.getGreenf(renderer.lightColor), ColorU.getBluef(renderer.lightColor) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "lightPosition"), renderer.lightPosition.x, renderer.lightPosition.y, renderer.lightPosition.z );
+				
 			
 			if (indicesPerObject> 0){
 				//trace(verticesData.activeDataCount);
