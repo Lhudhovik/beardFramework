@@ -163,8 +163,10 @@ class RenderedObjectBatch extends Batch
 					if (textfield.needLayoutUpdate)	textfield.UpdateLayout();
 										center.x =  textfield.width * 0.5;
 						center.y = textfield.height * 0.5;	
-					for (data in textfield.glyphsData)
+					var data:RenderedGlyphData;
+					for (d in 0...textfield.glyphsData.length)
 					{
+						data = textfield.glyphsData.get(d);
 						if (data.textureData == null || data.bufferIndex < 0) continue;
 						
 						visIndex = bufferIndices[data.bufferIndex].bufferIndex*40;

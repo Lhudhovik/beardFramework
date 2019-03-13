@@ -6,11 +6,13 @@ import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.graphics.ui.FocusableList;
 import beardFramework.input.InputManager;
 import beardFramework.input.InputType;
 import beardFramework.input.data.InputData;
 import beardFramework.input.data.KeyboardInputData;
 import beardFramework.interfaces.ICameraDependent;
+import beardFramework.interfaces.IFocusable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.updateProcess.UpdateProcess;
@@ -19,27 +21,30 @@ import beardFramework.updateProcess.Wait;
 import beardFramework.utils.graphics.ColorU;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.libraries.StringLibrary;
+import beardFramework.utils.math.MathU;
 import haxe.Json;
 import haxe.Utf8;
 import lime.text.Font;
 import lime.text.GlyphMetrics;
+import lime.ui.KeyCode;
 
 
 /**
  * ...
  * @author Ludo
  */
-class TextField extends RenderedObject {
+class TextField extends RenderedObject implements IFocusable {
 	
 	private static var instanceCount:Int = 0;
 	public static var defaultFont:String="";
-	
+		
+	public var list:FocusableList;
 	@:isVar public var atlas(get, set):String;
 	@:isVar public var font(get, set):String;
 	@:isVar public var isInteractive(get, set):Bool = false;
 	public var alignment(default, set):Alignment;
 	public var autoAdjust:AutoAdjust;
-	public var glyphsData:Array<RenderedGlyphData>;
+	public var glyphsData:MinAllocArray<RenderedGlyphData>;
 	//public var lines:Array<Array<LineGlyphData>>;
 	public var needLayoutUpdate(default, null):Bool = false;
 
@@ -49,10 +54,11 @@ class TextField extends RenderedObject {
 	public var spaceSpacing(default, set):Float = 0;
 	public var text(default, null):String;
 	public var textSize:Float;
+	public var isForm:Bool;
 	
 	private var linesHeight:Float;
 	private var cursor:Visual;
-	private var cursorIndex:Int;
+	private var cursorIndex(default, set):Int;
 	
 	
 	
@@ -66,7 +72,7 @@ class TextField extends RenderedObject {
 		
 		this.text = "";
 	
-		glyphsData = new Array<RenderedGlyphData>();
+		glyphsData = new MinAllocArray<RenderedGlyphData>();
 		
 		alignment = Alignment.LEFT;
 		autoAdjust = AutoAdjust.ADJUST_FIELD;
@@ -92,13 +98,14 @@ class TextField extends RenderedObject {
 		spaceSpacing = textSize;
 		needLayoutUpdate = true;
 		cursorIndex = 0;
+		
+		isForm = false;
 	}
 	
 	public function ShowCursor():Void
 	{
 		if (layer != null){
-			
-			layer.Add(cursor);
+			if(cursor.layer == null) layer.Add(cursor);
 			cursor.visible = true;
 			Wait.WaitFor(0.5, HideCursor,this.name );
 		}
@@ -109,13 +116,11 @@ class TextField extends RenderedObject {
 	private function HideCursor():Void
 	{
 		cursor.visible = false;
-		if (InputManager.Get().focusedObject == this.name) 
+		if (InputManager.Get().focusedObject == this) 
 			Wait.WaitFor(0.5, ShowCursor, this.name);
 		
 	}
-	
-	
-	
+		
 	public function RemoveText(index:Int, count:Int = 1):String
 	{
 		
@@ -127,8 +132,8 @@ class TextField extends RenderedObject {
 			
 			for (i in 0...count)
 			{
-				if (glyphsData.length-1 >= i && glyphsData[glyphsData.length-i-1] != null)
-				glyphsData[glyphsData.length-1-i].bufferIndex = renderingBatch.FreeBufferIndex(glyphsData[glyphsData.length-1-i].bufferIndex);
+				if (glyphsData.length-1 >= i && glyphsData.get(glyphsData.length-i-1) != null)
+				glyphsData.get(glyphsData.length-1-i).bufferIndex = renderingBatch.FreeBufferIndex(glyphsData.get(glyphsData.length-1-i).bufferIndex);
 			}
 			
 			if (bufferIndex >= 0 && renderingBatch != null) renderingBatch.AllocateBufferIndex(bufferIndex);
@@ -145,11 +150,11 @@ class TextField extends RenderedObject {
 		var j:Int = 0;
 		for (i in 0...glyphsData.length)
 		{
-			if (glyphsData[j] != null)
+			if (glyphsData.get(j) != null)
 			{
-				if (full || glyphsData[j].bufferIndex < 0){
-					glyphsData[j] = null;
-					glyphsData.splice(j, 1);
+				if (full || glyphsData.get(j).bufferIndex < 0){
+					glyphsData.set(j,  null);
+					glyphsData.RemoveByIndex(j);
 				}
 				else j++;
 			}
@@ -159,7 +164,7 @@ class TextField extends RenderedObject {
 	
 	public function AppendText( addedText:String, index:Int = -1):String
 	{
-		
+		trace(addedText);
 		isDirty = true;
 		//if (bufferIndex <0 && addedText.length > 0 && renderingBatch != null ) bufferIndex = renderingBatch.AllocateBufferIndex();
 			
@@ -185,13 +190,25 @@ class TextField extends RenderedObject {
 		
 		return text;
 	}
+	
 	public function AppendTextAtCursor( value:InputData):Void
 	{
-		trace(value);
-		
+			
 		var data:KeyboardInputData = cast value;
-		AppendText(String.fromCharCode(data.keyCode), cursorIndex);
-		cursorIndex++;
+		var key:KeyCode = data.keyCode;
+		
+		if (key == KeyCode.BACKSPACE){
+			RemoveText(cursorIndex -1);
+			cursorIndex--;
+		}
+		else if (key == KeyCode.TAB && isForm && list!=null) list.SelectNext();
+		else if (key == 13 && isForm) Validate();
+		else if(key > 32){
+			AppendText(String.fromCharCode(data.keyCode), cursorIndex);
+			cursorIndex++;
+		}
+		
+		
 		
 		
 	}
@@ -361,7 +378,7 @@ class TextField extends RenderedObject {
 			}
 			
 					
-			if (glyphsData.length > glyphDataIndex)		glyphData = glyphsData[glyphDataIndex];
+			if (glyphsData.length > glyphDataIndex)		glyphData = glyphsData.get(glyphDataIndex);
 			else {
 					glyphData = {
 					x:0,
@@ -376,7 +393,7 @@ class TextField extends RenderedObject {
 					metrics:null
 				}
 				
-				glyphsData.push(glyphData);
+				glyphsData.Push(glyphData);
 			}
 			
 			
@@ -497,7 +514,7 @@ class TextField extends RenderedObject {
 							lineData.space = lineData.tab = false;
 							lines[glyphData.line].push(lineData);
 							
-							data = glyphsData[currWord.get(i)];
+							data = glyphsData.get(currWord.get(i));
 							
 							data.line = line;
 							
@@ -563,7 +580,7 @@ class TextField extends RenderedObject {
 				case Alignment.RIGHT:
 					for (lineData in lines){
 						if (lineData.length == 0) continue;
-						data = prevData = glyphsData[lineData[lineData.length - 1].glyph];
+						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
 						
 						if(data.metrics != null)
 							data.x = this.width - (data.metrics.advance.x - data.metrics.horizontalBearing.x)*sizeRatio;
@@ -572,7 +589,7 @@ class TextField extends RenderedObject {
 									
 						for (i in 1...lineData.length)
 						{
-							data = glyphsData[lineData[lineData.length - 1 - i].glyph];
+							data = glyphsData.get(lineData[lineData.length - 1 - i].glyph);
 							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing);				
 							prevData = data;
 						}
@@ -587,7 +604,7 @@ class TextField extends RenderedObject {
 						
 						if (lineData.length == 0) continue;
 						
-						data = prevData = glyphsData[lineData[lineData.length - 1].glyph];
+						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
 						gap = this.width - data.x + (data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width);
 						//trace(gap);
 						//trace(this.width);
@@ -599,7 +616,7 @@ class TextField extends RenderedObject {
 							data.x = this.width - data.width - gap * 0.5;
 							
 						for (i in 1...lineData.length){
-							data = glyphsData[lineData[lineData.length - 1 - i].glyph];
+							data = glyphsData.get(lineData[lineData.length - 1 - i].glyph);
 							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing);				
 							prevData = data;
 						}
@@ -609,19 +626,18 @@ class TextField extends RenderedObject {
 				case Alignment.JUSTIFIED:
 					for (lineData in lines){
 						if (lineData.length == 0 || lineData == lines[lines.length -1]) continue;
-						data = prevData = glyphsData[lineData[lineData.length - 1].glyph];
+						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
 						gap = this.width - data.x + (data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width);
 						gap /= lineData.length;
 						for (i in 1...lineData.length)
-						glyphsData[lineData[i].glyph].x += gap*i;
+						glyphsData.get(lineData[i].glyph).x += gap*i;
 					}
 				
 			}
 			
 		}
 		if (cursor != null){
-			cursor.x = this.x + glyphsData[cursorIndex].x - cursor.width;
-			cursor.y = this.y + glyphsData[cursorIndex].line * linesHeight ;	
+			cursorIndex = cursorIndex;
 		}
 		
 		needLayoutUpdate = false;
@@ -651,9 +667,9 @@ class TextField extends RenderedObject {
 			
 			if (value < 0)
 			{
-				for (data in glyphsData)
+				for (i in 0...glyphsData.length)
 				{
-					if (data.bufferIndex > 0) renderingBatch.FreeBufferIndex(data.bufferIndex);
+					if (glyphsData.get(i).bufferIndex > 0) renderingBatch.FreeBufferIndex(glyphsData.get(i).bufferIndex);
 				}
 			}
 			else
@@ -661,12 +677,12 @@ class TextField extends RenderedObject {
 				for (i in 0...glyphsData.length)
 				{
 					
-					if (glyphsData[i].bufferIndex < 0 && glyphsData[i].textureData !=null)
+					if (glyphsData.get(i).bufferIndex < 0 && glyphsData.get(i).textureData !=null)
 					{
 						trace(i);
-						trace(glyphsData[i].textureData);
-						if (i == 0) glyphsData[i].bufferIndex = value;
-						else glyphsData[i].bufferIndex = renderingBatch.AllocateBufferIndex();
+						trace(glyphsData.get(i).textureData);
+						if (i == 0) glyphsData.get(i).bufferIndex = value;
+						else glyphsData.get(i).bufferIndex = renderingBatch.AllocateBufferIndex();
 						
 					}
 				}
@@ -688,8 +704,10 @@ class TextField extends RenderedObject {
 			{
 				renderingBatch.RemoveDirtyObject(this);
 				if (bufferIndex >= 0){
-					for (data in glyphsData)
+					var data:RenderedGlyphData;
+					for (i in 0...glyphsData.length)
 					{
+						data = glyphsData.get(i);
 						if (data.bufferIndex > 0) renderingBatch.FreeBufferIndex(data.bufferIndex);
 					}
 				}
@@ -738,10 +756,10 @@ class TextField extends RenderedObject {
 	{
 		if (glyphsData != null)
 		{
-			for (data in glyphsData)
+			for (i in 0...glyphsData.length)
 			{
-				if (!data.colorChanged)
-				data.color = value;
+				if (!glyphsData.get(i).colorChanged)
+				glyphsData.get(i).color = value;
 				
 			}
 		}
@@ -761,6 +779,42 @@ class TextField extends RenderedObject {
 		needLayoutUpdate = isDirty = true;
 		return super.set_width(value);
 	}
+		
+	public function FocusOn(value:InputData=null):Void 
+	{
+		
+		if (InputManager.Get().focusedObject != this)
+		{
+			if(InputManager.Get().focusedObject != null)	InputManager.Get().focusedObject.FocusOff();
+			InputManager.Get().focusedObject = this;
+		}
+		
+		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
+		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.MOUSE_CLICK, SetCursorPosition, this.name);
+		
+		SetCursorPosition();
+		cursor.height = linesHeight + AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);
+		
+		Wait.ClearWait(this.name);
+		ShowCursor();
+	}
+	
+	public function FocusOff():Void 
+	{
+		
+		InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
+		InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.MOUSE_CLICK, SetCursorPosition, this.name);
+		Wait.ClearWait(this.name);
+		HideCursor();
+		
+	}
+	
+	public function Validate():Void 
+	{
+		
+	}
+	
+	
 	
 	function set_tabSpacing(value:Float):Float 
 	{
@@ -787,14 +841,12 @@ class TextField extends RenderedObject {
 			if (value == true)
 			{
 				onAABBTree = true;
-				InputManager.Get().BindToInput(StringLibrary.ANY, InputType.MOUSE_CLICK,GetFocus, this.name);
-				/*//InputManager.Get().BindToAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);*/
+				InputManager.Get().BindToInput(StringLibrary.ANY, InputType.MOUSE_CLICK,FocusOn, this.name);
 			}
 			else
-			/*//{InputManager.Get().BindToAction(InputManager.GetDefaultInputActionID(InputManager.GetMouseInputID(0), InputType.MOUSE_CLICK), GetFocus, this.name);*/
 			{
 				onAABBTree = false;
-				/*//InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_CLICK+0, GetFocus, this.name);*/
+				InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.MOUSE_CLICK,FocusOn, this.name);
 				
 			}
 			
@@ -811,20 +863,57 @@ class TextField extends RenderedObject {
 		return alignment = value;
 	}
 	
-	private function GetFocus(value:InputData):Void
+	
+	private function SetCursorPosition(value:InputData = null):Void
 	{
-		InputManager.Get().focusedObject = this.name;
-		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
-		cursor.height = linesHeight + AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);
-		cursor.x = this.x + glyphsData[cursorIndex].x - cursor.width;
-		cursor.y = this.y + glyphsData[cursorIndex].line * linesHeight  + (glyphsData[cursorIndex].line)* AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);	
+		var mouseX:Float = BeardGame.Get().mousePos.current.x;
+		var mouseY:Float = BeardGame.Get().mousePos.current.y;
+		var distance:Float = this.width * 2;
+		var bestDistance:Float = distance;
+		var position : Int = glyphsData.length ;
+		
+		for (i in 0...glyphsData.length)
+		{
 			
-		cursorIndex ++;
-		Wait.ClearWait(this.name);
-		ShowCursor();
-		trace("focused!");
-		trace(glyphsData[cursorIndex].line);
+			if ( glyphsData.get(i).line * linesHeight > mouseY) continue;
+			if (  glyphsData.get(i).x + this.x > mouseX) continue;
+			
+			distance = Math.sqrt(Math.pow(mouseX - glyphsData.get(i).x, 2) + Math.pow(mouseY - glyphsData.get(i).y, 2));
+			
+			if (distance < bestDistance){
+				bestDistance = distance;
+				position = i;
+			}
+				
+			
+		}
+		
+		cursorIndex = position+1;
 	}
+	
+	function set_cursorIndex(value:Int):Int 
+	{
+		if (glyphsData != null && value < glyphsData.length && glyphsData.get(value) != null)
+		{
+			cursor.x = this.x +  glyphsData.get(value).x - cursor.width;
+			cursor.y = this.y +  glyphsData.get(value).line * linesHeight  + ( glyphsData.get(value).line)* AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);	
+			cursorIndex = value;
+		}
+		else if (glyphsData != null && value == glyphsData.length && glyphsData.length > 0)
+		{
+			cursor.x = this.x +  glyphsData.get(glyphsData.length-1).x + glyphsData.get(glyphsData.length-1).width - cursor.width;
+			cursor.y = this.y +  glyphsData.get(glyphsData.length-1).line * linesHeight  + ( glyphsData.get(glyphsData.length-1).line)* AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);	
+			cursorIndex = value;	
+		}
+		else{
+			cursor.x = this.x;
+			cursor.y = this.y;
+			cursorIndex = 0;
+		}
+		return cursorIndex ;
+	}
+	
+	
 	
 	
 	

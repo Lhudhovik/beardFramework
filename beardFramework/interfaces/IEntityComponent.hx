@@ -5,7 +5,7 @@ import beardFramework.resources.save.data.StructDataComponent;
 /**
  * @author Ludo
  */
-interface IEntityComponent 
+interface IEntityComponent
 {
 	public var name(get,set):String;
 	public var parentEntity:GameEntity;

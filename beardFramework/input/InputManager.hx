@@ -13,6 +13,7 @@ import beardFramework.input.data.GamepadInputData;
 import beardFramework.input.data.KeyboardInputData;
 import beardFramework.input.data.MouseInputData;
 import beardFramework.input.data.WheelInputData;
+import beardFramework.interfaces.IFocusable;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.resources.pool.ListPool;
 import beardFramework.resources.save.data.StructDataUIComponent;
@@ -64,7 +65,7 @@ class InputManager
 	private var mouseMoveTargetName:String;
 	private var mouseTargetName:String;
 	private var touchTargets:Map<String, String>;
-	public var focusedObject:String = "";
+	public var focusedObject:IFocusable;
 	
 	private var mouseInputData:ListPool<MouseInputData>;
 	private var wheelInputData:ListPool<WheelInputData>;
@@ -435,7 +436,7 @@ class InputManager
 		KIDUtil.keyCode = key;
 		KIDUtil.modifier = modifier;
 		KIDUtil.type = InputType.KEY_UP;
-		KIDUtil.target = focusedObject;
+		KIDUtil.target = focusedObject.name;
 		//KIDUtil = {type:InputType.KEY_UP, target:focusedObject, keyCode:key, modifier:modifier};
 		FetchActions(utilString, KIDUtil);
 		
@@ -453,7 +454,7 @@ class InputManager
 			KIDUtil.keyCode = key;
 			KIDUtil.modifier = modifier;
 			KIDUtil.type = InputType.KEY_PRESS;
-			KIDUtil.target = focusedObject;
+			KIDUtil.target = focusedObject.name;
 			//KIDUtil = {type:InputType.KEY_PRESS, target:focusedObject, keyCode:key, modifier:modifier};
 			FetchActions(utilString, KIDUtil);
 			
@@ -480,7 +481,7 @@ class InputManager
 		KIDUtil.keyCode = key;
 		KIDUtil.modifier = modifier;
 		KIDUtil.type = InputType.KEY_DOWN;
-		KIDUtil.target = focusedObject;
+		KIDUtil.target = focusedObject.name;
 		//KIDUtil = {type:InputType.KEY_DOWN, target:focusedObject, keyCode:key, modifier:modifier};
 		FetchActions(utilString, KIDUtil);
 		
@@ -494,7 +495,7 @@ class InputManager
 		AIDUtil.value = value;
 		AIDUtil.axis = axis ;
 		AIDUtil.gamepadID = gamepadID;
-		AIDUtil.target = focusedObject;
+		AIDUtil.target = focusedObject.name;
 		AIDUtil.type = InputType.GAMEPAD_AXIS_MOVE;
 		//AIDUtil = {type:InputType.GAMEPAD_AXIS_MOVE, target:focusedObject, gamepadID:gamepadID, axis:axis, value:value}
 		FetchActions(utilString, AIDUtil);
@@ -509,7 +510,7 @@ class InputManager
 		BIDUtil = buttonInputData.Get();
 		BIDUtil.button = button;
 		BIDUtil.gamepadID = gamepadID;
-		BIDUtil.target = focusedObject;
+		BIDUtil.target = focusedObject.name;
 		BIDUtil.type = InputType.GAMEPAD_BUTTON_UP;
 		//BIDUtil = {type:InputType.GAMEPAD_BUTTON_UP, target:focusedObject, gamepadID:gamepadID, button:button};
 		FetchActions(utilString, BIDUtil);
@@ -519,7 +520,7 @@ class InputManager
 			BIDUtil = buttonInputData.Get();
 			BIDUtil.button = button;
 			BIDUtil.gamepadID = gamepadID;
-			BIDUtil.target = focusedObject;
+			BIDUtil.target = focusedObject.name;
 			BIDUtil.type = InputType.GAMEPAD_BUTTON_PRESS;
 			//BIDUtil = {type:InputType.GAMEPAD_BUTTON_PRESS, target:focusedObject, gamepadID:gamepadID, button:button};
 			FetchActions(utilString, BIDUtil);
@@ -539,7 +540,7 @@ class InputManager
 		BIDUtil = buttonInputData.Get();
 		BIDUtil.button = button;
 		BIDUtil.gamepadID = gamepadID;
-		BIDUtil.target = focusedObject;
+		BIDUtil.target = focusedObject.name;
 		BIDUtil.type = InputType.GAMEPAD_BUTTON_DOWN;
 		//BIDUtil = {type:InputType.GAMEPAD_BUTTON_DOWN, target:focusedObject, gamepadID:gamepadID, button:button};
 		FetchActions(utilString, BIDUtil);
@@ -714,7 +715,6 @@ class InputManager
 		
 	}
 	
-		
 	private inline function FetchActions(inputId:String, inputData:InputData):Void
 	{
 		utilInput = Input.FromInputData(inputId, inputData.type);
