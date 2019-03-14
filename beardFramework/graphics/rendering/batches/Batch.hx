@@ -8,6 +8,7 @@ import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IBatch;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.GLU;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -175,7 +176,7 @@ class Batch implements IBatch
 			EBO  = renderer.GenerateBuffer();
 		
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.STREAM_DRAW);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 		}
 	
 		
@@ -478,7 +479,7 @@ class Batch implements IBatch
 		for (attribute in vertexAttributes)
 		{
 			
-			trace(attribute);
+			//trace(attribute);
 			pointer = GL.getAttribLocation(shaderProgram, attribute.name);
 			GL.enableVertexAttribArray(pointer);
 			//GL.enableVertexAttribArray(attribute.index);
@@ -510,18 +511,18 @@ class Batch implements IBatch
 			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, 0);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.ambient"), ColorU.getRedf(renderer.light.ambient), ColorU.getGreenf(renderer.light.ambient), ColorU.getBluef(renderer.light.ambient) );
-			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.diffuse"), ColorU.getRedf(renderer.light.diffuse), ColorU.getGreenf(renderer.light.diffuse), ColorU.getBluef(renderer.light.diffuse) );
-			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.specular"), ColorU.getRedf(renderer.light.specular), ColorU.getGreenf(renderer.light.specular), ColorU.getBluef(renderer.light.specular) );
-			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.position"), renderer.light.position.x, renderer.light.position.y, renderer.light.position.z );
-			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "viewPosition"), (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, 0 );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.ambient"), ColorU.getRedf(renderer.light.ambient), ColorU.getGreenf(renderer.light.ambient), ColorU.getBluef(renderer.light.ambient) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.diffuse"), ColorU.getRedf(renderer.light.diffuse), ColorU.getGreenf(renderer.light.diffuse), ColorU.getBluef(renderer.light.diffuse) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.specular"), ColorU.getRedf(renderer.light.specular), ColorU.getGreenf(renderer.light.specular), ColorU.getBluef(renderer.light.specular) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.position"), renderer.light.position.x, renderer.light.position.y, renderer.light.position.z );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "viewPosition"), camera.viewportX + camera.viewportWidth*0.5,camera.viewportY + camera.viewportHeight*0.5 , 0 );
 				
 			
 			if (indicesPerObject> 0){
 				//trace(verticesData.activeDataCount);
 				//GL.drawElementsInstanced(drawMode, 6, GL.UNSIGNED_SHORT, 0,10);
 				GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
-			
+					
 			}
 			else
 			{
@@ -532,11 +533,7 @@ class Batch implements IBatch
 		
 			drawCount++;
 			
-			
-			var error:Int = GL.getError();
-		
-			if (error != 0)
-				trace(error);
+			GLU.ShowErrors();
 			
 		}
 			

@@ -82,10 +82,10 @@ class BeardLayer
 	
 	public function Add(object:RenderedObject, updateBuffer:Bool = true):Void
 	{
-		trace(object.name);
+		//trace(object.name);
 		if (!renderedObjects.exists(object.name))
 		{
-			if(object.name == null)		trace(object.layer.id);
+			//if(object.name == null)		trace(object.layer.id);
 			object.layer = this;
 			object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 			object.visible =  this.visible;

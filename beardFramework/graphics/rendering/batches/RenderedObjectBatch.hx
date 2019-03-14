@@ -4,6 +4,7 @@ import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.text.TextField;
+import beardFramework.utils.data.DataU;
 import beardFramework.utils.graphics.ColorU;
 import beardFramework.resources.MinAllocArray;
 import haxe.ds.Vector;
@@ -63,7 +64,7 @@ class RenderedObjectBatch extends Batch
 			
 			if (GetHigherIndex()  >= verticesData.size)
 			{
-		
+				//trace(verticesData.objectStride);
 				var newBufferData:Float32Array = new Float32Array(verticesData.objectStride * (GetHigherIndex()+1));
 				
 				if(verticesData.size > 0)
@@ -77,12 +78,27 @@ class RenderedObjectBatch extends Batch
 					//if (utilUIntArray == null) utilUIntArray = new UInt16Array();
 					indicesData = new UInt16Array(indicesPerObject * (GetHigherIndex() + 1));
 				
-					for (i in 0...Math.round(indicesData.length / indicesPerObject)){
+					for (i in 0...(GetHigherIndex() + 1)){
 						attIndex = i * indicesPerObject ;
 						for(j in 0...indicesPerObject)
-							indicesData[attIndex+j] = indices[j] + i*vertices.length;
+							indicesData[attIndex+j] = indices[j] + i*4;
 					}
 					
+					//indicesData = new UInt16Array(6 * (GetHigherIndex() + 1));
+				//
+				//for (i in 0...Math.round(indicesData.length / 6)){
+					//attIndex = i * 6 ;
+					//indicesData[attIndex] 	= 0 + i*4;
+					//indicesData[attIndex+1] = 1 + i*4;
+					//indicesData[attIndex+2] = 2	+ i*4;
+					//indicesData[attIndex+3] = 2 + i*4;
+					//indicesData[attIndex+4] = 3	+ i*4;
+					//indicesData[attIndex+5] = 0 + i*4;
+					//
+				//}
+				
+					
+					DataU.DeepTrace(indicesData);
 					GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 					GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 				}
@@ -239,10 +255,10 @@ class RenderedObjectBatch extends Batch
 			GL.bindVertexArray(0);
 			dirtyObjects.Clean();
 			
-			var visu:Array<Float> = [];
-			for (i in 0...verticesData.data.length)
-				visu.push(verticesData.data[i]);
-			trace(visu);
+			//var visu:Array<Float> = [];
+			//for (i in 0...verticesData.data.length)
+				//visu.push(verticesData.data[i]);
+			trace("objects to render : " + verticesData.data.length/verticesData.objectStride);
 			
 			if (needOrdering && depthChange) OrderVerticesData();
 			needUpdate = false;
@@ -252,7 +268,7 @@ class RenderedObjectBatch extends Batch
 	
 	override public function OrderVerticesData():Void 
 	{
-			trace(bufferIndices);
+			//trace(bufferIndices);
 		//var ordered:Array<Int> = [];
 		var ordered:Vector<DepthOrderingData> = new Vector(bufferIndices.length);
 		var z:Float = 0;
@@ -262,9 +278,9 @@ class RenderedObjectBatch extends Batch
 			ordered[i] = { z: verticesData.data[bufferIndices[i].bufferIndex *verticesData.objectStride + 2], bufferIndex : bufferIndices[i].bufferIndex}   ;
 		}
 		
-		trace(ordered);
+		//trace(ordered);
 		ordered.sort(DepthSorting);
-		trace(ordered);
+		//trace(ordered);
 		var newBufferData:Float32Array = new Float32Array(verticesData.data.length);
 		
 		for (i in 0...ordered.length)
@@ -278,16 +294,16 @@ class RenderedObjectBatch extends Batch
 			
 		}
 		
-		trace(bufferIndices);
+		//trace(bufferIndices);
 		var visu:Array<Float> = [];
-			for (i in 0...verticesData.data.length)
-				visu.push(verticesData.data[i]);
-			trace(visu);
+			//for (i in 0...verticesData.data.length)
+				//visu.push(verticesData.data[i]);
+			//trace(visu);
 		
 		verticesData.data = newBufferData;
 		
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-		GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.STREAM_DRAW);
+		GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.DYNAMIC_DRAW);
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		visu = [];
 		for (i in 0...verticesData.data.length)

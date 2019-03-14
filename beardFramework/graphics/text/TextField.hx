@@ -165,7 +165,7 @@ class TextField extends RenderedObject implements IFocusable {
 	
 	public function AppendText( addedText:String, index:Int = -1):String
 	{
-		trace(addedText);
+		//trace(addedText);
 		isDirty = true;
 		//if (bufferIndex <0 && addedText.length > 0 && renderingBatch != null ) bufferIndex = renderingBatch.AllocateBufferIndex();
 			
@@ -306,7 +306,7 @@ class TextField extends RenderedObject implements IFocusable {
 				tag =  chars[i + 1];
 				
 				for (j in (i+1)...(chars.indexOf("}", i) + 1)){
-					trace(tag);
+					//trace(tag);
 					tag += chars[j];
 				}
 				
@@ -334,7 +334,7 @@ class TextField extends RenderedObject implements IFocusable {
 				tag = char;
 				
 				for (j in (i+1)...(chars.indexOf("}", i) + 1)){
-					trace(tag);
+					//trace(tag);
 					tag += chars[j];
 				}
 				
@@ -680,8 +680,8 @@ class TextField extends RenderedObject implements IFocusable {
 					
 					if (glyphsData.get(i).bufferIndex < 0 && glyphsData.get(i).textureData !=null)
 					{
-						trace(i);
-						trace(glyphsData.get(i).textureData);
+						//trace(i);
+						//trace(glyphsData.get(i).textureData);
 						if (i == 0) glyphsData.get(i).bufferIndex = value;
 						else glyphsData.get(i).bufferIndex = renderingBatch.AllocateBufferIndex();
 						

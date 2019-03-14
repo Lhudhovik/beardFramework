@@ -104,10 +104,10 @@ class Renderer
 		
 		light = 
 		{
-			position:{x:0, y:0, z:-500},
+			position:{x:0, y:0, z:-100},
 			ambient: 0x222222ff,
-			diffuse: ColorU.BLUE,
-			specular: ColorU.YELLOW
+			diffuse: ColorU.WHITE,
+			specular: ColorU.WHITE
 		}
 		
 		
@@ -266,7 +266,7 @@ class Renderer
 			if (batches.get(i).name == batch)
 			{
 				batches.MoveByIndex(i, batches.length - 1);
-				trace("moved");
+				//trace("moved");
 				break;
 			}
 		}

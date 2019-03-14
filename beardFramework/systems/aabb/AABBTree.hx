@@ -338,7 +338,7 @@ class AABBTree
 		#if debug
 		if (bestResult.hit == true)
 		{
-			trace(bestResult.fraction);
+			//trace(bestResult.fraction);
 			var end:SVec2 = {x: ray.start.x + ray.dir.x * ray.length, y :ray.start.y + ray.dir.y * ray.length};
 			//trace(end);
 			//trace({x: ray.start.x + ray.dir.x * ray.length * 0.9, y :ray.start.y + ray.dir.y * ray.length*0.9});

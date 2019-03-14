@@ -23,7 +23,9 @@
 		<shader name="fragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="uv" size="3" index="1" />
-		<vertexAttribute name="color" size="4" index="2" />
+		<vertexAttribute name="ambient" size="4" index="2" />
+		<vertexAttribute name="diffuse" size="3" index="3" />
+		<vertexAttribute name="specular" size="4" index="4" />
 		<vertex data="0,1,0.0,1.0"/>
 		<vertex data="1,1,1.0,1.0"/>
 		<vertex data="1,0,1.0,0.0"/>

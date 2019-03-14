@@ -238,9 +238,9 @@ class RenderedObject implements ICameraDependent
 		if (layer != null)
 		{
 			renderDepth = layer.depth + (z / layer.maxObjectsCount);
-			trace(layer.name);
-			trace(z);
-			trace(layer.depth);
+			//trace(layer.name);
+			//trace(z);
+			//trace(layer.depth);
 		}
 		
 		isDirty = true;
