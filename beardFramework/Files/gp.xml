@@ -18,20 +18,19 @@
 	<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>
 </fonts>
 <renderingBatches>
-	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" needOrdering="false">
+	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch">
 		<shader name="vertexShader" type="VERTEX_SHADER"/>
 		<shader name="fragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="uv" size="3" index="1" />
-		<vertexAttribute name="ambient" size="4" index="2" />
-		<vertexAttribute name="diffuse" size="3" index="3" />
-		<vertexAttribute name="specular" size="4" index="4" />
+		<vertexAttribute name="diffuse" size="4" index="2" />
+		<vertexAttribute name="specular" size="4" index="3" />
 		<vertex data="0,1,0.0,1.0"/>
 		<vertex data="1,1,1.0,1.0"/>
 		<vertex data="1,0,1.0,0.0"/>
 		<vertex data="0,0,0.0,0.0"/>
 	</template>
-	<template name="debugLine" vertexPerObject="2" drawMode="LINES" type="Batch" needOrdering="false">
+	<template name="debugLine" vertexPerObject="2" drawMode="LINES" type="Batch">
 		<shader name="debugVertexShader" type="VERTEX_SHADER"/>
 		<shader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
@@ -39,7 +38,7 @@
 		<vertex data="0,1"/>
 		<vertex data="1,1"/>
 	</template>
-	<template name="debugRect" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="Batch" needOrdering="false">
+	<template name="debugRect" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="Batch">
 		<shader name="debugVertexShader" type="VERTEX_SHADER"/>
 		<shader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
@@ -49,11 +48,11 @@
 		<vertex data="1,0"/>
 		<vertex data="0,0"/>
 	</template>
-	<batch name="UI" template="default"/>
-	<batch name="transparent" template="default"/>
-	<batch name="default" template="default"/>
-	<batch name="debugLine" template="debugLine"/>
-	<batch name="debugRect" template="debugRect"/>
+	<batch name="UI" template="default" needOrdering="true"/>
+	<batch name="transparent" template="default" needOrdering="true"/>
+	<batch name="default" template="default" needOrdering="true"/>
+	<batch name="debugLine" template="debugLine" needOrdering="false"/>
+	<batch name="debugRect" template="debugRect" needOrdering="false"/>
 	
 </renderingBatches>
 <fx></fx>

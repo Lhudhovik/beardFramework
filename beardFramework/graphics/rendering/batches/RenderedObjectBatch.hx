@@ -157,22 +157,19 @@ class RenderedObjectBatch extends Batch
 						verticesData.data[visIndex + attIndex + 4] = utilFloatArray[attIndex + 4] = visual.GetTextureData().uvY +  vertices[verIndex + 3] * visual.GetTextureData().uvH;
 						verticesData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast( visual.GetTextureData().atlasIndex, Float);
 						
-						//ambient
-						verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRedf(visual.material.ambient);
-						verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreenf(visual.material.ambient);
-						verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBluef(visual.material.ambient);
+						//diffuse
+						verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRedf(visual.material.diffuse);
+						verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreenf(visual.material.diffuse);
+						verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBluef(visual.material.diffuse);
 						//alpha
 						verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.alpha;	
-						//diffuse
-						verticesData.data[visIndex + attIndex + 10] = utilFloatArray[attIndex + 10] =  ColorU.getRedf(visual.material.diffuse);
-						verticesData.data[visIndex + attIndex + 11] = utilFloatArray[attIndex + 11] =  ColorU.getGreenf(visual.material.diffuse);
-						verticesData.data[visIndex + attIndex + 12] = utilFloatArray[attIndex + 12] =  ColorU.getBluef(visual.material.diffuse);
+						
 						//specular
-						verticesData.data[visIndex + attIndex + 13] = utilFloatArray[attIndex + 13] =  ColorU.getRedf(visual.material.specular);
-						verticesData.data[visIndex + attIndex + 14] = utilFloatArray[attIndex + 14] =  ColorU.getGreenf(visual.material.specular);
-						verticesData.data[visIndex + attIndex + 15] = utilFloatArray[attIndex + 15] =  ColorU.getBluef(visual.material.specular);
+						verticesData.data[visIndex + attIndex + 10] = utilFloatArray[attIndex + 10] =  ColorU.getRedf(visual.material.specular);
+						verticesData.data[visIndex + attIndex + 11] = utilFloatArray[attIndex + 11] =  ColorU.getGreenf(visual.material.specular);
+						verticesData.data[visIndex + attIndex + 12] = utilFloatArray[attIndex + 12] =  ColorU.getBluef(visual.material.specular);
 						//shininess
-						verticesData.data[visIndex + attIndex + 16] = utilFloatArray[attIndex + 16] = visual.material.shininess;	
+						verticesData.data[visIndex + attIndex + 13] = utilFloatArray[attIndex + 13] = visual.material.shininess;	
 						
 
 						
@@ -221,22 +218,19 @@ class RenderedObjectBatch extends Batch
 							verticesData.data[visIndex + attIndex + 4] = utilFloatArray[attIndex + 4] = data.textureData.uvY +  vertices[verIndex + 3] * data.textureData.uvH;
 							verticesData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast(data.textureData.atlasIndex, Float);
 													
-							//ambient
-							verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRedf(data.color);
-							verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreenf(data.color);
-							verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBluef(data.color);
+							//diffuse
+							verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRedf(textfield.material.diffuse);
+							verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreenf(textfield.material.diffuse);
+							verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBluef(textfield.material.diffuse);
 							//alpha
 							verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = textfield.alpha;	
-							//diffuse
-							verticesData.data[visIndex + attIndex + 10] = utilFloatArray[attIndex + 10] =  ColorU.getRedf(textfield.material.diffuse);
-							verticesData.data[visIndex + attIndex + 11] = utilFloatArray[attIndex + 11] =  ColorU.getGreenf(textfield.material.diffuse);
-							verticesData.data[visIndex + attIndex + 12] = utilFloatArray[attIndex + 12] =  ColorU.getBluef(textfield.material.diffuse);
+							
 							//specular
-							verticesData.data[visIndex + attIndex + 13] = utilFloatArray[attIndex + 13] =  ColorU.getRedf(textfield.material.specular);
-							verticesData.data[visIndex + attIndex + 14] = utilFloatArray[attIndex + 14] =  ColorU.getGreenf(textfield.material.specular);
-							verticesData.data[visIndex + attIndex + 15] = utilFloatArray[attIndex + 15] =  ColorU.getBluef(textfield.material.specular);
+							verticesData.data[visIndex + attIndex + 10] = utilFloatArray[attIndex + 10] =  ColorU.getRedf(textfield.material.specular);
+							verticesData.data[visIndex + attIndex + 11] = utilFloatArray[attIndex + 11] =  ColorU.getGreenf(textfield.material.specular);
+							verticesData.data[visIndex + attIndex + 12] = utilFloatArray[attIndex + 12] =  ColorU.getBluef(textfield.material.specular);
 							//shininess
-							verticesData.data[visIndex + attIndex + 16] = utilFloatArray[attIndex + 16] = textfield.material.shininess;	
+							verticesData.data[visIndex + attIndex + 13] = utilFloatArray[attIndex + 13] = textfield.material.shininess;	
 							
 							
 							

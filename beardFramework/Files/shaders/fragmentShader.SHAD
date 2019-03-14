@@ -1,8 +1,7 @@
 #version 460
 
 in vec3 TexCoord;
-in vec4 Ambient;
-in vec3 Diffuse;
+in vec4 Diffuse;
 in vec4 Specular;
 in vec3 Normal;
 in vec3 FragmentPosition;
@@ -16,28 +15,28 @@ struct Light {
     vec3 specular;
 };
 
-//uniform Light light; 
+uniform Light light; 
 uniform sampler2D atlas[10];
-//uniform vec3 viewPosition;
+uniform vec3 viewPosition;
 
 void main()
 {
-	
-    //vec4 ambient = vec4(light.ambient, 1.0f) * vec4(Ambient.x, Ambient.y, Ambient.z, 1.0f) ;
+	vec3 spriteColor = vec3(Diffuse.x, Diffuse.y, Diffuse.z);
+    vec4 ambient = vec4(light.ambient, 1.0f) * vec4(spriteColor, 1.0f) ;
 	
 		
-	//vec3 normal = normalize(Normal);
-	//vec3 lightDirection = normalize(light.position - FragmentPosition);
+	vec3 normal = normalize(Normal);
+	vec3 lightDirection = normalize(light.position - FragmentPosition);
 	
-//	vec4 diffuse = vec4((max(dot(normal, lightDirection), 0.0) * Diffuse)  * light.diffuse , 1.0);
+	vec4 diffuse = vec4((max(dot(normal, lightDirection), 0.0) * spriteColor)  * light.diffuse , 1.0);
 	
-	//vec3 viewDirection = normalize(viewPosition-FragmentPosition);
-	//vec3 reflectionDirection = reflect(-lightDirection, normal);
-	//vec3 specularValue = vec3(Specular.x, Specular.y, Specular.z);
-	//vec4 specular = vec4(light.specular * ( pow(max(dot(viewDirection, reflectionDirection),0.0),Specular.w) * specularValue), 1.0) ;
+	vec3 viewDirection = normalize(viewPosition-FragmentPosition);
+	vec3 reflectionDirection = reflect(-lightDirection, normal);
+	vec3 specularValue = vec3(Specular.x, Specular.y, Specular.z);
+	vec4 specular = vec4(light.specular * ( pow(max(dot(viewDirection, reflectionDirection),0.0),Specular.w) * specularValue), 1.0) ;
 	
-	//vec4 texColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * (ambient + diffuse + specular)  * Ambient;
-	vec4 texColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) ;
+	vec4 texColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * (ambient + diffuse + specular)  * Diffuse;
+	
 	FragColor = texColor;
 	
 	

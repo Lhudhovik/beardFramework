@@ -63,7 +63,6 @@ class RenderedObject implements ICameraDependent
 		
 		material = 
 		{
-			ambient:ColorU.WHITE,	
 			diffuse:ColorU.WHITE,	
 			specular: ColorU.WHITE,
 			shininess:32
@@ -302,13 +301,13 @@ class RenderedObject implements ICameraDependent
 	
 	function get_color():UInt 
 	{
-		return material.ambient;
+		return material.diffuse;
 	}
 	
 	function set_color(value:UInt):UInt 
 	{
 		isDirty = true;
-		return material.ambient = value;
+		return material.diffuse = value;
 	}
 	
 	public function SetBaseWidth(value:Float):Void
