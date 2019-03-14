@@ -61,11 +61,10 @@ class RenderedObjectBatch extends Batch
 			GL.bindVertexArray(VAO);
 	
 			
-			//enlarge the buffer data if too small	
 			if (GetHigherIndex()  >= verticesData.size)
 			{
-			
-				var newBufferData:Float32Array = new Float32Array(40 * (GetHigherIndex()+1));
+		
+				var newBufferData:Float32Array = new Float32Array(verticesData.objectStride * (GetHigherIndex()+1));
 				
 				if(verticesData.size > 0)
 					for (i in 0...verticesData.data.length)
@@ -73,34 +72,33 @@ class RenderedObjectBatch extends Batch
 			
 				verticesData.data = newBufferData;
 				
-				indicesData = new UInt16Array(6 * (GetHigherIndex() + 1));
-				
-				for (i in 0...Math.round(indicesData.length / 6)){
-					attIndex = i * 6 ;
-					indicesData[attIndex] 	= 0 + i*4;
-					indicesData[attIndex+1] = 1 + i*4;
-					indicesData[attIndex+2] = 2	+ i*4;
-					indicesData[attIndex+3] = 2 + i*4;
-					indicesData[attIndex+4] = 3	+ i*4;
-					indicesData[attIndex+5] = 0 + i*4;
+				if (indicesPerObject > 0){
 					
-				}
+					//if (utilUIntArray == null) utilUIntArray = new UInt16Array();
+					indicesData = new UInt16Array(indicesPerObject * (GetHigherIndex() + 1));
 				
-				GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
-				GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
+					for (i in 0...Math.round(indicesData.length / indicesPerObject)){
+						attIndex = i * indicesPerObject ;
+						for(j in 0...indicesPerObject)
+							indicesData[attIndex+j] = indices[j] + i*vertices.length;
+					}
+					
+					GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
+					GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
+				}
+						
 				
 				GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-				GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.STREAM_DRAW);
+				GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.DYNAMIC_DRAW);
 				
 				GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 				
-				depthChange = true;
-			}
 			
+			}
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 			
-			if (utilFloatArray == null) utilFloatArray = new Float32Array(40);
+			if (utilFloatArray == null) utilFloatArray = new Float32Array(verticesData.objectStride);
 					
 			var visual:Visual;
 			var textfield:TextField;
@@ -118,13 +116,13 @@ class RenderedObjectBatch extends Batch
 					//trace(visual.bufferIndex);
 					//trace(bufferIndices);
 					
-					visIndex = bufferIndices[visual.bufferIndex].bufferIndex *40;
+					visIndex = bufferIndices[visual.bufferIndex].bufferIndex *verticesData.objectStride;
 					center.x =  visual.width * 0.5;
 					center.y = visual.height * 0.5;
 					for (i in 0...4)
 					{
 						verIndex = i * 4;
-						attIndex = i * 10;
+						attIndex = i * verticesData.vertexStride;
 						
 						
 						//Position
@@ -132,10 +130,9 @@ class RenderedObjectBatch extends Batch
 						//renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = visual.x +  quadVertices[verIndex] * visual.width;
 						verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y + center.y + ((vertices[verIndex] * visual.width)-center.x)*visual.rotationSine +  ((vertices[verIndex+1] * visual.height)-center.y)*visual.rotationCosine;
 						//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y +  quadVertices[verIndex+1] * visual.height;
-						if (verticesData.data[visIndex + attIndex + 2] != (visual.visible ? visual.renderDepth : -2)){
-							depthChange = true;
-							trace("difference");
-						}
+						
+						if (verticesData.data[visIndex + attIndex + 2] != (visual.visible ? visual.renderDepth : -2)) depthChange = true;
+							
 						verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth : -2;
 								
 						
@@ -144,11 +141,25 @@ class RenderedObjectBatch extends Batch
 						verticesData.data[visIndex + attIndex + 4] = utilFloatArray[attIndex + 4] = visual.GetTextureData().uvY +  vertices[verIndex + 3] * visual.GetTextureData().uvH;
 						verticesData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast( visual.GetTextureData().atlasIndex, Float);
 						
-						//color
-						verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRed(visual.color)/255;
-						verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreen(visual.color)/255;
-						verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBlue(visual.color)/255;
-						verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.alpha;		
+						//ambient
+						verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRedf(visual.material.ambient);
+						verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreenf(visual.material.ambient);
+						verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBluef(visual.material.ambient);
+						//alpha
+						verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = visual.alpha;	
+						//diffuse
+						verticesData.data[visIndex + attIndex + 10] = utilFloatArray[attIndex + 10] =  ColorU.getRedf(visual.material.diffuse);
+						verticesData.data[visIndex + attIndex + 11] = utilFloatArray[attIndex + 11] =  ColorU.getGreenf(visual.material.diffuse);
+						verticesData.data[visIndex + attIndex + 12] = utilFloatArray[attIndex + 12] =  ColorU.getBluef(visual.material.diffuse);
+						//specular
+						verticesData.data[visIndex + attIndex + 13] = utilFloatArray[attIndex + 13] =  ColorU.getRedf(visual.material.specular);
+						verticesData.data[visIndex + attIndex + 14] = utilFloatArray[attIndex + 14] =  ColorU.getGreenf(visual.material.specular);
+						verticesData.data[visIndex + attIndex + 15] = utilFloatArray[attIndex + 15] =  ColorU.getBluef(visual.material.specular);
+						//shininess
+						verticesData.data[visIndex + attIndex + 16] = utilFloatArray[attIndex + 16] = visual.material.shininess;	
+						
+
+						
 						
 					}
 						
@@ -169,13 +180,13 @@ class RenderedObjectBatch extends Batch
 						data = textfield.glyphsData.get(d);
 						if (data.textureData == null || data.bufferIndex < 0) continue;
 						
-						visIndex = bufferIndices[data.bufferIndex].bufferIndex*40;
+						visIndex = bufferIndices[data.bufferIndex].bufferIndex*verticesData.objectStride;
 					
 						
 						for (i in 0...4)
 						{
 							verIndex = i * 4;
-							attIndex = i * 10;
+							attIndex = i * verticesData.vertexStride;
 							
 							
 							//Position
@@ -183,10 +194,9 @@ class RenderedObjectBatch extends Batch
 							//renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = textfield.x + data.x +  quadVertices[verIndex] * data.width;
 							verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] =  textfield.y + center.y + ((vertices[verIndex] * data.width+data.x)-center.x)*textfield.rotationSine +  ((vertices[verIndex+1] * data.height+data.y)-center.y)*textfield.rotationCosine;
 							//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = textfield.y +  data.y +  quadVertices[verIndex+1] * data.height;
-							if (verticesData.data[visIndex + attIndex + 2] != (textfield.visible ? textfield.renderDepth : -2)){
-								depthChange = true;
-								trace("difference");
-							}
+							if (verticesData.data[visIndex + attIndex + 2] != (textfield.visible ? textfield.renderDepth : -2))	depthChange = true;
+		
+	
 							verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = textfield.visible ? textfield.renderDepth : -2;
 							
 							
@@ -194,12 +204,25 @@ class RenderedObjectBatch extends Batch
 							verticesData.data[visIndex + attIndex + 3] = utilFloatArray[attIndex + 3] = data.textureData.uvX +  vertices[verIndex + 2] * data.textureData.uvW;
 							verticesData.data[visIndex + attIndex + 4] = utilFloatArray[attIndex + 4] = data.textureData.uvY +  vertices[verIndex + 3] * data.textureData.uvH;
 							verticesData.data[visIndex + attIndex + 5] = utilFloatArray[attIndex + 5] = cast(data.textureData.atlasIndex, Float);
+													
+							//ambient
+							verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] =  ColorU.getRedf(data.color);
+							verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] =  ColorU.getGreenf(data.color);
+							verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] =  ColorU.getBluef(data.color);
+							//alpha
+							verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = textfield.alpha;	
+							//diffuse
+							verticesData.data[visIndex + attIndex + 10] = utilFloatArray[attIndex + 10] =  ColorU.getRedf(textfield.material.diffuse);
+							verticesData.data[visIndex + attIndex + 11] = utilFloatArray[attIndex + 11] =  ColorU.getGreenf(textfield.material.diffuse);
+							verticesData.data[visIndex + attIndex + 12] = utilFloatArray[attIndex + 12] =  ColorU.getBluef(textfield.material.diffuse);
+							//specular
+							verticesData.data[visIndex + attIndex + 13] = utilFloatArray[attIndex + 13] =  ColorU.getRedf(textfield.material.specular);
+							verticesData.data[visIndex + attIndex + 14] = utilFloatArray[attIndex + 14] =  ColorU.getGreenf(textfield.material.specular);
+							verticesData.data[visIndex + attIndex + 15] = utilFloatArray[attIndex + 15] =  ColorU.getBluef(textfield.material.specular);
+							//shininess
+							verticesData.data[visIndex + attIndex + 16] = utilFloatArray[attIndex + 16] = textfield.material.shininess;	
 							
-							//color
-							verticesData.data[visIndex + attIndex + 6] = utilFloatArray[attIndex + 6] = ColorU.getRed(data.color)/255;
-							verticesData.data[visIndex + attIndex + 7] = utilFloatArray[attIndex + 7] = ColorU.getGreen(data.color)/255;
-							verticesData.data[visIndex + attIndex + 8] = utilFloatArray[attIndex + 8] = ColorU.getBlue(data.color)/255;
-							verticesData.data[visIndex + attIndex + 9] = utilFloatArray[attIndex + 9] = textfield.alpha;		
+							
 							
 						}
 						
@@ -216,10 +239,10 @@ class RenderedObjectBatch extends Batch
 			GL.bindVertexArray(0);
 			dirtyObjects.Clean();
 			
-			//var visu:Array<Float> = [];
-			//for (i in 0...verticesData.vertexStride)
-				//visu.push(verticesData.data[i]);
-			//trace(visu);
+			var visu:Array<Float> = [];
+			for (i in 0...verticesData.data.length)
+				visu.push(verticesData.data[i]);
+			trace(visu);
 			
 			if (needOrdering && depthChange) OrderVerticesData();
 			needUpdate = false;
@@ -236,7 +259,7 @@ class RenderedObjectBatch extends Batch
 		
 		for (i in 0...ordered.length)
 		{
-			ordered[i] = { z: verticesData.data[bufferIndices[i].bufferIndex *40 + 2], bufferIndex : bufferIndices[i].bufferIndex}   ;
+			ordered[i] = { z: verticesData.data[bufferIndices[i].bufferIndex *verticesData.objectStride + 2], bufferIndex : bufferIndices[i].bufferIndex}   ;
 		}
 		
 		trace(ordered);
@@ -247,9 +270,9 @@ class RenderedObjectBatch extends Batch
 		for (i in 0...ordered.length)
 		{
 			
-			for (j in 0...40)
+			for (j in 0...verticesData.objectStride)
 			{
-				newBufferData[i * 40 + j] = verticesData.data[bufferIndices[ordered[i].bufferIndex].bufferIndex * 40 + j];
+				newBufferData[i * verticesData.objectStride + j] = verticesData.data[bufferIndices[ordered[i].bufferIndex].bufferIndex * verticesData.objectStride + j];
 			}
 			bufferIndices[ordered[i].bufferIndex].bufferIndex = i;
 			

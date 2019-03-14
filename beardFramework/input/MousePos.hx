@@ -2,10 +2,13 @@ package beardFramework.input;
 import beardFramework.utils.simpleDataStruct.SVec2;
 
 /**
- * @author 
+ * ...
+ * @author Ludovic
  */
-typedef MousePos =
+class MousePos
 {
-	public var current:SVec2;	
-	public var previous:SVec2;	
+	
+	public static var current:SVec2 = {x:0, y:0};	
+	public static var previous:SVec2= {x:0, y:0};	
+	
 }

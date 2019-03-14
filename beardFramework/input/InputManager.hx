@@ -347,10 +347,11 @@ class InputManager
 		//
 		utilString = StringLibrary.MOUSE;
 	
-		BeardGame.Get().mousePos.previous.x = BeardGame.Get().mousePos.current.x;
-		BeardGame.Get().mousePos.previous.y = BeardGame.Get().mousePos.current.y;
-		BeardGame.Get().mousePos.current.x = mouseX;
-		BeardGame.Get().mousePos.current.y = mouseY;
+		
+		MousePos.previous.x = MousePos.current.x;
+		MousePos.previous.y = MousePos.current.y;
+		MousePos.current.x = mouseX;
+		MousePos.current.y = mouseY;
 		
 		var object:RenderedObject = BeardGame.Get().GetTargetUnderPoint(mouseX, mouseY);
 		

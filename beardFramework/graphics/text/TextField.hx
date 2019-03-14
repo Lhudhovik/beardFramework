@@ -9,6 +9,7 @@ import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.ui.FocusableList;
 import beardFramework.input.InputManager;
 import beardFramework.input.InputType;
+import beardFramework.input.MousePos;
 import beardFramework.input.data.InputData;
 import beardFramework.input.data.KeyboardInputData;
 import beardFramework.interfaces.ICameraDependent;
@@ -866,8 +867,8 @@ class TextField extends RenderedObject implements IFocusable {
 	
 	private function SetCursorPosition(value:InputData = null):Void
 	{
-		var mouseX:Float = BeardGame.Get().mousePos.current.x;
-		var mouseY:Float = BeardGame.Get().mousePos.current.y;
+		var mouseX:Float = MousePos.current.x;
+		var mouseY:Float = MousePos.current.y;
 		var distance:Float = this.width * 2;
 		var bestDistance:Float = distance;
 		var position : Int = glyphsData.length ;

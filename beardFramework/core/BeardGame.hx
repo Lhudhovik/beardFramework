@@ -67,7 +67,6 @@ class BeardGame extends Application
 	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
 	public var currentScreen:BasicScreen;
-	public var mousePos:MousePos;
 	var fps:MemoryUsage;
 	public function new() 
 	{
@@ -114,8 +113,7 @@ class BeardGame extends Application
 		
 		gameReady = false;
 		
-		mousePos = {current: {x:0, y:0}, previous: {x:0, y:0}};
-		
+			
 		InputManager.Get().Activate(Application.current.window);
 		
 		if (FileSystem.exists(SPLASHSCREENS_PATH) && FileSystem.readDirectory(SPLASHSCREENS_PATH).length > 0){
@@ -209,12 +207,12 @@ class BeardGame extends Application
 		
 		UIManager.Get();
 		
-		fps = new MemoryUsage(10, 10, 0xffffffff);
-	
-		fps.renderingBatch = cast Renderer.Get().GetBatch(Renderer.Get().UI);
-		
-		GetDebugLayer().Add(fps);
-		GetDebugLayer().visible = true;
+		//fps = new MemoryUsage(10, 10, 0xffffffff);
+	//
+		//fps.renderingBatch = cast Renderer.Get().GetBatch(Renderer.Get().UI);
+		//
+		//GetDebugLayer().Add(fps);
+		//GetDebugLayer().visible = true;
 		//grid = new RegionGrid(window.width, window.height,5);
 		
 	}

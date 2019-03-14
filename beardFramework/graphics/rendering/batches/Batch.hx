@@ -478,7 +478,7 @@ class Batch implements IBatch
 		for (attribute in vertexAttributes)
 		{
 			
-			
+			trace(attribute);
 			pointer = GL.getAttribLocation(shaderProgram, attribute.name);
 			GL.enableVertexAttribArray(pointer);
 			//GL.enableVertexAttribArray(attribute.index);
@@ -510,12 +510,16 @@ class Batch implements IBatch
 			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, 0);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "lightColor"), ColorU.getRedf(renderer.lightColor), ColorU.getGreenf(renderer.lightColor), ColorU.getBluef(renderer.lightColor) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "lightPosition"), renderer.lightPosition.x, renderer.lightPosition.y, renderer.lightPosition.z );
+			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.ambient"), ColorU.getRedf(renderer.light.ambient), ColorU.getGreenf(renderer.light.ambient), ColorU.getBluef(renderer.light.ambient) );
+			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.diffuse"), ColorU.getRedf(renderer.light.diffuse), ColorU.getGreenf(renderer.light.diffuse), ColorU.getBluef(renderer.light.diffuse) );
+			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.specular"), ColorU.getRedf(renderer.light.specular), ColorU.getGreenf(renderer.light.specular), ColorU.getBluef(renderer.light.specular) );
+			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.position"), renderer.light.position.x, renderer.light.position.y, renderer.light.position.z );
+			//GL.uniform3f(GL.getUniformLocation(shaderProgram , "viewPosition"), (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, 0 );
 				
 			
 			if (indicesPerObject> 0){
 				//trace(verticesData.activeDataCount);
+				//GL.drawElementsInstanced(drawMode, 6, GL.UNSIGNED_SHORT, 0,10);
 				GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
 			
 			}

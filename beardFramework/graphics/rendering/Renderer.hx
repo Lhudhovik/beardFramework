@@ -53,8 +53,7 @@ class Renderer
 	
 	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
-	public var lightColor:UInt = ColorU.WHITE;
-	public var lightPosition:SVec3;
+	public var light:Light;
 	private var batches:MinAllocArray<IBatch>;
 	private var batchTemplates:Map<String, BatchTemplateData>;
 	private	var pointer:Int;
@@ -103,12 +102,16 @@ class Renderer
 		batches = new MinAllocArray();
 		batchTemplates = new Map();
 		
-		lightPosition = {x:0, y:0, z:-100};
+		light = 
+		{
+			position:{x:0, y:0, z:-500},
+			ambient: 0x222222ff,
+			diffuse: ColorU.BLUE,
+			specular: ColorU.YELLOW
+		}
 		
-		#if debug
-		//InitDebugBatch();
-		#end
-		//InitBatch(DEFAULT);
+		
+		
 		
 	}
 	public function CreateBatch(name:String, template:String = "default" , needOrdering:Bool = false, addToBatchList:Bool = true):IBatch

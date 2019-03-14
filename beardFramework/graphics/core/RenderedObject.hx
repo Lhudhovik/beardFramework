@@ -3,6 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.graphics.rendering.vertexData.Material;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.utils.graphics.ColorU;
@@ -28,15 +29,16 @@ class RenderedObject implements ICameraDependent
 	@:isVar public var x(get, set):Float;
 	@:isVar public var y(get, set):Float;
 	@:isVar public var z(get, set):Float;
-	@:isVar public var color(get, set):UInt;
-
+	
 	public var onAABBTree(default, set):Bool;
 	public var layer:BeardLayer;
 	public var displayingCameras(default, null):List<String>;	
 	public var renderDepth(default,null):Float;
 	public var restrictedCameras(default, null):Array<String>;
 	public var rotationCosine(default,null):Float;
-	public var rotationSine(default,null):Float;
+	public var rotationSine(default, null):Float;
+	public var material:Material;
+	public var color(get, set):UInt;
 	
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
@@ -47,7 +49,6 @@ class RenderedObject implements ICameraDependent
 		
 		visible = true;
 		alpha = 1;
-		color = ColorU.WHITE;
 		z = -1;
 		renderDepth = -2;
 		scaleX = scaleY = 1;
@@ -59,6 +60,14 @@ class RenderedObject implements ICameraDependent
 		displayingCameras = new List<String>();
 		renderingBatch =  cast(Renderer.Get().GetBatch(Renderer.Get().DEFAULT), RenderedObjectBatch);
 		onAABBTree = false;
+		
+		material = 
+		{
+			ambient:ColorU.WHITE,	
+			diffuse:ColorU.WHITE,	
+			specular: ColorU.WHITE,
+			shininess:32
+		}
 	}
 	
 	inline public function get_x():Float 
@@ -293,13 +302,13 @@ class RenderedObject implements ICameraDependent
 	
 	function get_color():UInt 
 	{
-		return color;
+		return material.ambient;
 	}
 	
 	function set_color(value:UInt):UInt 
 	{
 		isDirty = true;
-		return color = value;
+		return material.ambient = value;
 	}
 	
 	public function SetBaseWidth(value:Float):Void
