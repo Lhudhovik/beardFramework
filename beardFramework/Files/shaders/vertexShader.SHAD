@@ -1,10 +1,15 @@
 #version 460
 in vec3 pos;
 in vec3 uv;
-in vec4 color;
+in vec4 ambient;
+in vec3 diffuse;
+in vec4 specular;
+
 
 out vec3 TexCoord;
-out vec4 Spritecolor;
+out vec4 Ambient;
+out vec3 Diffuse;
+out vec4 Specular;
 out vec3 Normal;
 out vec3 FragmentPosition;
 
@@ -18,11 +23,14 @@ void main()
 	
 	
 	
-    gl_Position = projection * view *vec4( pos.x ,pos.y, pos.z, 1.0);
+    gl_Position = projection * view *vec4( pos, 1.0);
     //gl_Position = projection*vec4( pos.x ,pos.y, pos.z, 1.0);
 	TexCoord = uv;
-	Spritecolor = color;
+	Ambient = ambient;
 	Normal = vec3(0,0,-1);
-	FragmentPosition = vec3( pos.x ,pos.y, pos.z);
+	FragmentPosition = pos;
+	Diffuse = diffuse;
+	Specular = specular;
+	
 	
 }
