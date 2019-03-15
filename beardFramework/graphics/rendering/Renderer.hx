@@ -3,6 +3,8 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.rendering.Light.PointLight;
+import beardFramework.graphics.rendering.Light.SpotLight;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.BatchTemplateData;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
@@ -53,7 +55,10 @@ class Renderer
 	
 	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
-	public var light:Light;
+	public var directionalLight:Light;
+	public var pointLight:PointLight;
+	public var spotLight:SpotLight;
+	
 	private var batches:MinAllocArray<IBatch>;
 	private var batchTemplates:Map<String, BatchTemplateData>;
 	private	var pointer:Int;
@@ -102,12 +107,36 @@ class Renderer
 		batches = new MinAllocArray();
 		batchTemplates = new Map();
 		
-		light = 
+		directionalLight = 
 		{
-			position:{x:0, y:0, z:-100},
+			position:{x:0, y:0, z:-50},
 			ambient: 0x222222ff,
 			diffuse: ColorU.WHITE,
-			specular: ColorU.WHITE
+			specular: ColorU.BLUE
+		}
+		
+		pointLight = 
+		{
+			position:{x:0, y:0, z:-50},
+			ambient: ColorU.YELLOW,
+			diffuse: ColorU.WHITE,
+			specular: ColorU.WHITE,
+			constant:1.0,
+			linear:0.045,
+			quadratic:0.0075
+			
+		}
+		
+		spotLight = 
+		{
+			position:{x:0, y:0, z:-50},
+			ambient: ColorU.YELLOW,
+			diffuse: ColorU.WHITE,
+			specular: ColorU.WHITE,
+			constant:1.0,
+			linear:0.045,
+			quadratic:0.0075
+			
 		}
 		
 		

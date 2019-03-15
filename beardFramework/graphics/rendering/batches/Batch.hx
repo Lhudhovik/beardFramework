@@ -508,15 +508,23 @@ class Batch implements IBatch
 			renderer.view.identity();
 			renderer.view.appendScale(camera.zoom, camera.zoom,1);
 			//renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
-			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, 0);
+			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, -1);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.ambient"), ColorU.getRedf(renderer.light.ambient), ColorU.getGreenf(renderer.light.ambient), ColorU.getBluef(renderer.light.ambient) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.diffuse"), ColorU.getRedf(renderer.light.diffuse), ColorU.getGreenf(renderer.light.diffuse), ColorU.getBluef(renderer.light.diffuse) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.specular"), ColorU.getRedf(renderer.light.specular), ColorU.getGreenf(renderer.light.specular), ColorU.getBluef(renderer.light.specular) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.position"), renderer.light.position.x, renderer.light.position.y, renderer.light.position.z );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "viewPosition"), camera.viewportX + camera.viewportWidth*0.5,camera.viewportY + camera.viewportHeight*0.5 , 0 );
-				
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.ambient"), ColorU.getRedf(renderer.directionalLight.ambient), ColorU.getGreenf(renderer.directionalLight.ambient), ColorU.getBluef(renderer.directionalLight.ambient) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.diffuse"), ColorU.getRedf(renderer.directionalLight.diffuse), ColorU.getGreenf(renderer.directionalLight.diffuse), ColorU.getBluef(renderer.directionalLight.diffuse) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.specular"), ColorU.getRedf(renderer.directionalLight.specular), ColorU.getGreenf(renderer.directionalLight.specular), ColorU.getBluef(renderer.directionalLight.specular) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.position"), renderer.directionalLight.position.x, renderer.directionalLight.position.y, renderer.directionalLight.position.z );
+			
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.ambient"), ColorU.getRedf(renderer.pointLight.ambient), ColorU.getGreenf(renderer.pointLight.ambient), ColorU.getBluef(renderer.pointLight.ambient) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.diffuse"), ColorU.getRedf(renderer.pointLight.diffuse), ColorU.getGreenf(renderer.pointLight.diffuse), ColorU.getBluef(renderer.pointLight.diffuse) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.specular"), ColorU.getRedf(renderer.pointLight.specular), ColorU.getGreenf(renderer.pointLight.specular), ColorU.getBluef(renderer.pointLight.specular) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.position"), renderer.pointLight.position.x, renderer.pointLight.position.y, renderer.pointLight.position.z );
+			GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLight.constant"), renderer.pointLight.constant);
+			GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLight.linear"), renderer.pointLight.linear );
+			GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLight.quadratic"), renderer.pointLight.quadratic);
+			
+							
 			
 			if (indicesPerObject> 0){
 				//trace(verticesData.activeDataCount);

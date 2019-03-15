@@ -11,3 +11,19 @@ typedef Light =
 	public var diffuse:UInt;
 	public var specular:UInt;
 }
+
+typedef PointLight =
+{
+	>Light,
+	public var constant : Float;
+	public var linear : Float;
+	public var quadratic : Float;
+}
+
+typedef SpotLight =
+{
+	>Light,
+	public var constant : Float;
+	public var linear : Float;
+	public var quadratic : Float;
+}
