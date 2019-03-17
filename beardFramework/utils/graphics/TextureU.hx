@@ -1,4 +1,5 @@
 package beardFramework.utils.graphics;
+import beardFramework.core.BeardGame;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLTexture;
@@ -73,19 +74,24 @@ class TextureU
 	
 	public static function GetFormat(image:Image):Int
 	{
-		var imageFormat:Int = GL.RGBA;
+		var __textureInternalFormat:Int = 0;
+		var __textureFormat:Int = 0;
+		var internalFormat = 0;
+		var format=0;
+	
 		if (image != null) {
 			
-												
+			
+			
 			if (image.buffer.bitsPerPixel == 1) {
 				
-				imageFormat = GL.ALPHA;
+				internalFormat = GL.ALPHA;
+				format = GL.ALPHA;
 				
 			} else {
-				
-											
+				__textureInternalFormat = GL.RGBA;
+					
 				var bgraExtension = null;
-				
 				#if (!js || !html5)
 				bgraExtension = GL.getExtension ("EXT_bgra");
 				if (bgraExtension == null)
@@ -95,18 +101,162 @@ class TextureU
 				#end
 				
 				if (bgraExtension != null) {
-					imageFormat = bgraExtension.BGRA_EXT;
+					
+					__textureFormat = bgraExtension.BGRA_EXT;
+					
+					#if (!ios && !tvos)
+					if (BeardGame.Get().window.context.type == #if (lime >= "7.0.0") OPENGLES #else GLES #end) {
+						
+						__textureInternalFormat = bgraExtension.BGRA_EXT;
+						
+					}
+					#end
+					
 				} 
-				else{
-					imageFormat = GL.RGBA;
-				}
-			
+				else	__textureFormat = GL.RGBA;
+					
+				internalFormat = __textureInternalFormat;
+				format = __textureFormat;
+				
 			}
 			
+				
 		}
 		
-		return imageFormat;
+		return format;
 		
+	}
+	public static function GetInternalFormat(image:Image):Int
+	{
+		var __textureInternalFormat:Int = 0;
+		var __textureFormat:Int = 0;
+		var internalFormat = 0;
+		var format;
+	
+		if (image != null) {
+			
+			
+			
+			if (image.buffer.bitsPerPixel == 1) {
+				
+				internalFormat = GL.ALPHA;
+				format = GL.ALPHA;
+				
+			} else {
+				__textureInternalFormat = GL.RGBA;
+					
+				var bgraExtension = null;
+				#if (!js || !html5)
+				bgraExtension = GL.getExtension ("EXT_bgra");
+				if (bgraExtension == null)
+					bgraExtension = GL.getExtension ("EXT_texture_format_BGRA8888");
+				if (bgraExtension == null)
+					bgraExtension = GL.getExtension ("APPLE_texture_format_BGRA8888");
+				#end
+				
+				if (bgraExtension != null) {
+					
+					__textureFormat = bgraExtension.BGRA_EXT;
+					
+					#if (!ios && !tvos)
+					if (BeardGame.Get().window.context.type == #if (lime >= "7.0.0") OPENGLES #else GLES #end) {
+						
+						__textureInternalFormat = bgraExtension.BGRA_EXT;
+						
+					}
+					#end
+					
+				} 
+				else	__textureFormat = GL.RGBA;
+					
+				internalFormat = __textureInternalFormat;
+				format = __textureFormat;
+				
+			}
+			
+				
+		}
+		
+		return internalFormat;
+		
+	}
+	public static function GetTexture(image:Image):GLTexture
+	{
+		var __texture:GLTexture = GL.createTexture ();
+		var __textureInternalFormat:Int = 0;
+		var __textureFormat:Int = 0;
+	
+	
+		GL.bindTexture (GL.TEXTURE_2D, __texture);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
+		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+				
+		if (image != null) {
+			
+			var internalFormat, format;
+			
+			if (image.buffer.bitsPerPixel == 1) {
+				
+				internalFormat = GL.ALPHA;
+				format = GL.ALPHA;
+				
+			} else {
+				__textureInternalFormat = GL.RGBA;
+					
+				var bgraExtension = null;
+				#if (!js || !html5)
+				bgraExtension = GL.getExtension ("EXT_bgra");
+				if (bgraExtension == null)
+					bgraExtension = GL.getExtension ("EXT_texture_format_BGRA8888");
+				if (bgraExtension == null)
+					bgraExtension = GL.getExtension ("APPLE_texture_format_BGRA8888");
+				#end
+				
+				if (bgraExtension != null) {
+					
+					__textureFormat = bgraExtension.BGRA_EXT;
+					
+					#if (!ios && !tvos)
+					if (BeardGame.Get().window.context.type == #if (lime >= "7.0.0") OPENGLES #else GLES #end) {
+						
+						__textureInternalFormat = bgraExtension.BGRA_EXT;
+						
+					}
+					#end
+					
+				} 
+				else	__textureFormat = GL.RGBA;
+					
+				internalFormat = __textureInternalFormat;
+				format = __textureFormat;
+				
+			}
+			
+			GL.bindTexture (GL.TEXTURE_2D, __texture);
+			
+			var textureImage = image;
+			
+			if (#if openfl_power_of_two !textureImage.powerOfTwo || #end (!textureImage.premultiplied && textureImage.transparent)) {
+				
+				textureImage = textureImage.clone ();
+				textureImage.premultiplied = true;
+				#if openfl_power_of_two
+				textureImage.powerOfTwo = true;
+				#end
+				
+			}
+			
+			GL.texImage2D (GL.TEXTURE_2D, 0, internalFormat, textureImage.buffer.width, textureImage.buffer.height, 0, format, GL.UNSIGNED_BYTE, textureImage.data);
+			
+			GL.bindTexture (GL.TEXTURE_2D, null);
+						
+		}
+				
+		return __texture;
 	}
 	//public static function GetTexture(image:Image):GLTexture
 	//{

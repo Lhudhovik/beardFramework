@@ -6,7 +6,7 @@ import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.rendering.vertexData.Material;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.systems.aabb.AABB;
-import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.Color;
 
 
 /**
@@ -17,7 +17,7 @@ class RenderedObject implements ICameraDependent
 {
 	
 	@:isVar public var alpha(get, set):Float;
-	@:isVar public var bufferIndex(get, set):Int;
+	
 	public var height(get, set):Float;	
 	public var width(get, set):Float;
 	@:isVar public var isDirty(get, set):Bool = false;
@@ -42,7 +42,7 @@ class RenderedObject implements ICameraDependent
 	
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
-	@:isVar public var renderingBatch(get, set):RenderedObjectBatch;
+	
 	
 	public function new() 
 	{
@@ -56,15 +56,13 @@ class RenderedObject implements ICameraDependent
 		rotation = 0;
 		rotationSine = Math.sin (0);
 		rotationCosine = Math.cos (0);
-		bufferIndex = -1;
 		displayingCameras = new List<String>();
-		renderingBatch =  cast(Renderer.Get().GetBatch(Renderer.Get().DEFAULT), RenderedObjectBatch);
 		onAABBTree = false;
 		
 		material = 
 		{
-			diffuse:ColorU.WHITE,	
-			specular: ColorU.WHITE,
+			diffuse:Color.WHITE,	
+			specular: Color.WHITE,
 			shininess:32
 		}
 	}
@@ -274,19 +272,7 @@ class RenderedObject implements ICameraDependent
 	
 	function  set_isDirty(value:Bool):Bool 
 	{
-		if (value == true && renderingBatch != null && bufferIndex >= 0) renderingBatch.AddDirtyObject(this);
-		else if ( value == false && renderingBatch != null) renderingBatch.RemoveDirtyObject(this);
 		return isDirty = value;
-	}
-	
-	function get_bufferIndex():Int 
-	{
-		return bufferIndex;
-	}
-	
-	function set_bufferIndex(value:Int):Int 
-	{
-		return bufferIndex = value;
 	}
 	
 	function get_alpha():Float 
@@ -332,37 +318,6 @@ class RenderedObject implements ICameraDependent
 		
 	}
 	
-	function get_renderingBatch():RenderedObjectBatch 
-	{
-		return renderingBatch;
-	}
-	
-	function set_renderingBatch(value:RenderedObjectBatch):RenderedObjectBatch 
-	{
-		if (value != renderingBatch)
-		{
-			if (renderingBatch != null)
-			{
-				renderingBatch.RemoveDirtyObject(this);
-				if(bufferIndex >= 0) renderingBatch.FreeBufferIndex(bufferIndex);
-			}
-			
-			renderingBatch = value;
-			
-			if (renderingBatch != null && bufferIndex >=0)
-			{
-				bufferIndex = renderingBatch.AllocateBufferIndex();
-			}
-		
-			
-			isDirty = true;
-			
-		}
-		
-		
-		return renderingBatch;
-	}
-	
 	function set_onAABBTree(value:Bool):Bool 
 	{
 		if (value != onAABBTree && layer!= null)
@@ -373,8 +328,6 @@ class RenderedObject implements ICameraDependent
 		}
 		return onAABBTree = value;
 	}
-	
-	
 	
 	
 	

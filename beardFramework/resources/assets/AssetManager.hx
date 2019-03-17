@@ -1,6 +1,6 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.resources.assets.Atlas;
 import beardFramework.graphics.text.FontFormat;
 import haxe.Utf8;

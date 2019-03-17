@@ -1,5 +1,5 @@
 package beardFramework.utils.graphics;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import lime.utils.Float32Array;
@@ -11,7 +11,7 @@ import lime.utils.Float32Array;
 class VertexAttributeU 
 {
 
-	public static function GenerateVertexAttributesFromVisual(visual:Visual):Float32Array
+	public static function GenerateVertexAttributesFromVisual(visual:BatchedVisual):Float32Array
 	{
 		
 		var textureData:SubTextureData = AssetManager.Get().GetSubTextureData(visual.texture, visual.atlas);

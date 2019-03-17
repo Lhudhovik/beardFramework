@@ -1,7 +1,7 @@
 package beardFramework.graphics.screens.regions;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.resources.MinAllocArray;
 
@@ -20,7 +20,7 @@ class Region
 	public var y:Float;
 	public var regionChildren:MinAllocArray<Region>;
 	#if debug
-	public var visual:Visual;
+	public var visual:BatchedVisual;
 	#end
 	
 	public function new(width:Float, height:Float, x:Float, y:Float, level:Int) 

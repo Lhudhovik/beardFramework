@@ -3,7 +3,7 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.LineBatch;
 import beardFramework.resources.options.OptionsManager;
-import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.Color;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.simpleDataStruct.SRect;
 import beardFramework.utils.simpleDataStruct.SVec2;
@@ -28,7 +28,7 @@ class DebugDraw
 		
 	}
 	
-	public static function DrawLine(start:SVec2, end:SVec2, color: UInt = 0x000000ff/*persistent:Bool = false*/):Int
+	public static function DrawLine(start:SVec2, end:SVec2, color: Color = 0x000000ff/*persistent:Bool = false*/):Int
 	{
 		if (linesBatch == null){
 			linesBatch = cast Renderer.Get().GetBatch("debugLine");
@@ -37,7 +37,7 @@ class DebugDraw
 		
 		var index:Int;
 		
-		var data:Vector<Float> =  Vector.fromArrayCopy([start.x, start.y, 0, ColorU.getRed(color),ColorU.getGreen(color),ColorU.getBlue(color),ColorU.getAlpha(color), end.x, end.y, 0,ColorU.getRed(color),ColorU.getGreen(color),ColorU.getBlue(color),ColorU.getAlpha(color)]);
+		var data:Vector<Float> =  Vector.fromArrayCopy([start.x, start.y, 0, color.getRedf(),color.getGreenf(),color.getBluef(),color.getAlphaf(), end.x, end.y, 0,color.getRedf(),color.getGreenf(),color.getBluef(),color.getAlphaf()]);
 		
 		index = linesBatch.AddData(data);
 		lines.add(index);
@@ -46,7 +46,7 @@ class DebugDraw
 		
 	}
 	
-	public static function DrawFullRectangle(x:Float, y:Float, width:Float, height:Float, color:UInt = 0x000000ff):Int
+	public static function DrawFullRectangle(x:Float, y:Float, width:Float, height:Float, color:Color = 0x000000ff):Int
 	{
 		
 		if (rectsBatch == null){
@@ -56,10 +56,10 @@ class DebugDraw
 	
 		var data:Vector<Float> = Vector.fromArrayCopy([
 		
-		0*width + x, 1*height + y, 0,ColorU.getRed(color),ColorU.getGreen(color),ColorU.getBlue(color),ColorU.getAlpha(color),
-		1*width + x, 1*height + y, 0,ColorU.getRed(color),ColorU.getGreen(color),ColorU.getBlue(color),ColorU.getAlpha(color),
-		1*width + x, 0*height + y, 0,ColorU.getRed(color),ColorU.getGreen(color),ColorU.getBlue(color),ColorU.getAlpha(color),
-		0*width + x, 0*height + y, 0,ColorU.getRed(color),ColorU.getGreen(color),ColorU.getBlue(color),ColorU.getAlpha(color)
+		0*width + x, 1*height + y, 0,color.getRedf(),color.getGreenf(),color.getBluef(),color.getAlphaf(),
+		1*width + x, 1*height + y, 0,color.getRedf(),color.getGreenf(),color.getBluef(),color.getAlphaf(),
+		1*width + x, 0*height + y, 0,color.getRedf(),color.getGreenf(),color.getBluef(),color.getAlphaf(),
+		0*width + x, 0*height + y, 0,color.getRedf(),color.getGreenf(),color.getBluef(),color.getAlphaf()
 		
 		]);
 		

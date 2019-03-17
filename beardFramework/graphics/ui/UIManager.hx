@@ -1,8 +1,9 @@
 package beardFramework.graphics.ui;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
+import beardFramework.graphics.core.BatchedRenderedObject;
 import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
@@ -96,7 +97,7 @@ class UIManager
 		if (Std.is(component, UIContainer))
 			for (element in cast(component, UIContainer).components) AddComponent(element);
 		else{
-			cast(component, RenderedObject).renderingBatch = cast(Renderer.Get().GetBatch(Renderer.Get().UI), RenderedObjectBatch);
+			if(Std.is(component, BatchedRenderedObject)) cast(component, BatchedRenderedObject).renderingBatch = cast(Renderer.Get().GetBatch(Renderer.Get().UI), RenderedObjectBatch);
 			UILayer.Add(cast(component, RenderedObject));
 		}
 		
@@ -109,7 +110,7 @@ class UIManager
 			cast(component, UIContainer).visible = false;
 			for (element in cast(component, UIContainer).components)	RemoveComponent(element);
 		}
-		else UILayer.Remove(cast(component, Visual));
+		else UILayer.Remove(cast(component, BatchedVisual));
 		
 		RemoveFromGroup( component, component.group);
 	}

@@ -1,6 +1,6 @@
 package beardFramework.systems.aabb;
 import beardFramework.debug.DebugDraw;
-import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.Color;
 import haxe.ds.Vector;
 
 /**
@@ -57,7 +57,7 @@ class Node
 		}
 		
 		
-		debugLeaf = DebugDraw.DrawWireFrameRectangle(aabbLeaf.topLeft.x, aabbLeaf.topLeft.y, aabbLeaf.bottomRight.x - aabbLeaf.topLeft.x, aabbLeaf.bottomRight.y - aabbLeaf.topLeft.y,ColorU.BLUE );
+		debugLeaf = DebugDraw.DrawWireFrameRectangle(aabbLeaf.topLeft.x, aabbLeaf.topLeft.y, aabbLeaf.bottomRight.x - aabbLeaf.topLeft.x, aabbLeaf.bottomRight.y - aabbLeaf.topLeft.y,Color.BLUE );
 		
 		
 	}
@@ -75,7 +75,7 @@ class Node
 			aabbFat.topLeft.y = aabbLeaf.topLeft.y - margin;
 			aabbFat.bottomRight.x = aabbLeaf.bottomRight.x + margin;
 			aabbFat.bottomRight.y = aabbLeaf.bottomRight.y + margin;
-			debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,ColorU.BLUE );
+			debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,Color.BLUE );
 		
 		}
 		else{
@@ -86,7 +86,7 @@ class Node
 			aabbFat.topLeft.y -= margin;
 			aabbFat.bottomRight.x += margin;
 			aabbFat.bottomRight.y +=  margin;
-			debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,ColorU.RED );
+			debugFat = DebugDraw.DrawWireFrameRectangle(aabbFat.topLeft.x, aabbFat.topLeft.y, aabbFat.bottomRight.x - aabbFat.topLeft.x, aabbFat.bottomRight.y - aabbFat.topLeft.y,Color.RED );
 		
 		}
 		

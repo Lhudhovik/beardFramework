@@ -1,6 +1,6 @@
 package beardFramework.systems.entities.components;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.resources.save.data.StructDataComponent;
 import haxe.Json;
 import beardFramework.systems.entities.GameEntity;
@@ -10,7 +10,7 @@ import beardFramework.interfaces.IEntityVisual;
  * ...
  * @author Ludo
  */
-class EntityVisualComponent extends Visual implements IEntityVisual
+class EntityVisualComponent extends BatchedVisual implements IEntityVisual
 {
 
 	public function new(texture:String, atlas:String, name:String ="" ) 

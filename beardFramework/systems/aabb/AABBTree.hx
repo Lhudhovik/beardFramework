@@ -1,7 +1,7 @@
 package beardFramework.systems.aabb;
 import beardFramework.core.BeardGame;
 import beardFramework.debug.DebugDraw;
-import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.Color;
 import beardFramework.utils.math.MathU;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.Tags;
@@ -342,14 +342,14 @@ class AABBTree
 			var end:SVec2 = {x: ray.start.x + ray.dir.x * ray.length, y :ray.start.y + ray.dir.y * ray.length};
 			//trace(end);
 			//trace({x: ray.start.x + ray.dir.x * ray.length * 0.9, y :ray.start.y + ray.dir.y * ray.length*0.9});
-			DebugDraw.DrawLine(ray.start, bestResult.hitPos, ColorU.RED);
-			DebugDraw.DrawLine({x: bestResult.hitPos.x, y:bestResult.hitPos.y + 3} , {x: ray.start.x + ray.dir.x * ray.length, y :ray.start.y + ray.dir.y * ray.length + 3} , ColorU.GREEN);
+			DebugDraw.DrawLine(ray.start, bestResult.hitPos, Color.RED);
+			DebugDraw.DrawLine({x: bestResult.hitPos.x, y:bestResult.hitPos.y + 3} , {x: ray.start.x + ray.dir.x * ray.length, y :ray.start.y + ray.dir.y * ray.length + 3} , Color.GREEN);
 		
 		}
 		else
 		{
 			var end:SVec2 = {x: ray.start.x + (ray.dir.x * ray.length), y :ray.start.y + (ray.dir.y * ray.length)};
-			DebugDraw.DrawLine(ray.start, end, ColorU.RED);
+			DebugDraw.DrawLine(ray.start, end, Color.RED);
 		}
 
 		
@@ -411,8 +411,8 @@ class AABBTree
 				var end:SVec2 = {x: ray.start.x + ray.dir.x * ray.length, y :ray.start.y + ray.dir.y * ray.length};
 				//trace(end);
 				//trace({x: ray.start.x + ray.dir.x * ray.length * 0.9, y :ray.start.y + ray.dir.y * ray.length*0.9});
-				DebugDraw.DrawLine(ray.start, results[i].hitPos, ColorU.RED);
-				DebugDraw.DrawLine({x: results[i].hitPos.x, y:results[i].hitPos.y + i*3} , {x: ray.start.x + ray.dir.x * ray.length, y :ray.start.y + ray.dir.y * ray.length + i*3} , ColorU.GREEN);
+				DebugDraw.DrawLine(ray.start, results[i].hitPos, Color.RED);
+				DebugDraw.DrawLine({x: results[i].hitPos.x, y:results[i].hitPos.y + i*3} , {x: ray.start.x + ray.dir.x * ray.length, y :ray.start.y + ray.dir.y * ray.length + i*3} , Color.GREEN);
 		
 				
 			}
@@ -421,7 +421,7 @@ class AABBTree
 		else
 		{
 			var end:SVec2 = {x: ray.start.x + (ray.dir.x * ray.length), y :ray.start.y + (ray.dir.y * ray.length)};
-			DebugDraw.DrawLine(ray.start, end, ColorU.RED);
+			DebugDraw.DrawLine(ray.start, end, Color.RED);
 		}
 
 		

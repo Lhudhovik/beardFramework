@@ -1,7 +1,7 @@
 package beardFramework.graphics.cameras;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.StructDataCamera;
 import beardFramework.utils.simpleDataStruct.SRect;

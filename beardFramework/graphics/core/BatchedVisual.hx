@@ -10,7 +10,7 @@ import openfl.geom.Matrix;
  * ...
  * @author 
  */
-class Visual extends RenderedObject
+class BatchedVisual extends BatchedRenderedObject
 {
 	private static var instanceCount:Int = 0;
 	
@@ -80,7 +80,22 @@ class Visual extends RenderedObject
 		
 	}
 	
-	
+	//override public function RequestBufferIndex():Void 
+	//{
+		//super.RequestBufferIndex();
+		//if (renderingBatch != null){
+			//renderingBatch.atlases.UniquePush(this.atlas);
+		//}
+	//}
+	//
+	//override public ReleaseBufferIndex function ():Void 
+	//{
+		//super.ReleaseBufferIndex();
+		//if (renderingBatch != null){
+			//
+			//renderingBatch.atlases[this.atlas]++;
+		//}
+	//}
 
 }
 

@@ -5,7 +5,7 @@ import beardFramework.graphics.rendering.batches.BatchTemplateData;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.graphics.screens.BasicLoadingScreen;
 import beardFramework.graphics.text.FontFormat;
-import beardFramework.graphics.text.TextField;
+import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
 import lime.graphics.opengl.GL;
@@ -66,7 +66,7 @@ class OptionsManager
 			else if (element.nodeName == "fonts")
 			{
 
-				TextField.defaultFont = element.get("default");
+				BatchedTextField.defaultFont = element.get("default");
 				var size:Array<Int> = [];
 				var readSize:Array<String> = [];
 				for (font in element.elementsNamed("font"))

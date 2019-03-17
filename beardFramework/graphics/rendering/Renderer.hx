@@ -2,18 +2,19 @@ package beardFramework.graphics.rendering;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
+import beardFramework.graphics.rendering.Light.DirectionalLight;
 import beardFramework.graphics.rendering.Light.PointLight;
 import beardFramework.graphics.rendering.Light.SpotLight;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.BatchTemplateData;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
-import beardFramework.graphics.text.TextField;
+import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.interfaces.IBatch;
 import beardFramework.utils.data.DataU;
 import beardFramework.resources.MinAllocArray;
-import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.Color;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.app.Application;
@@ -55,7 +56,7 @@ class Renderer
 	
 	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
-	public var directionalLight:Light;
+	public var directionalLight:DirectionalLight;
 	public var pointLight:PointLight;
 	public var spotLight:SpotLight;
 	
@@ -109,33 +110,33 @@ class Renderer
 		
 		directionalLight = 
 		{
-			position:{x:0, y:0, z:-50},
-			ambient: 0x222222ff,
-			diffuse: ColorU.WHITE,
-			specular: ColorU.BLUE
+			direction:{x:0, y:0, z:1},
+			ambient: Color.RED,
+			diffuse: Color.WHITE,
+			specular: Color.BLUE
 		}
 		
 		pointLight = 
 		{
 			position:{x:0, y:0, z:-50},
-			ambient: ColorU.YELLOW,
-			diffuse: ColorU.WHITE,
-			specular: ColorU.WHITE,
+			ambient: Color.YELLOW,
+			diffuse: Color.WHITE,
+			specular: Color.WHITE,
 			constant:1.0,
-			linear:0.045,
-			quadratic:0.0075
+			linear:0.0014,
+			quadratic:0.000007
 			
 		}
 		
 		spotLight = 
 		{
-			position:{x:0, y:0, z:-50},
-			ambient: ColorU.YELLOW,
-			diffuse: ColorU.WHITE,
-			specular: ColorU.WHITE,
-			constant:1.0,
-			linear:0.045,
-			quadratic:0.0075
+			position:{x:0, y:0, z:-200},
+			direction:{x:0, y:1, z:0},
+			ambient: 0x010101ff,
+			diffuse: Color.WHITE,
+			specular: Color.WHITE,
+			cutOff:25,
+			outerCutOff:60
 			
 		}
 		

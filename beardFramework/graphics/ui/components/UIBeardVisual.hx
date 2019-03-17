@@ -1,6 +1,6 @@
 package beardFramework.graphics.ui.components;
 
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.save.data.StructDataUIComponent;
@@ -10,7 +10,7 @@ import beardFramework.resources.save.data.StructDataUIVisualComponent;
  * ...
  * @author Ludo
  */
-class UIBeardVisual extends Visual implements IUIComponent
+class UIBeardVisual extends BatchedVisual implements IUIComponent
 {
 	
 	@:isVar public var preserved(get, set):Bool;

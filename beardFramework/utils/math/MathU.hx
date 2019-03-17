@@ -55,5 +55,14 @@ class MathU
 		
 	}
 	
+	public static inline function ToRadians(degree:Float) : Float
+	{
+		return degree * Math.PI / 180;
+	}
+	public static inline function ToDegrees(radian:Float) : Float
+	{
+		return radian * 180 / Math.PI;
+	}
+	
 	
 }

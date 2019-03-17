@@ -2,13 +2,13 @@ package beardFramework.graphics.rendering.batches;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IBatch;
 import beardFramework.resources.MinAllocArray;
-import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.GLU;
+import beardFramework.utils.math.MathU;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -44,6 +44,8 @@ class Batch implements IBatch
 	private var verticesData:RenderedDataBufferArray;
 	private var indicesData:UInt16Array;
 	
+	//private var atlases:MinAllocArray<String>;
+	
 	private var utilFloatArray:Float32Array;
 	private var utilUIntArray:UInt16Array;
 	private	var pointer:Int;
@@ -75,6 +77,8 @@ class Batch implements IBatch
 		
 		for (camera in BeardGame.Get().cameras)
 			cameras.add(camera.name);
+		
+		//atlases = new MinAllocArray();
 	
 	}
 	
@@ -511,18 +515,29 @@ class Batch implements IBatch
 			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, -1);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.ambient"), ColorU.getRedf(renderer.directionalLight.ambient), ColorU.getGreenf(renderer.directionalLight.ambient), ColorU.getBluef(renderer.directionalLight.ambient) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.diffuse"), ColorU.getRedf(renderer.directionalLight.diffuse), ColorU.getGreenf(renderer.directionalLight.diffuse), ColorU.getBluef(renderer.directionalLight.diffuse) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.specular"), ColorU.getRedf(renderer.directionalLight.specular), ColorU.getGreenf(renderer.directionalLight.specular), ColorU.getBluef(renderer.directionalLight.specular) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "light.position"), renderer.directionalLight.position.x, renderer.directionalLight.position.y, renderer.directionalLight.position.z );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLight.ambient"),renderer.directionalLight.ambient.getRedf(), renderer.directionalLight.ambient.getGreenf(), renderer.directionalLight.ambient.getBluef() );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLight.diffuse"), renderer.directionalLight.diffuse.getRedf(), renderer.directionalLight.diffuse.getGreenf(), renderer.directionalLight.diffuse.getBluef() );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLight.specular"), renderer.directionalLight.specular.getRedf(), renderer.directionalLight.specular.getGreenf(), renderer.directionalLight.specular.getBluef() );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLight.direction"), renderer.directionalLight.direction.x, renderer.directionalLight.direction.y, renderer.directionalLight.direction.z );
 			
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.ambient"), ColorU.getRedf(renderer.pointLight.ambient), ColorU.getGreenf(renderer.pointLight.ambient), ColorU.getBluef(renderer.pointLight.ambient) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.diffuse"), ColorU.getRedf(renderer.pointLight.diffuse), ColorU.getGreenf(renderer.pointLight.diffuse), ColorU.getBluef(renderer.pointLight.diffuse) );
-			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.specular"), ColorU.getRedf(renderer.pointLight.specular), ColorU.getGreenf(renderer.pointLight.specular), ColorU.getBluef(renderer.pointLight.specular) );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.ambient"), renderer.pointLight.ambient.getRedf(), renderer.pointLight.ambient.getGreenf(), renderer.pointLight.ambient.getBluef());
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.diffuse"), renderer.pointLight.diffuse.getRedf(), renderer.pointLight.diffuse.getGreenf(), renderer.pointLight.diffuse.getBluef() );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.specular"), renderer.pointLight.specular.getRedf(), renderer.pointLight.specular.getGreenf(), renderer.pointLight.specular.getBluef() );
 			GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLight.position"), renderer.pointLight.position.x, renderer.pointLight.position.y, renderer.pointLight.position.z );
 			GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLight.constant"), renderer.pointLight.constant);
 			GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLight.linear"), renderer.pointLight.linear );
 			GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLight.quadratic"), renderer.pointLight.quadratic);
+			
+			
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLight.ambient"), renderer.spotLight.ambient.getRedf(), renderer.spotLight.ambient.getGreenf(), renderer.spotLight.ambient.getBluef() );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLight.diffuse"), renderer.spotLight.diffuse.getRedf(), renderer.spotLight.diffuse.getGreenf(), renderer.spotLight.diffuse.getBluef() );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLight.specular"), renderer.spotLight.specular.getRedf(), renderer.spotLight.specular.getGreenf(), renderer.spotLight.specular.getBluef() );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLight.position"), renderer.spotLight.position.x, renderer.spotLight.position.y, renderer.spotLight.position.z );
+			GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLight.direction"), renderer.spotLight.direction.x, renderer.spotLight.direction.y, renderer.spotLight.direction.z );
+			GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLight.cutOff"), Math.cos(MathU.ToRadians(renderer.spotLight.cutOff)));
+			GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLight.outerCutOff"), Math.cos(MathU.ToRadians(renderer.spotLight.outerCutOff)));
+		
+			
 			
 							
 			

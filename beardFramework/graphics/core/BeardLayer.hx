@@ -53,7 +53,7 @@ class BeardLayer
 	{
 		
 		for (i in 0...objects.length)
-			Add(objects[i], false);
+			Add(objects[i]);
 		
 	}
 	
@@ -71,7 +71,7 @@ class BeardLayer
 				object.layer = this;
 				object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 				object.visible = this.visible;
-				object.bufferIndex =  object.renderingBatch.AllocateBufferIndex();
+				if(Std.is(object, BatchedRenderedObject)) cast(object, BatchedRenderedObject).RequestBufferIndex();
 				object.isDirty = true;
 				renderedObjects.set(object.name, object);
 			}
@@ -80,7 +80,7 @@ class BeardLayer
 		
 	}
 	
-	public function Add(object:RenderedObject, updateBuffer:Bool = true):Void
+	public function Add(object:RenderedObject):Void
 	{
 		//trace(object.name);
 		if (!renderedObjects.exists(object.name))
@@ -89,7 +89,7 @@ class BeardLayer
 			object.layer = this;
 			object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 			object.visible =  this.visible;
-			object.bufferIndex = object.renderingBatch.AllocateBufferIndex();
+			
 			renderedObjects.set(object.name, object);
 			
 			if (object.onAABBTree){
@@ -100,9 +100,11 @@ class BeardLayer
 			
 			object.isDirty = true;
 			
-			if (updateBuffer){
+			if (Std.is(object, BatchedRenderedObject)){
 				
-				object.renderingBatch.UpdateRenderedData();
+				cast(object, BatchedRenderedObject).RequestBufferIndex();
+				cast(object, BatchedRenderedObject).renderingBatch.UpdateRenderedData();
+		
 			}
 			
 		}
@@ -113,7 +115,7 @@ class BeardLayer
 		if (!renderedObjects.exists(object.name))
 		{
 			renderedObjects.remove(object.name);
-			object.bufferIndex = object.renderingBatch.FreeBufferIndex(object.bufferIndex);
+			if(Std.is(object, BatchedRenderedObject)) cast(object, BatchedRenderedObject).ReleaseBufferIndex();
 			//object.isDirty = false;
 			if (object.onAABBTree && aabbs[object.name] != null){
 				

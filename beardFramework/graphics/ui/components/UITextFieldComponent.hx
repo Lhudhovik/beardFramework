@@ -1,7 +1,7 @@
 package beardFramework.graphics.ui.components;
 
 
-import beardFramework.graphics.text.TextField;
+import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.resources.save.data.StructDataUIComponent;
 
@@ -9,7 +9,7 @@ import beardFramework.resources.save.data.StructDataUIComponent;
  * ...
  * @author Ludo
  */
-class UITextFieldComponent extends TextField implements IUIComponent
+class UITextFieldComponent extends BatchedTextField implements IUIComponent
 {
 
 	public var vAlign:UInt;

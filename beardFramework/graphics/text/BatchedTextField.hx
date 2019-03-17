@@ -1,9 +1,10 @@
 package beardFramework.graphics.text;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
+import beardFramework.graphics.core.BatchedRenderedObject;
 import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.ui.FocusableList;
@@ -19,7 +20,7 @@ import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.updateProcess.UpdateProcess;
 import beardFramework.updateProcess.UpdateProcessesManager;
 import beardFramework.updateProcess.Wait;
-import beardFramework.utils.graphics.ColorU;
+import beardFramework.utils.graphics.Color;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.math.MathU;
@@ -34,7 +35,7 @@ import lime.ui.KeyCode;
  * ...
  * @author Ludo
  */
-class TextField extends RenderedObject implements IFocusable {
+class BatchedTextField extends BatchedRenderedObject implements IFocusable {
 	
 	private static var instanceCount:Int = 0;
 	public static var defaultFont:String="";
@@ -58,7 +59,7 @@ class TextField extends RenderedObject implements IFocusable {
 	public var isForm:Bool;
 	
 	private var linesHeight:Float;
-	private var cursor:Visual;
+	private var cursor:BatchedVisual;
 	private var cursorIndex(default, set):Int;
 	
 	
@@ -87,7 +88,7 @@ class TextField extends RenderedObject implements IFocusable {
 		if(text != "") AppendText(text);
 		
 		this.atlas = AssetManager.Get().FONT_ATLAS_NAME;
-		cursor = new Visual(AssetManager.Get().GetFontGlyphTextureName(this.font, "|",Std.int(this.textSize)), this.atlas, "cursor" + instanceCount);
+		cursor = new BatchedVisual(AssetManager.Get().GetFontGlyphTextureName(this.font, "|",Std.int(this.textSize)), this.atlas, "cursor" + instanceCount);
 	
 		cursor.visible = false;
 		cursor.width =  5;
@@ -926,7 +927,7 @@ typedef RenderedGlyphData =
 	public var y:Float;
 	public var width:Float;
 	public var height:Float;
-	public var color:Int;
+	public var color:Color;
 	public var colorChanged:Bool;
 	public var line:Int;
 	public var textureData:SubTextureData;
