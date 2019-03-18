@@ -98,7 +98,7 @@ class RenderedObjectBatch extends Batch
 				//}
 				
 					
-					DataU.DeepTrace(indicesData);
+					//DataU.DeepTrace(indicesData);
 					GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 					GL.bufferData(GL.ELEMENT_ARRAY_BUFFER,indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 				}
@@ -300,9 +300,9 @@ class RenderedObjectBatch extends Batch
 		GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.DYNAMIC_DRAW);
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		visu = [];
-		for (i in 0...verticesData.data.length)
-			visu.push(verticesData.data[i]);
-		trace(visu);
+		//for (i in 0...verticesData.data.length)
+			//visu.push(verticesData.data[i]);
+		//trace(visu);
 		
 	}
 	private inline function DepthSorting(data1:DepthOrderingData, data2:DepthOrderingData):Int
