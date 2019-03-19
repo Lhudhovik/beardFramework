@@ -44,6 +44,7 @@ class Renderer
 	
 	public var DEFAULT(default, never):String = "default";
 	public var UI(default, never):String = "UI";
+	public var VISIBLEDEPTHLIMIT(default, never):Int = 10;
 	#if debug	
 	public var DEBUG(default, never):String = "debug";
 	#end
@@ -96,7 +97,7 @@ class Renderer
 		
 		projection = new Matrix4();
 		projection.identity();
-		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, 1, -1);
+		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, VISIBLEDEPTHLIMIT, -VISIBLEDEPTHLIMIT);
 		view = new Matrix4();
 		model = new Matrix4();
 			
@@ -197,7 +198,7 @@ class Renderer
 	{
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		projection.identity();
-		projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 1, -1);
+		projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 10, -10);
 		
 		for (i in 0...batches.length){
 			GL.useProgram(batches.get(i).shaderProgram);

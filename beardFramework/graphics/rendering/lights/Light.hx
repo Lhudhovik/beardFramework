@@ -64,7 +64,7 @@ import lime.graphics.opengl.GLProgram;
 		
 		if (light == null){
 			
-			light = new SpotLight(name, position, direction,  Color.WHITE, Color.WHITE, Color.WHITE);
+			light = new SpotLight(name, position, direction,  0x050505ff, Color.WHITE, Color.WHITE);
 			light.cutOff = cutOff;
 			light.outerCutOff = outerCutOff;
 			spotLights.Push(light);

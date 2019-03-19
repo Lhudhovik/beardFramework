@@ -226,7 +226,7 @@ class InputManager
 	
 	public function BindToAction(actionID : String, callback:InputData -> Void, targetName:String="", once :Bool = false, active : Bool = true):Void
 	{
-		
+		trace("actionID " + actionID + " added");
 		if (actions[actionID] == null){
 			actions[actionID] = { ID:actionID, active:true, callbackDetails:new MinAllocArray()};	
 		}
@@ -234,7 +234,7 @@ class InputManager
 		if (!CheckDetailExisting(actions[actionID] , callback, targetName))
 		{
 			actions[actionID].callbackDetails.Push({ callback:callback, target:targetName,once:once });
-			
+			//trace("details checked");
 			
 		}
 		
@@ -437,7 +437,7 @@ class InputManager
 		KIDUtil.keyCode = key;
 		KIDUtil.modifier = modifier;
 		KIDUtil.type = InputType.KEY_UP;
-		KIDUtil.target = focusedObject.name;
+		KIDUtil.target = (focusedObject != null ? focusedObject.name : "");
 		//KIDUtil = {type:InputType.KEY_UP, target:focusedObject, keyCode:key, modifier:modifier};
 		FetchActions(utilString, KIDUtil);
 		
@@ -455,7 +455,7 @@ class InputManager
 			KIDUtil.keyCode = key;
 			KIDUtil.modifier = modifier;
 			KIDUtil.type = InputType.KEY_PRESS;
-			KIDUtil.target = focusedObject.name;
+			KIDUtil.target = (focusedObject != null ? focusedObject.name : "");
 			//KIDUtil = {type:InputType.KEY_PRESS, target:focusedObject, keyCode:key, modifier:modifier};
 			FetchActions(utilString, KIDUtil);
 			
@@ -482,7 +482,7 @@ class InputManager
 		KIDUtil.keyCode = key;
 		KIDUtil.modifier = modifier;
 		KIDUtil.type = InputType.KEY_DOWN;
-		KIDUtil.target = focusedObject.name;
+		KIDUtil.target = (focusedObject != null ? focusedObject.name : "");
 		//KIDUtil = {type:InputType.KEY_DOWN, target:focusedObject, keyCode:key, modifier:modifier};
 		FetchActions(utilString, KIDUtil);
 		
@@ -496,7 +496,7 @@ class InputManager
 		AIDUtil.value = value;
 		AIDUtil.axis = axis ;
 		AIDUtil.gamepadID = gamepadID;
-		AIDUtil.target = focusedObject.name;
+		AIDUtil.target = (focusedObject != null ? focusedObject.name : "");
 		AIDUtil.type = InputType.GAMEPAD_AXIS_MOVE;
 		//AIDUtil = {type:InputType.GAMEPAD_AXIS_MOVE, target:focusedObject, gamepadID:gamepadID, axis:axis, value:value}
 		FetchActions(utilString, AIDUtil);
@@ -511,7 +511,7 @@ class InputManager
 		BIDUtil = buttonInputData.Get();
 		BIDUtil.button = button;
 		BIDUtil.gamepadID = gamepadID;
-		BIDUtil.target = focusedObject.name;
+		BIDUtil.target = (focusedObject != null ? focusedObject.name : "");
 		BIDUtil.type = InputType.GAMEPAD_BUTTON_UP;
 		//BIDUtil = {type:InputType.GAMEPAD_BUTTON_UP, target:focusedObject, gamepadID:gamepadID, button:button};
 		FetchActions(utilString, BIDUtil);
@@ -521,7 +521,7 @@ class InputManager
 			BIDUtil = buttonInputData.Get();
 			BIDUtil.button = button;
 			BIDUtil.gamepadID = gamepadID;
-			BIDUtil.target = focusedObject.name;
+			BIDUtil.target =(focusedObject != null ? focusedObject.name : "");
 			BIDUtil.type = InputType.GAMEPAD_BUTTON_PRESS;
 			//BIDUtil = {type:InputType.GAMEPAD_BUTTON_PRESS, target:focusedObject, gamepadID:gamepadID, button:button};
 			FetchActions(utilString, BIDUtil);
@@ -541,7 +541,7 @@ class InputManager
 		BIDUtil = buttonInputData.Get();
 		BIDUtil.button = button;
 		BIDUtil.gamepadID = gamepadID;
-		BIDUtil.target = focusedObject.name;
+		BIDUtil.target = (focusedObject != null ? focusedObject.name : "");
 		BIDUtil.type = InputType.GAMEPAD_BUTTON_DOWN;
 		//BIDUtil = {type:InputType.GAMEPAD_BUTTON_DOWN, target:focusedObject, gamepadID:gamepadID, button:button};
 		FetchActions(utilString, BIDUtil);
@@ -750,13 +750,13 @@ class InputManager
 		
 		if (actions[utilInput] != null)
 		{
-			trace("not empty");
+			//trace("not empty");
 			
 			j = actions[utilInput].callbackDetails.length-1;
 			while (j >= 0)
 			{
 				detail = actions[utilInput].callbackDetails.get(j);
-				if(detail != null) trace(detail.target);
+				//if(detail != null) trace(detail.target);
 				if (detail != null && detail.target == inputData.target){
 					success = true;
 					resolveQueue.add({callback:detail.callback, data:inputData});

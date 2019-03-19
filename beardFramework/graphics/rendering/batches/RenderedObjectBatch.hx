@@ -147,9 +147,9 @@ class RenderedObjectBatch extends Batch
 						verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y + center.y + ((vertices[verIndex] * visual.width)-center.x)*visual.rotationSine +  ((vertices[verIndex+1] * visual.height)-center.y)*visual.rotationCosine;
 						//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y +  quadVertices[verIndex+1] * visual.height;
 						
-						if (verticesData.data[visIndex + attIndex + 2] != (visual.visible ? visual.renderDepth : -2)) depthChange = true;
+						if (verticesData.data[visIndex + attIndex + 2] != (visual.visible ? visual.renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT+1)) depthChange = true;
 							
-						verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth : -2;
+						verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth :Renderer.Get().VISIBLEDEPTHLIMIT+1;
 								
 						
 						//UV + TextureID
@@ -207,10 +207,10 @@ class RenderedObjectBatch extends Batch
 							//renderedData.data[visIndex + attIndex] = utilFloatArray[attIndex] = textfield.x + data.x +  quadVertices[verIndex] * data.width;
 							verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] =  textfield.y + center.y + ((vertices[verIndex] * data.width+data.x)-center.x)*textfield.rotationSine +  ((vertices[verIndex+1] * data.height+data.y)-center.y)*textfield.rotationCosine;
 							//renderedData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = textfield.y +  data.y +  quadVertices[verIndex+1] * data.height;
-							if (verticesData.data[visIndex + attIndex + 2] != (textfield.visible ? textfield.renderDepth : -2))	depthChange = true;
+							if (verticesData.data[visIndex + attIndex + 2] != (textfield.visible ? textfield.renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT+1))	depthChange = true;
 		
 	
-							verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = textfield.visible ? textfield.renderDepth : -2;
+							verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = textfield.visible ? textfield.renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT+1;
 							
 							
 							//UV + Texture ID
@@ -252,7 +252,7 @@ class RenderedObjectBatch extends Batch
 			//var visu:Array<Float> = [];
 			//for (i in 0...verticesData.data.length)
 				//visu.push(verticesData.data[i]);
-			trace("objects to render : " + verticesData.data.length/verticesData.objectStride);
+			//trace("objects to render : " + verticesData.data.length/verticesData.objectStride);
 			
 			if (needOrdering && depthChange) OrderVerticesData();
 			needUpdate = false;
@@ -269,7 +269,7 @@ class RenderedObjectBatch extends Batch
 		
 		for (i in 0...ordered.length)
 		{
-			ordered[i] = { z: verticesData.data[bufferIndices[i].bufferIndex *verticesData.objectStride + 2], bufferIndex : bufferIndices[i].bufferIndex}   ;
+			ordered[i] = { z: verticesData.data[bufferIndices[i].bufferIndex *verticesData.objectStride + 2], stockedIndex : i}   ;
 		}
 		
 		//trace(ordered);
@@ -282,24 +282,24 @@ class RenderedObjectBatch extends Batch
 			
 			for (j in 0...verticesData.objectStride)
 			{
-				newBufferData[i * verticesData.objectStride + j] = verticesData.data[bufferIndices[ordered[i].bufferIndex].bufferIndex * verticesData.objectStride + j];
+				newBufferData[i * verticesData.objectStride + j] = verticesData.data[bufferIndices[ordered[i].stockedIndex].bufferIndex * verticesData.objectStride + j];
 			}
-			bufferIndices[ordered[i].bufferIndex].bufferIndex = i;
+			bufferIndices[ordered[i].stockedIndex].bufferIndex = i;
 			
 		}
-		
+		//
 		//trace(bufferIndices);
-		var visu:Array<Float> = [];
+		//var visu:Array<Float> = [];
 			//for (i in 0...verticesData.data.length)
 				//visu.push(verticesData.data[i]);
 			//trace(visu);
-		
+		////
 		verticesData.data = newBufferData;
 		
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 		GL.bufferData(GL.ARRAY_BUFFER, verticesData.data.byteLength, verticesData.data, GL.DYNAMIC_DRAW);
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
-		visu = [];
+		//visu = [];
 		//for (i in 0...verticesData.data.length)
 			//visu.push(verticesData.data[i]);
 		//trace(visu);
@@ -339,5 +339,5 @@ class RenderedObjectBatch extends Batch
 typedef DepthOrderingData = 
 {
 	var z:Float;
-	var bufferIndex:Int;
+	var stockedIndex:Int;
 }

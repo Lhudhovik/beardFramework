@@ -234,7 +234,7 @@ class RenderedObject implements ICameraDependent
 		
 		if (layer != null)
 		{
-			renderDepth = layer.depth + (z / layer.maxObjectsCount);
+			renderDepth = layer.depth + (z*100 / layer.maxObjectsCount);
 			//trace(layer.name);
 			//trace(z);
 			//trace(layer.depth);
