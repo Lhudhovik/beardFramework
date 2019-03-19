@@ -3,7 +3,7 @@
 <version></version>
 	
 <atlases>
-	<atlas name="menuHD" fileExtension="jpg" path="assets/atlases" />
+	<atlas name="menuHD" fileExtension="png" path="assets/atlases" />
 	<!--<atlas name="img001" fileExtension="jpg" path="assets/atlases" />-->
 	<atlas name="menuHD2" fileExtension="png" path="assets/atlases" />
 	<!--<atlas name="menuHD3" fileExtension="png" path="assets/atlases" />-->
@@ -18,13 +18,24 @@
 	<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>
 </fonts>
 <renderingBatches>
-	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch">
-		<shader name="vertexShader" type="VERTEX_SHADER"/>
-		<shader name="fragmentShader" type="FRAGMENT_SHADER"/>
+	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" z="1">
+		<shader name="lightVertexShader" type="VERTEX_SHADER"/>
+		<shader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="uv" size="3" index="1" />
 		<vertexAttribute name="diffuse" size="4" index="2" />
 		<vertexAttribute name="specular" size="4" index="3" />
+		<vertex data="0,1,0.0,1.0"/>
+		<vertex data="1,1,1.0,1.0"/>
+		<vertex data="1,0,1.0,0.0"/>
+		<vertex data="0,0,0.0,0.0"/>
+	</template>
+	<template name="ui" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="UIBatch" z="0">
+		<shader name="vertexShader" type="VERTEX_SHADER"/>
+		<shader name="fragmentShader" type="FRAGMENT_SHADER"/>
+		<vertexAttribute name="pos" size="3" index="0" />
+		<vertexAttribute name="uv" size="3" index="1" />
+		<vertexAttribute name="color" size="4" index="2" />
 		<vertex data="0,1,0.0,1.0"/>
 		<vertex data="1,1,1.0,1.0"/>
 		<vertex data="1,0,1.0,0.0"/>
@@ -48,7 +59,7 @@
 		<vertex data="1,0"/>
 		<vertex data="0,0"/>
 	</template>
-	<batch name="UI" template="default" needOrdering="true"/>
+	<batch name="UI" template="ui" needOrdering="true"/>
 	<batch name="transparent" template="default" needOrdering="true"/>
 	<batch name="default" template="default" needOrdering="true"/>
 	<batch name="debugLine" template="debugLine" needOrdering="false"/>
