@@ -24,7 +24,7 @@ import lime.utils.UInt16Array;
  * ...
  * @author 
  */
-class Batch implements IBatch
+@:keepSub class Batch implements IBatch
 {
 
 	private static var nullPtr:Float32Array = null;
@@ -61,19 +61,20 @@ class Batch implements IBatch
 	
 	public function Init( batchData:BatchTemplateData):Void
 	{
+		trace("huh u");
 		renderer = Renderer.Get();
 		drawMode = batchData.drawMode;
 		needUpdate = false;
 		indicesPerObject = 0;
-		
+	trace("huh u");
 		verticesData = new RenderedDataBufferArray(batchData.vertexStride, batchData.vertexPerObject);
 		bufferIndices = new Array<BufferIndexData>();
-		
+		trace("huh u");
 		
 		InitVertices(batchData.vertices, batchData.indices);
 		InitShaders(batchData.shaders);
 		InitBuffers(batchData.vertexAttributes, batchData.vertexStride);
-		
+		trace("huh u");
 		cameras = new List();
 		
 		for (camera in BeardGame.Get().cameras)

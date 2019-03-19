@@ -1,64 +1,15 @@
 #version 460
 
 in vec3 TexCoord;
-in vec4 Diffuse;
-in vec4 Specular;
-in vec3 Normal;
-in vec3 FragmentPosition;
+in vec4 SpriteColor;
 
 out vec4 FragColor;
 
-struct Light {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};
-
-struct PointLight {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-	float constant;
-	float linear;
-	float quadratic;
-};
-/*struct SpotLight {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};*/
-
-uniform Light light; 
-uniform PointLight pointLight;
-//uniform SpotLight spotLight;
 uniform sampler2D atlas[10];
 
 void main()
 {
-	vec3 spriteColor = vec3(Diffuse);
-    vec4 ambient = vec4(light.ambient, 1.0f) * vec4(spriteColor, 1.0f) ;
 	
-		
-	vec3 normal = normalize(Normal);
-	//vec3 lightDirection = normalize(-light.position);
-	vec3 lightDirection = normalize(light.position - FragmentPosition);
-	float diff = max(dot(normal, lightDirection), 0.0);
-	vec4 diffuse = vec4((diff * spriteColor)  * light.diffuse , 1.0);
-	
-	vec3 viewDirection = normalize(vec3(0,0,-1));
-	vec3 reflectionDirection = reflect(-lightDirection, normal);
-	vec3 specularValue = vec3(Specular);
-	float specularStrength = pow(max(dot(viewDirection, reflectionDirection),0.0),Specular.w);
-	vec4 specular = vec4(light.specular * (specularStrength * specularValue), 1.0) ;
-	
-	vec4 texColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * (ambient + diffuse + specular);
-	
-	FragColor = texColor;
-	
-	
-	
-	
+	FragColor = texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * SpriteColor;
+
 } 

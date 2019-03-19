@@ -177,6 +177,7 @@ class BeardGame extends Application
 			
 			for (batch in OptionsManager.Get().batchesToCreate)
 			{
+				trace(batch.name);
 				Renderer.Get().CreateBatch(batch.name, batch.template,batch.needOrdering);
 			
 			}
