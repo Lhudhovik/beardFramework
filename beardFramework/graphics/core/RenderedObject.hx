@@ -44,7 +44,7 @@ class RenderedObject implements ICameraDependent
 	private var cachedHeight:Float;
 	
 	
-	public function new() 
+	private function new() 
 	{
 		
 		visible = true;

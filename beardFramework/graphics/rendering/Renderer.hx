@@ -10,6 +10,7 @@ import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.interfaces.IBatch;
+import beardFramework.interfaces.IRenderable;
 import beardFramework.utils.data.DataU;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.graphics.Color;
@@ -56,7 +57,7 @@ class Renderer
 	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
 	
-	private var batches:MinAllocArray<IBatch>;
+	private var renderables:MinAllocArray<IRenderable>;
 	private var batchTemplates:Map<String, BatchTemplateData>;
 	private	var pointer:Int;
 	
@@ -101,7 +102,7 @@ class Renderer
 		view = new Matrix4();
 		model = new Matrix4();
 			
-		batches = new MinAllocArray();
+		renderables = new MinAllocArray();
 		batchTemplates = new Map();
 		
 
@@ -118,24 +119,24 @@ class Renderer
 			batch.Init(batchTemplates[template]);
 			batch.name = name;
 			batch.needOrdering = needOrdering;
-			if (addToBatchList) AddBatch(batch);
+			if (addToBatchList) AddRenderable(batch);
 		}
 		
 		return batch;
 		
 	}
 
-	public function AddBatch(batch:IBatch ):Void
+	public function AddRenderable(renderable:IRenderable ):Void
 	{
-		for (i in 0...batches.length)
-			if (batches.get(i).name == batch.name) return;
+		for (i in 0...renderables.length)
+			if (renderables.get(i).name == renderable.name) return;
 		
-		batches.Push(batch);
+		renderables.Push(renderable);
 		
 		#if debug
-		MoveBatchToLast(DEBUG);
+		MoveRenderableToLast(DEBUG);
 		#end
-		MoveBatchToLast(UI);
+		MoveRenderableToLast(UI);
 	}
 	
 	public inline function AddTemplate(templateData:BatchTemplateData):Void
@@ -160,28 +161,29 @@ class Renderer
 		
 		if (ready)
 		{
+			DepthSorting();
+			
 			GL.scissor(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			GL.clearColor(0, 0, 0,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
 			GL.clear(GL.DEPTH_BUFFER_BIT);
 			
-			var batch:IBatch;
-			
+			var renderable:IRenderable;
+						
 			drawCount = 0;
 			
 			//trace(batches.toString());
-			for (i in 0...batches.length)
+			for (i in 0...renderables.length)
 			{
 			
 				
-				batch = batches.get(i);
-				
-				if (batch.needUpdate) batch.UpdateRenderedData();
-				if (batch.IsEmpty()) continue;
+				renderable = renderables.get(i);
+							
+				if (!renderable.readyForRendering) continue;
 		
 				//trace("go to render " + batch + " " +renderedData[batch].activeDataCount  );
 				
-				drawCount+= batch.Render();
+				drawCount+= renderable.Render();
 			
 			}
 			
@@ -200,9 +202,9 @@ class Renderer
 		projection.identity();
 		projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 10, -10);
 		
-		for (i in 0...batches.length){
-			GL.useProgram(batches.get(i).shaderProgram);
-			GL.uniformMatrix4fv(GL.getUniformLocation(batches.get(i).shaderProgram, "projection"), 1, false, projection);
+		for (i in 0...renderables.length){
+			GL.useProgram(renderables.get(i).shaderProgram);
+			GL.uniformMatrix4fv(GL.getUniformLocation(renderables.get(i).shaderProgram, "projection"), 1, false, projection);
 		}
 		
 		
@@ -232,74 +234,89 @@ class Renderer
 	
 	public function UpdateTexture(index:Int = 0):Void
 	{
-		for (i in 0...batches.length){
-			GL.useProgram(batches.get(i).shaderProgram);
-			GL.uniform1i(GL.getUniformLocation(batches.get(i).shaderProgram, "atlas[" + index + "]"), index);
+		for (i in 0...renderables.length){
+			GL.useProgram(renderables.get(i).shaderProgram);
+			GL.uniform1i(GL.getUniformLocation(renderables.get(i).shaderProgram, "atlas[" + index + "]"), index);
 		}
 		
 		
 	}
 	
-	public function MoveBatchToFirst(batch:String):Void
+	public function MoveRenderableToFirst(renderable:String):Void
 	{
 			
-		for (i in 0...batches.length)
+		for (i in 0...renderables.length)
 		{
-			if (batches.get(i).name == batch)
+			if (renderables.get(i).name == renderable)
 			{
-				batches.MoveByIndex(i, 0);
+				renderables.MoveByIndex(i, 0);
 				break;
 			}
 		}
 		
 	}
 	
-	public function MoveBatchToLast(batch:String):Void
+	public function MoveRenderableToLast(renderable:String):Void
 	{
-		for (i in 0...batches.length)
+		for (i in 0...renderables.length)
 		{
-			if (batches.get(i).name == batch)
+			if (renderables.get(i).name == renderable)
 			{
-				batches.MoveByIndex(i, batches.length - 1);
+				renderables.MoveByIndex(i, renderables.length - 1);
 				//trace("moved");
 				break;
 			}
 		}
 	}
 	
-	public function MoveBatchUp(batch:String):Void
+	public function MoveRenderableUp(renderable:String):Void
 	{
 		
-		for (i in 0...batches.length)
+		for (i in 0...renderables.length)
 		{
-			if (batches.get(i).name == batch && i < batches.length-1)
+			if (renderables.get(i).name == renderable && i < renderables.length-1)
 			{
-				batches.MoveByIndex(i, i+1);
+				renderables.MoveByIndex(i, i+1);
 				break;
 			}
 		}
 		
 	}
 	
-	public function MoveBatchDown(batch:String):Void
+	public function MoveRenderableDown(renderable:String):Void
 	{
-		for (i in 0...batches.length)
+		for (i in 0...renderables.length)
 		{
-			if (batches.get(i).name == batch && i > 0)
+			if (renderables.get(i).name == renderable && i > 0)
 			{
-				batches.MoveByIndex(i, i-1);
+				renderables.MoveByIndex(i, i-1);
 				break;
 			}
 		}
 		
 	}
 		
-	public function GetBatch(name:String):IBatch
+	public function GetRenderable(name:String):IRenderable
 	{
-		for (i in 0...batches.length)
-			if (batches.get(i).name == name) return batches.get(i);
+		for (i in 0...renderables.length)
+			if (renderables.get(i).name == name) return renderables.get(i);
 			
 		return null;
+	}
+	
+	public function DepthSorting():Void
+	{
+		renderables.Sort(DepthSortingFunction);
+	}
+	
+	private function DepthSortingFunction(renderable1:IRenderable, renderable2:IRenderable):Int
+	{
+		var result:Int = 0;
+		if (renderable1.z < renderable2.z) result = 1;
+		else if (renderable1.z > renderable2.z) result = -1;
+		else result = 0;
+		
+		return result;	
 	}
 	
 	function get_ready():Bool 

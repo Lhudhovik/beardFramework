@@ -1,11 +1,11 @@
 package beardFramework.graphics.ui;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.core.BatchedRenderedObject;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.interfaces.IBatchable;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.updateProcess.thread.RowThreadDetail;
 import beardFramework.updateProcess.thread.Thread;
@@ -67,8 +67,8 @@ class UIManager
 		BeardGame.Get().AddCamera(new Camera(CAMERANAME+0, BeardGame.Get().window.width, BeardGame.Get().window.height, 0, 0, 100, true));
 		BeardGame.Get().cameras[CAMERANAME+0].Center(BeardGame.Get().window.width * 0.5, BeardGame.Get().window.height * 0.5);
 		
-		Renderer.Get().GetBatch(Renderer.Get().UI).cameras.add(CAMERANAME+0);
-		Renderer.Get().GetBatch(Renderer.Get().UI).cameras.remove("default");
+		Renderer.Get().GetRenderable(Renderer.Get().UI).cameras.add(CAMERANAME+0);
+		Renderer.Get().GetRenderable(Renderer.Get().UI).cameras.remove("default");
 		
 		
 		
@@ -97,7 +97,7 @@ class UIManager
 		if (Std.is(component, UIContainer))
 			for (element in cast(component, UIContainer).components) AddComponent(element);
 		else{
-			if(Std.is(component, BatchedRenderedObject)) cast(component, BatchedRenderedObject).renderingBatch = cast(Renderer.Get().GetBatch(Renderer.Get().UI), RenderedObjectBatch);
+			if(Std.is(component, IBatchable)) cast(component, IBatchable).renderingBatch = cast Renderer.Get().GetRenderable(Renderer.Get().UI);
 			UILayer.Add(cast(component, RenderedObject));
 		}
 		

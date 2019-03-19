@@ -1,6 +1,7 @@
 package beardFramework.graphics.core;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
+import beardFramework.interfaces.IBatchable;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.systems.aabb.AABBTree;
 import beardFramework.resources.MinAllocArray;
@@ -71,7 +72,7 @@ class BeardLayer
 				object.layer = this;
 				object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 				object.visible = this.visible;
-				if(Std.is(object, BatchedRenderedObject)) cast(object, BatchedRenderedObject).RequestBufferIndex();
+				if(Std.is(object, IBatchable)) cast(object, IBatchable).RequestBufferIndex();
 				object.isDirty = true;
 				renderedObjects.set(object.name, object);
 			}
@@ -100,10 +101,10 @@ class BeardLayer
 			
 			object.isDirty = true;
 			
-			if (Std.is(object, BatchedRenderedObject)){
+			if (Std.is(object, IBatchable)){
 				
-				cast(object, BatchedRenderedObject).RequestBufferIndex();
-				cast(object, BatchedRenderedObject).renderingBatch.UpdateRenderedData();
+				cast(object, IBatchable).RequestBufferIndex();
+				cast(object, IBatchable).renderingBatch.UpdateRenderedData();
 		
 			}
 			
@@ -115,7 +116,7 @@ class BeardLayer
 		if (!renderedObjects.exists(object.name))
 		{
 			renderedObjects.remove(object.name);
-			if(Std.is(object, BatchedRenderedObject)) cast(object, BatchedRenderedObject).ReleaseBufferIndex();
+			if(Std.is(object, IBatchable)) cast(object, IBatchable).ReleaseBufferIndex();
 			//object.isDirty = false;
 			if (object.onAABBTree && aabbs[object.name] != null){
 				

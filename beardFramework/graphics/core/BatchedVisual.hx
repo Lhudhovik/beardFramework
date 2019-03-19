@@ -1,6 +1,9 @@
 package beardFramework.graphics.core;
 
 import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.interfaces.IBatch;
+import beardFramework.interfaces.IBatchable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import haxe.ds.Vector;
@@ -10,92 +13,81 @@ import openfl.geom.Matrix;
  * ...
  * @author 
  */
-class BatchedVisual extends BatchedRenderedObject
+class BatchedVisual extends AbstractVisual implements IBatchable
 {
-	private static var instanceCount:Int = 0;
 	
-@:isVar	public var atlas(default, set):String;
-@:isVar	public var texture(default, set):String;
-
+	@:isVar public var bufferIndex(get, set):Int;
+	@:isVar public var renderingBatch(get, set):IBatch;
+	
 	public function new(texture:String, atlas:String , name:String = "") 
 	{
-		super();
-		
-		
-		if (name == "") this.name = "Visual_" + instanceCount;
-		else this.name = name;
-		instanceCount++;
-	
-		this.texture = texture;
-		this.atlas = atlas;
-				
-		var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
-		
-		SetBaseWidth(texture.imageArea.width);
-		SetBaseHeight(texture.imageArea.height);
-	
-		
-		
+		super(texture,atlas,name);
+		bufferIndex = -1;
+		renderingBatch =  cast Renderer.Get().GetRenderable(Renderer.Get().DEFAULT);
 	}
 	
-	public inline function GetTextureData():SubTextureData
+	override function  set_isDirty(value:Bool):Bool 
 	{
-		return AssetManager.Get().GetSubTextureData(texture, atlas);
+		if (value == true && renderingBatch != null && bufferIndex >= 0) renderingBatch.AddDirtyObject(this);
+		else if ( value == false && renderingBatch != null) renderingBatch.RemoveDirtyObject(this);
+		return isDirty = value;
 	}
 	
-	function set_texture(value:String):String 
+	function get_renderingBatch():IBatch 
 	{
-		if (value != texture){
-			texture = value;
-			
-			Reinit();
-			isDirty = true;
-		}
-		return texture;
+		return renderingBatch;
 	}
 	
-	function set_atlas(value:String):String 
+	function set_renderingBatch(value:IBatch):IBatch 
 	{
-		if (value != atlas){
-			atlas = value;
-			Reinit();
-			isDirty = true;
-		}
-		return atlas;
-	}
-	
-	private function Reinit():Void
-	{
-		if (texture != null && atlas != null)
+		if (value != renderingBatch)
 		{
+			if (renderingBatch != null)
+			{
+				cast(renderingBatch, RenderedObjectBatch).RemoveDirtyObject(this);
+				if(bufferIndex >= 0) renderingBatch.FreeBufferIndex(bufferIndex);
+			}
 			
-			var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
-			SetBaseWidth(texture.imageArea.width);
-			SetBaseHeight(texture.imageArea.height);
+			renderingBatch = value;
+			
+			if (renderingBatch != null && bufferIndex >=0)
+			{
+				bufferIndex = renderingBatch.AllocateBufferIndex();
+			}
+		
+			
+			isDirty = true;
 			
 		}
 		
-			
 		
-		
+		return renderingBatch;
 	}
 	
-	//override public function RequestBufferIndex():Void 
-	//{
-		//super.RequestBufferIndex();
-		//if (renderingBatch != null){
-			//renderingBatch.atlases.UniquePush(this.atlas);
-		//}
-	//}
-	//
-	//override public ReleaseBufferIndex function ():Void 
-	//{
-		//super.ReleaseBufferIndex();
-		//if (renderingBatch != null){
-			//
-			//renderingBatch.atlases[this.atlas]++;
-		//}
-	//}
+	function get_bufferIndex():Int 
+	{
+		return bufferIndex;
+	}
+	
+	function set_bufferIndex(value:Int):Int 
+	{
+		return bufferIndex = value;
+	}
+	
+	public function RequestBufferIndex():Void
+	{
+		if (renderingBatch != null){
+			bufferIndex = renderingBatch.AllocateBufferIndex();
+		}
+	}
+	
+	public function ReleaseBufferIndex():Void
+	{
+		if (renderingBatch != null){
+			
+			bufferIndex = renderingBatch.FreeBufferIndex(bufferIndex);
+		}
+	}
 
 }
 

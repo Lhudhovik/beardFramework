@@ -6,6 +6,7 @@ import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IBatch;
+import beardFramework.interfaces.IBatchable;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.GLU;
@@ -29,8 +30,10 @@ import lime.utils.UInt16Array;
 
 	private static var nullPtr:Float32Array = null;
 	@:isVar public var name(get, set):String;
+	@:isVar public var z(get, set):Float;
 	public var needUpdate:Bool;
 	public var needOrdering:Bool;
+	public var readyForRendering(get, null):Bool;
 	public var cameras:List<String>;
 	public var shaderProgram(default, null):GLProgram;
 	public var drawMode:Int;
@@ -45,6 +48,7 @@ import lime.utils.UInt16Array;
 	private var verticesData:RenderedDataBufferArray;
 	private var indicesData:UInt16Array;
 	
+	private var dirtyObjects:MinAllocArray<IBatchable>;
 	//private var atlases:MinAllocArray<String>;
 	
 	private var utilFloatArray:Float32Array;
@@ -61,20 +65,18 @@ import lime.utils.UInt16Array;
 	
 	public function Init( batchData:BatchTemplateData):Void
 	{
-		trace("huh u");
 		renderer = Renderer.Get();
 		drawMode = batchData.drawMode;
 		needUpdate = false;
 		indicesPerObject = 0;
-	trace("huh u");
 		verticesData = new RenderedDataBufferArray(batchData.vertexStride, batchData.vertexPerObject);
 		bufferIndices = new Array<BufferIndexData>();
-		trace("huh u");
-		
+		z = batchData.z;	
 		InitVertices(batchData.vertices, batchData.indices);
 		InitShaders(batchData.shaders);
 		InitBuffers(batchData.vertexAttributes, batchData.vertexStride);
-		trace("huh u");
+		
+		dirtyObjects = new MinAllocArray<IBatchable>();
 		cameras = new List();
 		
 		for (camera in BeardGame.Get().cameras)
@@ -456,11 +458,6 @@ import lime.utils.UInt16Array;
 		return bufferIndices.length - 1;
 	}
 	
-	public inline function IsEmpty():Bool
-	{
-		return verticesData.activeDataCount == 0;
-	}
-	
 	public function ToString():String
 	{
 		var visu:Array<Float> = [];
@@ -471,10 +468,27 @@ import lime.utils.UInt16Array;
 		
 	}
 	
+	public inline function AddDirtyObject(object:IBatchable):Void
+	{
+		if (dirtyObjects.IndexOf(object) == -1)
+		{
+			dirtyObjects.Push(object);
+			needUpdate = true;
+		}
+	}
+	
+	public function RemoveDirtyObject(object:IBatchable):Void
+	{
+		dirtyObjects.Remove(object);
+	}
+	
 	public function Render():Int
 	{
 		
+	
 		drawCount = 0;
+		
+		if (needUpdate) UpdateRenderedData();
 		
 		GL.useProgram(shaderProgram);
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
@@ -548,6 +562,17 @@ import lime.utils.UInt16Array;
 		return drawCount;
 	}
 	
+	
+	/* INTERFACE beardFramework.interfaces.IBatch */
+	
+	public function IsEmpty():Bool 
+	{
+		return !readyForRendering;
+	}
+	
+	
+	
+	
 	inline function get_name():String 
 	{
 		return name;
@@ -557,6 +582,23 @@ import lime.utils.UInt16Array;
 	{
 		return name = value;
 	}
+	
+	function get_z():Float 
+	{
+		return z;
+	}
+	
+	function set_z(value:Float):Float 
+	{
+		return z = value;
+	}
+	
+	function get_readyForRendering():Bool 
+	{
+		return verticesData.activeDataCount != 0;
+	}
+	
+
 }
 
 typedef BufferIndexData =

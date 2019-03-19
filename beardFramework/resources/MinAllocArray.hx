@@ -193,6 +193,10 @@ class MinAllocArray<T>
 		return Std.string(data);
 	}
 	
+	public function Sort(f:Null<T>->Null<T>->Int):Void
+	{
+		data.sort(f);
+	}
 	
 	
 	

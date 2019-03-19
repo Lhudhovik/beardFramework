@@ -19,7 +19,7 @@ import lime.utils.UInt16Array;
 class UIBatch extends Batch 
 {
 
-	private var dirtyObjects:MinAllocArray<RenderedObject>;
+	
 	public function new() 
 	{
 		super();
@@ -28,8 +28,7 @@ class UIBatch extends Batch
 	override function Init(batchData:BatchTemplateData ):Void
 	{
 		super.Init(batchData);
-		dirtyObjects = new MinAllocArray<RenderedObject>();
-		
+	
 	}
 	
 	override public function UpdateRenderedData():Void
@@ -269,19 +268,6 @@ class UIBatch extends Batch
 		return result;		
 	}
 	
-	public inline function AddDirtyObject(object:RenderedObject):Void
-	{
-		if (dirtyObjects.IndexOf(object) == -1)
-		{
-			dirtyObjects.Push(object);
-			needUpdate = true;
-		}
-	}
-	
-	public function RemoveDirtyObject(object:RenderedObject):Void
-	{
-		dirtyObjects.Remove(object);
-	}
 	
 	override public function Flush():Void 
 	{

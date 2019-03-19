@@ -1,7 +1,6 @@
 package beardFramework.graphics.text;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.core.BatchedRenderedObject;
 import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
@@ -13,6 +12,8 @@ import beardFramework.input.InputType;
 import beardFramework.input.MousePos;
 import beardFramework.input.data.InputData;
 import beardFramework.input.data.KeyboardInputData;
+import beardFramework.interfaces.IBatch;
+import beardFramework.interfaces.IBatchable;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.interfaces.IFocusable;
 import beardFramework.resources.assets.AssetManager;
@@ -35,7 +36,10 @@ import lime.ui.KeyCode;
  * ...
  * @author Ludo
  */
-class BatchedTextField extends BatchedRenderedObject implements IFocusable {
+class BatchedTextField extends RenderedObject implements IFocusable implements IBatchable{
+	
+	@:isVar public var bufferIndex(get, set):Int;
+	@:isVar public var renderingBatch(get, set):IBatch;
 	
 	private static var instanceCount:Int = 0;
 	public static var defaultFont:String="";
@@ -661,7 +665,7 @@ class BatchedTextField extends BatchedRenderedObject implements IFocusable {
 		return letterSpacing = value;
 	}
 	
-	override function set_bufferIndex(value:Int):Int 
+	function set_bufferIndex(value:Int):Int 
 	{
 		
 		if (glyphsData != null)
@@ -694,10 +698,10 @@ class BatchedTextField extends BatchedRenderedObject implements IFocusable {
 		
 		}
 		
-		return super.set_bufferIndex(value);
+		return bufferIndex = value;
 	}
 	
-	override function set_renderingBatch(value:RenderedObjectBatch):RenderedObjectBatch 
+	function set_renderingBatch(value:IBatch):IBatch 
 	{
 	
 		if (value != renderingBatch)
@@ -816,7 +820,15 @@ class BatchedTextField extends BatchedRenderedObject implements IFocusable {
 		
 	}
 	
+	function get_renderingBatch():IBatch 
+	{
+		return renderingBatch;
+	}
 	
+	function get_bufferIndex():Int 
+	{
+		return bufferIndex;
+	}
 	
 	function set_tabSpacing(value:Float):Float 
 	{
@@ -915,7 +927,20 @@ class BatchedTextField extends BatchedRenderedObject implements IFocusable {
 		return cursorIndex ;
 	}
 	
+	public function RequestBufferIndex():Void
+	{
+		if (renderingBatch != null){
+			bufferIndex = renderingBatch.AllocateBufferIndex();
+		}
+	}
 	
+	public function ReleaseBufferIndex():Void
+	{
+		if (renderingBatch != null){
+			
+			bufferIndex = renderingBatch.FreeBufferIndex(bufferIndex);
+		}
+	}
 	
 	
 	
