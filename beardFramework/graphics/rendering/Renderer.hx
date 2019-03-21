@@ -38,7 +38,7 @@ class Renderer
 {
 	private static var VAOCOUNT:Int = 1;
 	private static var BUFFERCOUNT:Int = 1;
-	private static var FREETEXTUREINDEX:Int = 0;
+	private static var FREETEXTUREUNIT:Int = 0;
 	private static var ATTRIBUTEPOINTER:Int = 0;
 	private static var instance:Renderer;
 
@@ -60,6 +60,8 @@ class Renderer
 	private var renderables:MinAllocArray<IRenderable>;
 	private var batchTemplates:Map<String, BatchTemplateData>;
 	private	var pointer:Int;
+	
+	public var atlasTextureUnits:Map<String, Int>;
 	
 	
 	private function new()
@@ -96,15 +98,10 @@ class Renderer
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		
-		projection = new Matrix4();
-		projection.identity();
-		projection.createOrtho( 0, Application.current.window.width, Application.current.window.height, 0, VISIBLEDEPTHLIMIT, -VISIBLEDEPTHLIMIT);
-		view = new Matrix4();
-		model = new Matrix4();
-			
+		
 		renderables = new MinAllocArray();
 		batchTemplates = new Map();
-		
+		atlasTextureUnits = new Map();
 
 		
 		
@@ -116,10 +113,24 @@ class Renderer
 		if (batchTemplates[template] != null)
 		{
 			batch = cast Type.createInstance(Type.resolveClass("beardFramework.graphics.rendering.batches."+batchTemplates[template].type), []);
-			batch.Init(batchTemplates[template]);
-			batch.name = name;
-			batch.needOrdering = needOrdering;
-			if (addToBatchList) AddRenderable(batch);
+			if (batch != null)
+			{
+				batch.Init(batchTemplates[template]);
+				batch.name = name;
+				batch.needOrdering = needOrdering;
+				if (addToBatchList) AddRenderable(batch);
+				var unit:Int = 0;
+				for (atlas in atlasTextureUnits.keys())
+				{
+					GL.activeTexture(GL.TEXTURE0 + atlasTextureUnits[atlas]);
+					GL.useProgram(batch.shaderProgram);
+					if (GL.getUniformLocation(batch.shaderProgram, "atlas[" + atlasTextureUnits[atlas] + "]") >= 0)
+						GL.uniform1i(GL.getUniformLocation(batch.shaderProgram, "atlas[" + atlasTextureUnits[atlas] + "]"), atlasTextureUnits[atlas]);
+				}
+			
+			}
+			
+			
 		}
 		
 		return batch;
@@ -199,20 +210,28 @@ class Renderer
 	public function OnResize(width:Int, height:Int):Void
 	{
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
-		projection.identity();
-		projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 10, -10);
 		
-		for (i in 0...renderables.length){
-			GL.useProgram(renderables.get(i).shaderProgram);
-			GL.uniformMatrix4fv(GL.getUniformLocation(renderables.get(i).shaderProgram, "projection"), 1, false, projection);
+	
+		for (i in 0...renderables.length)
+		{
+			
+			for (camera in renderables.get(i).cameras)
+			{
+				
+				GL.useProgram(renderables.get(i).shaderProgram);
+				BeardGame.Get().cameras[camera].projection.identity();
+				BeardGame.Get().cameras[camera].projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 10, -10);
+				GL.uniformMatrix4fv(GL.getUniformLocation(renderables.get(i).shaderProgram, "projection"), 1, false, BeardGame.Get().cameras[camera].projection);
+			}
+			
 		}
 		
 		
 	}
 	
-	public function GetFreeTextureIndex():Int
+	public function GetFreeTextureUnit():Int
 	{
-		return FREETEXTUREINDEX;
+		return FREETEXTUREUNIT;
 	}
 	
 	public inline function GenerateVAO():GLVertexArrayObject
@@ -229,14 +248,17 @@ class Renderer
 	public inline function AllocateFreeTextureIndex():Int
 	{
 		
-		return FREETEXTUREINDEX++;
+		return FREETEXTUREUNIT++;
 	}
 	
-	public function UpdateTexture(index:Int = 0):Void
+	public function UpdateTextureUnits(atlas:String, index:Int = 0):Void
 	{
+		atlasTextureUnits[atlas] = index;
+		
 		for (i in 0...renderables.length){
 			GL.useProgram(renderables.get(i).shaderProgram);
-			GL.uniform1i(GL.getUniformLocation(renderables.get(i).shaderProgram, "atlas[" + index + "]"), index);
+			if (GL.getUniformLocation(renderables.get(i).shaderProgram, "atlas[" + index + "]") >= 0)
+				GL.uniform1i(GL.getUniformLocation(renderables.get(i).shaderProgram, "atlas[" + index + "]"), index);
 		}
 		
 		

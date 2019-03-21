@@ -19,4 +19,6 @@ interface IBatch extends IRenderable
 	public function FreeBufferIndex(index:Int):Int;
 	public function AddDirtyObject(object:IBatchable):Void;
 	public function RemoveDirtyObject(object:IBatchable):Void;
+	public function AddAtlas(atlas:String):Void;
+	public function RemoveAtlas(atlas:String):Void;
 }

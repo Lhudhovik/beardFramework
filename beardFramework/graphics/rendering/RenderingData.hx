@@ -1,4 +1,6 @@
 package beardFramework.graphics.rendering;
+import beardFramework.graphics.rendering.Shaders.Shader;
+import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 
 /**
  * @author 
@@ -12,5 +14,6 @@ typedef RenderingData =
 	var drawMode:Int;
 	var name:String;
 	var vertexStride:Int;
+	var lightGroup:String;
 		
 }

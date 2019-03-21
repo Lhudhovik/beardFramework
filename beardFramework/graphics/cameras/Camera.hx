@@ -2,14 +2,16 @@ package beardFramework.graphics.cameras;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
+import beardFramework.graphics.rendering.Renderer;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.StructDataCamera;
+import beardFramework.utils.data.DataU;
 import beardFramework.utils.simpleDataStruct.SRect;
+import lime.math.Matrix4;
 import openfl.display.Tile;
-import openfl.geom.Matrix;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
-import openfl.display.DisplayObject;
+
 
 /**
  * ...
@@ -23,31 +25,27 @@ class Camera
 	
 		
 	@:isVar public var name(get, set):String;
-	public var zoom(get,set):Float;
+	public var zoom(default,set):Float;
 	public var viewportWidth(default, set):Float;
 	public var viewportHeight(default, set):Float;
 	public var centerX(default, set):Float;
 	public var centerY(default, set):Float;
-	public var viewportX(get, set):Float;
-	public var viewportY(get, set):Float;
+	public var viewportX(default, set):Float;
+	public var viewportY(default, set):Float;
 	public var buffer(default, set):Float;
-	public var needRenderUpdate:Bool;
-	public var transform(default, null):Matrix;//a : scale X, d: ScaleY
+	public var needViewUpdate:Bool;
 	public var keepRatio:Bool;
 	public var ratios:SRect;
 	
 	public var viewport(default, null):ViewportRect;
+	public var view:Matrix4;
+	public var projection:Matrix4;
 	private var attachedObject:RenderedObject;
 	
 	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = false) 
 	{
-		transform = new Matrix();
-			viewport = {
-			x:0,
-			y:0,
-			width:0,
-			height:0
-		}	
+		
+		viewport = {x:0,y:0,width:0,height:0}	
 		
 		this.name = name;
 		this.viewportWidth  = viewPortWidth;
@@ -55,7 +53,7 @@ class Camera
 		this.viewportX = viewPortX;
 		this.viewportY = viewPortY;
 		this.buffer = buffer;
-		needRenderUpdate = true;
+		zoom = 1;
 		this.keepRatio = keepRatio;
 		if (keepRatio == true)
 		{
@@ -67,10 +65,16 @@ class Camera
 			}
 		}else ratios = {x:0, y:0, width:0, height:0 };
 		
-		
-		
 		centerX = 0;
 		centerY = 0;
+		
+		projection = new Matrix4();
+		projection.identity();
+		//projection.createOrtho( 0,viewportWidth, viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		view = new Matrix4();
+		needViewUpdate = true;
+		
 	}
 	
 	public function SetViewportRatios(x:Float, y: Float, width:Float, height:Float):Void
@@ -89,24 +93,25 @@ class Camera
 		
 	}
 	
-	public inline function get_zoom():Float return transform.a;
-	
 	public function set_zoom(newZoom:Float):Float{
 		
 		if (newZoom <= 0) newZoom = MINZOOM;
-		buffer *= zoom;
-		buffer /= newZoom;
-		//trace(buffer);
-		transform.d = newZoom;
 		
-		if (transform.a != newZoom) needRenderUpdate = true;
-		return transform.a = newZoom;
+		if (newZoom != zoom)
+		{
+			buffer *= zoom;
+			buffer /= newZoom;
+			needViewUpdate = true;
+		}
+		
+		return zoom = newZoom;
 	}
 	
 	public inline function Center(centerX:Float=0, centerY:Float=0):Void
 	{
 		this.centerX = centerX;
 		this.centerY = centerY;	
+		needViewUpdate = true;
 	}
 	
 	public function Attach(object:RenderedObject):Void
@@ -135,8 +140,8 @@ class Camera
 		
 		utilRect.width = this.viewportWidth;
 		utilRect.height = this.viewportHeight;
-		utilRect.x = transform.tx;
-		utilRect.y = transform.ty;
+		utilRect.x = viewportX;
+		utilRect.y = viewportY;
 		
 		return utilRect;
 	}
@@ -148,8 +153,8 @@ class Camera
 		
 		utilRect.width = this.viewportWidth;
 		utilRect.height = this.viewportHeight;
-		utilRect.x = transform.tx;
-		utilRect.y = transform.ty;
+		utilRect.x = viewportX;
+		utilRect.y = viewportY;
 		
 		return utilRect.containsPoint(point);
 		
@@ -182,32 +187,28 @@ class Camera
 	}
 	
 	
-	inline function get_viewportX():Float 
-	{
-		return transform.tx;
-	}
 	
 	inline function set_viewportX(value:Float):Float 
 	{
-		if (transform.tx != value){
-			needRenderUpdate = true;
+		if (viewportX != value){
+			needViewUpdate = true;
 			viewport.x = Math.round(value);		
 		}
-		return transform.tx = value;
+		return viewportX = value;
 	}
 	
 	inline function get_viewportY():Float 
 	{
-		return transform.ty;
+		return viewportY;
 	}
 	
 	inline function set_viewportY(value:Float):Float 
 	{
-		if (transform.ty != value){
-			needRenderUpdate = true;
+		if (viewportY != value){
+			needViewUpdate = true;
 			viewport.y = Math.round(value);	
 		}
-		return transform.ty = value;
+		return viewportY = value;
 	}
 		
 	inline function get_name():String 
@@ -227,13 +228,13 @@ class Camera
 			
 			name:this.name,
 			type:"Camera",
-			zoom:transform.a,
+			zoom:zoom,
 			viewportWidth:this.viewportWidth,
 			viewportHeight:this.viewportHeight,
 			centerX:this.centerX,
 			centerY:this.centerY,
-			viewportX:transform.tx,
-			viewportY:transform.ty,
+			viewportX:viewportX,
+			viewportY:viewportY,
 			buffer:this.buffer,
 			keepRatio:this.keepRatio,
 			ratioX:ratios.x,
@@ -254,39 +255,48 @@ class Camera
 		viewportHeight = data.viewportHeight;
 		centerX = data.centerX;
 		centerY = data.centerY;
-		transform.tx = data.viewportX;
-		transform.ty = data.viewportY;
+		viewportX = data.viewportX;
+		viewportY= data.viewportY;
 		buffer = data.buffer;
 		keepRatio = data.keepRatio;
 		if (keepRatio)	SetViewportRatios(data.ratioX, data.ratioY, data.ratioWidth, data.ratioHeight);
+		
+		needViewUpdate = true;
 	
 	}
 	
 	//To Do : update depending on the zoom
 	inline function set_buffer(value:Float):Float 
 	{
-		if (buffer != value) needRenderUpdate = true;
+		if (buffer != value) needViewUpdate = true;
 		return buffer = value;
 	}
 	
 	inline function set_centerX(value:Float):Float 
 	{
-		if(centerX != value) needRenderUpdate = true;
+		if(centerX != value) needViewUpdate = true;
 		return centerX = value;
 	}
 	
 	inline function set_centerY(value:Float):Float 
 	{
-		if (centerY != value) needRenderUpdate = true;
+		if (centerY != value) needViewUpdate = true;
 		return centerY = value;
 	}
 	
 	inline function set_viewportWidth(value:Float):Float 
 	{
-		trace("viewpotWidth changed");
+		
 		if (viewportWidth != value){
-			needRenderUpdate = true;
 			viewport.width = Math.round(value);	
+			if (projection != null)
+			{
+				projection.identity();
+				//projection.createOrtho( 0,value, viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+				projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+			}
+			
+			needViewUpdate = true;	
 		}
 		
 		return viewportWidth = value;
@@ -295,8 +305,15 @@ class Camera
 	function set_viewportHeight(value:Float):Float 
 	{
 		if (viewportHeight != value){
-			needRenderUpdate = true;
-			viewport.height = Math.round(value);	
+			viewport.height = Math.round(value);
+			if (projection != null)
+			{
+				projection.identity();
+				//projection.createOrtho( 0, viewportWidth,  value, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+				projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+			}
+			needViewUpdate = true;
+			
 		}
 		return viewportHeight = value;
 	}
@@ -309,14 +326,34 @@ class Camera
 			viewportY = BeardGame.Get().window.height * ratios.y;
 			viewportWidth = BeardGame.Get().window.width * ratios.width;
 			viewportHeight = BeardGame.Get().window.height * ratios.height;
-			
+			if (projection != null)
+			{
+				projection.identity();
+				//projection.createOrtho( 0, viewportWidth,  viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+				projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+			}
+			needViewUpdate = true;
 		}
+	}
+	
+	public function UpdateView():Void
+	{
+		
+		view.identity();
+		view.appendScale(zoom,zoom,1);
+		view.appendTranslation( (viewportX + viewportWidth * 0.5) - centerX, (viewportY + viewportHeight * 0.5) - centerY, -1);
+		
+		//DataU.DeepTrace(view);
+		
+		needViewUpdate = false;
 	}
 	
 	public function Update():Void
 	{
 		if (attachedObject != null)
 			Center(attachedObject.x + attachedObject.width * 0.5, attachedObject.y + attachedObject.height * 0.5);
+			
+		if (needViewUpdate) UpdateView();
 		
 	}
 	

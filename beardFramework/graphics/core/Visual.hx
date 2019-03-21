@@ -1,4 +1,6 @@
 package beardFramework.graphics.core;
+import beardFramework.core.BeardGame;
+import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.RenderingData;
 import beardFramework.graphics.rendering.Shaders;
@@ -22,12 +24,14 @@ class Visual extends AbstractVisual implements IRenderable
 {
 	private static var vertices:Vector<Float>; //overide with local variable if necessary
 	private static var indices:UInt16Array;
+	private static var VBOs:Map<String, GLBuffer>;
 	
 	@:isVar public var readyForRendering(get, null):Bool;
 	
 	public var shaderProgram(default, null):GLProgram;
 	public var cameras:List<String>;
 	public var drawMode:Int;
+	public var lightGroup:String;
 	
 	
 	private var vertexAttributes:Vector<VertexAttribute>;
@@ -48,7 +52,12 @@ class Visual extends AbstractVisual implements IRenderable
 		1, 0, 1.0, 0.0,
 		0, 0, 0.0, 0.0]);
 		
-		if (indices == null) indices = new UInt16Array([0,1,2,2,3,0]);
+		if (indices == null) indices = new UInt16Array([0, 1, 2, 2, 3, 0]);
+		
+		cameras = new List();
+		for (camera in BeardGame.Get().cameras)
+			cameras.add(camera.name);
+		
 	}
 	
 	public function InitGraphics(data:RenderingData):Void
@@ -57,6 +66,7 @@ class Visual extends AbstractVisual implements IRenderable
 		renderer = Renderer.Get();
 		drawMode = data.drawMode;
 		verticesData = new Float32Array(data.vertexStride*4);
+		lightGroup = data.lightGroup;
 		
 		InitShaders(data.shaders);
 		InitBuffers(data.vertexAttributes, data.vertexStride);
@@ -104,20 +114,9 @@ class Visual extends AbstractVisual implements IRenderable
 		}
 		
 		
-		GL.useProgram(shaderProgram);trace(GL.getError());
-		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
-		//GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "model"), 1, false, renderer.model);
-		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-		
-		//todefine
-		for (i in 0...renderer.GetFreeTextureIndex())
-		{
-			GL.activeTexture(GL.TEXTURE0 + i);
-			GL.uniform1i(GL.getUniformLocation(shaderProgram , "atlas[" + i + "]"), i);
-		}
-		
-	
-		
+		GL.useProgram(shaderProgram);
+		trace(GL.getError());
+			
 	}
 	
 	public function InitBuffers(attributes:Array<VertexAttribute> = null, vertexStride:Int = 0):Void
@@ -157,7 +156,7 @@ class Visual extends AbstractVisual implements IRenderable
 			EBO  = renderer.GenerateBuffer();
 		
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
 		}
 	
 		
@@ -172,9 +171,81 @@ class Visual extends AbstractVisual implements IRenderable
 	{
 		return readyForRendering;
 	}
+	
+	private function SetUniforms():Void
+	{
+		
+		GL.useProgram(shaderProgram);
+		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
+		
+		
+		
+		
+	}
 		
 	public function Render():Int 
 	{
+		
+		if (isDirty){
+			SetUniforms();
+			isDirty = false;
+		}
+		
+		//GL.bindVertexArray(VAO);
+		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
+		var pointer:Int;
+		var stride:Int = 0;
+		for (attribute in vertexAttributes)
+		{
+			
+			//trace(attribute);
+			pointer = GL.getAttribLocation(shaderProgram, attribute.name);
+			GL.enableVertexAttribArray(pointer);
+			//GL.enableVertexAttribArray(attribute.index);
+			//GL.vertexAttribPointer(attribute.index, attribute.size, GL.FLOAT, false, renderedData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
+			GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
+			stride += attribute.size;
+			
+			
+		}
+		
+		GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
+		GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
+		
+		var camera:Camera;
+		for (cam in cameras)
+		{
+	
+			camera = BeardGame.Get().cameras[cam];
+			//trace(camera.name);
+			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
+			
+			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, camera.view);
+			Light.SetUniforms(shaderProgram);
+			
+			
+							
+			
+			if (indicesPerObject> 0){
+				//trace(verticesData.activeDataCount);
+				//GL.drawElementsInstanced(drawMode, 6, GL.UNSIGNED_SHORT, 0,10);
+				GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
+					
+			}
+			else
+			{
+				//trace(verticesData.activeDataCount);
+				
+				GL.drawArrays(drawMode, 0, verticesData.activeDataCount*verticesData.vertexPerObject);
+			}
+		
+			drawCount++;
+			
+			GLU.ShowErrors();
+			
+		}
+			
+		
 		
 	}
 	

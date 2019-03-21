@@ -8,6 +8,7 @@ import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IBatchable;
 import beardFramework.resources.MinAllocArray;
+import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.math.MathU;
@@ -37,6 +38,8 @@ import lime.utils.UInt16Array;
 	public var cameras:List<String>;
 	public var shaderProgram(default, null):GLProgram;
 	public var drawMode:Int;
+	public var lightGroup:String;
+		
 	
 	private var vertices:Vector<Float>; //implement as you like on each batch class
 	private var indices:Vector<Int>;
@@ -49,7 +52,7 @@ import lime.utils.UInt16Array;
 	private var indicesData:UInt16Array;
 	
 	private var dirtyObjects:MinAllocArray<IBatchable>;
-	//private var atlases:MinAllocArray<String>;
+	private var atlases:Map<String, Int>;
 	
 	private var utilFloatArray:Float32Array;
 	private var utilUIntArray:UInt16Array;
@@ -72,18 +75,20 @@ import lime.utils.UInt16Array;
 		verticesData = new RenderedDataBufferArray(batchData.vertexStride, batchData.vertexPerObject);
 		bufferIndices = new Array<BufferIndexData>();
 		z = batchData.z;	
-		InitVertices(batchData.vertices, batchData.indices);
-		InitShaders(batchData.shaders);
-		InitBuffers(batchData.vertexAttributes, batchData.vertexStride);
+		
 		
 		dirtyObjects = new MinAllocArray<IBatchable>();
 		cameras = new List();
 		
 		for (camera in BeardGame.Get().cameras)
 			cameras.add(camera.name);
+			
+		InitVertices(batchData.vertices, batchData.indices);
+		InitShaders(batchData.shaders);
+		InitBuffers(batchData.vertexAttributes, batchData.vertexStride);
 		
-		//atlases = new MinAllocArray();
-	
+		atlases = new Map();
+		lightGroup = batchData.lightGroup;
 	}
 	
 	public function InitVertices(vertices: Array<Float> , indices:Array<Int> = null):Void
@@ -133,18 +138,14 @@ import lime.utils.UInt16Array;
 		}
 		
 		
-		GL.useProgram(shaderProgram);trace(GL.getError());
-		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
-		//GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "model"), 1, false, renderer.model);
-		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-		
-		
-		for (i in 0...renderer.GetFreeTextureIndex())
+		GL.useProgram(shaderProgram); trace(GL.getError());
+		for (camera in cameras)
 		{
-			GL.activeTexture(GL.TEXTURE0 + i);
-			GL.uniform1i(GL.getUniformLocation(shaderProgram , "atlas[" + i + "]"), i);
+			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, BeardGame.Get().cameras[camera].projection);
+			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, BeardGame.Get().cameras[camera].view);
 		}
-		
+
+
 	
 		
 	}
@@ -491,8 +492,20 @@ import lime.utils.UInt16Array;
 		if (needUpdate) UpdateRenderedData();
 		
 		GL.useProgram(shaderProgram);
-		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
+		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, BeardGame.Get().cameras[cameras.first()].projection);
 			
+		
+		//var textUnit:Int = 0;
+		//for (atlas in atlases.keys())
+		//{
+			//
+			//GL.activeTexture(GL.TEXTURE0 + textUnit);
+			//GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetAtlas(atlas).texture);
+			//GL.uniform1i(GL.getUniformLocation(shaderProgram , "atlas[" + textUnit + "]"), textUnit);
+			//textUnit++;
+			//
+		//}
+		
 		//GL.lineWidth(125);
 		//GL.bindVertexArray(VAO);
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
@@ -517,23 +530,27 @@ import lime.utils.UInt16Array;
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 		}
-		//
 		
+		Light.SetUniforms(shaderProgram, lightGroup);
+			
+		
+		var camera:Camera;
 		for (batchCam in cameras)
 		{
 	
-			var camera:Camera = BeardGame.Get().cameras[batchCam];
+			camera = BeardGame.Get().cameras[batchCam];
 			//trace(camera.name);
 			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
+		
+			//GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, camera.projection);
 			
-			
-			renderer.view.identity();
-			renderer.view.appendScale(camera.zoom, camera.zoom,1);
-			//renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
-			renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, -1);
+			//renderer.view.identity();
+			//renderer.view.appendScale(camera.zoom, camera.zoom,1);
+			////renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
+			//renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, -1);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
-			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, renderer.view);
-			Light.SetUniforms(shaderProgram);
+			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, camera.view);
+			
 			
 			
 							
@@ -571,6 +588,28 @@ import lime.utils.UInt16Array;
 	}
 	
 	
+	/* INTERFACE beardFramework.interfaces.IBatch */
+	
+	public function AddAtlas(atlas:String):Void 
+	{
+		if (atlases[atlas] == null) atlases[atlas] = 0;
+		atlases[atlas]++;
+	}
+	
+	public function RemoveAtlas(atlas:String):Void 
+	{
+		if (atlases[atlas] != null)
+		{
+			if (atlases[atlas] > 0) atlases[atlas]--;
+			if (atlases[atlas] == 0) atlases.remove(atlas);
+			
+		}
+		
+		
+	}
+	
+	
+
 	
 	
 	inline function get_name():String 

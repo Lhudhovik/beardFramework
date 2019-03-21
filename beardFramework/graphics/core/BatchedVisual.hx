@@ -44,7 +44,8 @@ class BatchedVisual extends AbstractVisual implements IBatchable
 		{
 			if (renderingBatch != null)
 			{
-				cast(renderingBatch, RenderedObjectBatch).RemoveDirtyObject(this);
+				renderingBatch.RemoveDirtyObject(this);
+				renderingBatch.RemoveAtlas(this.atlas);
 				if(bufferIndex >= 0) renderingBatch.FreeBufferIndex(bufferIndex);
 			}
 			
@@ -52,6 +53,7 @@ class BatchedVisual extends AbstractVisual implements IBatchable
 			
 			if (renderingBatch != null && bufferIndex >=0)
 			{
+				if(atlas != null && atlas !="") renderingBatch.AddAtlas(this.atlas);
 				bufferIndex = renderingBatch.AllocateBufferIndex();
 			}
 		
@@ -77,6 +79,7 @@ class BatchedVisual extends AbstractVisual implements IBatchable
 	public function RequestBufferIndex():Void
 	{
 		if (renderingBatch != null){
+			if(atlas != null && atlas !="") renderingBatch.AddAtlas(this.atlas);
 			bufferIndex = renderingBatch.AllocateBufferIndex();
 		}
 	}
@@ -84,7 +87,7 @@ class BatchedVisual extends AbstractVisual implements IBatchable
 	public function ReleaseBufferIndex():Void
 	{
 		if (renderingBatch != null){
-			
+			renderingBatch.RemoveAtlas(this.atlas);
 			bufferIndex = renderingBatch.FreeBufferIndex(bufferIndex);
 		}
 	}

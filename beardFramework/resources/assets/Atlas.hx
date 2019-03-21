@@ -92,19 +92,16 @@ class Atlas
 				atlasIndex: this.index
 			}
         }
-		
-		
+				
 		subAreas[name].imageArea.width = textureImage.width;
 		subAreas[name].imageArea.height = textureImage.height;
 		
 		textureIndex = Renderer.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + textureIndex);
-		
 		texture = GetTexture(textureImage);
-		
 		GL.bindTexture(GL.TEXTURE_2D, texture);
-		Renderer.Get().UpdateTexture(textureIndex);
-	//trace(index);
+		Renderer.Get().UpdateTextureUnits(this.name, textureIndex);
+	
     }
 	
 	private function GetTexture(image:Image):GLTexture

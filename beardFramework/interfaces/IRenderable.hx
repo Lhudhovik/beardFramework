@@ -11,7 +11,9 @@ interface IRenderable
 	public var readyForRendering(get, null):Bool;
 	public var shaderProgram(default, null):GLProgram;
 	public var cameras:List<String>;
+	public var lightGroup:String;
 	public function Render():Int;
+	
 
 
 }
