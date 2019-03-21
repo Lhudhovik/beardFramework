@@ -6,6 +6,7 @@ import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.BatchTemplateData;
+import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.graphics.ui.UIManager;
@@ -197,6 +198,8 @@ class Renderer
 				drawCount+= renderable.Render();
 			
 			}
+			
+			LightManager.Get().CleanLightStates();
 			
 			//trace(drawCount);
 		}

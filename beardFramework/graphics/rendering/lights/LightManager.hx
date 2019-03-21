@@ -1,5 +1,9 @@
 package beardFramework.graphics.rendering.lights;
+import beardFramework.utils.graphics.Color;
+import beardFramework.utils.math.MathU;
+import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.graphics.opengl.GL;
+import lime.graphics.opengl.GLProgram;
 
 /**
  * ...
@@ -7,14 +11,14 @@ import lime.graphics.opengl.GL;
  */
 class LightManager 
 {
+	
+	private static var instance(default, null):LightManager;
+	
 	public var MAX_LIGHT_COUNT_BY_TYPE(default, never):Int = 10;
-	public var directionalLights:Map<String, Light>;
-	private var pointLights:Map<String, PointLight>;
-	private var spotLights:Map<String, SpotLight>;
-	private var lightGroups:Map<String, List<String>>;
-	private var directionalLightsCount:Int = 0;
-	private var spotLightsCount:Int = 0;
-	private var pointLightsCount:Int=0;
+	private var lights:Map<String, Light>;
+	private var lightGroups:Map<String,LightGroup>;
+	private var dirtyLights:List<String>;
+	private var dirtyGroups:List<String>;
 	
 	private function new() 
 	{
@@ -36,193 +40,279 @@ class LightManager
 	{
 		
 		lightGroups = new Map();
+		lightGroups["default"] = {
+			lights:new List<String>(),
+			directionalLightsCount:0,
+			spotLightsCount:0,
+			pointLightsCount:0,
+			orderChanged:true
+		}
+		dirtyGroups = new List();
+		dirtyLights = new List();
 		
+		dirtyGroups.add("default");
+		lights = new Map();
 	}
 	
-	public static function CreateLightGroup(name:String, lights:Array<String>):List<Light>
+	public function AddToGroup(light:Light, group:String="default"):Void
 	{
-		
-		if (lightGroups[name] == null) lightGroups[name] = new List<Light>();
-		
-		for (i in 0...lights.length)
+		if (lightGroups[group] == null) CreateLightGroup(group, [light.name]);
+		else
 		{
-			if (i > MAX_LIGHT_COUNT_BY_TYPE) break;
-			lightGroups[name].add(lights[i]);
+			var canBeAdded:Bool = false;
+			switch(light.type)
+			{
+				case LightType.DIRECTIONAL : canBeAdded = (lightGroups[group].directionalLightsCount < MAX_LIGHT_COUNT_BY_TYPE);
+				case LightType.POINT :canBeAdded = (lightGroups[group].pointLightsCount < MAX_LIGHT_COUNT_BY_TYPE) ;
+				case LightType.SPOT : canBeAdded = (lightGroups[group].spotLightsCount < MAX_LIGHT_COUNT_BY_TYPE);
+				
+			}
+			if (canBeAdded){
+				
+				lightGroups[group].lights.add(light.name);
+				light.isDirty = true;
+			}
+			
 			
 		}
 		
-		return lightGroups[name];		
+		
+		
 	}
 	
-	
-	public static function CreateDirectionalLight(name:String, group:String="default", position:SVec3 = null, ambient:Color = Color.WHITE, diffuse:Color = Color.WHITE, specular:Color=Color.WHITE):Light
+	public function RemoveFromGroup(light:Light, group:String="default"):Void
 	{
-		if (directionalLights == null) directionalLights = new Map();
-		if(lightGroups == null) lightGroups = new Map();
-		if (position == null) position = {x:0, y:0, z: -50};
 		
+		if (lightGroups[group] != null && lightGroups[group].lights.remove(light.name))
+		{
+			switch(light.type)
+			{
+				case LightType.DIRECTIONAL : lightGroups[group].directionalLightsCount--;
+				case LightType.POINT :lightGroups[group].pointLightsCount-- ;
+				case LightType.SPOT : lightGroups[group].spotLightsCount--;
 				
-		var light:Light = GetDirectionalLight(name);
+			}
+			
+			lightGroups[group].orderChanged = true;
+			dirtyGroups.add(group);
+		}
+		
+	}
+	
+	public inline function AddToGroupByName(light:String, group:String="default"):Void
+	{
+		if (lights[light] != null) AddToGroup(lights[light], group);
+		
+	}
+	
+	public inline function RemoveFromGroupByName(light:String, group:String="default"):Void
+	{
+		if (lights[light] != null) RemoveFromGroup(lights[light], group);
+		
+	}
+	
+	public  function CreateLightGroup(name:String, lights:Array<String> = null):String
+	{
+		if (name != null){
+			if (lightGroups[name] == null) lightGroups[name] = {lights:new List<String>(),	directionalLightsCount:0,spotLightsCount:0,	pointLightsCount:0, orderChanged:true}
+		
+			if (lights != null)
+				for (i in 0...lights.length)
+					AddToGroupByName(lights[i], name);			
+				
+			
+		}
+		
+		
+		
+		return name;		
+	}
+	
+	public function CreateDirectionalLight(name:String, group:String="default", position:SVec3 = null, ambient:Color = Color.WHITE, diffuse:Color = Color.WHITE, specular:Color=Color.WHITE):Light
+	{
+		
+		if (position == null) position = {x:0, y:0, z: -50};
+	
+		var light:Light = GetLight(name);
 		
 		if (light == null ){
 			
 			light = new Light(name, position, ambient, diffuse, specular);
-			directionalLights[name] =light;
-			directionalLightsCount++;
-			
-		
-			
+			lights[name] =light;
 		}
+		
+		AddToGroup(light, group);
 		
 	
 		return light;
 		
 	}
 	
-	public static function CreateSpotLight(name:String, group:String="default", position:SVec3 = null, direction:SVec3=null, cutOff:Float=25, outerCutOff:Float=35):SpotLight
+	public function CreateSpotLight(name:String, group:String="default", position:SVec3 = null, direction:SVec3=null, cutOff:Float=25, outerCutOff:Float=35):SpotLight
 	{
-		if (spotLights == null) spotLights = new Map();
+		
 		if (position == null) position = {x:0, y:0, z: -50};
 		if (direction == null) direction = {x:0, y:1, z:0};
 		
-		var light:SpotLight = GetSpotLight(name);
+		var light:SpotLight =  cast GetLight(name);
 		
 		if (light == null ){
 			
 			light = new SpotLight(name, position, direction,  0x050505ff, Color.WHITE, Color.WHITE);
 			light.cutOff = cutOff;
 			light.outerCutOff = outerCutOff;
-			spotLights[name] = light;
-			spotLightsCount++;
-			
+			lights[name] = light;
+		
 		}
 		
+		AddToGroup(light, group);
 	
 		return light;
 		
 	}
 	
-	public static function CreatePointLight(name:String, group:String="default",position:SVec3 = null, constant:Float = 1.0, linear:Float=0.0014, quadratic:Float=0.000007 ):PointLight
+	public function CreatePointLight(name:String, group:String="default",position:SVec3 = null, constant:Float = 1.0, linear:Float=0.0014, quadratic:Float=0.000007 ):PointLight
 	{
-		if (pointLights == null) pointLights = new Map();
+		
 		if (position == null) position = {x:0, y:0, z: -50};
 		
-		var light:PointLight = GetPointLight(name);		
+		var light:PointLight = cast GetLight(name);		
 		
 		if (light == null ){
 			light = new PointLight(name, position, Color.WHITE, Color.WHITE, Color.WHITE);
 			light.constant = constant;
 			light.linear = linear;
 			light.quadratic = quadratic;
-			pointLights[name] = light;
-			pointLightsCount++;
+			lights[name] = light;
 		}
 		
-		
+		AddToGroup(light, group);
 	
 		return light;
 	}
 	 
-	public static inline function GetDirectionalLight(name:String):Light
+	public inline function GetLight(name:String):Light
 	{
-		return (directionalLights != null ? directionalLights[name] : null);
+		return lights[name];
 	}
 	
-	public static inline function GetSpotLight(name:String):SpotLight
+	public function RemoveLight(name:String):Light
 	{
-		return (spotLights != null ? spotLights[name] : null);
-		
-	}
-	
-	public static inline function GetPointLight(name:String):PointLight
-	{
-		return (pointLights != null ? pointLights[name] : null);
-	}
-	
-	public static function RemoveDirectionalLight(name:String):Light
-	{
-		if (directionalLights != null && directionalLights[name] != null)
+		if (lights[name] != null)
 		{
-			directionalLights.remove(name);
-			directionalLightsCount--;
-		}
-		
-		return null;
-		
-	}
-	
-	public static function RemoveSpotLight(name:String):SpotLight
-	{
-		if (spotLights != null && spotLights[name] != null)
-		{
-			spotLights.remove(name);
-			spotLightsCount--;
-		}
-		
-		return null;
-	}
-	
-	public static function RemovePointLight(name:String):PointLight
-	{
-		if (pointLights != null && pointLights[name] != null)
-		{
-			pointLights.remove(name);
-			pointLightsCount--;
-		}
-		
-		return null;
-		
-	}
-	
-	public static function SetUniforms(shaderProgram:GLProgram, lightGroup:String):Void
-	{
-		
-		for (i in 0...MAX_LIGHT_COUNT_BY_TYPE)
-		{
-			
-			if ( directionalLights != null && i < directionalLights.length){
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+i+"].ambient"),directionalLights.get(i).ambient.getRedf(), directionalLights.get(i).ambient.getGreenf(), directionalLights.get(i).ambient.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+i+"].diffuse"), directionalLights.get(i).diffuse.getRedf(), directionalLights.get(i).diffuse.getGreenf(), directionalLights.get(i).diffuse.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+i+"].specular"), directionalLights.get(i).specular.getRedf(), directionalLights.get(i).specular.getGreenf(), directionalLights.get(i).specular.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+i+"].direction"), directionalLights.get(i).position.x, directionalLights.get(i).position.y, directionalLights.get(i).position.z );
-				GL.uniform1i(GL.getUniformLocation(shaderProgram , "directionalLights["+i+"].used"), 1);
-			}
-			else 
-				GL.uniform1i(GL.getUniformLocation(shaderProgram , "directionalLights["+i+"].used"), 0);
-			
-			
-			if ( pointLights != null &&  i < pointLights.length){
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].ambient"), pointLights.get(i).ambient.getRedf(), pointLights.get(i).ambient.getGreenf(), pointLights.get(i).ambient.getBluef());
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].diffuse"), pointLights.get(i).diffuse.getRedf(), pointLights.get(i).diffuse.getGreenf(), pointLights.get(i).diffuse.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].specular"), pointLights.get(i).specular.getRedf(), pointLights.get(i).specular.getGreenf(), pointLights.get(i).specular.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].position"), pointLights.get(i).position.x, pointLights.get(i).position.y, pointLights.get(i).position.z );
-				GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].constant"), pointLights.get(i).constant);
-				GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].linear"), pointLights.get(i).linear );
-				GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].quadratic"), pointLights.get(i).quadratic);
-				GL.uniform1i(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].used"), 1);
-			}
-			else 
-				GL.uniform1i(GL.getUniformLocation(shaderProgram , "pointLights["+i+"].used"), 0);
-			
-			
-			
-			if (spotLights != null && i < spotLights.length)
+			for (group in lightGroups.keys())
 			{
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].ambient"), spotLights.get(i).ambient.getRedf(), spotLights.get(i).ambient.getGreenf(), spotLights.get(i).ambient.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].diffuse"), spotLights.get(i).diffuse.getRedf(), spotLights.get(i).diffuse.getGreenf(), spotLights.get(i).diffuse.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].specular"), spotLights.get(i).specular.getRedf(), spotLights.get(i).specular.getGreenf(), spotLights.get(i).specular.getBluef() );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].position"), spotLights.get(i).position.x, spotLights.get(i).position.y, spotLights.get(i).position.z );
-				GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].direction"), spotLights.get(i).direction.x, spotLights.get(i).direction.y, spotLights.get(i).direction.z );
-				GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].cutOff"), Math.cos(MathU.ToRadians(spotLights.get(i).cutOff)));
-				GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].outerCutOff"), Math.cos(MathU.ToRadians(spotLights.get(i).outerCutOff)));
-				GL.uniform1i(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].used"), 1);
+				
+				if ( lightGroups[group].lights.remove(name))
+				{
+					switch(lights[name].type)
+					{
+						case LightType.DIRECTIONAL : lightGroups[group].directionalLightsCount--;
+						case LightType.POINT :lightGroups[group].pointLightsCount-- ;
+						case LightType.SPOT : lightGroups[group].spotLightsCount--;
+						
+					}
+					lightGroups[group].orderChanged = true;
+					dirtyGroups.add(group);
+				}
 			}
-			else
-				GL.uniform1i(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].used"), 0);
 			
-			
+			lights.remove(name);
 			
 		}
+		
+		return null;
+		
+	}
+	
+	public function CleanLightStates():Void
+	{
+		for (light in dirtyLights)
+			lights[light].isDirty = false;
+		
+		dirtyLights.clear();
+		
+		for (group in dirtyGroups)
+			lightGroups[group].orderChanged = false;
+			
+		dirtyGroups.clear();
+	}
+	
+	public function SetUniforms(shaderProgram:GLProgram, lightGroup:String):Void
+	{
+		if (lightGroups[lightGroup] != null)
+		{
+			var directionalIndex:Int = 0;			
+			var spotIndex:Int = 0;			
+			var pointIndex:Int = 0;			
+			
+			for (light in lights)
+			{
+				if (light.isDirty) dirtyLights.add(light.name);
+				switch(light.type)
+				{
+					
+					case LightType.DIRECTIONAL : 
+						if (light.isDirty || lightGroups[lightGroup].orderChanged)
+						{
+							
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].specular"), light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].direction"), light.x, light.y, light.z );
+							GL.uniform1i(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].used"), 1);
+							
+						}
+						directionalIndex++;
+				
+					case LightType.POINT : 
+						if (light.isDirty || lightGroups[lightGroup].orderChanged)
+						{
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].ambient"), light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef());
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].specular"), light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].position"), light.x, light.y, light.z );
+							GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].constant"), cast( light, PointLight).constant);
+							GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].linear"), cast( light, PointLight).linear );
+							GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].quadratic"), cast( light, PointLight).quadratic);
+							GL.uniform1i(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].used"), 1);
+						}
+						pointIndex++;
+					
+					case LightType.SPOT :
+						if (light.isDirty || lightGroups[lightGroup].orderChanged)
+						{
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].ambient"), light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].specular"), light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].position"), light.x, light.y, light.z );
+							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].direction"), cast( light, SpotLight).directionX,  cast( light, SpotLight).directionY,  cast( light, SpotLight).directionZ );
+							GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].cutOff"), Math.cos(MathU.ToRadians( cast( light, SpotLight).cutOff)));
+							GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].outerCutOff"), Math.cos(MathU.ToRadians( cast( light, SpotLight).outerCutOff)));
+							GL.uniform1i(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].used"), 1);
+						}
+						spotIndex++;
+				
+				
+				}			
+	
+			}
+			
+			if (lightGroups[lightGroup].orderChanged)
+			{
+				for (i in directionalIndex...MAX_LIGHT_COUNT_BY_TYPE)
+					GL.uniform1i(GL.getUniformLocation(shaderProgram , "directionalLights[" + i + "].used"), 0);
+					
+				for (i in pointIndex...MAX_LIGHT_COUNT_BY_TYPE)
+					GL.uniform1i(GL.getUniformLocation(shaderProgram , "pointLights[" + i + "].used"), 0);
+				
+				for (i in spotIndex...MAX_LIGHT_COUNT_BY_TYPE)
+					GL.uniform1i(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].used"), 0);
+	
+			}
+			
+		}
+		
 		
 		
 		
@@ -230,3 +320,14 @@ class LightManager
 	}
 	
 }
+
+private typedef LightGroup =
+{
+	public var lights:List<String>;
+	public var directionalLightsCount:Int;
+	public var spotLightsCount:Int;
+	public var pointLightsCount:Int;
+	public var orderChanged:Bool;
+	
+}
+

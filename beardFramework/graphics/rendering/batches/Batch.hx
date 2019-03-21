@@ -3,6 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.lights.Light;
+import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IBatch;
@@ -531,7 +532,7 @@ import lime.utils.UInt16Array;
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 		}
 		
-		Light.SetUniforms(shaderProgram, lightGroup);
+		LightManager.Get().SetUniforms(shaderProgram, lightGroup);
 			
 		
 		var camera:Camera;
@@ -607,10 +608,6 @@ import lime.utils.UInt16Array;
 		
 		
 	}
-	
-	
-
-	
 	
 	inline function get_name():String 
 	{

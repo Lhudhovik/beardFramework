@@ -147,7 +147,7 @@ class OptionsManager
 								
 					}
 					
-					Renderer.Get().AddTemplate({name: template.get("name"), type: template.get("type"), drawMode: drawMode, shaders:shaders, indices:verticesIndices, vertices: vertices, vertexAttributes: vertexAttributes, vertexStride : vertexStride, vertexPerObject: Std.parseInt(template.get("vertexPerObject")), z: Std.parseFloat(template.get("z"))});
+					Renderer.Get().AddTemplate({name: template.get("name"), type: template.get("type"), drawMode: drawMode, shaders:shaders, indices:verticesIndices, vertices: vertices, vertexAttributes: vertexAttributes, vertexStride : vertexStride, vertexPerObject: Std.parseInt(template.get("vertexPerObject")), z: Std.parseFloat(template.get("z")), lightGroup:template.get("lightGroup")});
 					
 					
 				}
