@@ -111,14 +111,14 @@ class LightManager
 		
 	}
 	
-	public  function CreateLightGroup(name:String, lights:Array<String> = null):String
+	public  function CreateLightGroup(name:String, addedLights:Array<String> = null):String
 	{
 		if (name != null){
 			if (lightGroups[name] == null) lightGroups[name] = {lights:new List<String>(),	directionalLightsCount:0,spotLightsCount:0,	pointLightsCount:0, orderChanged:true}
 		
-			if (lights != null)
-				for (i in 0...lights.length)
-					AddToGroupByName(lights[i], name);			
+			if (addedLights != null)
+				for (i in 0...addedLights.length)
+					AddToGroupByName(addedLights[i], name);			
 				
 			
 		}
@@ -238,22 +238,23 @@ class LightManager
 		dirtyGroups.clear();
 	}
 	
-	public function SetUniforms(shaderProgram:GLProgram, lightGroup:String):Void
+	public function SetUniforms(shaderProgram:GLProgram, lightGroup:String, forceUpdated:Bool = false):Void
 	{
 		if (lightGroups[lightGroup] != null)
 		{
 			var directionalIndex:Int = 0;			
 			var spotIndex:Int = 0;			
 			var pointIndex:Int = 0;			
-			
-			for (light in lights)
+			var light:Light;
+			for (lightName in lightGroups[lightGroup].lights)
 			{
+				light = GetLight(lightName);
 				if (light.isDirty) dirtyLights.add(light.name);
 				switch(light.type)
 				{
 					
 					case LightType.DIRECTIONAL : 
-						if (light.isDirty || lightGroups[lightGroup].orderChanged)
+						if (light.isDirty || lightGroups[lightGroup].orderChanged || forceUpdated)
 						{
 							
 							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
@@ -266,7 +267,7 @@ class LightManager
 						directionalIndex++;
 				
 					case LightType.POINT : 
-						if (light.isDirty || lightGroups[lightGroup].orderChanged)
+						if (light.isDirty || lightGroups[lightGroup].orderChanged || forceUpdated )
 						{
 							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].ambient"), light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef());
 							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
@@ -280,7 +281,7 @@ class LightManager
 						pointIndex++;
 					
 					case LightType.SPOT :
-						if (light.isDirty || lightGroups[lightGroup].orderChanged)
+						if (light.isDirty || lightGroups[lightGroup].orderChanged|| forceUpdated)
 						{
 							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].ambient"), light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
 							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
@@ -298,8 +299,9 @@ class LightManager
 	
 			}
 			
-			if (lightGroups[lightGroup].orderChanged)
+			if (lightGroups[lightGroup].orderChanged || forceUpdated)
 			{
+				
 				for (i in directionalIndex...MAX_LIGHT_COUNT_BY_TYPE)
 					GL.uniform1i(GL.getUniformLocation(shaderProgram , "directionalLights[" + i + "].used"), 0);
 					

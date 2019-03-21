@@ -39,8 +39,7 @@ import lime.utils.UInt16Array;
 	public var cameras:List<String>;
 	public var shaderProgram(default, null):GLProgram;
 	public var drawMode:Int;
-	public var lightGroup:String;
-		
+	public var lightGroup(default, set):String;
 	
 	private var vertices:Vector<Float>; //implement as you like on each batch class
 	private var indices:Vector<Int>;
@@ -55,6 +54,7 @@ import lime.utils.UInt16Array;
 	private var dirtyObjects:MinAllocArray<IBatchable>;
 	private var atlases:Map<String, Int>;
 	
+	public var lightGroupChanged:Bool;
 	private var utilFloatArray:Float32Array;
 	private var utilUIntArray:UInt16Array;
 	private	var pointer:Int;
@@ -496,18 +496,6 @@ import lime.utils.UInt16Array;
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, BeardGame.Get().cameras[cameras.first()].projection);
 			
 		
-		//var textUnit:Int = 0;
-		//for (atlas in atlases.keys())
-		//{
-			//
-			//GL.activeTexture(GL.TEXTURE0 + textUnit);
-			//GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetAtlas(atlas).texture);
-			//GL.uniform1i(GL.getUniformLocation(shaderProgram , "atlas[" + textUnit + "]"), textUnit);
-			//textUnit++;
-			//
-		//}
-		
-		//GL.lineWidth(125);
 		//GL.bindVertexArray(VAO);
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 			
@@ -515,11 +503,9 @@ import lime.utils.UInt16Array;
 		for (attribute in vertexAttributes)
 		{
 			
-			//trace(attribute);
+			
 			pointer = GL.getAttribLocation(shaderProgram, attribute.name);
 			GL.enableVertexAttribArray(pointer);
-			//GL.enableVertexAttribArray(attribute.index);
-			//GL.vertexAttribPointer(attribute.index, attribute.size, GL.FLOAT, false, renderedData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
 			GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
 			stride += attribute.size;
 			
@@ -532,8 +518,9 @@ import lime.utils.UInt16Array;
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 		}
 		
-		LightManager.Get().SetUniforms(shaderProgram, lightGroup);
+		LightManager.Get().SetUniforms(shaderProgram, lightGroup, lightGroupChanged);
 			
+		lightGroupChanged = false;
 		
 		var camera:Camera;
 		for (batchCam in cameras)
@@ -607,6 +594,14 @@ import lime.utils.UInt16Array;
 		}
 		
 		
+	}
+	
+	
+	
+	function set_lightGroup(value:String):String 
+	{
+		if (lightGroup != value) lightGroupChanged = true;
+		return lightGroup = value;
 	}
 	
 	inline function get_name():String 
