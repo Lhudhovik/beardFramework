@@ -25,7 +25,7 @@ class UIBatch extends Batch
 		super();
 		
 	}
-	override function Init(batchData:BatchTemplateData ):Void
+	override function Init(batchData:BatchRenderingData ):Void
 	{
 		super.Init(batchData);
 	

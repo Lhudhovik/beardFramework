@@ -1,7 +1,7 @@
 package beardFramework.resources.options;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.Shaders.Shader;
-import beardFramework.graphics.rendering.batches.BatchTemplateData;
+import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.graphics.screens.BasicLoadingScreen;
 import beardFramework.graphics.text.FontFormat;

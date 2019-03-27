@@ -5,7 +5,7 @@ import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 /**
  * @author 
  */
-typedef BatchTemplateData =
+typedef BatchRenderingData =
 {
 	>RenderingData,
 	var type:String;

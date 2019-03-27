@@ -5,7 +5,7 @@ import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.batches.Batch;
-import beardFramework.graphics.rendering.batches.BatchTemplateData;
+import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.text.BatchedTextField;
@@ -54,12 +54,13 @@ class Renderer
 	public var drawCount(default, null):Int = 0;
 	public var projection:Matrix4;
 	public var view:Matrix4;
+	public var boundBuffer:GLBuffer;
 	
 	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
 	
 	private var renderables:MinAllocArray<IRenderable>;
-	private var batchTemplates:Map<String, BatchTemplateData>;
+	private var batchTemplates:Map<String, BatchRenderingData>;
 	private	var pointer:Int;
 	
 	public var atlasTextureUnits:Map<String, Int>;
@@ -151,7 +152,7 @@ class Renderer
 		MoveRenderableToLast(UI);
 	}
 	
-	public inline function AddTemplate(templateData:BatchTemplateData):Void
+	public inline function AddTemplate(templateData:BatchRenderingData):Void
 	{
 		if (templateData != null)
 		{
@@ -327,6 +328,11 @@ class Renderer
 			if (renderables.get(i).name == name) return renderables.get(i);
 			
 		return null;
+	}
+	
+	public function GetTemplate(name:String):BatchRenderingData
+	{
+		return batchTemplates[name];
 	}
 	
 	public function DepthSorting():Void

@@ -1,5 +1,5 @@
 package beardFramework.interfaces;
-import beardFramework.graphics.rendering.batches.BatchTemplateData;
+import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.resources.MinAllocArray;
 import lime.graphics.opengl.GLProgram;
 
@@ -14,7 +14,7 @@ interface IBatch extends IRenderable
 	public function UpdateRenderedData():Void;
 	public function IsEmpty():Bool;
 	
-	public function Init(batchData:BatchTemplateData):Void;
+	public function Init(batchData:BatchRenderingData):Void;
 	public function AllocateBufferIndex(index:Int=-1):Int;
 	public function FreeBufferIndex(index:Int):Int;
 	public function AddDirtyObject(object:IBatchable):Void;

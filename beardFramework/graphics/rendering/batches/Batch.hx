@@ -67,7 +67,7 @@ import lime.utils.UInt16Array;
 	
 	}
 	
-	public function Init( batchData:BatchTemplateData):Void
+	public function Init( batchData:BatchRenderingData):Void
 	{
 		renderer = Renderer.Get();
 		drawMode = batchData.drawMode;
@@ -498,7 +498,7 @@ import lime.utils.UInt16Array;
 		
 		//GL.bindVertexArray(VAO);
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-			
+			renderer.boundBuffer = VBO;
 		var stride:Int = 0;
 		for (attribute in vertexAttributes)
 		{
