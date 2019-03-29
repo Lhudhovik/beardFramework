@@ -29,6 +29,7 @@ class Visual extends AbstractVisual implements IRenderable
 	private static var indices:UInt16Array;
 	private static var VBO:GLBuffer;
 	private static var EBO:GLBuffer;
+	private static var VAO:GLVertexArrayObject;
 	
 	@:isVar public var readyForRendering(get, null):Bool;
 	
@@ -36,14 +37,44 @@ class Visual extends AbstractVisual implements IRenderable
 	public var cameras:List<String>;
 	public var drawMode:Int;
 	public var lightGroup:String;
-	
-	
-	private var vertexAttributes:Vector<VertexAttribute>;
-	private var VAO:GLVertexArrayObject;
-	//private var verticesData:Float32Array;
+		
 	private var renderer:Renderer;
 	
-	
+	public static function InitSharedGraphics():Void
+	{
+		
+		VAO = renderer.GenerateVAO();
+		
+		GL.bindVertexArray(VAO);
+		
+		VBO = renderer.GenerateBuffer();
+		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
+			
+		GL.enableVertexAttribArray(0);
+		GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
+		//----------------------------  x   y  z  
+		verticesData = new Float32Array([0, 1, 0,
+										1, 1, 0,
+										1, 0, 0,
+										0, 0, 0]);
+		
+		GL.bufferData(GL.ARRAY_BUFFER, verticesData.byteLength, verticesData, GL.STATIC_DRAW);
+		
+					
+		var indices:UInt16Array = new UInt16Array([0, 1, 2, 2, 3, 0]);
+		
+		EBO  = renderer.GenerateBuffer();
+		
+		GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
+		GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
+		
+		
+		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
+		GL.bindVertexArray(0);
+		
+			
+		
+	}
 	
 	public function new(texture:String, atlas:String, name:String="") 
 	{
@@ -55,7 +86,7 @@ class Visual extends AbstractVisual implements IRenderable
 		
 	}
 	
-	public function InitGraphics(data:RenderingData):Void
+	public function Init(data:RenderingData):Void
 	{
 		
 		renderer = Renderer.Get();
@@ -64,19 +95,7 @@ class Visual extends AbstractVisual implements IRenderable
 		lightGroup = data.lightGroup;
 		
 		InitShaders(data.shaders);
-		if (verticesData == null){
-			if (vertices == null) vertices = Vector.fromArrayCopy([
-		0, 1, 0.0, 1.0,
-		1, 1, 1.0, 1.0,
-		1, 0, 1.0, 0.0,
-		0, 0, 0.0, 0.0]);
-		
-		if (indices == null) indices = new UInt16Array([0, 1, 2, 2, 3, 0]);
-			
-			
-			InitBuffers(renderer.GetTemplate(TEMPLATE).vertexAttributes, renderer.GetTemplate(TEMPLATE).vertexStride);
-		}
-		
+				
 		cameras = new List();
 		
 		for (camera in BeardGame.Get().cameras)
@@ -125,54 +144,7 @@ class Visual extends AbstractVisual implements IRenderable
 			
 	}
 	
-	public function InitBuffers(attributes:Array<VertexAttribute> = null, vertexStride:Int = 0):Void
-	{
-		VAO = renderer.GenerateVAO();
-		//trace(VAOs);
-		GL.bindVertexArray(VAO);
 		
-		VBO = renderer.GenerateBuffer();
-		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-			
-		
-		if (attributes != null && attributes.length > 0){
-				
-			vertexAttributes =  Vector.fromArrayCopy(attributes);
-			var stride:Int = 0;
-			for (attribute in attributes)
-			{
-				GL.enableVertexAttribArray(attribute.index);
-				GL.vertexAttribPointer(attribute.index, attribute.size, GL.FLOAT, false, vertexStride * Float32Array.BYTES_PER_ELEMENT, stride  * Float32Array.BYTES_PER_ELEMENT );
-				GL.bindAttribLocation(shaderProgram, attribute.index, attribute.name);
-				stride+= attribute.size;
-			}
-			
-		}
-		else{
-			vertexAttributes = new Vector(1);
-			GL.enableVertexAttribArray(0);
-			GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
-			GL.bindAttribLocation(shaderProgram, 0, "pos");
-			vertexAttributes[0] = { name:"pos", size:3, index:0};
-		}
-			
-		
-		if (indices.length > 0)
-		{
-			EBO  = renderer.GenerateBuffer();
-		
-			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
-		}
-	
-		
-		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
-		GL.bindVertexArray(0);
-		
-	}
-	
-	
-	
 	function get_readyForRendering():Bool 
 	{
 		return readyForRendering;
@@ -184,7 +156,7 @@ class Visual extends AbstractVisual implements IRenderable
 		GL.useProgram(shaderProgram);
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
 		
-		
+		GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
 		
 		
 	}
@@ -199,23 +171,28 @@ class Visual extends AbstractVisual implements IRenderable
 		
 		//GL.bindVertexArray(VAO);
 		if (renderer.boundBuffer != VBO){
+			
 			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 			renderer.boundBuffer = VBO;
-			var pointer:Int;
-			var stride:Int = 0;
-			for (attribute in vertexAttributes)
-			{
-				
-				//trace(attribute);
-				pointer = GL.getAttribLocation(shaderProgram, attribute.name);
-				GL.enableVertexAttribArray(pointer);
-				//GL.enableVertexAttribArray(attribute.index);
-				//GL.vertexAttribPointer(attribute.index, attribute.size, GL.FLOAT, false, renderedData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
-				GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
-				stride += attribute.size;
-				
-				
-			}
+			//var pointer:Int;
+			//var stride:Int = 0;
+			//for (attribute in vertexAttributes)
+			//{
+				//
+				////trace(attribute);
+				//pointer = GL.getAttribLocation(shaderProgram, attribute.name);
+				//GL.enableVertexAttribArray(pointer);
+				////GL.enableVertexAttribArray(attribute.index);
+				////GL.vertexAttribPointer(attribute.index, attribute.size, GL.FLOAT, false, renderedData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
+				//GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
+				//stride += attribute.size;
+				//
+				//
+			//}
+			
+			GL.enableVertexAttribArray(0);
+			GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
+			
 			
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);

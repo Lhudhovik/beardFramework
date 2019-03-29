@@ -1,4 +1,5 @@
 package beardFramework.graphics.rendering;
+import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
@@ -100,6 +101,7 @@ class Renderer
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		
+		Visual.InitSharedGraphics();
 		
 		renderables = new MinAllocArray();
 		batchTemplates = new Map();
