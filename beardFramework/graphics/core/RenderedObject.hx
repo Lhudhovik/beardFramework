@@ -61,10 +61,12 @@ class RenderedObject implements ICameraDependent
 		
 		material = 
 		{
-			diffuse:Color.WHITE,	
-			specular: Color.WHITE,
+			components : new Map(),
 			shininess:32
 		}
+		
+		material.components["diffuse"] = {color:Color.WHITE, texture:"", atlas: -1, uvs: { width:0, height:0, x : 0, y:0 }};
+		material.components["specular"] = {color:Color.WHITE, texture:"", atlas: -1, uvs: { width:0, height:0, x : 0, y:0 }};
 	}
 	
 	inline public function get_x():Float 
@@ -287,13 +289,13 @@ class RenderedObject implements ICameraDependent
 	
 	function get_color():UInt 
 	{
-		return material.diffuse;
+		return material.diffuse.color;
 	}
 	
 	function set_color(value:UInt):UInt 
 	{
 		isDirty = true;
-		return material.diffuse = value;
+		return material.diffuse.color = value;
 	}
 	
 	public function SetBaseWidth(value:Float):Void

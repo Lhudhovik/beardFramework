@@ -22,6 +22,7 @@ class OptionsManager
 	public var resourcesToLoad:Array<ResourceToLoad>;
 	public var fontsToLoad:Array<FontToLoad>;
 	public var batchesToCreate:Array<BatchToCreate>;
+	public var texturesToLoad:Array<
 	private var settings(null,null):Xml;
 	private function new() 
 	{

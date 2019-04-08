@@ -5,9 +5,11 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.RenderingData;
 import beardFramework.graphics.rendering.Shaders;
 import beardFramework.graphics.rendering.lights.LightManager;
+import beardFramework.graphics.rendering.vertexData.MaterialComponent;
 import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.vertexData.VertexAttribute;
 import beardFramework.interfaces.IRenderable;
+import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.GLU;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
@@ -36,18 +38,18 @@ class Visual extends AbstractVisual implements IRenderable
 	public var shaderProgram(default, null):GLProgram;
 	public var cameras:List<String>;
 	public var drawMode:Int;
-	public var lightGroup:String;
-		
+	public var lightGroup(default, set):String;	
+	
 	private var renderer:Renderer;
 	
 	public static function InitSharedGraphics():Void
 	{
 		
-		VAO = renderer.GenerateVAO();
+		VAO = Renderer.Get().GenerateVAO();
 		
 		GL.bindVertexArray(VAO);
 		
-		VBO = renderer.GenerateBuffer();
+		VBO = Renderer.Get().GenerateBuffer();
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 			
 		GL.enableVertexAttribArray(0);
@@ -63,7 +65,7 @@ class Visual extends AbstractVisual implements IRenderable
 					
 		var indices:UInt16Array = new UInt16Array([0, 1, 2, 2, 3, 0]);
 		
-		EBO  = renderer.GenerateBuffer();
+		EBO  = Renderer.Get().GenerateBuffer();
 		
 		GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 		GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
@@ -156,8 +158,40 @@ class Visual extends AbstractVisual implements IRenderable
 		GL.useProgram(shaderProgram);
 		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
 		
-		GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
+		var component:MaterialComponent;
+		var textureIndex:Int = renderer.GetFreeTextureUnit();
+		for (componentName in material.components.keys())
+		{
+			
+			component = material.components[componentName];
+			if (component.texture != "")
+			{
+				
+				if (component.atlas > -1)
+				{
+					GL.uniform1i(GL.getUniformLocation(shaderProgram , "material." + componentName+".atlasIndex"), component.atlas);			
+				}
+				else
+				{
+					GL.activeTexture(GL.TEXTURE0 + textureIndex);
+					GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(component.texture));
+					GL.uniform1i(GL.getUniformLocation(shaderProgram , "material." + componentName+".sampler"), component.atlas);
+				}
+				
+				
+			}
+						
+			
+		}
 		
+		
+		GL.uniform1i(GL.getUniformLocation(shaderProgram , "material.diffuse.sampler")
+		//GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
+			sampler2D sampler;
+	vec4 uv;
+	vec3 color;
+	int atlasIndex;
+	int useSampler;
 		
 	}
 		
@@ -168,6 +202,7 @@ class Visual extends AbstractVisual implements IRenderable
 			SetUniforms();
 			isDirty = false;
 		}
+		var drawCount:Int = 0;
 		
 		//GL.bindVertexArray(VAO);
 		if (renderer.boundBuffer != VBO){
@@ -210,16 +245,23 @@ class Visual extends AbstractVisual implements IRenderable
 			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, camera.view);
 			LightManager.Get().SetUniforms(shaderProgram, this.lightGroup);
 					
-			GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
-		
+			GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
 			drawCount++;
-			
 			GLU.ShowErrors();
 			
 		}
 			
 		
-		
+		return drawCount;
+	}
+	
+	
+	
+
+	
+	function set_lightGroup(value:String):String 
+	{
+		return lightGroup = value;
 	}
 	
 	

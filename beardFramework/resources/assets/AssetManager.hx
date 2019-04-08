@@ -9,6 +9,7 @@ import haxe.ds.Vector;
 import haxe.io.Float32Array;
 import haxe.io.UInt8Array;
 import lime.text.Font;
+import lime.graphics.opengl.GLTexture;
 import mloader.HttpLoader;
 import mloader.ImageLoader;
 import mloader.Loader.LoaderEvent;
@@ -38,6 +39,7 @@ class AssetManager
 	private var loaderQueue:LoaderQueue;
 	private var loaders:Map<String, Loader<Dynamic>>;
 	private var atlases:Map<String, Atlas>;
+	private var textures:Map<String, GLTexture>;
 	private var fonts:Map<String, Font>;
 	private var onComplete:Signal0;
 	private var onProgress:Signal1<Float>;
@@ -69,7 +71,7 @@ class AssetManager
 		loaders = new Map<String, Loader<Dynamic>>();
 		atlases = new Map<String, Atlas>();
 		fonts = new Map<String, Font>();
-		
+		textures = new Map<String,GLTexture>();
 		requestedAtlasQueue = new Array<String>();
 		
 		onComplete = new Signal0();
@@ -99,7 +101,7 @@ class AssetManager
 			
 		switch(type)
 		{
-			case AssetType.IMAGE : 
+			case AssetType.IMAGE | AssetType.TEXTURE : 
 				
 				loaders[loaderName] = new ImageLoader(url);
 				
@@ -337,6 +339,7 @@ class AssetManager
 }
 enum AssetType{
 		IMAGE;
+		TEXTURE;
 		XML;
 		DATA;
 		SOUND;
