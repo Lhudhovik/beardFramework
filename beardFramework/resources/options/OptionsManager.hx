@@ -1,8 +1,8 @@
 package beardFramework.resources.options;
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.Shaders.Shader;
+import beardFramework.graphics.rendering.shaders.Shader.NativeShader;
 import beardFramework.graphics.rendering.batches.BatchRenderingData;
-import beardFramework.graphics.rendering.vertexData.VertexAttribute;
+import beardFramework.graphics.rendering.shaders.VertexAttribute;
 import beardFramework.graphics.screens.BasicLoadingScreen;
 import beardFramework.graphics.text.FontFormat;
 import beardFramework.graphics.text.BatchedTextField;
@@ -88,7 +88,7 @@ class OptionsManager
 			else if (element.nodeName == "renderingBatches")
 			{
 				
-				var shaders:Array<Shader> = [];
+				var shaders:Array<NativeShader> = [];
 				var vertexAttributes:Array<VertexAttribute> = [];
 				var verticesIndices:Array<Int> = [];
 				var vertices:Array<Float> = [];

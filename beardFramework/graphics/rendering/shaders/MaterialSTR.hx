@@ -1,10 +1,10 @@
-package beardFramework.graphics.rendering.vertexData;
+package beardFramework.graphics.rendering.shaders;
 
 
 /**
  * @author Ludovic
  */
-typedef Material =
+typedef MaterialSTR =
 {
 	public var components:Map<String, MaterialComponent>;
 	public var shininess:Float;

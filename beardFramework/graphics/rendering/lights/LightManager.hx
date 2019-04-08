@@ -1,4 +1,5 @@
 package beardFramework.graphics.rendering.lights;
+import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.math.MathU;
 import beardFramework.utils.simpleDataStruct.SVec3;
@@ -238,7 +239,7 @@ class LightManager
 		dirtyGroups.clear();
 	}
 	
-	public function SetUniforms(shaderProgram:GLProgram, lightGroup:String, forceUpdated:Bool = false):Void
+	public function CompileLights(shader:Shader, lightGroup:String, forceUpdated:Bool = false):Void
 	{
 		if (lightGroups[lightGroup] != null)
 		{
@@ -257,11 +258,11 @@ class LightManager
 						if (light.isDirty || lightGroups[lightGroup].orderChanged || forceUpdated)
 						{
 							
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].specular"), light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].direction"), light.x, light.y, light.z );
-							GL.uniform1i(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].used"), 1);
+							shader.Set3Float( "directionalLights["+directionalIndex+"].ambient",light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
+							shader.Set3Float( "directionalLights["+directionalIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
+							shader.Set3Float( "directionalLights["+directionalIndex+"].specular", light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
+							shader.Set3Float( "directionalLights["+directionalIndex+"].direction", light.x, light.y, light.z );
+							shader.SetInt(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].used", 1);
 							
 						}
 						directionalIndex++;
@@ -269,28 +270,28 @@ class LightManager
 					case LightType.POINT : 
 						if (light.isDirty || lightGroups[lightGroup].orderChanged || forceUpdated )
 						{
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].ambient"), light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef());
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].specular"), light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].position"), light.x, light.y, light.z );
-							GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].constant"), cast( light, PointLight).constant);
-							GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].linear"), cast( light, PointLight).linear );
-							GL.uniform1f(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].quadratic"), cast( light, PointLight).quadratic);
-							GL.uniform1i(GL.getUniformLocation(shaderProgram , "pointLights["+pointIndex+"].used"), 1);
+							shader.Set3Float( "pointLights["+pointIndex+"].ambient", light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef());
+							shader.Set3Float( "pointLights["+pointIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
+							shader.Set3Float( "pointLights["+pointIndex+"].specular", light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
+							shader.Set3Float( "pointLights["+pointIndex+"].position", light.x, light.y, light.z );
+							shader.SetFloat( "pointLights["+pointIndex+"].constant", cast( light, PointLight).constant);
+							shader.SetFloat("pointLights["+pointIndex+"].linear", cast( light, PointLight).linear );
+							shader.SetFloat( "pointLights["+pointIndex+"].quadratic", cast( light, PointLight).quadratic);
+							shader.SetInt("pointLights["+pointIndex+"].used", 1);
 						}
 						pointIndex++;
 					
 					case LightType.SPOT :
 						if (light.isDirty || lightGroups[lightGroup].orderChanged|| forceUpdated)
 						{
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].ambient"), light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].diffuse"), light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].specular"), light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].position"), light.x, light.y, light.z );
-							GL.uniform3f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].direction"), cast( light, SpotLight).directionX,  cast( light, SpotLight).directionY,  cast( light, SpotLight).directionZ );
-							GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].cutOff"), Math.cos(MathU.ToRadians( cast( light, SpotLight).cutOff)));
-							GL.uniform1f(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].outerCutOff"), Math.cos(MathU.ToRadians( cast( light, SpotLight).outerCutOff)));
-							GL.uniform1i(GL.getUniformLocation(shaderProgram , "spotLights["+spotIndex+"].used"), 1);
+							shader.Set3Float( "spotLights["+spotIndex+"].ambient", light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
+							shader.Set3Float( "spotLights["+spotIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
+							shader.Set3Float( "spotLights["+spotIndex+"].specular", light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
+							shader.Set3Float( "spotLights["+spotIndex+"].position", light.x, light.y, light.z );
+							shader.Set3Float( "spotLights["+spotIndex+"].direction", cast( light, SpotLight).directionX,  cast( light, SpotLight).directionY,  cast( light, SpotLight).directionZ );
+							shader.SetFloat( "spotLights["+spotIndex+"].cutOff", Math.cos(MathU.ToRadians( cast( light, SpotLight).cutOff)));
+							shader.SetFloat( "spotLights["+spotIndex+"].outerCutOff", Math.cos(MathU.ToRadians( cast( light, SpotLight).outerCutOff)));
+							shader.SetInt("spotLights["+spotIndex+"].used", 1);
 						}
 						spotIndex++;
 				
@@ -303,13 +304,13 @@ class LightManager
 			{
 				
 				for (i in directionalIndex...MAX_LIGHT_COUNT_BY_TYPE)
-					GL.uniform1i(GL.getUniformLocation(shaderProgram , "directionalLights[" + i + "].used"), 0);
+					shader.SetInt( "directionalLights[" + i + "].used", 0);
 					
 				for (i in pointIndex...MAX_LIGHT_COUNT_BY_TYPE)
-					GL.uniform1i(GL.getUniformLocation(shaderProgram , "pointLights[" + i + "].used"), 0);
+					shader.SetInt( "pointLights[" + i + "].used", 0);
 				
 				for (i in spotIndex...MAX_LIGHT_COUNT_BY_TYPE)
-					GL.uniform1i(GL.getUniformLocation(shaderProgram , "spotLights["+i+"].used"), 0);
+					shader.SetInt("spotLights["+i+"].used", 0);
 	
 			}
 			

@@ -2,7 +2,7 @@ package beardFramework.core;
 
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.Shaders;
+import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.screens.regions.RegionGrid;
@@ -165,7 +165,7 @@ class BeardGame extends Application
 			}
 			
 			//trace("*** Resources to load : " + OptionsManager.Get().resourcesToLoad);
-			Shaders.LoadShaders();
+			Shader.LoadShaders();
 			
 			for (font in OptionsManager.Get().fontsToLoad)
 			{

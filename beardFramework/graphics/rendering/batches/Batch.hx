@@ -4,8 +4,9 @@ import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.graphics.rendering.lights.LightManager;
-import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
-import beardFramework.graphics.rendering.vertexData.VertexAttribute;
+import beardFramework.graphics.rendering.shaders.RenderedDataBufferArray;
+import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.rendering.shaders.VertexAttribute;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IBatchable;
 import beardFramework.resources.MinAllocArray;
@@ -37,7 +38,7 @@ import lime.utils.UInt16Array;
 	public var needOrdering:Bool;
 	public var readyForRendering(get, null):Bool;
 	public var cameras:List<String>;
-	public var shaderProgram(default, null):GLProgram;
+	public var shader(default, null):Shader;
 	public var drawMode:Int;
 	public var lightGroup(default, set):String;
 	
@@ -103,51 +104,18 @@ import lime.utils.UInt16Array;
 	
 	}
 	
-	public function InitShaders(shadersList:Array<Shaders.Shader>):Void
+	public function InitShaders(shadersList:Array<Shader.NativeShader>):Void
 	{
-		var createdShaders:Array<GLShader> = [];
-		for (shader in shadersList)
-		{
-			
-			var glShader:GLShader =  GL.createShader(shader.type);
-			
-			GL.shaderSource(glShader, Shaders.shader[shader.name]);
-			
-			GL.compileShader(glShader);
-			trace(shader.name + " :\n" + GL.getShaderInfoLog(glShader));
-			
-			createdShaders.push(glShader);
-			
-		}
-			
-		if (shaderProgram == null) shaderProgram = GL.createProgram();
-		trace(GL.getProgramInfoLog(shaderProgram ));
 		
-		for (shader in createdShaders)
-		{
-			GL.attachShader(shaderProgram, shader);
-			trace(GL.getProgramInfoLog(shaderProgram ));
-		}
+		shader = Shader.CreateShader(shadersList);
 		
+		shader.Use();
 		
-		GL.linkProgram(shaderProgram);
-		trace(GL.getProgramInfoLog(shaderProgram ));
-
-		for (shader in createdShaders)
-		{
-			GL.deleteShader(shader);
-		}
-		
-		
-		GL.useProgram(shaderProgram); trace(GL.getError());
 		for (camera in cameras)
 		{
-			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, BeardGame.Get().cameras[camera].projection);
-			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, BeardGame.Get().cameras[camera].view);
+			shader.SetMatrix4fv("projection", BeardGame.Get().cameras[camera].projection);
+			shader.SetMatrix4fv("view", BeardGame.Get().cameras[camera].view);
 		}
-
-
-	
 		
 	}
 	
@@ -169,7 +137,7 @@ import lime.utils.UInt16Array;
 			{
 				GL.enableVertexAttribArray(attribute.index);
 				GL.vertexAttribPointer(attribute.index, attribute.size, GL.FLOAT, false, vertexStride * Float32Array.BYTES_PER_ELEMENT, stride  * Float32Array.BYTES_PER_ELEMENT );
-				GL.bindAttribLocation(shaderProgram, attribute.index, attribute.name);
+				GL.bindAttribLocation(shader.program, attribute.index, attribute.name);
 				stride+= attribute.size;
 			}
 			
@@ -178,7 +146,7 @@ import lime.utils.UInt16Array;
 			vertexAttributes = new Vector(1);
 			GL.enableVertexAttribArray(0);
 			GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
-			GL.bindAttribLocation(shaderProgram, 0, "pos");
+			GL.bindAttribLocation(shader.program, 0, "pos");
 			vertexAttributes[0] = { name:"pos", size:3, index:0};
 		}
 			
@@ -492,8 +460,8 @@ import lime.utils.UInt16Array;
 		
 		if (needUpdate) UpdateRenderedData();
 		
-		GL.useProgram(shaderProgram);
-		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, BeardGame.Get().cameras[cameras.first()].projection);
+		shader.Use();
+		shader.SetMatrix4fv("projection"), BeardGame.Get().cameras[cameras.first()].projection);
 			
 		
 		//GL.bindVertexArray(VAO);
@@ -504,7 +472,7 @@ import lime.utils.UInt16Array;
 		{
 			
 			
-			pointer = GL.getAttribLocation(shaderProgram, attribute.name);
+			pointer = GL.getAttribLocation(shader.program, attribute.name);
 			GL.enableVertexAttribArray(pointer);
 			GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
 			stride += attribute.size;
@@ -518,7 +486,7 @@ import lime.utils.UInt16Array;
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
 		}
 		
-		LightManager.Get().SetUniforms(shaderProgram, lightGroup, lightGroupChanged);
+		LightManager.Get().CompileLights(shader, lightGroup, lightGroupChanged);
 			
 		lightGroupChanged = false;
 		
@@ -537,7 +505,8 @@ import lime.utils.UInt16Array;
 			////renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
 			//renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, -1);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
-			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, camera.view);
+			
+			shader.SetMatrix4fv("view", camera.view);
 			
 			
 			

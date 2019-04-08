@@ -1,13 +1,14 @@
 package beardFramework.graphics.rendering;
-import beardFramework.graphics.rendering.Shaders.Shader;
-import beardFramework.graphics.rendering.vertexData.VertexAttribute;
+import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.rendering.shaders.Shader.NativeShader;
+import beardFramework.graphics.rendering.shaders.VertexAttribute;
 
 /**
  * @author 
  */
 typedef RenderingData =
 {
-	var shaders:Array<Shader>;
+	var shaders:Array<NativeShader>;
 	var indices:Array<Int>;
 	var vertices:Array<Float>;
 	var vertexAttributes:Array<VertexAttribute>;

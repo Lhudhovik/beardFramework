@@ -8,7 +8,7 @@ import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.graphics.rendering.lights.LightManager;
-import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
+import beardFramework.graphics.rendering.shaders.RenderedDataBufferArray;
 import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.interfaces.IBatch;
@@ -127,9 +127,9 @@ class Renderer
 				for (atlas in atlasTextureUnits.keys())
 				{
 					GL.activeTexture(GL.TEXTURE0 + atlasTextureUnits[atlas]);
-					GL.useProgram(batch.shaderProgram);
-					if (GL.getUniformLocation(batch.shaderProgram, "atlas[" + atlasTextureUnits[atlas] + "]") >= 0)
-						GL.uniform1i(GL.getUniformLocation(batch.shaderProgram, "atlas[" + atlasTextureUnits[atlas] + "]"), atlasTextureUnits[atlas]);
+					GL.useProgram(batch.shader);
+					if (GL.getUniformLocation(batch.shader, "atlas[" + atlasTextureUnits[atlas] + "]") >= 0)
+						GL.uniform1i(GL.getUniformLocation(batch.shader, "atlas[" + atlasTextureUnits[atlas] + "]"), atlasTextureUnits[atlas]);
 				}
 			
 			}

@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.vertexData;
+package beardFramework.graphics.rendering.shaders;
 
 /**
  * @author 

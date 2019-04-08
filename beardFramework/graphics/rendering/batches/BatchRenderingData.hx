@@ -1,6 +1,7 @@
 package beardFramework.graphics.rendering.batches;
-import beardFramework.graphics.rendering.Shaders.Shader;
-import beardFramework.graphics.rendering.vertexData.VertexAttribute;
+import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.rendering.shaders.Shader.NativeShader;
+import beardFramework.graphics.rendering.shaders.VertexAttribute;
 
 /**
  * @author 

@@ -3,11 +3,11 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.RenderingData;
-import beardFramework.graphics.rendering.Shaders;
+import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.rendering.lights.LightManager;
-import beardFramework.graphics.rendering.vertexData.MaterialComponent;
-import beardFramework.graphics.rendering.vertexData.RenderedDataBufferArray;
-import beardFramework.graphics.rendering.vertexData.VertexAttribute;
+import beardFramework.graphics.rendering.shaders.MaterialComponent;
+import beardFramework.graphics.rendering.shaders.RenderedDataBufferArray;
+import beardFramework.graphics.rendering.shaders.VertexAttribute;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.GLU;
@@ -35,7 +35,7 @@ class Visual extends AbstractVisual implements IRenderable
 	
 	@:isVar public var readyForRendering(get, null):Bool;
 	
-	public var shaderProgram(default, null):GLProgram;
+	public var shader(default, null):Shader;
 	public var cameras:List<String>;
 	public var drawMode:Int;
 	public var lightGroup(default, set):String;	
@@ -105,45 +105,18 @@ class Visual extends AbstractVisual implements IRenderable
 	}
 	
 		
-	public function InitShaders(shadersList:Array<Shader>):Void
+	public function InitShaders(shadersList:Array<NativeShader>):Void
 	{
-		var createdShaders:Array<GLShader> = [];
-		for (shader in shadersList)
+		
+		shader = Shader.CreateShader(shadersList);
+		
+		shader.Use();
+		
+		for (camera in cameras)
 		{
-			
-			var glShader:GLShader =  GL.createShader(shader.type);
-			
-			GL.shaderSource(glShader, Shaders.shader[shader.name]);
-			
-			GL.compileShader(glShader);
-			trace(shader.name + " :\n" + GL.getShaderInfoLog(glShader));
-			
-			createdShaders.push(glShader);
-			
+			shader.SetMatrix4fv("projection", BeardGame.Get().cameras[camera].projection);
+			shader.SetMatrix4fv("view", BeardGame.Get().cameras[camera].view);
 		}
-			
-		if (shaderProgram == null) shaderProgram = GL.createProgram();
-		trace(GL.getProgramInfoLog(shaderProgram ));
-		
-		for (shader in createdShaders)
-		{
-			GL.attachShader(shaderProgram, shader);
-			trace(GL.getProgramInfoLog(shaderProgram ));
-		}
-		
-		
-		GL.linkProgram(shaderProgram);
-		trace(GL.getProgramInfoLog(shaderProgram ));
-
-		for (shader in createdShaders)
-		{
-			GL.deleteShader(shader);
-		}
-		
-		
-		GL.useProgram(shaderProgram);
-		trace(GL.getError());
-			
 	}
 	
 		
@@ -155,8 +128,8 @@ class Visual extends AbstractVisual implements IRenderable
 	private inline function SetUniforms():Void
 	{
 		
-		GL.useProgram(shaderProgram);
-		GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "projection"), 1, false, renderer.projection);
+		shader.Use();
+		shader.SetMatrix4fv("projection", renderer.projection);
 		
 		var component:MaterialComponent;
 		var textureIndex:Int = renderer.GetFreeTextureUnit();
@@ -169,13 +142,13 @@ class Visual extends AbstractVisual implements IRenderable
 				
 				if (component.atlas > -1)
 				{
-					GL.uniform1i(GL.getUniformLocation(shaderProgram , "material." + componentName+".atlasIndex"), component.atlas);			
+					GL.uniform1i(GL.getUniformLocation(shader , "material." + componentName+".atlasIndex"), component.atlas);			
 				}
 				else
 				{
 					GL.activeTexture(GL.TEXTURE0 + textureIndex);
 					GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(component.texture));
-					GL.uniform1i(GL.getUniformLocation(shaderProgram , "material." + componentName+".sampler"), component.atlas);
+					GL.uniform1i(GL.getUniformLocation(shader , "material." + componentName+".sampler"), component.atlas);
 				}
 				
 				
@@ -185,7 +158,7 @@ class Visual extends AbstractVisual implements IRenderable
 		}
 		
 		
-		GL.uniform1i(GL.getUniformLocation(shaderProgram , "material.diffuse.sampler")
+		GL.uniform1i(GL.getUniformLocation(shader , "material.diffuse.sampler")
 		//GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
 			sampler2D sampler;
 	vec4 uv;
@@ -242,8 +215,8 @@ class Visual extends AbstractVisual implements IRenderable
 			//trace(camera.name);
 			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 			
-			GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram , "view"), 1, false, camera.view);
-			LightManager.Get().SetUniforms(shaderProgram, this.lightGroup);
+			shader.SetMatrix4fv("view", camera.view);
+			LightManager.Get().CompileLights(shader, this.lightGroup);
 					
 			GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
 			drawCount++;
@@ -255,8 +228,7 @@ class Visual extends AbstractVisual implements IRenderable
 		return drawCount;
 	}
 	
-	
-	
+		
 
 	
 	function set_lightGroup(value:String):String 
