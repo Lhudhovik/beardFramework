@@ -6,6 +6,7 @@ import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.shaders.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.rendering.shaders.Shader.NativeShader;
 import beardFramework.graphics.rendering.shaders.VertexAttribute;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IBatchable;
@@ -104,7 +105,7 @@ import lime.utils.UInt16Array;
 	
 	}
 	
-	public function InitShaders(shadersList:Array<Shader.NativeShader>):Void
+	public function InitShaders(shadersList:Array<NativeShader>):Void
 	{
 		
 		shader = Shader.CreateShader(shadersList);
@@ -461,7 +462,7 @@ import lime.utils.UInt16Array;
 		if (needUpdate) UpdateRenderedData();
 		
 		shader.Use();
-		shader.SetMatrix4fv("projection"), BeardGame.Get().cameras[cameras.first()].projection);
+		shader.SetMatrix4fv("projection", BeardGame.Get().cameras[cameras.first()].projection);
 			
 		
 		//GL.bindVertexArray(VAO);

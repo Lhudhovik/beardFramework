@@ -262,9 +262,9 @@ class Renderer
 		atlasTextureUnits[atlas] = index;
 		
 		for (i in 0...renderables.length){
-			GL.useProgram(renderables.get(i).shaderProgram);
-			if (GL.getUniformLocation(renderables.get(i).shaderProgram, "atlas[" + index + "]") >= 0)
-				GL.uniform1i(GL.getUniformLocation(renderables.get(i).shaderProgram, "atlas[" + index + "]"), index);
+			GL.useProgram(renderables.get(i).shader);
+			if (GL.getUniformLocation(renderables.get(i).shader.program, "atlas[" + index + "]") >= 0)
+				renderables.get(i).shader.SetInt("atlas[" + index + "]", index);
 		}
 		
 		

@@ -262,7 +262,7 @@ class LightManager
 							shader.Set3Float( "directionalLights["+directionalIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
 							shader.Set3Float( "directionalLights["+directionalIndex+"].specular", light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
 							shader.Set3Float( "directionalLights["+directionalIndex+"].direction", light.x, light.y, light.z );
-							shader.SetInt(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].used", 1);
+							shader.SetInt("directionalLights["+directionalIndex+"].used", 1);
 							
 						}
 						directionalIndex++;

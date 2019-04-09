@@ -180,6 +180,7 @@ class TextureU
 		return internalFormat;
 		
 	}
+	
 	public static function GetTexture(image:Image):GLTexture
 	{
 		var __texture:GLTexture = GL.createTexture ();

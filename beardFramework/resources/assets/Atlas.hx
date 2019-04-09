@@ -26,8 +26,7 @@ class Atlas
 	//public var atlasBitmapData:BitmapData;
 	public var textureImage:Image;
 	public var name:String;
-	public var texture:GLTexture;
-
+	
 	private var defaultRect:Rectangle;
 	public var subAreas:Map<String, SubTextureData>;
 	
@@ -96,92 +95,20 @@ class Atlas
 		subAreas[name].imageArea.width = textureImage.width;
 		subAreas[name].imageArea.height = textureImage.height;
 		
+		
+		
 		textureIndex = Renderer.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + textureIndex);
-		texture = GetTexture(textureImage);
+	
+		var texture:GLTexture;
+		texture = TextureU.GetTexture(textureImage);
+		AssetManager.Get().AddTexture(this.name, texture );
 		GL.bindTexture(GL.TEXTURE_2D, texture);
 		Renderer.Get().UpdateTextureUnits(this.name, textureIndex);
 	
     }
 	
-	private function GetTexture(image:Image):GLTexture
-	{
-		var __texture:GLTexture = GL.createTexture ();
-		var __textureInternalFormat:Int = 0;
-		var __textureFormat:Int = 0;
 	
-	
-		GL.bindTexture (GL.TEXTURE_2D, __texture);
-		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
-		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
-		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
-		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-		//GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
-		GL.texParameteri (GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
-				
-		if (image != null) {
-			
-			var internalFormat, format;
-			
-			if (image.buffer.bitsPerPixel == 1) {
-				
-				internalFormat = GL.ALPHA;
-				format = GL.ALPHA;
-				
-			} else {
-				__textureInternalFormat = GL.RGBA;
-					
-				var bgraExtension = null;
-				#if (!js || !html5)
-				bgraExtension = GL.getExtension ("EXT_bgra");
-				if (bgraExtension == null)
-					bgraExtension = GL.getExtension ("EXT_texture_format_BGRA8888");
-				if (bgraExtension == null)
-					bgraExtension = GL.getExtension ("APPLE_texture_format_BGRA8888");
-				#end
-				
-				if (bgraExtension != null) {
-					
-					__textureFormat = bgraExtension.BGRA_EXT;
-					
-					#if (!ios && !tvos)
-					if (BeardGame.Get().window.context.type == #if (lime >= "7.0.0") OPENGLES #else GLES #end) {
-						
-						__textureInternalFormat = bgraExtension.BGRA_EXT;
-						
-					}
-					#end
-					
-				} 
-				else	__textureFormat = GL.RGBA;
-					
-				internalFormat = __textureInternalFormat;
-				format = __textureFormat;
-				
-			}
-			
-			GL.bindTexture (GL.TEXTURE_2D, __texture);
-			
-			var textureImage = image;
-			
-			if (#if openfl_power_of_two !textureImage.powerOfTwo || #end (!textureImage.premultiplied && textureImage.transparent)) {
-				
-				textureImage = textureImage.clone ();
-				textureImage.premultiplied = true;
-				#if openfl_power_of_two
-				textureImage.powerOfTwo = true;
-				#end
-				
-			}
-			
-			GL.texImage2D (GL.TEXTURE_2D, 0, internalFormat, textureImage.buffer.width, textureImage.buffer.height, 0, format, GL.UNSIGNED_BYTE, textureImage.data);
-			
-			GL.bindTexture (GL.TEXTURE_2D, null);
-						
-		}
-				
-		return __texture;
-	}
 	
 	
    	

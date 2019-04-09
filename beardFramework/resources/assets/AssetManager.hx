@@ -4,6 +4,7 @@ import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.resources.assets.Atlas;
 import beardFramework.graphics.text.FontFormat;
 import haxe.Utf8;
+import lime.graphics.opengl.GL;
 //import extension.harfbuzz.TextScript;
 import haxe.ds.Vector;
 import haxe.io.Float32Array;
@@ -39,7 +40,7 @@ class AssetManager
 	private var loaderQueue:LoaderQueue;
 	private var loaders:Map<String, Loader<Dynamic>>;
 	private var atlases:Map<String, Atlas>;
-	private var textures:Map<String, GLTexture>;
+	private var textures:Map<String, Texture>;
 	private var fonts:Map<String, Font>;
 	private var onComplete:Signal0;
 	private var onProgress:Signal1<Float>;
@@ -71,7 +72,7 @@ class AssetManager
 		loaders = new Map<String, Loader<Dynamic>>();
 		atlases = new Map<String, Atlas>();
 		fonts = new Map<String, Font>();
-		textures = new Map<String,GLTexture>();
+		textures = new Map<String,Texture>();
 		requestedAtlasQueue = new Array<String>();
 		
 		onComplete = new Signal0();
@@ -169,8 +170,6 @@ class AssetManager
 		loaderQueue.load();
 	
 	}
-	
-	
 	
 	private function OnLoadingEvent(e:LoaderEvent<Dynamic> = null):Void
 	{
@@ -329,6 +328,28 @@ class AssetManager
 			
 		}
 	}
+	
+	public inline function AddTexture(name:String, glTexture:GLTexture, fixedIndex:Int=-1):Void
+	{
+		
+		if (textures[name] == null) textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex};
+		
+	}
+	
+	public inline function RemoveTexture(name:String, destroy:Bool = false):Void
+	{
+		if (textures[name] != null) 
+		{
+			if (destroy) GL.deleteTexture(textures[name].glTexture);
+			textures[name] = null;
+		}
+	}
+	
+	public inline function GetTexture(name:String, glTexture:GLTexture, fixedIndex:Int=-1):Void
+	{
+		return textures[name];
+	}
+	
 	
 	public function Cancel():Void
 	{

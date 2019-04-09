@@ -7,7 +7,8 @@ package beardFramework.graphics.rendering.shaders;
 class Material 
 {
 	
-	private var components(default, null):Map<String, MaterialComponent>;
+	public var components(default,null):Map<String,MaterialComponent>;
+	public var isDirty:Bool;
 	
 	public function new() 
 	{
@@ -18,6 +19,8 @@ class Material
 	public function ParseData():Void
 	{
 		
+		
+		isDirty = true;
 	}
 	
 	

@@ -32,6 +32,7 @@ class Visual extends AbstractVisual implements IRenderable
 	private static var VBO:GLBuffer;
 	private static var EBO:GLBuffer;
 	private static var VAO:GLVertexArrayObject;
+	public static var sharedShader:Shader;
 	
 	@:isVar public var readyForRendering(get, null):Bool;
 	
@@ -42,7 +43,7 @@ class Visual extends AbstractVisual implements IRenderable
 	
 	private var renderer:Renderer;
 	
-	public static function InitSharedGraphics():Void
+	public static function InitSharedGraphics(data:RenderingData):Void
 	{
 		
 		VAO = Renderer.Get().GenerateVAO();
@@ -74,7 +75,7 @@ class Visual extends AbstractVisual implements IRenderable
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		GL.bindVertexArray(0);
 		
-			
+		sharedShader = Shader.CreateShader(data.shaders);
 		
 	}
 	
@@ -95,9 +96,12 @@ class Visual extends AbstractVisual implements IRenderable
 		drawMode = data.drawMode;
 	
 		lightGroup = data.lightGroup;
+		if (data.shaders != null && data.shaders.length > 0)
 		
-		InitShaders(data.shaders);
-				
+			InitShaders(data.shaders);
+		else 
+			shader = sharedShader;
+		
 		cameras = new List();
 		
 		for (camera in BeardGame.Get().cameras)
@@ -158,20 +162,16 @@ class Visual extends AbstractVisual implements IRenderable
 		}
 		
 		
-		GL.uniform1i(GL.getUniformLocation(shader , "material.diffuse.sampler")
+		//GL.uniform1i(GL.getUniformLocation(shader , "material.diffuse.sampler");
 		//GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
-			sampler2D sampler;
-	vec4 uv;
-	vec3 color;
-	int atlasIndex;
-	int useSampler;
+
 		
 	}
 		
 	public function Render():Int 
 	{
 		
-		if (isDirty){
+		if (isDirty || material.is){
 			SetUniforms();
 			isDirty = false;
 		}
@@ -179,6 +179,8 @@ class Visual extends AbstractVisual implements IRenderable
 		
 		//GL.bindVertexArray(VAO);
 		if (renderer.boundBuffer != VBO){
+			
+			shader.Use();
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 			renderer.boundBuffer = VBO;

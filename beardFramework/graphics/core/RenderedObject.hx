@@ -3,7 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
-import beardFramework.graphics.rendering.shaders.MaterialSTR;
+import beardFramework.graphics.rendering.shaders.Material;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.utils.graphics.Color;
@@ -37,7 +37,7 @@ class RenderedObject implements ICameraDependent
 	public var restrictedCameras(default, null):Array<String>;
 	public var rotationCosine(default,null):Float;
 	public var rotationSine(default, null):Float;
-	public var material:MaterialSTR;
+	public var material:Material;
 	public var color(get, set):UInt;
 	
 	private var cachedWidth:Float;

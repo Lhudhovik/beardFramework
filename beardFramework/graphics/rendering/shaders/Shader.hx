@@ -18,7 +18,9 @@ class Shader
 {
 	
 	static public var nativeShader:Map<String,String> = new Map<String,String>();
-	static public var loaded:Bool= false;
+	static public var loaded:Bool = false;
+	
+	static private var currentUsed:Shader;
 	
 	static public function LoadShaders():Void
 	{
@@ -85,21 +87,31 @@ class Shader
 	
 	
 	public var program(default, null):GLProgram;
+	public var isUsed(default, null):Bool;
 	public var uniformLocations(default, null):Map<String, Int>;
 	
 	private function new()
 	{
 		program = GL.createProgram();
 		trace(GL.getProgramInfoLog(program ));
-		
+		isUsed = false;
 		uniformLocations = new Map<String,Int>();
 	}
 	
 	
 	public inline function Use():Void
 	{
-		GL.useProgram(program);
-		trace(GL.getError());
+		
+		if (isUsed == false)
+		{
+			if (currentUsed != null) currentUsed.isUsed = false;		
+			currentUsed = this;
+			isUsed = true;
+		
+			GL.useProgram(program);
+			trace(GL.getError());
+		}
+		
 	}
 	
 	public function SetInt(name:String, value:Int):Void
