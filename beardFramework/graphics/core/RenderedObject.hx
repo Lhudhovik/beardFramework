@@ -4,6 +4,7 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.rendering.shaders.Material;
+import beardFramework.graphics.rendering.shaders.MaterialComponent;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.utils.graphics.Color;
@@ -59,14 +60,11 @@ class RenderedObject implements ICameraDependent
 		displayingCameras = new List<String>();
 		onAABBTree = false;
 		
-		material = 
-		{
-			components : new Map(),
-			shininess:32
-		}
-		
-		material.components["diffuse"] = {color:Color.WHITE, texture:"", atlas: -1, uvs: { width:0, height:0, x : 0, y:0 }};
-		material.components["specular"] = {color:Color.WHITE, texture:"", atlas: -1, uvs: { width:0, height:0, x : 0, y:0 }};
+		material = new Material();
+		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:0, height:0, x : 0, y:0 }};
+		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:0, height:0, x : 0, y:0 }};
+		material.components["diffuse"] = diffuseComponent;
+		material.components["specular"] = specularComponent;
 	}
 	
 	inline public function get_x():Float 
@@ -289,13 +287,13 @@ class RenderedObject implements ICameraDependent
 	
 	function get_color():UInt 
 	{
-		return material.diffuse.color;
+		return material.components["diffuse"].color;
 	}
 	
 	function set_color(value:UInt):UInt 
 	{
 		isDirty = true;
-		return material.diffuse.color = value;
+		return material.components["diffuse"].color = value;
 	}
 	
 	public function SetBaseWidth(value:Float):Void

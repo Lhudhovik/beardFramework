@@ -31,7 +31,7 @@ class Atlas
 	public var subAreas:Map<String, SubTextureData>;
 	
 	public var index(default, null):Int;
-	public var textureIndex(default, null):Int = -1;
+	public var samplerIndex(default, null):Int = -1;
 	
 	
 	public function new(name:String, bitmapData:BitmapData, xml:Xml) 
@@ -39,7 +39,7 @@ class Atlas
 		this.name = name;
 		index = atlasCount++;
 		subAreas = new Map<String, SubTextureData>();
-		
+		samplerIndex = AssetManager.Get().AllocateFreeTextureIndex();
 		
 		subAreas.set(name, {
 				imageArea:	new Rectangle(),
@@ -49,7 +49,8 @@ class Atlas
 				uvY: 		0,
 				uvW:		1,
 				uvH:		1,
-				atlasIndex: this.index
+				atlasIndex: this.index,
+				samplerIndex: 0
 		});
 		
 		if (bitmapData != null) {
@@ -67,7 +68,8 @@ class Atlas
     {
         var imageArea:Rectangle = new Rectangle();
         var frame:Rectangle  = new Rectangle();
-      	
+      		
+		
 		if (xml.firstElement().nodeName == "TextureAtlas") {
 			xml = xml.firstElement();
 		}
@@ -88,7 +90,8 @@ class Atlas
 				uvY: 		imageArea.y/textureImage.height,
 				uvW:		imageArea.width/textureImage.width,
 				uvH:		imageArea.height/textureImage.height,
-				atlasIndex: this.index
+				atlasIndex: this.index,
+				samplerIndex: samplerIndex
 			}
         }
 				
@@ -97,14 +100,10 @@ class Atlas
 		
 		
 		
-		textureIndex = Renderer.Get().AllocateFreeTextureIndex();
-		GL.activeTexture(GL.TEXTURE0 + textureIndex);
-	
-		var texture:GLTexture;
-		texture = TextureU.GetTexture(textureImage);
-		AssetManager.Get().AddTexture(this.name, texture );
-		GL.bindTexture(GL.TEXTURE_2D, texture);
-		Renderer.Get().UpdateTextureUnits(this.name, textureIndex);
+		
+		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
+		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTexture(this.name,textureImage, samplerIndex ));
+		Renderer.Get().UpdateAtlasTextureUnits( samplerIndex);
 	
     }
 	
@@ -150,6 +149,7 @@ typedef SubTextureData =
 	public var uvW:Float;
 	public var uvH:Float;
 	public var atlasIndex:Int;
+	public var samplerIndex:Int;
 	
 	
 }

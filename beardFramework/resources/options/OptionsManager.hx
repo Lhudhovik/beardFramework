@@ -1,5 +1,7 @@
 package beardFramework.resources.options;
+import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.rendering.shaders.Shader.NativeShader;
 import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.graphics.rendering.shaders.VertexAttribute;
@@ -8,6 +10,7 @@ import beardFramework.graphics.text.FontFormat;
 import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.input.InputManager;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.utils.libraries.StringLibrary;
 import lime.graphics.opengl.GL;
 
 /**
@@ -22,7 +25,7 @@ class OptionsManager
 	public var resourcesToLoad:Array<ResourceToLoad>;
 	public var fontsToLoad:Array<FontToLoad>;
 	public var batchesToCreate:Array<BatchToCreate>;
-	//public var texturesToLoad:Array<
+	public var shadersToCreate:Array<ShaderToCreate>;
 	private var settings(null,null):Xml;
 	private function new() 
 	{
@@ -51,6 +54,7 @@ class OptionsManager
 		resourcesToLoad = new Array<ResourceToLoad>();
 		fontsToLoad = new Array<FontToLoad>();
 		batchesToCreate = new Array<BatchToCreate>();
+		shadersToCreate = new Array<ShaderToCreate>();
 		xml = xml.firstElement();
 		
 		for (element in xml.elements())
@@ -64,6 +68,13 @@ class OptionsManager
 				}
 			}
 			
+			else if (element.nodeName == "textures")
+			{
+				for (texture in element.elementsNamed("texture"))
+				{
+					resourcesToLoad.push({ type: AssetType.TEXTURE, name: texture.get("name"), url:texture.get("path")});
+				}
+			}
 			else if (element.nodeName == "fonts")
 			{
 
@@ -84,22 +95,44 @@ class OptionsManager
 					fontsToLoad.push({ format: (font.get("fileExtension") == "ttf" ?FontFormat.TTF : FontFormat.OTF), name : font.get("name"), size: size });
 				}
 			}
+			else if (element.nodeName == "shaders")
+			{
+				var type:Int = GL.VERTEX_SHADER;
+				var nativeName:String;
+				for (native in element.elementsNamed("nativeShader")){
+									
+					nativeName = native.get("name");
+					switch(native.get("type"))
+					{
+						case "VERTEX_SHADER": type = GL.VERTEX_SHADER;
+						case "FRAGMENT_SHADER": type = GL.FRAGMENT_SHADER;							
+						
+					}
+					resourcesToLoad.push({ type: AssetType.SHADER, name: nativeName , url:BeardGame.Get().SHADERS_PATH + nativeName + StringLibrary.SHADER_EXTENSION});
+					Shader.nativeShaders[native.get("name")] = { src:"", type:type };
+				}		
+				
+				
+				for (shader in element.elementsNamed("shader")){
+								
+					shadersToCreate.push({name: shader.get("name"), nativeShaders: shader.get("nativeShaders").split(",")});
+				}
 			
+				
+			}
 			else if (element.nodeName == "renderingBatches")
 			{
 				
-				var shaders:Array<NativeShader> = [];
+				
 				var vertexAttributes:Array<VertexAttribute> = [];
 				var verticesIndices:Array<Int> = [];
 				var vertices:Array<Float> = [];
 				var vertexStride:Int;
-				var type:Int = GL.VERTEX_SHADER;
 				var drawMode:Int = GL.TRIANGLES;
 				
 				for (template in element.elementsNamed("template"))
 				{
 					vertexStride = 0;
-					shaders = [];
 					vertexAttributes = [];
 					verticesIndices = [];
 					vertices = [];
@@ -110,20 +143,6 @@ class OptionsManager
 							verticesIndices.push(Std.parseInt(indice));
 					}
 					
-					
-					for (shader in template.elementsNamed("shader")){
-					
-						
-						switch(shader.get("type"))
-						{
-							
-							case "VERTEX_SHADER": type = GL.VERTEX_SHADER;
-							case "FRAGMENT_SHADER": type = GL.FRAGMENT_SHADER;							
-							
-						}
-						shaders.push({name: shader.get("name") , type :type});
-							
-					}
 					for (vertex in template.elementsNamed("vertex"))
 					{
 						for (value in vertex.get("data").split(","))
@@ -148,7 +167,7 @@ class OptionsManager
 								
 					}
 					
-					Renderer.Get().AddTemplate({name: template.get("name"), type: template.get("type"), drawMode: drawMode, shaders:shaders, indices:verticesIndices, vertices: vertices, vertexAttributes: vertexAttributes, vertexStride : vertexStride, vertexPerObject: Std.parseInt(template.get("vertexPerObject")), z: Std.parseFloat(template.get("z")), lightGroup:template.get("lightGroup")});
+					AssetManager.Get().AddTemplate({name: template.get("name"), type: template.get("type"), drawMode: drawMode, shader:template.get("shader"), indices:verticesIndices, vertices: vertices, vertexAttributes: vertexAttributes, vertexStride : vertexStride, vertexPerObject: Std.parseInt(template.get("vertexPerObject")), z: Std.parseFloat(template.get("z")), lightGroup:template.get("lightGroup")});
 					
 					
 				}
@@ -212,3 +231,10 @@ typedef BatchToCreate = {
 	var template:String;
 	var needOrdering:Bool;
 }
+
+typedef ShaderToCreate =
+{
+	var name:String;
+	var nativeShaders:Array<String>;
+}
+

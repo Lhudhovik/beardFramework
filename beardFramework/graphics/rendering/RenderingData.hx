@@ -8,7 +8,7 @@ import beardFramework.graphics.rendering.shaders.VertexAttribute;
  */
 typedef RenderingData =
 {
-	var shaders:Array<NativeShader>;
+	var shader:String;
 	var indices:Array<Int>;
 	var vertices:Array<Float>;
 	var vertexAttributes:Array<VertexAttribute>;

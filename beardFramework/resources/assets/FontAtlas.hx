@@ -3,12 +3,14 @@ package beardFramework.resources.assets;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.data.DataU;
+import beardFramework.utils.graphics.TextureU;
 import beardFramework.utils.math.MathU;
 import beardFramework.utils.simpleDataStruct.SRect;
 import haxe.Utf8;
 import lime.graphics.ImageBuffer;
 import lime.graphics.ImageFileFormat;
 import lime.graphics.PixelFormat;
+import lime.graphics.opengl.GLTexture;
 import lime.utils.UInt8Array;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
@@ -128,7 +130,8 @@ class FontAtlas extends Atlas
 						uvY: 		(imageArea.y)/MAXSIZE,
 						uvW:		(imageArea.width)/MAXSIZE,
 						uvH:		(imageArea.height)/MAXSIZE,
-						atlasIndex: this.index
+						atlasIndex: this.index,
+						samplerIndex: this.samplerIndex
 					}
 								
 					if (fontData.firstGlyphPosition == null)
@@ -155,11 +158,12 @@ class FontAtlas extends Atlas
 		
 		fonts.push(fontData);
 		//trace(count);
-		if (textureIndex < 0) textureIndex = Renderer.Get().AllocateFreeTextureIndex();
-		GL.activeTexture(GL.TEXTURE0 + textureIndex);
-		texture = GetTexture(textureImage);
-		GL.bindTexture(GL.TEXTURE_2D, texture);
-		Renderer.Get().UpdateTextureUnits(this.name, textureIndex);
+		if (samplerIndex < 0) samplerIndex = AssetManager.Get().AllocateFreeTextureIndex();
+		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
+		
+		
+		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTexture(this.name, textureImage, samplerIndex ));
+		Renderer.Get().UpdateAtlasTextureUnits(samplerIndex);
 		//trace(size + " " +keeys);
 	}
 	

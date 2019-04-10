@@ -85,10 +85,21 @@ import lime.utils.UInt16Array;
 		
 		for (camera in BeardGame.Get().cameras)
 			cameras.add(camera.name);
-			
+		
+			trace(batchData.shader);
+		shader = Shader.GetShader(batchData.shader);
+		shader.Use();
+		
 		InitVertices(batchData.vertices, batchData.indices);
-		InitShaders(batchData.shaders);
 		InitBuffers(batchData.vertexAttributes, batchData.vertexStride);
+		
+		
+		
+		for (camera in cameras)
+		{
+			shader.SetMatrix4fv("projection", BeardGame.Get().cameras[camera].projection);
+			shader.SetMatrix4fv("view", BeardGame.Get().cameras[camera].view);
+		}
 		
 		atlases = new Map();
 		lightGroup = batchData.lightGroup;
@@ -103,21 +114,6 @@ import lime.utils.UInt16Array;
 		//trace(indices);
 		this.vertices = Vector.fromArrayCopy(vertices);
 	
-	}
-	
-	public function InitShaders(shadersList:Array<NativeShader>):Void
-	{
-		
-		shader = Shader.CreateShader(shadersList);
-		
-		shader.Use();
-		
-		for (camera in cameras)
-		{
-			shader.SetMatrix4fv("projection", BeardGame.Get().cameras[camera].projection);
-			shader.SetMatrix4fv("view", BeardGame.Get().cameras[camera].view);
-		}
-		
 	}
 	
 	public function InitBuffers(attributes:Array<VertexAttribute> = null, vertexStride:Int = 0):Void
@@ -462,7 +458,7 @@ import lime.utils.UInt16Array;
 		if (needUpdate) UpdateRenderedData();
 		
 		shader.Use();
-		shader.SetMatrix4fv("projection", BeardGame.Get().cameras[cameras.first()].projection);
+		//shader.SetMatrix4fv("projection", BeardGame.Get().cameras[cameras.first()].projection);
 			
 		
 		//GL.bindVertexArray(VAO);
@@ -496,6 +492,7 @@ import lime.utils.UInt16Array;
 		{
 	
 			camera = BeardGame.Get().cameras[batchCam];
+			
 			//trace(camera.name);
 			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 		
@@ -506,12 +503,9 @@ import lime.utils.UInt16Array;
 			////renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
 			//renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, -1);
 			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
-			
+			shader.SetMatrix4fv("projection", camera.projection);
 			shader.SetMatrix4fv("view", camera.view);
 			
-			
-			
-							
 			
 			if (indicesPerObject> 0){
 				//trace(verticesData.activeDataCount);

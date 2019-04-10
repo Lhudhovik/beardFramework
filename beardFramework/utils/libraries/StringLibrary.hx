@@ -10,6 +10,8 @@ class StringLibrary
 	public static inline var ACTION:String 					= "action";
 	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
 	public static inline var ANY:String 					= "any";
+	public static inline var DEBUG:String	 				= "debug";
+	public static inline var DEFAULT:String 				= "default";
 	public static inline var DIRECT_MODE:String 			= "directMode";
 	public static inline var GAMEPAD:String 				= "gamepad";
 	public static inline var GAMEPAD_AXIS_MOVE:String 		= "gamepadAxisMove";
@@ -54,6 +56,7 @@ class StringLibrary
 	public static inline var TOUCH_OVER:String 				= "touchOver";
 	public static inline var TOUCH_START:String 			= "touchStart";
 	public static inline var TOUCH_TAP:String 				= "touchTap";
+	public static inline var UI:String 						= "UI";
 	public static inline var UIBASE:String 					= "UIBase";
 	public static inline var UNKNOWN:String 				= "unknown";
 

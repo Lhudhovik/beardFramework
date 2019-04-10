@@ -9,24 +9,31 @@ import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.shaders.RenderedDataBufferArray;
+import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IRenderable;
+import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.data.DataU;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.graphics.Color;
+import beardFramework.utils.graphics.TextureU;
+import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.app.Application;
+import lime.graphics.Image;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLProgram;
 import lime.graphics.opengl.GLQuery;
 import lime.graphics.opengl.GLShader;
+import lime.graphics.opengl.GLTexture;
 import lime.graphics.opengl.GLVertexArrayObject;
 import lime.math.Matrix4;
 import lime.math.Vector2;
+import lime.math.Vector4;
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 
@@ -38,33 +45,22 @@ import lime.utils.UInt16Array;
  */
 class Renderer 
 {
-	private static var VAOCOUNT:Int = 1;
-	private static var BUFFERCOUNT:Int = 1;
-	private static var FREETEXTUREUNIT:Int = 0;
-	private static var ATTRIBUTEPOINTER:Int = 0;
 	private static var instance:Renderer;
-
 	
-	public var DEFAULT(default, never):String = "default";
-	public var UI(default, never):String = "UI";
+	
+	
 	public var VISIBLEDEPTHLIMIT(default, never):Int = 10;
-	#if debug	
-	public var DEBUG(default, never):String = "debug";
-	#end
-
 	public var drawCount(default, null):Int = 0;
-	public var projection:Matrix4;
-	public var view:Matrix4;
-	public var boundBuffer:GLBuffer;
-	
-	public var ready(get, null):Bool = false;
 	public var model:Matrix4;
+	public var rotationAxis(default,null):Vector4;
+	public var boundBuffer:GLBuffer;
+	public var ready(get, null):Bool = false;
 	
+	private var VAOCOUNT:Int = 1;
+	private var BUFFERCOUNT:Int = 1;
+	private var ATTRIBUTEPOINTER:Int = 0;
 	private var renderables:MinAllocArray<IRenderable>;
-	private var batchTemplates:Map<String, BatchRenderingData>;
 	private	var pointer:Int;
-	
-	public var atlasTextureUnits:Map<String, Int>;
 	
 	
 	private function new()
@@ -101,35 +97,36 @@ class Renderer
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		
-		Visual.InitSharedGraphics();
+		
+		
+		AssetManager.Get().AddTexture(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.WHITE), AssetManager.Get().AllocateFreeTextureIndex());
 		
 		renderables = new MinAllocArray();
-		batchTemplates = new Map();
-		atlasTextureUnits = new Map();
-
 		
-		
-		
+		model = new Matrix4();
+		rotationAxis = new Vector4(0, 0, 1);
 	}
+	
 	public function CreateBatch(name:String, template:String = "default" , needOrdering:Bool = false, addToBatchList:Bool = true):IBatch
 	{
 		var batch:IBatch = null;
-		if (batchTemplates[template] != null)
+		var template:BatchRenderingData = AssetManager.Get().GetTemplate(template);
+		if (template != null)
 		{
-			batch = cast Type.createInstance(Type.resolveClass("beardFramework.graphics.rendering.batches."+batchTemplates[template].type), []);
+			batch = cast Type.createInstance(Type.resolveClass("beardFramework.graphics.rendering.batches."+template.type), []);
 			if (batch != null)
 			{
-				batch.Init(batchTemplates[template]);
+				batch.Init(template);
 				batch.name = name;
 				batch.needOrdering = needOrdering;
 				if (addToBatchList) AddRenderable(batch);
 				var unit:Int = 0;
-				for (atlas in atlasTextureUnits.keys())
+				for (i in 0...AssetManager.Get().GetFreeTextureUnit())
 				{
-					GL.activeTexture(GL.TEXTURE0 + atlasTextureUnits[atlas]);
-					GL.useProgram(batch.shader);
-					if (GL.getUniformLocation(batch.shader, "atlas[" + atlasTextureUnits[atlas] + "]") >= 0)
-						GL.uniform1i(GL.getUniformLocation(batch.shader, "atlas[" + atlasTextureUnits[atlas] + "]"), atlasTextureUnits[atlas]);
+					GL.activeTexture(GL.TEXTURE0 + i);
+					batch.shader.Use();
+					if (GL.getUniformLocation(batch.shader.program, "atlas[" + i + "]") >= 0)
+						batch.shader.SetInt("atlas[" +i + "]", i);
 				}
 			
 			}
@@ -149,17 +146,9 @@ class Renderer
 		renderables.Push(renderable);
 		
 		#if debug
-		MoveRenderableToLast(DEBUG);
+		MoveRenderableToLast(StringLibrary.DEBUG);
 		#end
-		MoveRenderableToLast(UI);
-	}
-	
-	public inline function AddTemplate(templateData:BatchRenderingData):Void
-	{
-		if (templateData != null)
-		{
-			batchTemplates[templateData.name] = templateData;
-		}
+		MoveRenderableToLast(StringLibrary.UI);
 	}
 	
 	public function Start():Void
@@ -211,8 +200,6 @@ class Renderer
 			
 	}
 	
-	
-	
 	public function OnResize(width:Int, height:Int):Void
 	{
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
@@ -224,20 +211,15 @@ class Renderer
 			for (camera in renderables.get(i).cameras)
 			{
 				
-				GL.useProgram(renderables.get(i).shaderProgram);
+				renderables.get(i).shader.Use();
 				BeardGame.Get().cameras[camera].projection.identity();
 				BeardGame.Get().cameras[camera].projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 10, -10);
-				GL.uniformMatrix4fv(GL.getUniformLocation(renderables.get(i).shaderProgram, "projection"), 1, false, BeardGame.Get().cameras[camera].projection);
+				renderables.get(i).shader.SetMatrix4fv("projection" , BeardGame.Get().cameras[camera].projection);
 			}
 			
 		}
 		
 		
-	}
-	
-	public function GetFreeTextureUnit():Int
-	{
-		return FREETEXTUREUNIT;
 	}
 	
 	public inline function GenerateVAO():GLVertexArrayObject
@@ -251,18 +233,11 @@ class Renderer
 		
 	}
 	
-	public inline function AllocateFreeTextureIndex():Int
-	{
-		
-		return FREETEXTUREUNIT++;
-	}
 	
-	public function UpdateTextureUnits(atlas:String, index:Int = 0):Void
+	public function UpdateAtlasTextureUnits(index:Int = 0):Void
 	{
-		atlasTextureUnits[atlas] = index;
-		
 		for (i in 0...renderables.length){
-			GL.useProgram(renderables.get(i).shader);
+			renderables.get(i).shader.Use();
 			if (GL.getUniformLocation(renderables.get(i).shader.program, "atlas[" + index + "]") >= 0)
 				renderables.get(i).shader.SetInt("atlas[" + index + "]", index);
 		}
@@ -332,11 +307,6 @@ class Renderer
 		return null;
 	}
 	
-	public function GetTemplate(name:String):BatchRenderingData
-	{
-		return batchTemplates[name];
-	}
-	
 	public function DepthSorting():Void
 	{
 		renderables.Sort(DepthSortingFunction);
@@ -351,6 +321,7 @@ class Renderer
 		
 		return result;	
 	}
+	
 	
 	function get_ready():Bool 
 	{

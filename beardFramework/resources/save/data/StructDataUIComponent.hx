@@ -22,7 +22,6 @@ typedef StructDataUIComponent =
 	
 	var parent:String;
 	//var subComponents:Array<DataUIComponent>; 
-	var additionalData:String;
 	
 	
 	

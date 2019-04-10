@@ -303,10 +303,13 @@ class BasicScreen
 			name : this.name,
 			type : Type.getClassName(Type.getClass(this)),
 			cameras : [for (camera in BeardGame.Get().cameras) camera.ToData() ],
-			entitiesData : [for(entity in BeardGame.Get().entities) if(entity.isLocal && (complete || entity.requiredSave) ) entity.ToData()],
+			entitiesData : [for (entity in BeardGame.Get().entities) if (entity.isLocal && (complete || entity.requiredSave) ) entity.ToData()],
+			visualsData:[],
+			soundsData:[],
 			UITemplates:[],
 			width: this.width,
-			height:this.height
+			height:this.height,
+			additionalData:""
 		}
 		
 		return data;

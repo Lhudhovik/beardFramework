@@ -1,6 +1,8 @@
 package beardFramework.graphics.rendering.shaders;
 import beardFramework.core.BeardGame;
+import beardFramework.resources.options.OptionsManager.ShaderToCreate;
 import beardFramework.utils.data.Crypto;
+import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.libraries.StringLibrary;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLProgram;
@@ -17,56 +19,76 @@ import sys.io.File;
 class Shader 
 {
 	
-	static public var nativeShader:Map<String,String> = new Map<String,String>();
+	static public var nativeShaders:Map<String,NativeShader> = new Map<String,NativeShader>();
 	static public var loaded:Bool = false;
 	
 	static private var currentUsed:Shader;
+	static private var shaders:Map<String, Shader> = new Map<String, Shader>();
 	
-	static public function LoadShaders():Void
+	static public function LoadShaders(shadersToCreate:Array<ShaderToCreate>):Void
 	{
-		
-		if (!loaded && FileSystem.exists(BeardGame.Get().SHADERS_PATH))
+		trace(shadersToCreate);
+		for (shaderToCreate in shadersToCreate)
 		{
-			for (element in FileSystem.readDirectory(BeardGame.Get().SHADERS_PATH))
-			{
-				if (element.indexOf(StringLibrary.SHADER_EXTENSION) != -1){
-					
-					
-					#if debug
-					nativeShader[cast(element, String).split(".")[0]] =  File.getContent(BeardGame.Get().SHADERS_PATH + element);
-					#else
-					nativeShader[cast(element, String).split(".")[0]] =  Crypto.DecodedData(File.getContent(BeardGame.Get().SHADERS_PATH + element));	
-					#end
-					
-					//trace(shader[cast(element, String).split(".")[0]]);
-					//trace(shader);
-				}
-			}
-			loaded = true;
+			shaders[shaderToCreate.name] = CreateShader(shaderToCreate.nativeShaders);
 		}
-		
-			
 	}
 	
-	static public function CreateShader(shadersList:Array<Shader.NativeShader>):Shader
+	static public inline function GetShader(name:String):Shader
+	{
+		return shaders[name];
+	}
+	
+	static public inline function GetShaderName(shader:Shader):String
+	{
+		var name:String="";
+		for (key in shaders.keys())
+		{
+			if (shaders[key] == shader){
+				name = key;
+				break;
+			}
+		}
+		return name;
+	}
+	
+	static public inline function AddShader(name:String, shader:Shader):Shader
+	{
+		shaders[name] = shader;
+		return shaders[name];
+	}
+	
+	static public inline function RemoveShader(name:String, destroy:Bool = false):Void
+	{
+		
+		if (shaders[name] != null) 
+		{
+			if (destroy) GL.deleteProgram(shaders[name].program);
+			shaders[name] = null;
+		}
+		
+	}
+	
+	static public function CreateShader(nativeShadersList:Array<String>):Shader
 	{
 		var shader:Shader = new Shader();
 		
 		var createdShaders:Array<GLShader> = [];
-		for (nativeShader in shadersList)
+		for (nativeName in nativeShadersList)
 		{
 			
-			var glShader:GLShader =  GL.createShader(nativeShader.type);
+			var glShader:GLShader =  GL.createShader(nativeShaders[nativeName].type);
 			
-			GL.shaderSource(glShader, Shader.nativeShader[nativeShader.name]);
+			
+			GL.shaderSource(glShader, nativeShaders[nativeName].src);
 			
 			GL.compileShader(glShader);
-			trace(nativeShader.name + " :\n" + GL.getShaderInfoLog(glShader));
+			trace(nativeName + " :\n" + GL.getShaderInfoLog(glShader));
 			
 			createdShaders.push(glShader);
 			
 			GL.attachShader(shader.program, glShader);
-			trace(GL.getProgramInfoLog(shaderProgram ));
+			trace(GL.getProgramInfoLog(shader.program ));
 			
 			
 		}
@@ -80,7 +102,7 @@ class Shader
 			GL.deleteShader(nativeShader);
 		}
 		
-		
+		return shader;
 		
 		
 	}
@@ -109,7 +131,7 @@ class Shader
 			isUsed = true;
 		
 			GL.useProgram(program);
-			trace(GL.getError());
+			GLU.ShowErrors("Shader Error");
 		}
 		
 	}
@@ -179,6 +201,6 @@ class Shader
 
 typedef NativeShader =
 {
-	public var name:String;
+	public var src:String;
 	public var type:Int;
 }

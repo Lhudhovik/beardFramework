@@ -6,6 +6,7 @@ import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IBatchable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
+import beardFramework.utils.libraries.StringLibrary;
 import haxe.ds.Vector;
 import openfl.geom.Matrix;
 
@@ -23,7 +24,7 @@ class BatchedVisual extends AbstractVisual implements IBatchable
 	{
 		super(texture,atlas,name);
 		bufferIndex = -1;
-		renderingBatch =  cast Renderer.Get().GetRenderable(Renderer.Get().DEFAULT);
+		renderingBatch =  cast Renderer.Get().GetRenderable(StringLibrary.DEFAULT);
 	}
 	
 	override function  set_isDirty(value:Bool):Bool 

@@ -7,14 +7,13 @@ struct ColorComponent{
 	sampler2D sampler;
 	vec4 uv;
 	vec3 color;
-	int atlasIndex;
-	int useSampler;
 };
 
 struct Material{
 	ColorComponent diffuse;
 	ColorComponent specular;
 	float shininess;
+	float transparency;
 };
 
 struct DirectionalLight {
@@ -58,7 +57,6 @@ uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLights[NR_POINT_LIGHTS];
 uniform DirectionalLight directionalLights[NR_DIR_LIGHTS]; 
 uniform Material material;
-uniform sampler2D atlas[10];
 
 vec3 specular;
 vec3 diffuse;
@@ -74,33 +72,10 @@ void main()
 	vec3 normal = normalize(vec3(0,0,-1));
 	vec3 viewDirection = normalize(vec3(0,0,-1));
 	
+	diffuse = vec3(texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentPosition.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentPosition.y)))) *material.diffuse.color; 
 	
-	if(material.diffuse.useSampler > 0)
-	{
-		diffuse = vec3(texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentPosition.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentPosition.y)))) *material.diffuse.color; 
-		
-	}
-	else if(material.diffuse.atlasIndex >=0)
-	{
-		diffuse = vec3(texture(atlas[material.diffuse.atlasIndex], vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentPosition.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentPosition.y)))) * material.diffuse.color ; 
-	}
-	else
-		diffuse = material.diffuse.color;
-	
-	
-	
-	if(material.specular.useSampler > 0)
-	{
-		specular = vec3(texture(material.specular.sampler, vec2(material.specular.uv.x + (material.specular.uv.z*FragmentPosition.x),material.specular.uv.y + (material.specular.uv.w*FragmentPosition.y)))) *material.specular.color; 
-		
-	}
-	else if(material.specular.atlasIndex >=0)
-	{
-		specular = vec3(texture(atlas[material.specular.atlasIndex], vec2(material.specular.uv.x + (material.specular.uv.z*FragmentPosition.x),material.specular.uv.y + (material.specular.uv.w*FragmentPosition.y)))) * material.specular.color ; 
-	}
-	else
-		specular = material.specular.color;
-	
+	specular = vec3(texture(material.specular.sampler, vec2(material.specular.uv.x + (material.specular.uv.z*FragmentPosition.x),material.specular.uv.y + (material.specular.uv.w*FragmentPosition.y)))) *material.specular.color; 
+
 	//----------------------------------------------------------------------------------------------------------------------directional
     vec3 color = CalculateDirectionalLights( normal, viewDirection);
 	
@@ -111,7 +86,7 @@ void main()
 	color += CalculateSpotLights(normal, viewDirection,FragmentPosition);
 		
 	//----------------------------------------------------------------------------------------------------------------------result
-	FragColor =  texture(atlas[int(floor(TexCoord.z))],vec2(FragmentPosition.x * material.uv.x,FragmentPosition.y* material.uv.y)) * vec4(color, 1.0) * Diffuse;
+	FragColor =  texture(atlas[int(floor(TexCoord.z))],vec2(FragmentPosition.x * material.uv.x,FragmentPosition.y* material.uv.y)) * vec4(color, transparency);
 	
 	
 	

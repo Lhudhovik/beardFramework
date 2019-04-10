@@ -1,4 +1,5 @@
 package beardFramework.resources.save.data;
+import haxe.ds.Vector;
 
 /**
  * @author Ludo

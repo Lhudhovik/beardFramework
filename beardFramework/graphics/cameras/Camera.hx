@@ -240,7 +240,8 @@ class Camera
 			ratioX:ratios.x,
 			ratioY:ratios.y,
 			ratioWidth:ratios.width,
-			ratioHeight:ratios.height
+			ratioHeight:ratios.height,
+			additionalData:""
 			
 			
 		}
@@ -342,7 +343,7 @@ class Camera
 		view.identity();
 		view.appendScale(zoom,zoom,1);
 		view.appendTranslation( (viewportX + viewportWidth * 0.5) - centerX, (viewportY + viewportHeight * 0.5) - centerY, -1);
-		
+		//view.appendRotation(this.rotation, new Vector4(0, 0, 1));
 		//DataU.DeepTrace(view);
 		
 		needViewUpdate = false;

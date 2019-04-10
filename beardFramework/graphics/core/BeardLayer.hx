@@ -2,6 +2,7 @@ package beardFramework.graphics.core;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.interfaces.IBatchable;
+import beardFramework.interfaces.IRenderable;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.systems.aabb.AABBTree;
 import beardFramework.resources.MinAllocArray;
@@ -107,7 +108,11 @@ class BeardLayer
 				cast(object, IBatchable).renderingBatch.UpdateRenderedData();
 		
 			}
-			
+			else if (Std.is(object, IRenderable))
+			{
+				trace("add to rendered");
+				Renderer.Get().AddRenderable(cast object);
+			}
 		}
 	}
 	

@@ -8,7 +8,7 @@ typedef StructDataComponent =
 	>StructDataGeneric,
 	var update:Bool;
 	var position:Int;
-	var additionalData:String;
+	
 }
 
 @:forward

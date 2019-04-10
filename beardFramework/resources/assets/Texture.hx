@@ -8,4 +8,6 @@ typedef Texture =
 {
 	public var glTexture:GLTexture;
 	public var fixedIndex:Int;
+	public var width:Int;
+	public var height:Int;
 }

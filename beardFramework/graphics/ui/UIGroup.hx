@@ -78,7 +78,8 @@ class UIGroup implements IUIGroupable
 			visible: this.visible,
 			parentGroup: this.group,
 			subGroupsData: [for(member in members) if(Std.is(member,UIGroup)) cast(member, UIGroup).ToData()],
-			componentsData:componentsData
+			componentsData:componentsData,
+			additionalData:""
 		}
 		
 		//trace(componentsData);

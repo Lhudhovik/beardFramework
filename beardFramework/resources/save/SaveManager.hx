@@ -80,7 +80,7 @@ class SaveManager
 		
 		if (saveSlots[saveName] == null) 
 		{
-			saveSlots[saveName] = {	name : saveName, address : BeardGame.Get().SAVE_PATH +  saveName + StringLibrary.SAVE_EXTENSION , data: { name:saveName, playersData:[],gameData:[]} };
+			saveSlots[saveName] = {	name : saveName, address : BeardGame.Get().SAVE_PATH +  saveName + StringLibrary.SAVE_EXTENSION , data: { name:saveName, playersData:[],gameData:[],additionalData:""} };
 			#if debug
 			File.saveContent(saveSlots[saveName].address, haxe.Json.stringify(saveSlots[saveName].data));
 			#else

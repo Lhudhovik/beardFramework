@@ -10,7 +10,9 @@ import beardFramework.graphics.rendering.shaders.RenderedDataBufferArray;
 import beardFramework.graphics.rendering.shaders.VertexAttribute;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.resources.save.data.StructDataVisual;
 import beardFramework.utils.graphics.GLU;
+import beardFramework.utils.libraries.StringLibrary;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -43,8 +45,9 @@ class Visual extends AbstractVisual implements IRenderable
 	
 	private var renderer:Renderer;
 	
-	public static function InitSharedGraphics(data:RenderingData):Void
+	public static function InitSharedGraphics():Void
 	{
+		sharedShader = Shader.GetShader("visualDefault");
 		
 		VAO = Renderer.Get().GenerateVAO();
 		
@@ -64,7 +67,7 @@ class Visual extends AbstractVisual implements IRenderable
 		GL.bufferData(GL.ARRAY_BUFFER, verticesData.byteLength, verticesData, GL.STATIC_DRAW);
 		
 					
-		var indices:UInt16Array = new UInt16Array([0, 1, 2, 2, 3, 0]);
+		indices = new UInt16Array([0, 1, 2, 2, 3, 0]);
 		
 		EBO  = Renderer.Get().GenerateBuffer();
 		
@@ -75,106 +78,88 @@ class Visual extends AbstractVisual implements IRenderable
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		GL.bindVertexArray(0);
 		
-		sharedShader = Shader.CreateShader(data.shaders);
+		
 		
 	}
 	
 	public function new(texture:String, atlas:String, name:String="") 
 	{
 		super(texture, atlas, name);
-				
+		lightGroup = StringLibrary.DEFAULT;
+		drawMode = GL.TRIANGLES;
+		shader = sharedShader;
 		cameras = new List();
 		for (camera in BeardGame.Get().cameras)
 			cameras.add(camera.name);
-		
-	}
-	
-	public function Init(data:RenderingData):Void
-	{
 		
 		renderer = Renderer.Get();
-		drawMode = data.drawMode;
-	
-		lightGroup = data.lightGroup;
-		if (data.shaders != null && data.shaders.length > 0)
-		
-			InitShaders(data.shaders);
-		else 
-			shader = sharedShader;
-		
-		cameras = new List();
-		
-		for (camera in BeardGame.Get().cameras)
-			cameras.add(camera.name);
+		readyForRendering = true;
 	}
 	
-		
-	public function InitShaders(shadersList:Array<NativeShader>):Void
-	{
-		
-		shader = Shader.CreateShader(shadersList);
-		
-		shader.Use();
-		
-		for (camera in cameras)
-		{
-			shader.SetMatrix4fv("projection", BeardGame.Get().cameras[camera].projection);
-			shader.SetMatrix4fv("view", BeardGame.Get().cameras[camera].view);
-		}
-	}
-	
-		
 	function get_readyForRendering():Bool 
 	{
-		return readyForRendering;
+		return material!=null;
 	}
 	
-	private inline function SetUniforms():Void
+	private function SetUniforms():Void
 	{
 		
 		shader.Use();
-		shader.SetMatrix4fv("projection", renderer.projection);
-		
+				
 		var component:MaterialComponent;
-		var textureIndex:Int = renderer.GetFreeTextureUnit();
+		var activeTextures:Map<String,Int> = new Map();
+		var sampleUnit:Int = 0;
+		var availableUnit:Int = AssetManager.Get().GetFreeTextureUnit();
 		for (componentName in material.components.keys())
 		{
-			
 			component = material.components[componentName];
 			if (component.texture != "")
 			{
 				
-				if (component.atlas > -1)
+				if (component.atlas != "")
 				{
-					GL.uniform1i(GL.getUniformLocation(shader , "material." + componentName+".atlasIndex"), component.atlas);			
+					sampleUnit = AssetManager.Get().GetTexture(component.atlas).fixedIndex;
 				}
 				else
 				{
-					GL.activeTexture(GL.TEXTURE0 + textureIndex);
-					GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(component.texture));
-					GL.uniform1i(GL.getUniformLocation(shader , "material." + componentName+".sampler"), component.atlas);
+					if (activeTextures[component.texture] == null)
+					{
+						activeTextures[component.texture] = availableUnit++;
+					}
+					
+					GL.activeTexture(GL.TEXTURE0 + activeTextures[component.texture]);
+					GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(component.texture).glTexture);
+					sampleUnit = activeTextures[component.texture] ;
 				}
 				
+				shader.SetInt("material." + componentName + ".atlasIndex", sampleUnit);			
+				shader.Set4Float("material." + componentName+".uvs", component.uvs.x, component.uvs.y, component.uvs.width, component.uvs.height);
 				
 			}
-						
+					
 			
 		}
 		
+		shader.SetFloat("material.transparency", material.transparency);
+		shader.SetFloat("material.shininess", material.shininess);
 		
-		//GL.uniform1i(GL.getUniformLocation(shader , "material.diffuse.sampler");
-		//GL.uniform3f(GL.getUniformLocation(shaderProgram , "directionalLights["+directionalIndex+"].ambient"),light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef() );
+		renderer.model.identity();
+		renderer.model.appendScale(this.width, this.height, 1.0);
+		renderer.model.appendTranslation(this.x, this.y, (visible ? renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT + 1));
+		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
+		shader.SetMatrix4fv("model", renderer.model);
+		
+		
 
-		
 	}
 		
 	public function Render():Int 
 	{
-		
-		if (isDirty || material.is){
+		trace("rendervisual");
+		//if (material.isDirty){
 			SetUniforms();
-			isDirty = false;
-		}
+			//isDirty = false;
+		//}
 		var drawCount:Int = 0;
 		
 		//GL.bindVertexArray(VAO);
@@ -230,14 +215,64 @@ class Visual extends AbstractVisual implements IRenderable
 		return drawCount;
 	}
 	
+	override function set_atlas(value:String):String 
+	{
+		if (material != null && material.hasComponent("diffuse"))
+		{
+			material.components["diffuse"].atlas = value;
+		}
 		
+		return super.set_atlas(value);
+	}
 
-	
 	function set_lightGroup(value:String):String 
 	{
 		return lightGroup = value;
 	}
 	
+	public function ToData():StructDataVisual
+	{
+		
+		
+		var data:StructDataVisual =
+		{
+			
+			name:this.name,
+			type:Type.getClassName(Visual),
+			x:this.x,
+			y:this.y,
+			z:this.z,
+			shader:	Shader.GetShaderName(this.shader),
+			material: this.material.ToData(),
+			drawMode:drawMode,
+			lightGroup:lightGroup,
+			cameras:cameras,
+			additionalData:""
+			
+			
+		}
+	
+		return data;
+		
+	}
+	
+	public function ParseData(data:StructDataVisual):Void
+	{
+		this.name = data.name;
+		this.x = data.x;
+		this.y = data.y;
+		this.z = data.z;
+		if (data.shader != "")
+			this.shader = Shader.GetShader(data.shader);
+		else this.shader = sharedShader;
+		
+		material.ParseData(data.material);
+		
+		drawMode = data.drawMode;
+		
+		lightGroup = data.lightGroup;
+		cameras = data.cameras;
+	}
 	
 	
 }

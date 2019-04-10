@@ -6,4 +6,5 @@ package beardFramework.resources.save.data;
 typedef StructAbstractData =
 {
 	var name:String;	
+	var additionalData:String;
 }

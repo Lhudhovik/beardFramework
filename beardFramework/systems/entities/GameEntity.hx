@@ -12,6 +12,7 @@ class GameEntity
 	public var name:String;
 	public var x:Float;
 	public var y:Float;
+	public var z:Float;
 	public var isLocal:Bool=true;
 	public var forcedLocation(default, null):Bool = false;
 	public var isVirtual(default,null):Bool;
@@ -20,13 +21,11 @@ class GameEntity
 	
 	private var components:Array<IEntityComponent>;
 
-	public function new(x:Float = 0, y:Float = 0) 
+	public function new(x:Float = 0, y:Float = 0, z:Float = 0 ) 
 	{
 		this.x = x;
 		this.y = y;
-		
-		
-		
+		this.z = z;
 		components = new Array<IEntityComponent>();
 		isVirtual = false;
 		
@@ -144,6 +143,7 @@ class GameEntity
 			type:Type.getClassName(GameEntity),
 			x:this.x,
 			y:this.y,
+			z:this.z,
 			components:[for (component in components) component.ToData()],
 			additionalData:""
 			

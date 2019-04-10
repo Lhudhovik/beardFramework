@@ -1,4 +1,5 @@
 package beardFramework.resources.save.data;
+import haxe.ds.Vector;
 
 /**
  * @author Ludo
@@ -9,8 +10,10 @@ typedef StructDataEntity =
 	
 	var x:Float;
 	var y:Float;
+	var z:Float;
 	var components:Array<StructDataComponent>;
-	var additionalData:String;
+	
+	
 }
 
 @:forward

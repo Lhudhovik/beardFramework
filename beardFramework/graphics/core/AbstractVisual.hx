@@ -22,11 +22,26 @@ class AbstractVisual extends RenderedObject
 	
 		this.texture = texture;
 		this.atlas = atlas;
-				
-		var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
 		
-		SetBaseWidth(texture.imageArea.width);
-		SetBaseHeight(texture.imageArea.height);
+	
+		material.SetComponentTexture("diffuse",texture);
+		
+		
+		if (atlas != "")
+		{
+			var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
+			SetBaseWidth(texture.imageArea.width);
+			SetBaseHeight(texture.imageArea.height);
+			
+			material.SetComponentAtlas("diffuse",  atlas);
+			material.SetComponentUVs("diffuse", texture.uvX, texture.uvY, texture.uvW, texture.uvH);
+		}
+		else if (AssetManager.Get().GetTexture(texture) != null)
+		{
+			SetBaseWidth(AssetManager.Get().GetTexture(texture).width);
+			SetBaseHeight(AssetManager.Get().GetTexture(texture).height);
+		}
+		
 	}
 	public inline function GetTextureData():SubTextureData
 	{
@@ -56,12 +71,20 @@ class AbstractVisual extends RenderedObject
 	
 	private function Reinit():Void
 	{
-		if (texture != null && atlas != null)
+		if (texture != null && texture != "")
 		{
 			
-			var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
-			SetBaseWidth(texture.imageArea.width);
-			SetBaseHeight(texture.imageArea.height);
+			if (atlas != "" && atlas != null)
+			{
+				var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
+				SetBaseWidth(texture.imageArea.width);
+				SetBaseHeight(texture.imageArea.height);
+			}
+			else if (AssetManager.Get().GetTexture(texture) != null)
+			{
+				SetBaseWidth(AssetManager.Get().GetTexture(texture).width);
+				SetBaseHeight(AssetManager.Get().GetTexture(texture).height);
+			}
 			
 		}
 		

@@ -148,7 +148,7 @@ class ScreenFlowManager
 	{
 		//***********************  Load screen Data ***********************************************
 		var data:DataScreen = null;
-		
+		trace(nextScreenData.screen.dataPath);
 		if (AssetManager.Get().HasContent(nextScreenData.screen.dataPath)){
 			#if (debug)
 			data = haxe.Json.parse(AssetManager.Get().GetContent(nextScreenData.screen.dataPath));

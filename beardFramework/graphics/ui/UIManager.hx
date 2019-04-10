@@ -67,8 +67,8 @@ class UIManager
 		BeardGame.Get().AddCamera(new Camera(CAMERANAME+0, BeardGame.Get().window.width, BeardGame.Get().window.height, 0, 0, 100, true));
 		BeardGame.Get().cameras[CAMERANAME+0].Center(BeardGame.Get().window.width * 0.5, BeardGame.Get().window.height * 0.5);
 		
-		Renderer.Get().GetRenderable(Renderer.Get().UI).cameras.add(CAMERANAME+0);
-		Renderer.Get().GetRenderable(Renderer.Get().UI).cameras.remove("default");
+		Renderer.Get().GetRenderable(StringLibrary.UI).cameras.add(CAMERANAME+0);
+		Renderer.Get().GetRenderable(StringLibrary.UI).cameras.remove("default");
 		
 		
 		
@@ -97,7 +97,7 @@ class UIManager
 		if (Std.is(component, UIContainer))
 			for (element in cast(component, UIContainer).components) AddComponent(element);
 		else{
-			if(Std.is(component, IBatchable)) cast(component, IBatchable).renderingBatch = cast Renderer.Get().GetRenderable(Renderer.Get().UI);
+			if(Std.is(component, IBatchable)) cast(component, IBatchable).renderingBatch = cast Renderer.Get().GetRenderable(StringLibrary.UI);
 			UILayer.Add(cast(component, RenderedObject));
 		}
 		

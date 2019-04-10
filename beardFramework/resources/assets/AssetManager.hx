@@ -1,10 +1,18 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.BatchedVisual;
+import beardFramework.graphics.rendering.batches.BatchRenderingData;
+import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.resources.assets.Atlas;
 import beardFramework.graphics.text.FontFormat;
+import beardFramework.utils.data.Crypto;
+import beardFramework.utils.graphics.TextureU;
 import haxe.Utf8;
+import lime.graphics.Image;
 import lime.graphics.opengl.GL;
+import lime.utils.Assets;
+import openfl.display.BitmapData;
+import sys.io.File;
 //import extension.harfbuzz.TextScript;
 import haxe.ds.Vector;
 import haxe.io.Float32Array;
@@ -37,6 +45,7 @@ class AssetManager
 	private var DEFAULT_LOADER_NAME(null, never):String = "DefaultName";
 	public var FONT_ATLAS_NAME(default, never):String = "FontAtlas";
 	
+	private var FREETEXTUREUNIT:Int = 0;
 	private var loaderQueue:LoaderQueue;
 	private var loaders:Map<String, Loader<Dynamic>>;
 	private var atlases:Map<String, Atlas>;
@@ -48,8 +57,10 @@ class AssetManager
 	private var onStart:Signal0;
 	private var onError:Signal1<LoaderErrorType>;
 	private var requestedAtlasQueue:Array<String>;
-
-	
+	private var requestedTexturesQueue:Array<String>;
+	private var requestedNativeShaderQueue:Array<String>;
+	private var batchTemplates:Map<String, BatchRenderingData>;
+			
 	public function new() 
 	{
 		
@@ -74,7 +85,10 @@ class AssetManager
 		fonts = new Map<String, Font>();
 		textures = new Map<String,Texture>();
 		requestedAtlasQueue = new Array<String>();
-		
+		requestedTexturesQueue = new Array<String>();
+		requestedNativeShaderQueue = new Array<String>();
+		batchTemplates = new Map();
+				
 		onComplete = new Signal0();
 		onProgress = new Signal1(Float);
 		onStart = new Signal0();
@@ -102,19 +116,23 @@ class AssetManager
 			
 		switch(type)
 		{
-			case AssetType.IMAGE | AssetType.TEXTURE : 
+			case AssetType.IMAGE: 
 				
 				loaders[loaderName] = new ImageLoader(url);
-				
+			case AssetType.TEXTURE :
+				loaders[loaderName] = new ImageLoader(url);
+				requestedTexturesQueue.push(loaderName);		
 			
 			case AssetType.XML : 
 				
 				loaders[loaderName] = new XmlLoader(url);
-				
+			
+			case AssetType.SHADER :
+				requestedNativeShaderQueue.push(loaderName);
+				loaders[loaderName] = new StringLoader(url);
 				
 			case AssetType.DATA | AssetType.SOUND : 	
-				
-				loaders[loaderName] = new StringLoader(url);
+						loaders[loaderName] = new StringLoader(url);
 			case AssetType.FONT_TTF | AssetType.FONT_OTF:
 				return;
 			case AssetType.ATLAS_PNG | AssetType.ATLAS_JPG:
@@ -185,6 +203,26 @@ class AssetManager
 					requestedAtlasQueue[i++] = null;
 				}
 				requestedAtlasQueue = [];
+					
+				for (requestedTexture in requestedTexturesQueue)
+				{
+					if (loaders[requestedTexture] != null && loaders[requestedTexture].content != null){
+						AddTexture(	requestedTexture, cast(loaders[requestedTexture].content, BitmapData).image);		
+					}
+				}
+				requestedTexturesQueue = [];
+				
+				for (requestedNativeShader in requestedNativeShaderQueue)
+				{
+					if (loaders[requestedNativeShader] != null && loaders[requestedNativeShader].content != null){
+						#if debug
+							Shader.nativeShaders[requestedNativeShader].src =  cast loaders[requestedNativeShader].content;
+						#else
+							Shader.nativeShaders[requestedNativeShader].src =  Crypto.DecodedData( cast loaders[requestedNativeShader].content);	
+						#end
+					}
+				}
+				requestedNativeShaderQueue = [];
 				
 				
 				
@@ -329,12 +367,25 @@ class AssetManager
 		}
 	}
 	
-	public inline function AddTexture(name:String, glTexture:GLTexture, fixedIndex:Int=-1):Void
+	public inline function AddTexture(name:String, texture:Image, fixedIndex:Int=-1):GLTexture
 	{
-		
-		if (textures[name] == null) textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex};
-		
+		trace(name);
+		trace(texture);
+		trace("ok");
+		var glTexture:GLTexture;
+		trace("ok");
+		if (textures[name] == null){
+			trace("ok");
+			glTexture = TextureU.GetTexture(texture);
+			trace("ok");
+			textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex, width:texture.buffer.width, height:texture.buffer.height};
+			trace("ok");
+		}
+		else glTexture = textures[name].glTexture;
+		trace("ok");
+		return glTexture;
 	}
+
 	
 	public inline function RemoveTexture(name:String, destroy:Bool = false):Void
 	{
@@ -345,9 +396,33 @@ class AssetManager
 		}
 	}
 	
-	public inline function GetTexture(name:String, glTexture:GLTexture, fixedIndex:Int=-1):Void
+	public inline function GetTexture(name:String):Texture
 	{
 		return textures[name];
+	}
+	
+	public inline function AddTemplate(templateData:BatchRenderingData):Void
+	{
+		if (templateData != null)
+		{
+			batchTemplates[templateData.name] = templateData;
+		}
+	}
+	
+	public inline function GetTemplate(name:String):BatchRenderingData
+	{
+		return batchTemplates[name];
+	}
+	
+	public function GetFreeTextureUnit():Int
+	{
+		return FREETEXTUREUNIT;
+	}
+	
+	public inline function AllocateFreeTextureIndex():Int
+	{
+		
+		return FREETEXTUREUNIT++;
 	}
 	
 	
@@ -361,6 +436,7 @@ class AssetManager
 enum AssetType{
 		IMAGE;
 		TEXTURE;
+		SHADER;
 		XML;
 		DATA;
 		SOUND;

@@ -1,6 +1,7 @@
 package beardFramework.core;
 
 import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.rendering.batches.Batch;
@@ -164,9 +165,6 @@ class BeardGame extends Application
 				AssetManager.Get().Append(resource.type, resource.url, resource.name,null,OnPreciseResourcesProgress);
 			}
 			
-			//trace("*** Resources to load : " + OptionsManager.Get().resourcesToLoad);
-			Shader.LoadShaders();
-			
 			for (font in OptionsManager.Get().fontsToLoad)
 			{
 				for (size in font.size)
@@ -175,23 +173,20 @@ class BeardGame extends Application
 				}
 			}
 			
-			for (batch in OptionsManager.Get().batchesToCreate)
-			{
-				trace(batch.name);
-				Renderer.Get().CreateBatch(batch.name, batch.template,batch.needOrdering);
 			
-			}
-			AssetManager.Get().Load(GameStart, OnResourcesProgress, OnResourcesFailed);
+			OptionsManager.Get().resourcesToLoad = null;
+			OptionsManager.Get().fontsToLoad = null;
+			
+			AssetManager.Get().Load(InitGraphics, OnResourcesProgress, OnResourcesFailed);
 		}
 		else GameStart();
 		
 		
 	}
 	
-	private function GameStart():Void
+	private function InitGraphics():Void
 	{
 		
-		gameReady = true;
 		if (cameras != null && cameras["default"] != null){
 			
 			cameras["default"].viewportWidth = window.width;
@@ -199,13 +194,34 @@ class BeardGame extends Application
 			trace("Default camera resized");
 		}
 		
+		Shader.LoadShaders(OptionsManager.Get().shadersToCreate);
+		
+		for (batch in OptionsManager.Get().batchesToCreate)
+		{
+			trace(batch.name);
+			Renderer.Get().CreateBatch(batch.name, batch.template,batch.needOrdering);
+		
+		}
+		
+		OptionsManager.Get().batchesToCreate = null;		
+		OptionsManager.Get().shadersToCreate = null;
+		
+		Visual.InitSharedGraphics();
+		
+		GameStart();
+	}
+	
+	private function GameStart():Void
+	{
+		
+		gameReady = true;
+		
+		
 		if (physicsEnabled)
 			PhysicsManager.Get().InitSpace(OptionsManager.Get().GetSettings("physics"));
 		
+		Renderer.Get().Start();	
 			
-		
-		Renderer.Get().Start();
-		
 		UIManager.Get();
 		
 		//fps = new MemoryUsage(10, 10, 0xffffffff);
