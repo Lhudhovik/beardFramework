@@ -64,7 +64,7 @@ class Visual extends AbstractVisual implements IRenderable
 										1, 0, 0,
 										0, 0, 0]);
 		
-		GL.bufferData(GL.ARRAY_BUFFER, verticesData.byteLength, verticesData, GL.STATIC_DRAW);
+		GL.bufferData(GL.ARRAY_BUFFER, verticesData.byteLength, verticesData, GL.DYNAMIC_DRAW);
 		
 					
 		indices = new UInt16Array([0, 1, 2, 2, 3, 0]);
@@ -132,16 +132,23 @@ class Visual extends AbstractVisual implements IRenderable
 					sampleUnit = activeTextures[component.texture] ;
 				}
 				
-				shader.SetInt("material." + componentName + ".atlasIndex", sampleUnit);			
+				shader.SetInt("material." + componentName + ".sampler", sampleUnit);			
 				shader.Set4Float("material." + componentName+".uvs", component.uvs.x, component.uvs.y, component.uvs.width, component.uvs.height);
 				
 			}
-					
+			shader.Set3Float("color", component.color.getRedf(), component.color.getGreenf(), component.color.getBluef());
+			
+			
+			trace(name);
+			trace("component : " + componentName);
+			trace("component : " + componentName);
 			
 		}
 		
 		shader.SetFloat("material.transparency", material.transparency);
 		shader.SetFloat("material.shininess", material.shininess);
+		
+		
 		
 		renderer.model.identity();
 		renderer.model.appendScale(this.width, this.height, 1.0);
@@ -155,7 +162,7 @@ class Visual extends AbstractVisual implements IRenderable
 		
 	public function Render():Int 
 	{
-		trace("rendervisual");
+		trace("rneder--------------------------------------");
 		//if (material.isDirty){
 			SetUniforms();
 			//isDirty = false;
@@ -164,7 +171,7 @@ class Visual extends AbstractVisual implements IRenderable
 		
 		//GL.bindVertexArray(VAO);
 		if (renderer.boundBuffer != VBO){
-			
+		
 			shader.Use();
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
@@ -193,17 +200,18 @@ class Visual extends AbstractVisual implements IRenderable
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
 		}
 		
+
+		LightManager.Get().CompileLights(shader, this.lightGroup);
 		
 		var camera:Camera;
 		for (cam in cameras)
-		{
-	
+		{	
 			camera = BeardGame.Get().cameras[cam];
 			//trace(camera.name);
 			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
-			
+			shader.SetMatrix4fv("projection", camera.projection);
 			shader.SetMatrix4fv("view", camera.view);
-			LightManager.Get().CompileLights(shader, this.lightGroup);
+			
 					
 			GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
 			drawCount++;

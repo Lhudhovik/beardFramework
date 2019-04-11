@@ -61,8 +61,8 @@ class RenderedObject implements ICameraDependent
 		onAABBTree = false;
 		
 		material = new Material();
-		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:0, height:0, x : 0, y:0 }};
-		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:0, height:0, x : 0, y:0 }};
+		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:1, height:1, x : 0, y:0 }};
+		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:1, height:1, x : 0, y:0 }};
 		material.components["diffuse"] = diffuseComponent;
 		material.components["specular"] = specularComponent;
 	}

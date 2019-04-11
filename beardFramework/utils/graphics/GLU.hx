@@ -14,7 +14,7 @@ class GLU
 		var error:Int = GL.getError();
 	
 		if (error != 0)
-			trace("OpenGL Error at " + location +  " " + error);
+			trace("OpenGL Error " + error +"  at " + location);
 		
 	}
 	

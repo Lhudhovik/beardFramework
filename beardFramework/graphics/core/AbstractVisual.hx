@@ -40,6 +40,8 @@ class AbstractVisual extends RenderedObject
 		{
 			SetBaseWidth(AssetManager.Get().GetTexture(texture).width);
 			SetBaseHeight(AssetManager.Get().GetTexture(texture).height);
+			material.SetComponentUVs("diffuse", 0, 0, 1, 1);
+			
 		}
 		
 	}

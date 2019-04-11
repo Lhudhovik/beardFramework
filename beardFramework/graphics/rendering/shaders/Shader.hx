@@ -24,10 +24,11 @@ class Shader
 	
 	static private var currentUsed:Shader;
 	static private var shaders:Map<String, Shader> = new Map<String, Shader>();
+
 	
 	static public function LoadShaders(shadersToCreate:Array<ShaderToCreate>):Void
 	{
-		trace(shadersToCreate);
+		
 		for (shaderToCreate in shadersToCreate)
 		{
 			shaders[shaderToCreate.name] = CreateShader(shaderToCreate.nativeShaders);
@@ -72,7 +73,7 @@ class Shader
 	static public function CreateShader(nativeShadersList:Array<String>):Shader
 	{
 		var shader:Shader = new Shader();
-		
+		var error:String = null;
 		var createdShaders:Array<GLShader> = [];
 		for (nativeName in nativeShadersList)
 		{
@@ -83,19 +84,22 @@ class Shader
 			GL.shaderSource(glShader, nativeShaders[nativeName].src);
 			
 			GL.compileShader(glShader);
-			trace(nativeName + " :\n" + GL.getShaderInfoLog(glShader));
+			error = GL.getShaderInfoLog(glShader);
+			if(error != null) 	trace(nativeName + " : " + error);
 			
 			createdShaders.push(glShader);
 			
 			GL.attachShader(shader.program, glShader);
-			trace(GL.getProgramInfoLog(shader.program ));
+			error = GL.getProgramInfoLog(shader.program );
+			if(error != null) trace(error);
 			
 			
 		}
 						
 		
 		GL.linkProgram(shader.program);
-		trace(GL.getProgramInfoLog(shader.program));
+		error = GL.getProgramInfoLog(shader.program);
+		if(error != null) trace(error);
 
 		for (nativeShader in createdShaders)
 		{

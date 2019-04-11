@@ -110,7 +110,6 @@ class BeardLayer
 			}
 			else if (Std.is(object, IRenderable))
 			{
-				trace("add to rendered");
 				Renderer.Get().AddRenderable(cast object);
 			}
 		}
