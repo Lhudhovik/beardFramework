@@ -86,7 +86,9 @@ void main()
 	color += CalculateSpotLights(normal, viewDirection,FragmentPosition);
 		
 	//----------------------------------------------------------------------------------------------------------------------result
-	FragColor =  texture(atlas[int(floor(TexCoord.z))],vec2(FragmentPosition.x * material.uv.x,FragmentPosition.y* material.uv.y)) * vec4(color, transparency);
+	//FragColor =  texture(atlas[int(floor(TexCoord.z))],vec2(FragmentPosition.x * material.uv.x,FragmentPosition.y* material.uv.y)) * vec4(color, transparency);
+	//FragColor =  vec4(color, material.transparency);
+	FragColor =  vec4(diffuse, material.transparency);
 	
 	
 	
