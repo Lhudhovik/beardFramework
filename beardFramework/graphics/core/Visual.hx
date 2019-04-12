@@ -145,7 +145,8 @@ class Visual extends AbstractVisual implements IRenderable
 				
 				
 			}
-			shader.Set3Float("color", component.color.getRedf(), component.color.getGreenf(), component.color.getBluef());
+			shader.Set3Float("material." + componentName + ".color", component.color.getRedf(), component.color.getGreenf(), component.color.getBluef());
+			
 			
 		}
 		

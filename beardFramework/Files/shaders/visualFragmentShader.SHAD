@@ -78,8 +78,9 @@ void main()
 	vec3 normal = normalize(vec3(0,0,-1));
 	vec3 viewDirection = normalize(vec3(0,0,-1));
 	
-	vec3 matSpec = vec3(texture(material.specular.sampler, vec2(material.specular.uv.x + (material.specular.uv.z*FragmentUV.x),material.specular.uv.y + (material.specular.uv.w*FragmentUV.y))));// *material.specular.color; 
-	vec3 matDiff = vec3(texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentUV.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentUV.y))));// *material.diffuse.color; 
+	vec3 matDiff = vec3(texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentUV.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentUV.y))))* material.diffuse.color; 
+	vec3 matSpec = vec3(texture(material.specular.sampler, vec2(material.specular.uv.x + (material.specular.uv.z*FragmentUV.x),material.specular.uv.y + (material.specular.uv.w*FragmentUV.y)))) * material.specular.color ; 
+	
 	
 	ambient = vec3(0,0,0);
 	diffuse = vec3(0,0,0);
@@ -95,6 +96,7 @@ void main()
 	CalculateSpotLights(normal, viewDirection,FragmentPosition);
 		
 	//----------------------------------------------------------------------------------------------------------------------result
+	
 	ambient *= matDiff;
 	diffuse *= matDiff;
 	specular *= matSpec;
@@ -131,12 +133,12 @@ void CalculateDirectionalLights(vec3 normal, vec3 viewDirection)
 			lightDirection = normalize(-light.direction);
 				
 			//----------------------------------------------------------------------------------------------------------------------ambient
-			ambient += light.ambient ;
+			ambient += light.ambient * material.diffuse.color ;
 			
 			//----------------------------------------------------------------------------------------------------------------------diffuse
 
 			diff = max(dot(normal, lightDirection), 0.0);
-			diffuse += diff  * light.diffuse;
+			diffuse += diff  * light.diffuse * material.diffuse.color;
 
 			//----------------------------------------------------------------------------------------------------------------------specular
 			reflectionDirection = reflect(-lightDirection, normal);
