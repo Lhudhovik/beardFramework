@@ -11,7 +11,7 @@ class Material
 {
 	
 	public var components(default, null):Map<String,MaterialComponent>;
-	public var shininess(default, null):Float = 1.0;
+	public var shininess(default, null):Float = 32;
 	public var transparency(default, set):Float = 1.0;
 	public var isDirty:Bool;
 	public var name:String;
@@ -30,7 +30,7 @@ class Material
 		for (key in components.keys())
 		{
 			component = components[key];
-			componentData.push({color:component.color,texture:component.texture,atlas:component.atlas,uvs:component.uvs,type: "",name:key, additionalData:""});
+			componentData.push({color:component.color,texture:component.texture,atlas:component.atlas,uv:component.uv,type: "",name:key, additionalData:""});
 		}
 		
 		var data:StructDataMaterial =
@@ -49,7 +49,7 @@ class Material
 	public function ParseData(data:StructDataMaterial):Void
 	{
 		for (component in data.components)
-			components[component.name] = {color:component.color, texture:component.texture, atlas:component.atlas, uvs:component.uvs};
+			components[component.name] = {color:component.color, texture:component.texture, atlas:component.atlas, uv:component.uv};
 		
 		shininess = data.shininess;
 		transparency = data.transparency;
@@ -75,10 +75,10 @@ class Material
 	public inline function SetComponentUVs(component:String, uvX:Float=-1, uvY:Float=-1, uvWidth:Float = -1, uvHeight:Float =-1):Void
 	{
 		if (components[component] != null){
-			if(uvX >= 0) components[component].uvs.x = uvX;
-			if(uvY >= 0)components[component].uvs.y = uvY;
-			if(uvWidth >= 0)components[component].uvs.width = uvWidth;
-			if(uvHeight >= 0)components[component].uvs.height = uvHeight;
+			if(uvX >= 0) components[component].uv.x = uvX;
+			if(uvY >= 0)components[component].uv.y = uvY;
+			if(uvWidth >= 0)components[component].uv.width = uvWidth;
+			if(uvHeight >= 0)components[component].uv.height = uvHeight;
 			isDirty = true;
 		}
 	}

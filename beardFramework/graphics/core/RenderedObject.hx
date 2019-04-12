@@ -39,7 +39,7 @@ class RenderedObject implements ICameraDependent
 	public var rotationCosine(default,null):Float;
 	public var rotationSine(default, null):Float;
 	public var material:Material;
-	public var color(get, set):UInt;
+	public var color(get, set):Color;
 	
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
@@ -61,10 +61,11 @@ class RenderedObject implements ICameraDependent
 		onAABBTree = false;
 		
 		material = new Material();
-		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:1, height:1, x : 0, y:0 }};
-		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uvs: { width:1, height:1, x : 0, y:0 }};
+		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
+		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
 		material.components["diffuse"] = diffuseComponent;
 		material.components["specular"] = specularComponent;
+	
 	}
 	
 	inline public function get_x():Float 
@@ -285,12 +286,12 @@ class RenderedObject implements ICameraDependent
 		return alpha = value;
 	}
 	
-	function get_color():UInt 
+	function get_color():Color 
 	{
 		return material.components["diffuse"].color;
 	}
 	
-	function set_color(value:UInt):UInt 
+	function set_color(value:Color):Color 
 	{
 		isDirty = true;
 		return material.components["diffuse"].color = value;

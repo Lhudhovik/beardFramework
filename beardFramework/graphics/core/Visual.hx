@@ -110,6 +110,7 @@ class Visual extends AbstractVisual implements IRenderable
 		var activeTextures:Map<String,Int> = new Map();
 		var sampleUnit:Int = 0;
 		var availableUnit:Int = AssetManager.Get().GetFreeTextureUnit();
+		trace(availableUnit);
 		for (componentName in material.components.keys())
 		{
 			component = material.components[componentName];
@@ -133,15 +134,18 @@ class Visual extends AbstractVisual implements IRenderable
 				}
 				
 				shader.SetInt("material." + componentName + ".sampler", sampleUnit);			
-				shader.Set4Float("material." + componentName+".uvs", component.uvs.x, component.uvs.y, component.uvs.width, component.uvs.height);
+				shader.Set4Float("material." + componentName+".uv", component.uv.x, component.uv.y, component.uv.width, component.uv.height);
+				
+			}
+			else
+			{
+				
+				shader.SetInt("material." + componentName + ".sampler", 0);			
+				shader.Set4Float("material." + componentName+".uv", component.uv.x, component.uv.y, component.uv.width, component.uv.height);
+				
 				
 			}
 			shader.Set3Float("color", component.color.getRedf(), component.color.getGreenf(), component.color.getBluef());
-			
-			
-			trace(name);
-			trace("component : " + componentName);
-			trace("component : " + componentName);
 			
 		}
 		
@@ -162,9 +166,9 @@ class Visual extends AbstractVisual implements IRenderable
 		
 	public function Render():Int 
 	{
-		trace("rneder--------------------------------------");
+		
 		//if (material.isDirty){
-			SetUniforms();
+		SetUniforms();
 			//isDirty = false;
 		//}
 		var drawCount:Int = 0;

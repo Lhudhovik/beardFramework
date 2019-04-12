@@ -7,7 +7,7 @@ import beardFramework.utils.simpleDataStruct.SVec3;
  * ...
  * @author Ludovic
  */
-class SpotLight extends Light 
+class SpotLight extends PointLight 
 {
 	public var directionX(default, set):Float;
 	public var directionY(default, set):Float;

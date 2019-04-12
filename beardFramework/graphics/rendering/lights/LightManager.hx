@@ -290,7 +290,10 @@ class LightManager
 							shader.Set3Float( "spotLights["+spotIndex+"].position", light.x, light.y, light.z );
 							shader.Set3Float( "spotLights["+spotIndex+"].direction", cast( light, SpotLight).directionX,  cast( light, SpotLight).directionY,  cast( light, SpotLight).directionZ );
 							shader.SetFloat( "spotLights["+spotIndex+"].cutOff", Math.cos(MathU.ToRadians( cast( light, SpotLight).cutOff)));
-							shader.SetFloat( "spotLights["+spotIndex+"].outerCutOff", Math.cos(MathU.ToRadians( cast( light, SpotLight).outerCutOff)));
+							shader.SetFloat( "spotLights[" + spotIndex + "].outerCutOff", Math.cos(MathU.ToRadians( cast( light, SpotLight).outerCutOff)));
+							shader.SetFloat( "spotLights["+spotIndex+"].constant", cast( light, PointLight).constant);
+							shader.SetFloat("spotLights["+spotIndex+"].linear", cast( light, PointLight).linear );
+							shader.SetFloat( "spotLights["+spotIndex+"].quadratic", cast( light, PointLight).quadratic);
 							shader.SetInt("spotLights["+spotIndex+"].used", 1);
 						}
 						spotIndex++;
