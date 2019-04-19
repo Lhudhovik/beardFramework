@@ -23,15 +23,16 @@ class Shader
 	static public var loaded:Bool = false;
 	
 	static private var currentUsed:Shader;
+	static private var instanceCount:Int = 0;
 	static private var shaders:Map<String, Shader> = new Map<String, Shader>();
-
+	
 	
 	static public function LoadShaders(shadersToCreate:Array<ShaderToCreate>):Void
 	{
 		
 		for (shaderToCreate in shadersToCreate)
 		{
-			shaders[shaderToCreate.name] = CreateShader(shaderToCreate.nativeShaders);
+			shaders[shaderToCreate.name] = CreateShader(shaderToCreate.nativeShaders,shaderToCreate.name);
 		}
 	}
 	
@@ -70,9 +71,10 @@ class Shader
 		
 	}
 	
-	static public function CreateShader(nativeShadersList:Array<String>):Shader
+	static public function CreateShader(nativeShadersList:Array<String>, name:String = ""):Shader
 	{
-		var shader:Shader = new Shader();
+		instanceCount++; 
+		var shader:Shader = new Shader(name);
 		var error:String = null;
 		var createdShaders:Array<GLShader> = [];
 		for (nativeName in nativeShadersList)
@@ -100,7 +102,7 @@ class Shader
 		GL.linkProgram(shader.program);
 		error = GL.getProgramInfoLog(shader.program);
 		if(error != null) trace(error);
-
+				
 		for (nativeShader in createdShaders)
 		{
 			GL.deleteShader(nativeShader);
@@ -115,13 +117,16 @@ class Shader
 	public var program(default, null):GLProgram;
 	public var isUsed(default, null):Bool;
 	public var uniformLocations(default, null):Map<String, Int>;
-	
-	private function new()
+	public var name:String; 
+	private function new(name:String = "")
 	{
 		program = GL.createProgram();
 		trace(GL.getProgramInfoLog(program ));
 		isUsed = false;
 		uniformLocations = new Map<String,Int>();
+		
+		if (name == "") this.name = StringLibrary.SHADER + instanceCount;
+		else this.name = name;
 	}
 	
 	
@@ -135,7 +140,7 @@ class Shader
 			isUsed = true;
 		
 			GL.useProgram(program);
-			GLU.ShowErrors("Shader Error");
+			GLU.ShowErrors("Shader Error at " + this.name);
 		}
 		
 	}

@@ -371,18 +371,18 @@ class AssetManager
 	{
 		trace(name);
 		trace(texture);
-		trace("ok");
+		
 		var glTexture:GLTexture;
-		trace("ok");
+		
 		if (textures[name] == null){
-			trace("ok");
+		
 			glTexture = TextureU.GetTexture(texture);
-			trace("ok");
+		
 			textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex, width:texture.buffer.width, height:texture.buffer.height};
-			trace("ok");
+			
 		}
 		else glTexture = textures[name].glTexture;
-		trace("ok");
+		
 		return glTexture;
 	}
 

@@ -18,8 +18,11 @@
 	<shader name="visualDefault" nativeShaders="visualVertexShader,visualFragmentShader" />
 	<shader name="basic" nativeShaders="vertexShader,fragmentShader" />
 	<shader name="debug" nativeShaders="debugVertexShader,debugFragmentShader" />
+	<shader name="frame" nativeShaders="frameVertexShader,frameFragmentShader" />
 	<nativeShader name="lightVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
+	<nativeShader name="frameVertexShader" type="VERTEX_SHADER"/>
+	<nativeShader name="frameFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="visualVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="visualFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="vertexShader" type="VERTEX_SHADER"/>

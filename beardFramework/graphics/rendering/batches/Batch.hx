@@ -14,6 +14,7 @@ import beardFramework.resources.MinAllocArray;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.GLU;
+import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.math.MathU;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
@@ -97,8 +98,8 @@ import lime.utils.UInt16Array;
 		
 		for (camera in cameras)
 		{
-			shader.SetMatrix4fv("projection", BeardGame.Get().cameras[camera].projection);
-			shader.SetMatrix4fv("view", BeardGame.Get().cameras[camera].view);
+			shader.SetMatrix4fv(StringLibrary.PROJECTION, BeardGame.Get().cameras[camera].projection);
+			shader.SetMatrix4fv(StringLibrary.VIEW, BeardGame.Get().cameras[camera].view);
 		}
 		
 		atlases = new Map();
@@ -172,6 +173,21 @@ import lime.utils.UInt16Array;
 	public function OrderVerticesData():Void
 	{
 				
+	}
+	
+	public inline function HasCamera(camera:String):Bool
+	{
+		var result:Bool = false;
+		
+		for (name in cameras)
+			if (name == camera)
+			{
+				result = true;
+				break;
+			}
+		
+		return result;
+		
 	}
 	
 	public function CleanRenderedData(index:Int):Void
@@ -449,7 +465,7 @@ import lime.utils.UInt16Array;
 		dirtyObjects.Remove(object);
 	}
 	
-	public function Render():Int
+	public function Render(camera:Camera):Int
 	{
 		
 	
@@ -458,26 +474,19 @@ import lime.utils.UInt16Array;
 		if (needUpdate) UpdateRenderedData();
 		
 		shader.Use();
-		//shader.SetMatrix4fv("projection", BeardGame.Get().cameras[cameras.first()].projection);
-			
-		
-		//GL.bindVertexArray(VAO);
+	
 		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-			renderer.boundBuffer = VBO;
+		renderer.boundBuffer = VBO;
+		
 		var stride:Int = 0;
 		for (attribute in vertexAttributes)
 		{
-			
-			
 			pointer = GL.getAttribLocation(shader.program, attribute.name);
 			GL.enableVertexAttribArray(pointer);
 			GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
 			stride += attribute.size;
-			
-			
 		}
-		
-			
+					
 		if (indicesPerObject > 0){
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
@@ -486,47 +495,23 @@ import lime.utils.UInt16Array;
 		LightManager.Get().CompileLights(shader, lightGroup, lightGroupChanged);
 			
 		lightGroupChanged = false;
-		
-		var camera:Camera;
-		for (batchCam in cameras)
-		{
 	
-			camera = BeardGame.Get().cameras[batchCam];
+	
+		shader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
+		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
 			
-			//trace(camera.name);
-			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
+			
+		if (indicesPerObject > 0) GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
+		else GL.drawArrays(drawMode, 0, verticesData.activeDataCount*verticesData.vertexPerObject);
 		
-			//GL.uniformMatrix4fv(GL.getUniformLocation(shaderProgram, "projection"), 1, false, camera.projection);
-			
-			//renderer.view.identity();
-			//renderer.view.appendScale(camera.zoom, camera.zoom,1);
-			////renderer.view.appendTranslation( -(camera.centerX - camera.viewportWidth * 0.5), -(camera.centerY - camera.viewportHeight * 0.5), 0);
-			//renderer.view.appendTranslation( (camera.viewportX + camera.viewportWidth * 0.5) - camera.centerX, (camera.viewportY + camera.viewportHeight * 0.5) - camera.centerY, -1);
-			//renderer.view.appendRotation(50, new Vector4(0, 0, 1));
-			shader.SetMatrix4fv("projection", camera.projection);
-			shader.SetMatrix4fv("view", camera.view);
-			
-			
-			if (indicesPerObject> 0){
-				//trace(verticesData.activeDataCount);
-				//GL.drawElementsInstanced(drawMode, 6, GL.UNSIGNED_SHORT, 0,10);
-				GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
-					
-			}
-			else
-			{
-				//trace(verticesData.activeDataCount);
-				
-				GL.drawArrays(drawMode, 0, verticesData.activeDataCount*verticesData.vertexPerObject);
-			}
+	
+		drawCount++;
 		
-			drawCount++;
+		GLU.ShowErrors();
+		
+		
 			
-			GLU.ShowErrors();
-			
-		}
-			
-		GL.bindVertexArray(0);
+		//GL.bindVertexArray(0);
 		
 		return drawCount;
 	}

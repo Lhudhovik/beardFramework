@@ -33,6 +33,7 @@ class StringLibrary
 	public static inline var KEY_UP:String					= "keyUp";
 	public static inline var KEYBOARD:String				= "keyboard";
 	public static inline var LEVELS_PATH:String 			= "assets/levels/";
+	public static inline var MODEL:String 					= "model";
 	public static inline var MOUSE:String 					= "mouse";
 	public static inline var MOUSE_BUTTONS_MAX:String 		= "maxMouseButtons";
 	public static inline var MOUSE_CLICK:String				= "mouseClick";
@@ -44,8 +45,10 @@ class StringLibrary
 	public static inline var MOUSE_UP:String 				= "mouseUp";
 	public static inline var MOUSE_WHEEL:String 			= "mouseWheel";
 	public static inline var NONE:String 					= "none";
+	public static inline var PROJECTION:String 				= "projection";
 	public static inline var SAVE:String 					= "save";
 	public static inline var SAVE_EXTENSION:String 			= ".BEARD";
+	public static inline var SHADER:String 					= "shader";
 	public static inline var SHADER_EXTENSION:String 		= ".SHAD";
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";
@@ -59,6 +62,7 @@ class StringLibrary
 	public static inline var UI:String 						= "UI";
 	public static inline var UIBASE:String 					= "UIBase";
 	public static inline var UNKNOWN:String 				= "unknown";
+	public static inline var VIEW:String 					= "view";
 
 	
 

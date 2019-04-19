@@ -2,11 +2,14 @@ package beardFramework.graphics.cameras;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
+import beardFramework.graphics.rendering.Framebuffer;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.StructDataCamera;
 import beardFramework.utils.data.DataU;
 import beardFramework.utils.simpleDataStruct.SRect;
+import lime.graphics.opengl.GL;
+import lime.graphics.opengl.GLFramebuffer;
 import lime.math.Matrix4;
 import openfl.display.Tile;
 import openfl.geom.Point;
@@ -36,11 +39,15 @@ class Camera
 	public var needViewUpdate:Bool;
 	public var keepRatio:Bool;
 	public var ratios:SRect;
+	public var framebuffer:Framebuffer;
+	
 	
 	public var viewport(default, null):ViewportRect;
 	public var view:Matrix4;
 	public var projection:Matrix4;
 	private var attachedObject:RenderedObject;
+	
+	
 	
 	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = false) 
 	{
@@ -75,6 +82,11 @@ class Camera
 		view = new Matrix4();
 		needViewUpdate = true;
 		
+		framebuffer = new Framebuffer();
+		framebuffer.Bind(GL.FRAMEBUFFER);
+		framebuffer.CreateTexture("color", BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0);
+		framebuffer.CreateRenderBuffer("depth", GL.RENDERBUFFER, GL.DEPTH24_STENCIL8, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.DEPTH_STENCIL_ATTACHMENT);
+		framebuffer.UnBind(GL.FRAMEBUFFER);
 	}
 	
 	public function SetViewportRatios(x:Float, y: Float, width:Float, height:Float):Void
@@ -345,6 +357,8 @@ class Camera
 		view.appendTranslation( (viewportX + viewportWidth * 0.5) - centerX, (viewportY + viewportHeight * 0.5) - centerY, -1);
 		//view.appendRotation(this.rotation, new Vector4(0, 0, 1));
 		//DataU.DeepTrace(view);
+		
+		framebuffer.UpdateTextureSize("color", viewport.width, viewport.height);
 		
 		needViewUpdate = false;
 	}

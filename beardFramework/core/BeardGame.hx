@@ -261,6 +261,7 @@ class BeardGame extends Application
 	{
 		if (!cameras.exists(camera.name)){
 			cameras[camera.name] = camera;
+			trace(camera.viewportWidth);
 			return true;
 		}
 		

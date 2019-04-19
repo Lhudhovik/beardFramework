@@ -1,4 +1,5 @@
 package beardFramework.interfaces;
+import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.rendering.shaders.Shader;
 import lime.graphics.opengl.GLProgram;
 
@@ -13,7 +14,8 @@ interface IRenderable
 	public var shader(default, null):Shader;
 	public var cameras:List<String>;
 	public var lightGroup(default, set):String;
-	public function Render():Int;
+	public function Render(camera:Camera):Int;
+	public function HasCamera(camera:String):Bool;
 	
 
 
