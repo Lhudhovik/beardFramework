@@ -42,6 +42,7 @@ class Visual extends AbstractVisual implements IRenderable
 	public var cameras:List<String>;
 	public var drawMode:Int;
 	public var lightGroup(default, set):String;	
+	public var lightGroupChanged:Bool;
 	
 	private var renderer:Renderer;
 	
@@ -110,7 +111,7 @@ class Visual extends AbstractVisual implements IRenderable
 		var activeTextures:Map<String,Int> = new Map();
 		var sampleUnit:Int = 0;
 		var availableUnit:Int = AssetManager.Get().GetFreeTextureUnit();
-		trace(availableUnit);
+		
 		for (componentName in material.components.keys())
 		{
 			component = material.components[componentName];
@@ -159,19 +160,18 @@ class Visual extends AbstractVisual implements IRenderable
 		renderer.model.appendScale(this.width, this.height, 1.0);
 		renderer.model.appendTranslation(this.x, this.y, (visible ? renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT + 1));
 		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
-		shader.SetMatrix4fv("model", renderer.model);
+		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
 		
 		
 
 	}
 		
-	public function Render():Int 
+	public function Render(camera:Camera):Int 
 	{
 		
-		//if (material.isDirty){
+		
 		SetUniforms();
-			//isDirty = false;
-		//}
+		
 		var drawCount:Int = 0;
 		
 		//GL.bindVertexArray(VAO);
@@ -181,53 +181,48 @@ class Visual extends AbstractVisual implements IRenderable
 			
 			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 			renderer.boundBuffer = VBO;
-			//var pointer:Int;
-			//var stride:Int = 0;
-			//for (attribute in vertexAttributes)
-			//{
-				//
-				////trace(attribute);
-				//pointer = GL.getAttribLocation(shaderProgram, attribute.name);
-				//GL.enableVertexAttribArray(pointer);
-				////GL.enableVertexAttribArray(attribute.index);
-				////GL.vertexAttribPointer(attribute.index, attribute.size, GL.FLOAT, false, renderedData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
-				//GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
-				//stride += attribute.size;
-				//
-				//
-			//}
 			
 			GL.enableVertexAttribArray(0);
 			GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
-			
-			
+					
 			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
 		}
 		
 
-		LightManager.Get().CompileLights(shader, this.lightGroup);
+		LightManager.Get().CompileLights(shader, this.lightGroup, lightGroupChanged);
+		lightGroupChanged = false;
 		
-		var camera:Camera;
-		for (cam in cameras)
-		{	
-			camera = BeardGame.Get().cameras[cam];
-			//trace(camera.name);
-			GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
-			shader.SetMatrix4fv("projection", camera.projection);
-			shader.SetMatrix4fv("view", camera.view);
+		shader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
+		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
+							
+		GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
+		
+		drawCount++;
+		
+		GLU.ShowErrors();
 			
-					
-			GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
-			drawCount++;
-			GLU.ShowErrors();
-			
-		}
+		
 			
 		
 		return drawCount;
 	}
 	
+	
+	public inline function HasCamera(camera:String):Bool
+	{
+		var result:Bool = false;
+		
+		for (name in cameras)
+			if (name == camera)
+			{
+				result = true;
+				break;
+			}
+		
+		return result;
+		
+	}
 	override function set_atlas(value:String):String 
 	{
 		if (material != null && material.hasComponent("diffuse"))
@@ -240,6 +235,7 @@ class Visual extends AbstractVisual implements IRenderable
 
 	function set_lightGroup(value:String):String 
 	{
+		if (lightGroup != value) lightGroupChanged = true;
 		return lightGroup = value;
 	}
 	
