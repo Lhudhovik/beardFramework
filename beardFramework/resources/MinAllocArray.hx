@@ -31,6 +31,11 @@ class MinAllocArray<T>
 		}
 	}
 	
+	public inline function Has(element:Null<T>):Bool
+	{
+		return IndexOf(element) != -1;
+	}
+	
 	public function Remove(element:Null<T>):Bool
 	{
 		
@@ -136,9 +141,15 @@ class MinAllocArray<T>
 	
 	}
 	
-	public inline function UniquePush(element:Null<T>):Void
+	public inline function UniquePush(element:Null<T>):Bool
 	{
-		if (this.IndexOf(element) == -1) Push(element);
+		var added:Bool = false;
+		if (this.IndexOf(element) == -1){
+			Push(element);
+			added = true;
+		}
+		
+		return added;
 	}
 	
 	@:op([]) public inline function get(index:Int):Null<T>

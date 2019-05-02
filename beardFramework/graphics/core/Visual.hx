@@ -90,9 +90,7 @@ class Visual extends AbstractVisual implements IRenderable
 		drawMode = GL.TRIANGLES;
 		shader = sharedShader;
 		cameras = new List();
-		for (camera in BeardGame.Get().cameras)
-			cameras.add(camera.name);
-		
+		cameras.add(StringLibrary.DEFAULT);
 		renderer = Renderer.Get();
 		readyForRendering = true;
 	}

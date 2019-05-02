@@ -84,10 +84,10 @@ import lime.utils.UInt16Array;
 		dirtyObjects = new MinAllocArray<IBatchable>();
 		cameras = new List();
 		
-		for (camera in BeardGame.Get().cameras)
-			cameras.add(camera.name);
 		
-			trace(batchData.shader);
+		cameras.add(StringLibrary.DEFAULT);
+		
+		trace(batchData.shader);
 		shader = Shader.GetShader(batchData.shader);
 		shader.Use();
 		

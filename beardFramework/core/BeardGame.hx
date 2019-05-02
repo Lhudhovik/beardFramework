@@ -24,6 +24,7 @@ import beardFramework.input.InputManager;
 import beardFramework.physics.PhysicsManager;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.MinAllocArray;
+import beardFramework.utils.libraries.StringLibrary;
 //import crashdumper.CrashDumper;
 //import crashdumper.SessionData;
 import lime.app.Application;
@@ -103,9 +104,7 @@ class BeardGame extends Application
 			layers.get(i).visible = false;
 			
 		cameras = new Map<String,Camera>();
-		AddCamera(new Camera("default",window.width, window.height));
 		
-		cameras["default"].Center(window.width * 0.5,window.height * 0.5);
 		
 		entities = new Array<GameEntity>();
 		
@@ -187,14 +186,21 @@ class BeardGame extends Application
 	private function InitGraphics():Void
 	{
 		
-		if (cameras != null && cameras["default"] != null){
-			
-			cameras["default"].viewportWidth = window.width;
-			cameras["default"].viewportHeight = window.height;
-			trace("Default camera resized");
-		}
+		
 		
 		Shader.LoadShaders(OptionsManager.Get().shadersToCreate);
+		
+		var defaultCam:Camera = new Camera(StringLibrary.DEFAULT, window.width, window.height);
+		AddCamera(defaultCam);
+		
+		defaultCam.Center(window.width * 0.5,window.height * 0.5);
+		
+		//if (cameras != null && cameras["default"] != null){
+			
+			//cameras["default"].viewportWidth = window.width;
+			//cameras["default"].viewportHeight = window.height;
+			//trace("Default camera resized");
+		////}
 		
 		for (batch in OptionsManager.Get().batchesToCreate)
 		{
@@ -203,10 +209,15 @@ class BeardGame extends Application
 		
 		}
 		
+		
+		
 		OptionsManager.Get().batchesToCreate = null;		
 		OptionsManager.Get().shadersToCreate = null;
 		
+		
+		
 		Visual.InitSharedGraphics();
+		
 		
 		GameStart();
 	}
@@ -356,13 +367,7 @@ class BeardGame extends Application
 	
 	override public function onWindowResize(width:Int, height:Int):Void 
 	{
-		
-		if (cameras != null){
-			for (camera in cameras.keys())
-				cameras[camera].AdjustResize();
-			
-			trace("Default camera resized");
-		}
+		if (gameReady) Renderer.Get().OnResize(width, height );
 	}
 	
 	public static inline function Get():BeardGame

@@ -28,7 +28,7 @@ class FrameBufferQuad
 	public var height:Int;
 	public var rotation:Float;
 	public var renderer:Renderer;
-	public var drawMode:Int = GL.LINE_LOOP;
+	public var drawMode:Int = GL.TRIANGLES;
 	public var texture:GLTexture;
 	public var shader(default, null):Shader;
 	
@@ -48,6 +48,8 @@ class FrameBufferQuad
 		
 		renderer = Renderer.Get();
 		shader = Shader.GetShader("frame");
+		shader.Use();
+		shader.SetMatrix4fv(StringLibrary.PROJECTION, renderer.projection);
 		
 		if (VAO == null || VBO == null)
 		{
@@ -93,8 +95,8 @@ class FrameBufferQuad
 		shader.Use();
 		
 		renderer.model.identity();
-		renderer.model.appendScale(this.width, this.height, 1.0);
-		renderer.model.appendTranslation(this.x, this.y, this.z);
+		renderer.model.appendScale(width, this.height, 1.0);
+		renderer.model.appendTranslation(this.x, this.y,1);
 		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
 		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
 	

@@ -58,12 +58,8 @@ class Framebuffer
 			
 			textures[name] = texture;
 			
-			if (applyToQuad)
-			{
-				
-				quad.texture = texture;
-				
-			}
+			if (applyToQuad)	quad.texture = texture;
+
 		}
 		
 	}
@@ -85,9 +81,35 @@ class Framebuffer
 		
 	}
 	
-	public function UpdateTextureSize(name:String, width:Int, height:Int):Void
+	public function UpdateTextureSize(width:Int, height:Int, name:String = ""):Void
 	{
-		GL.tex
+		if (name != "")
+		{
+			//if (textures[name] != null)
+			//{
+				//samplerIndex = AssetManager.Get().GetFreeTextureUnit();
+						//
+				//GL.activeTexture(GL.TEXTURE0 + samplerIndex);
+				//GL.bindTexture(GL.TEXTURE_2D, texture);
+				//
+				//GL.texImage2D(GL.TEXTURE_2D, 0,internalFormat, width, height, 0,format,type, 0);
+				//
+				//GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+				//GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+				//GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
+				//GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
+				//
+				//GL.framebufferTexture2D(GL.FRAMEBUFFER, attachment, GL.TEXTURE_2D, texture, 0);
+				//
+			//}
+		//
+			
+			
+		}
+		else
+		{
+			
+		}
 	}
 	
 	public function CheckStatus():Void
@@ -96,4 +118,10 @@ class Framebuffer
 			trace("Framebuffer is not complete");
 	}
 	
+}
+
+typedef FrameBufferTexture =
+{
+	var texture:GLTexture;
+	//var 
 }

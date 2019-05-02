@@ -52,6 +52,7 @@ class Renderer
 	public var VISIBLEDEPTHLIMIT(default, never):Int = 10;
 	public var drawCount(default, null):Int = 0;
 	public var model:Matrix4;
+	public var projection:Matrix4;
 	public var rotationAxis(default,null):Vector4;
 	public var boundBuffer:GLBuffer;
 	public var ready(get, null):Bool = false;
@@ -83,7 +84,7 @@ class Renderer
 	{
 		
 		
-		Application.current.window.onResize.add(OnResize);
+		//Application.current.window.onResize.add(OnResize);
 		//
 		GL.enable(GL.DEPTH_TEST);
 		GL.enable(GL.BLEND);
@@ -104,6 +105,8 @@ class Renderer
 		renderables = new MinAllocArray();
 		
 		model = new Matrix4();
+		projection = new Matrix4();
+		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		rotationAxis = new Vector4(0, 0, 1);
 	}
 	
@@ -178,6 +181,7 @@ class Renderer
 				GL.clearColor(0, 0, 0,0);
 				GL.clear(GL.COLOR_BUFFER_BIT);
 				GL.clear(GL.DEPTH_BUFFER_BIT);
+				GL.viewport(camera.viewport.x, BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 				GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
 				
 				for (i in 0...renderables.length)
@@ -185,7 +189,8 @@ class Renderer
 					renderable = renderables.get(i);
 								
 					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
-			
+					trace(renderable.name);
+					//trace(camera.
 					drawCount+= renderable.Render(camera);
 			
 				}
@@ -201,6 +206,7 @@ class Renderer
 			GL.disable(GL.DEPTH_TEST);
 			GL.clearColor(1, 1, 1,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
+			GL.viewport(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			GL.scissor(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			
 			
@@ -208,16 +214,13 @@ class Renderer
 			{
 				if (camera.framebuffer != null && camera.framebuffer.quad != null)
 				{
-					camera.framebuffer.quad.x = camera.viewportX;
-					camera.framebuffer.quad.y = camera.viewportY;
-					camera.framebuffer.quad.width = camera.viewport.width;
-					camera.framebuffer.quad.height = camera.viewport.height;
 					camera.framebuffer.quad.Render();
-					trace(camera.viewportWidth);
+					//drawCount++;
+					//trace(camera.name);
 				}
 				
 			}
-			
+			trace(renderables);
 			//trace(drawCount);
 		}
 		
@@ -227,18 +230,21 @@ class Renderer
 	
 	public function OnResize(width:Int, height:Int):Void
 	{
-		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
+		GL.clearColor(0, 0, 0, 0);
+		GL.viewport(0, 0, width, height);
+		GL.scissor(0, 0, width, height);
+		projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		
-	
+		
+		
+		for (camera in BeardGame.Get().cameras)
+			camera.AdjustResize();
+		
 		for (i in 0...renderables.length)
-		{
-			
+		{			
 			for (camera in renderables.get(i).cameras)
-			{
-				
+			{				
 				renderables.get(i).shader.Use();
-				BeardGame.Get().cameras[camera].projection.identity();
-				BeardGame.Get().cameras[camera].projection.createOrtho( 0,Application.current.window.width, Application.current.window.height, 0, 10, -10);
 				renderables.get(i).shader.SetMatrix4fv(StringLibrary.PROJECTION , BeardGame.Get().cameras[camera].projection);
 			}
 			
