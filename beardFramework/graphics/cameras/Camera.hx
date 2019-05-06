@@ -29,17 +29,16 @@ class Camera
 	
 		
 	@:isVar public var name(get, set):String;
-	public var zoom(default,set):Float;
-	public var viewportWidth(default, set):Float;
-	public var viewportHeight(default, set):Float;
+	public var zoom(default, set):Float;
+	public var viewportWidth(get,set):Float;
+	public var viewportHeight(get, set):Float;
 	public var centerX(default, set):Float;
 	public var centerY(default, set):Float;
 	public var viewportX(default, set):Float;
 	public var viewportY(default, set):Float;
 	public var buffer(default, set):Float;
 	public var needViewUpdate:Bool;
-	public var keepRatio:Bool;
-	public var ratios:SRect;
+	public var keepRatio(default, set):Bool;
 	public var framebuffer:Framebuffer;
 	
 	
@@ -47,8 +46,10 @@ class Camera
 	public var view:Matrix4;
 	public var projection:Matrix4;
 	private var attachedObject:RenderedObject;
-	
-	
+	private var dimensionsRatio:Float; // height/width
+	private var screenRatios:SRect;
+	private var width(default, set):Float;
+	private var height(default, set):Float;
 	
 	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = true) 
 	{
@@ -56,30 +57,32 @@ class Camera
 		viewport = {x:0,y:0,width:0,height:0}	
 		
 		this.name = name;
-		this.viewportWidth  = viewPortWidth;
-		this.viewportHeight  = viewPortHeight;
+		this.width  = viewPortWidth;
+		this.height  = viewPortHeight;
+		this.dimensionsRatio = height / width;
 		this.viewportX = viewPortX;
 		this.viewportY = viewPortY;
+		viewport.width = Math.round(width);	
+		viewport.height = Math.round(height);	
 		this.buffer = buffer;
 		zoom = 1;
-		this.keepRatio = keepRatio;
-		if (keepRatio == true)
-		{
-			ratios = {
-				x: viewportX / BeardGame.Get().window.width,
-				y:  viewportY / BeardGame.Get().window.height,
-				width: viewportWidth / BeardGame.Get().window.width,
-				height: viewportHeight / BeardGame.Get().window.height
-			}
-		}else ratios = {x:0, y:0, width:0, height:0 };
 		
+		this.keepRatio = keepRatio;
+		
+		screenRatios = {
+			x: viewportX / BeardGame.Get().window.width,
+			y:  viewportY / BeardGame.Get().window.height,
+			width: width / BeardGame.Get().window.width,
+			height: height / BeardGame.Get().window.height
+		}
+				
 		centerX = 0;
 		centerY = 0;
 		
 		projection = new Matrix4();
 		projection.identity();
-		projection.createOrtho( 0,viewportWidth, viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-		//projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		//projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		view = new Matrix4();
 		needViewUpdate = true;
 		
@@ -96,23 +99,34 @@ class Camera
 		framebuffer.UnBind(GL.FRAMEBUFFER);
 	}
 	
-	public function SetViewportRatios(x:Float, y: Float, width:Float, height:Float):Void
+	public function SetViewportRatios(x:Float, y: Float, width:Float, height:Float,keepRatio:Bool = true):Void
 	{
-		keepRatio = true;
 		
-		ratios.x=x;
-		ratios.y=y;
-		ratios.width=width;
-		ratios.height=height;
+		this.keepRatio = false;
+		screenRatios.x=x;
+		screenRatios.y=y;
+		screenRatios.width=width;
+		screenRatios.height=height;
 		
 		viewportX = BeardGame.Get().window.width * x;
 		viewportY = BeardGame.Get().window.height * y;
-		viewportWidth = BeardGame.Get().window.width * width;
-		viewportHeight = BeardGame.Get().window.height * height;
+		this.width = BeardGame.Get().window.width * width;
+		this.height  = BeardGame.Get().window.height * height;
+		
+		this.keepRatio = keepRatio;
+	}
+		
+	inline public function SetDimensions(width:Float, height:Float, keepRatio:Bool=true):Void
+	{
+		this.keepRatio = false;
+		this.width = width;
+		this.height = height;
+		this.keepRatio = keepRatio;
 		
 	}
 	
-	public function set_zoom(newZoom:Float):Float{
+	public function set_zoom(newZoom:Float):Float
+	{
 		
 		if (newZoom <= 0) newZoom = MINZOOM;
 		
@@ -180,7 +194,8 @@ class Camera
 		
 	}
 	
-	public  function Contains(visual:RenderedObject):Bool{
+	public  function Contains(visual:RenderedObject):Bool
+	{
 		
 		var success:Bool = (visual.restrictedCameras == null || visual.restrictedCameras.indexOf(name) != -1);
 		
@@ -204,9 +219,7 @@ class Camera
 	
 		return success;
 	}
-	
-	
-	
+		
 	inline function set_viewportX(value:Float):Float 
 	{
 		if (viewportX != value){
@@ -256,10 +269,10 @@ class Camera
 			viewportY:viewportY,
 			buffer:this.buffer,
 			keepRatio:this.keepRatio,
-			ratioX:ratios.x,
-			ratioY:ratios.y,
-			ratioWidth:ratios.width,
-			ratioHeight:ratios.height,
+			ratioX:screenRatios.x,
+			ratioY:screenRatios.y,
+			ratioWidth:screenRatios.width,
+			ratioHeight:screenRatios.height,
 			additionalData:""
 			
 			
@@ -271,16 +284,19 @@ class Camera
 	{
 		this.name = data.name;
 		zoom = data.zoom;
-		viewportWidth = data.viewportWidth;
-		viewportHeight = data.viewportHeight;
+		this.width = data.viewportWidth;
+		this.height = data.viewportHeight;
 		centerX = data.centerX;
 		centerY = data.centerY;
 		viewportX = data.viewportX;
 		viewportY= data.viewportY;
 		buffer = data.buffer;
 		keepRatio = data.keepRatio;
-		if (keepRatio)	SetViewportRatios(data.ratioX, data.ratioY, data.ratioWidth, data.ratioHeight);
-		
+		screenRatios.x = data.ratioX;
+		screenRatios.y = data.ratioY;
+		screenRatios.width = data.ratioWidth;
+		screenRatios.height = data.ratioHeight;
+			
 		needViewUpdate = true;
 	
 	}
@@ -307,64 +323,82 @@ class Camera
 	inline function set_viewportWidth(value:Float):Float 
 	{
 		
-		if (viewportWidth != value){
-			viewport.width = Math.round(value);	
-			if (projection != null)
+		if (width != value){
+	
+			width = value;
+		
+			if (keepRatio)
 			{
-				projection.identity();
-				//projection.createOrtho( 0,value, viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-				projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+				height = width * dimensionsRatio;
 			}
 			
-			needViewUpdate = true;	
 		}
 		
-		return viewportWidth = value;
+		return width;
 	}
 	
-	function set_viewportHeight(value:Float):Float 
+	inline function set_viewportHeight(value:Float):Float 
 	{
-		if (viewportHeight != value){
-			viewport.height = Math.round(value);
-			if (projection != null)
-			{
-				projection.identity();
-				//projection.createOrtho( 0, viewportWidth,  value, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-				projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-			}
-			needViewUpdate = true;
+		if (height != value){
 			
+			height = value;
+			
+			if (keepRatio)
+			{
+				width = height / dimensionsRatio;
+			}
 		}
-		return viewportHeight = value;
+		return height;
 	}
+	
+	inline function get_viewportWidth():Float return width;
+	
+	inline function get_viewportHeight():Float return height;
+	
 	
 	public function AdjustResize():Void
 	{
 		if (keepRatio)
 		{
-			viewportX = BeardGame.Get().window.width * ratios.x;
-			viewportY = BeardGame.Get().window.height * ratios.y;
-			viewportWidth = BeardGame.Get().window.width * ratios.width;
-			viewportHeight = BeardGame.Get().window.height * ratios.height;
-			if (projection != null)
-			{
-				projection.identity();
-				projection.createOrtho( 0, viewportWidth,  viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-				//projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-			}
 			
-			if (framebuffer != null && framebuffer.quad != null){
-				framebuffer.quad.shader.Use();
-				framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
-				framebuffer.quad.width = viewport.width;
-				framebuffer.quad.height = viewport.height;
-			}
-			needViewUpdate = true;
+			viewportX = BeardGame.Get().window.width * screenRatios.x;
+			viewportY = BeardGame.Get().window.height * screenRatios.y;
+			var newWidth:Float = BeardGame.Get().window.width * screenRatios.width;
+			var newHeight:Float = BeardGame.Get().window.height * screenRatios.height;
+			
+			if(newWidth < newHeight)  
+			viewportWidth = newWidth;
+			else viewportHeight = newHeight;
+			
+			
 		}
 		else
 		{
-			
+			viewportX = BeardGame.Get().window.width * screenRatios.x;
+			viewportY = BeardGame.Get().window.height * screenRatios.y;
+			viewportWidth = BeardGame.Get().window.width * screenRatios.width;
+			viewportHeight = BeardGame.Get().window.height * screenRatios.height;
+		
 		}
+		
+		if (projection != null)
+		{
+			projection.identity();
+			//projection.createOrtho( 0, viewportWidth,  viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+			projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		}
+		
+		if (framebuffer != null && framebuffer.quad != null){
+			
+			framebuffer.UpdateTextureSize("colo", width, height);
+			framebuffer.quad.shader.Use();
+			framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
+			framebuffer.quad.width = viewport.width;
+			framebuffer.quad.height = viewport.height;
+		}
+		
+		trace(viewport);
+		needViewUpdate = true;
 	}
 	
 	public function UpdateView():Void
@@ -393,6 +427,35 @@ class Camera
 			
 		if (needViewUpdate) UpdateView();
 		
+	}
+	
+	function set_keepRatio(value:Bool):Bool 
+	{
+		
+		if (keepRatio != value && value == true)
+		{
+			dimensionsRatio = height / width;
+		}
+		
+		return keepRatio = value;
+	}
+	
+	function set_width(value:Float):Float 
+	{
+		if (width != value){
+			viewport.width = Math.round(value);
+			needViewUpdate = true;	
+		}
+		return width = value;
+	}
+	
+	function set_height(value:Float):Float 
+	{
+		if (height != value){
+			viewport.height = Math.round(value);
+			needViewUpdate = true;	
+		}
+		return height = value;
 	}
 	
 }

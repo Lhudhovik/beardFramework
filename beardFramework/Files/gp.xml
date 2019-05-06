@@ -4,13 +4,12 @@
 	
 <atlases>
 	<atlas name="menuHD" fileExtension="png" path="assets/atlases" />
-	<!--<atlas name="menuHD" fileExtension="png" path="assets/atlases" />-->
 	<!--<atlas name="img001" fileExtension="jpg" path="assets/atlases" />-->
 	<atlas name="menuHD2" fileExtension="png" path="assets/atlases" />
 	<!--<atlas name="menuHD3" fileExtension="png" path="assets/atlases" />-->
 	<!--<atlas name="menuHD4" fileExtension="png" path="assets/atlases" />-->
 </atlases>
-	<textures>
+<textures>
 	<texture name="haxe" path="assets/textures/haxe.png"/>	
 </textures>
 <shaders>
@@ -19,10 +18,10 @@
 	<shader name="basic" nativeShaders="vertexShader,fragmentShader" />
 	<shader name="debug" nativeShaders="debugVertexShader,debugFragmentShader" />
 	<shader name="frame" nativeShaders="frameVertexShader,frameFragmentShader" />
-	<nativeShader name="lightVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="frameVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="frameFragmentShader" type="FRAGMENT_SHADER"/>
+	<nativeShader name="lightVertexShader" type="VERTEX_SHADER"/>
+	<nativeShader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="visualVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="visualFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="vertexShader" type="VERTEX_SHADER"/>
@@ -30,30 +29,16 @@
 	<nativeShader name="debugVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
 </shaders>
-<fonts default="American Captain">
-	<font name="American Captain" fileExtension="ttf" path="assets/fonts" size="32,72" />
+<fonts default="Roboto-Medium">
+	<!--<font name="American Captain" fileExtension="ttf" path="assets/fonts" size="32,72" />-->
 	<!--<font name="chinese rocks rg" fileExtension="ttf" path="assets/fonts" size="32"/>-->
 	<!--<font name="INFECTED" fileExtension="ttf" path="assets/fonts" size="32,72"/>-->
 	<!--<font name="Outrun future" fileExtension="otf" path="assets/fonts" size="32,72"/>-->
 	<!--<font name="Presque Normal" fileExtension="ttf" path="assets/fonts" size="32,72"/>-->
-	<!--<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>-->
+	<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>
 </fonts>
 <renderingBatches>
-	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" z="1" lightGroup="default" shader="default">
-		<shader name="lightVertexShader" type="VERTEX_SHADER"/>
-		<shader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
-		<vertexAttribute name="pos" size="3" index="0" />
-		<vertexAttribute name="uv" size="3" index="1" />
-		<vertexAttribute name="diffuse" size="4" index="2" />
-		<vertexAttribute name="specular" size="4" index="3" />
-		<vertex data="0,1,0.0,1.0"/>
-		<vertex data="1,1,1.0,1.0"/>
-		<vertex data="1,0,1.0,0.0"/>
-		<vertex data="0,0,0.0,0.0"/>
-	</template>
-	<template name="visual" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" z="1" lightGroup="default" shader="default">
-		<shader name="lightVertexShader" type="VERTEX_SHADER"/>
-		<shader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
+	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" z="1"  lightGroup="default" shader="default">
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="uv" size="3" index="1" />
 		<vertexAttribute name="diffuse" size="4" index="2" />
@@ -64,8 +49,6 @@
 		<vertex data="0,0,0.0,0.0"/>
 	</template>
 	<template name="ui" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="UIBatch" z="0" lightGroup="default" shader="default">
-		<shader name="vertexShader" type="VERTEX_SHADER"/>
-		<shader name="fragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="uv" size="3" index="1" />
 		<vertexAttribute name="color" size="4" index="2" />
@@ -75,16 +58,12 @@
 		<vertex data="0,0,0.0,0.0"/>
 	</template>
 	<template name="debugLine" vertexPerObject="2" drawMode="LINES" type="Batch" lightGroup="default" shader="debug">
-		<shader name="debugVertexShader" type="VERTEX_SHADER"/>
-		<shader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="color" size="4" index="1" />
 		<vertex data="0,1"/>
 		<vertex data="1,1"/>
 	</template>
 	<template name="debugRect" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="Batch" lightGroup="default" shader="debug">
-		<shader name="debugVertexShader" type="VERTEX_SHADER"/>
-		<shader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="color" size="4" index="1" />
 		<vertex data="0,1"/>

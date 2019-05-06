@@ -189,7 +189,7 @@ class Renderer
 					renderable = renderables.get(i);
 								
 					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
-					trace(renderable.name);
+					//trace(renderable.name);
 					//trace(camera.
 					drawCount+= renderable.Render(camera);
 			
@@ -220,7 +220,7 @@ class Renderer
 				}
 				
 			}
-			trace(renderables);
+			//trace(renderables);
 			//trace(drawCount);
 		}
 		

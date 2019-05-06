@@ -81,7 +81,7 @@ class Framebuffer
 		
 	}
 	
-	public function UpdateTextureSize(width:Int, height:Int, name:String = ""):Void
+	public function UpdateTextureSize(name:String = "", width:Int, height:Int):Void
 	{
 		if (name != "")
 		{
