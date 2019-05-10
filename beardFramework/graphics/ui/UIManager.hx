@@ -64,11 +64,11 @@ class UIManager
 		baseGroup = new UIGroup("UIBase");
 		cameras = new MinAllocArray<String>();
 		cameras.Push(CAMERANAME+0);
-		BeardGame.Get().AddCamera(new Camera(CAMERANAME+0, BeardGame.Get().window.width, BeardGame.Get().window.height, 0, 0, 100, true));
-		BeardGame.Get().cameras[CAMERANAME+0].Center(BeardGame.Get().window.width * 0.5, BeardGame.Get().window.height * 0.5);
+		//BeardGame.Get().AddCamera(new Camera(CAMERANAME+0, BeardGame.Get().window.width, BeardGame.Get().window.height, 0, 0, 100, true));
+		//BeardGame.Get().cameras[CAMERANAME+0].Center(BeardGame.Get().window.width * 0.5, BeardGame.Get().window.height * 0.5);
 		
-		Renderer.Get().GetRenderable(StringLibrary.UI).cameras.add(CAMERANAME+0);
-		Renderer.Get().GetRenderable(StringLibrary.UI).cameras.remove("default");
+		//Renderer.Get().GetRenderable(StringLibrary.UI).cameras.add(CAMERANAME+0);
+		//Renderer.Get().GetRenderable(StringLibrary.UI).cameras.remove("default");
 		
 		
 		

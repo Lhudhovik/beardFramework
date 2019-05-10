@@ -10,8 +10,10 @@ class StringLibrary
 	public static inline var ACTION:String 					= "action";
 	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
 	public static inline var ANY:String 					= "any";
+	public static inline var COLOR:String 					= "color";
 	public static inline var DEBUG:String	 				= "debug";
 	public static inline var DEFAULT:String 				= "default";
+	public static inline var DEPTH:String 					= "depth";
 	public static inline var DIRECT_MODE:String 			= "directMode";
 	public static inline var GAMEPAD:String 				= "gamepad";
 	public static inline var GAMEPAD_AXIS_MOVE:String 		= "gamepadAxisMove";

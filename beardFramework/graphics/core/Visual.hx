@@ -193,7 +193,6 @@ class Visual extends AbstractVisual implements IRenderable
 		
 		shader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
 		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
-							
 		GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
 		
 		drawCount++;

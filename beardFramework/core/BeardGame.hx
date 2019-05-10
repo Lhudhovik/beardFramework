@@ -190,7 +190,7 @@ class BeardGame extends Application
 		
 		Shader.LoadShaders(OptionsManager.Get().shadersToCreate);
 		
-		var defaultCam:Camera = new Camera(StringLibrary.DEFAULT, window.width, window.height);
+		var defaultCam:Camera = new Camera(StringLibrary.DEFAULT, window.width, window.height,0,0,100,false);
 		AddCamera(defaultCam);
 		
 		defaultCam.Center(window.width * 0.5,window.height * 0.5);
@@ -272,7 +272,6 @@ class BeardGame extends Application
 	{
 		if (!cameras.exists(camera.name)){
 			cameras[camera.name] = camera;
-			trace(camera.viewportWidth);
 			return true;
 		}
 		

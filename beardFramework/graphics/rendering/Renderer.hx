@@ -178,21 +178,19 @@ class Renderer
 				
 				camera.framebuffer.Bind(GL.FRAMEBUFFER);
 				GL.enable(GL.DEPTH_TEST);
-				GL.clearColor(0, 0, 0,0);
+				GL.clearColor(camera.clearColor.getRedf(),camera.clearColor.getGreenf(), camera.clearColor.getBluef(),1);
 				GL.clear(GL.COLOR_BUFFER_BIT);
 				GL.clear(GL.DEPTH_BUFFER_BIT);
-				GL.viewport(camera.viewport.x, BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
-				GL.scissor(camera.viewport.x,BeardGame.Get().window.height - camera.viewport.y - camera.viewport.height, camera.viewport.width, camera.viewport.height);
-				
+				GL.viewport(0, - Math.round(BeardGame.Get().window.height - camera.viewportHeight) , BeardGame.Get().window.width, BeardGame.Get().window.height);
+				//GL.viewport(0, 0 camera.viewport.width, camera.viewport.height);
 				for (i in 0...renderables.length)
 				{
 					renderable = renderables.get(i);
 								
 					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
-					//trace(renderable.name);
-					//trace(camera.
+
 					drawCount+= renderable.Render(camera);
-			
+					//trace("render");
 				}
 			
 				
@@ -206,9 +204,7 @@ class Renderer
 			GL.disable(GL.DEPTH_TEST);
 			GL.clearColor(1, 1, 1,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
-			GL.viewport(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
-			GL.scissor(0,0, BeardGame.Get().window.width, BeardGame.Get().window.height);
-			
+			GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			
 			for (camera in BeardGame.Get().cameras)
 			{

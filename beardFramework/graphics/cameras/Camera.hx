@@ -7,6 +7,7 @@ import beardFramework.graphics.rendering.Renderer;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.StructDataCamera;
 import beardFramework.utils.data.DataU;
+import beardFramework.utils.graphics.Color;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.simpleDataStruct.SRect;
 import lime.graphics.opengl.GL;
@@ -40,6 +41,7 @@ class Camera
 	public var needViewUpdate:Bool;
 	public var keepRatio(default, set):Bool;
 	public var framebuffer:Framebuffer;
+	public var clearColor:Color;
 	
 	
 	public var viewport(default, null):ViewportRect;
@@ -51,7 +53,7 @@ class Camera
 	private var width(default, set):Float;
 	private var height(default, set):Float;
 	
-	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = true) 
+	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = true, clearColor:Color = Color.BLACK) 
 	{
 		
 		viewport = {x:0,y:0,width:0,height:0}	
@@ -66,7 +68,7 @@ class Camera
 		viewport.height = Math.round(height);	
 		this.buffer = buffer;
 		zoom = 1;
-		
+		this.clearColor = clearColor;
 		this.keepRatio = keepRatio;
 		
 		screenRatios = {
@@ -88,8 +90,8 @@ class Camera
 		
 		framebuffer = new Framebuffer();
 		framebuffer.Bind(GL.FRAMEBUFFER);
-		framebuffer.CreateTexture("color", BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,true);
-		framebuffer.CreateRenderBuffer("depth", GL.RENDERBUFFER, GL.DEPTH24_STENCIL8, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.DEPTH_STENCIL_ATTACHMENT);
+		framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,true);
+		framebuffer.CreateRenderBuffer(StringLibrary.DEPTH, GL.RENDERBUFFER, GL.DEPTH24_STENCIL8, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.DEPTH_STENCIL_ATTACHMENT);
 		
 		framebuffer.quad.width = viewport.width;
 		framebuffer.quad.height = viewport.height;
@@ -108,11 +110,13 @@ class Camera
 		screenRatios.width=width;
 		screenRatios.height=height;
 		
-		viewportX = BeardGame.Get().window.width * x;
-		viewportY = BeardGame.Get().window.height * y;
-		this.width = BeardGame.Get().window.width * width;
-		this.height  = BeardGame.Get().window.height * height;
+		//viewportX = BeardGame.Get().window.width * x;
+		//viewportY = BeardGame.Get().window.height * y;
+		//this.width = BeardGame.Get().window.width * width;
+		//this.height  = BeardGame.Get().window.height * height;
 		
+		AdjustResize();
+	
 		this.keepRatio = keepRatio;
 	}
 		
@@ -358,6 +362,14 @@ class Camera
 	
 	public function AdjustResize():Void
 	{
+		//
+		framebuffer.Bind(GL.FRAMEBUFFER);
+		GL.enable(GL.DEPTH_TEST);
+		GL.clearColor(clearColor.getRedf(), clearColor.getGreenf(), clearColor.getBluef(),1);
+		GL.clear(GL.COLOR_BUFFER_BIT);
+		GL.clear(GL.DEPTH_BUFFER_BIT);
+		
+		
 		if (keepRatio)
 		{
 			
@@ -370,34 +382,31 @@ class Camera
 			viewportWidth = newWidth;
 			else viewportHeight = newHeight;
 			
-			
 		}
 		else
 		{
+			//trace(screenRatios.height);
 			viewportX = BeardGame.Get().window.width * screenRatios.x;
 			viewportY = BeardGame.Get().window.height * screenRatios.y;
 			viewportWidth = BeardGame.Get().window.width * screenRatios.width;
 			viewportHeight = BeardGame.Get().window.height * screenRatios.height;
 		
 		}
-		
 		if (projection != null)
 		{
 			projection.identity();
-			//projection.createOrtho( 0, viewportWidth,  viewportHeight, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 			projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		}
 		
 		if (framebuffer != null && framebuffer.quad != null){
-			
-			framebuffer.UpdateTextureSize("colo", width, height);
+			framebuffer.UpdateTextureSize(StringLibrary.COLOR, viewport.width, viewport.height);
 			framebuffer.quad.shader.Use();
 			framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
 			framebuffer.quad.width = viewport.width;
 			framebuffer.quad.height = viewport.height;
 		}
 		
-		trace(viewport);
+		framebuffer.UnBind(GL.FRAMEBUFFER);
 		needViewUpdate = true;
 	}
 	
@@ -405,12 +414,15 @@ class Camera
 	{
 		
 		view.identity();
-		view.appendScale(zoom,zoom,1);
-		view.appendTranslation( (viewportX + viewportWidth * 0.5) - centerX, (viewportY + viewportHeight * 0.5) - centerY, -1);
+		view.appendScale(zoom, zoom, 1);
+		var diffW:Float = BeardGame.Get().window.width - viewportWidth;
+		var diffH:Float = BeardGame.Get().window.height - viewportHeight;
+		//view.appendTranslation( -centerX, - centerY, -1);
+		view.appendTranslation(  viewportWidth*0.5 -centerX,  viewportHeight*0.5 - centerY, -1);
+			
 		//view.appendRotation(this.rotation, new Vector4(0, 0, 1));
 		//DataU.DeepTrace(view);
 		
-		//framebuffer.UpdateTextureSize(viewport.width, viewport.height);
 		if (framebuffer != null && framebuffer.quad != null){
 				framebuffer.quad.x = viewportX;
 				framebuffer.quad.y = viewportY;
