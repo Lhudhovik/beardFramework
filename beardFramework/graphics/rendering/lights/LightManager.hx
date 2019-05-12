@@ -8,7 +8,6 @@ import beardFramework.utils.math.MathU;
 import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLProgram;
-import lime.graphics.opengl.GLTexture;
 import lime.math.Matrix4;
 /**
  * ...
@@ -66,7 +65,7 @@ class LightManager
 		lights = new Map();
 		
 		lightProjection = new Matrix4();
-		//lightProjection.( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		lightProjection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		
 		lightView = new Matrix4();
 		
@@ -75,7 +74,7 @@ class LightManager
 		framebuffer = new Framebuffer();
 		framebuffer.Bind(GL.FRAMEBUFFER);
 		framebuffer.CreateTexture(StringLibrary.SHADOW_MAP, BeardGame.Get().window.width, BeardGame.Get().window.height,GL.DEPTH_COMPONENT, GL.DEPTH_COMPONENT, GL.FLOAT, GL.DEPTH_ATTACHMENT,true);
-		//framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,false);
+		framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,false);
 		
 		var samplerIndex:Int = AssetManager.Get().AllocateFreeTextureIndex();
 		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
@@ -83,37 +82,14 @@ class LightManager
 			
 		//trace("is the framebuffer ready ? " + (GL.checkFramebufferStatus(GL.FRAMEBUFFER) == GL.FRAMEBUFFER_COMPLETE));
 		
-		
+		framebuffer.UnBind(GL.FRAMEBUFFER);
 		
 		depthShader = Shader.GetShader(StringLibrary.DEPTH);
 		
 		framebuffer.quad.shader = Shader.GetShader("debugDepth");
 		framebuffer.quad.shader.Use();
 		framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
-		
-		var depthCubeMap:GLTexture = GL.createTexture();
-		samplerIndex = AssetManager.Get().AllocateFreeTextureIndex();
-		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
-		GL.bindTexture(GL.TEXTURE_CUBE_MAP, depthCubeMap);
-		for (i in 0...6)
-		{
-			GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL.DEPTH_COMPONENT, BeardGame.Get().window.width, BeardGame.Get().window.height,0,GL.DEPTH_COMPONENT,GL.FLOAT,0);
-		}
-		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
-		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
-		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
-		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
-		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_R, GL.CLAMP_TO_EDGE); 
-		
-		GL.framebufferTextureLayer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, depthCubeMap, 0, 1);
-		framebuffer.textures["cube"] = {
-				texture:depthCubeMap,
-				internalFormat:GL.DEPTH_COMPONENT,
-				format:GL.DEPTH_COMPONENT,
-				type:GL.FLOAT,
-				attachment:GL.DEPTH_ATTACHMENT
-			}
-		framebuffer.UnBind(GL.FRAMEBUFFER);
+
 	}
 	
 	public function AddToGroup(light:Light, group:String="default"):Void
@@ -193,7 +169,7 @@ class LightManager
 	public function CreateDirectionalLight(name:String, group:String="default", position:SVec3 = null, ambient:Color = Color.WHITE, diffuse:Color = Color.WHITE, specular:Color=Color.WHITE):Light
 	{
 		
-		if (position == null) position = {x:0, y:0, z: -50};
+		if (position == null) position = {x:0, y:0, z: 0};
 	
 		var light:Light = GetLight(name);
 		
@@ -213,7 +189,7 @@ class LightManager
 	public function CreateSpotLight(name:String, group:String="default", position:SVec3 = null, direction:SVec3=null, cutOff:Float=25, outerCutOff:Float=35):SpotLight
 	{
 		
-		if (position == null) position = {x:0, y:0, z: -50};
+		if (position == null) position = {x:0, y:0, z: 0};
 		if (direction == null) direction = {x:0, y:1, z:0};
 		
 		var light:SpotLight =  cast GetLight(name);
@@ -236,7 +212,7 @@ class LightManager
 	public function CreatePointLight(name:String, group:String="default",position:SVec3 = null, constant:Float = 1.0, linear:Float=0.0014, quadratic:Float=0.000007 ):PointLight
 	{
 		
-		if (position == null) position = {x:0, y:0, z: -50};
+		if (position == null) position = {x:0, y:0, z: 0};
 		
 		var light:PointLight = cast GetLight(name);		
 		

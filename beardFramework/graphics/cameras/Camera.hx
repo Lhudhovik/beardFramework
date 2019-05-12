@@ -414,7 +414,7 @@ class Camera
 	{
 		
 		view.identity();
-		view.appendRotation(this.rotation, new Vector4(0, 0, 1));
+		//view.appendRotation(this.rotation, new Vector4(0, 0, 1));
 		view.appendScale(zoom, zoom, 1);
 		view.appendTranslation(  viewportWidth*0.5 -centerX,  viewportHeight*0.5 - centerY, -1);
 		

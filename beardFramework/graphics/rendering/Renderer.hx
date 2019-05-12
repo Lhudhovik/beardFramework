@@ -21,6 +21,7 @@ import beardFramework.utils.graphics.TextureU;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import beardFramework.utils.simpleDataStruct.SVec3;
+import haxe.ds.Vector;
 import lime.app.Application;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
@@ -106,7 +107,8 @@ class Renderer
 		
 		model = new Matrix4();
 		projection = new Matrix4();
-		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		//projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0,- Renderer.Get().VISIBLEDEPTHLIMIT,Renderer.Get().VISIBLEDEPTHLIMIT);
 		//projection.createPerspective( BeardGame.Get().window.width, BeardGame.Get().window.height,90, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		rotationAxis = new Vector4(0, 0, 1);
 	}
@@ -163,7 +165,7 @@ class Renderer
 		
 		
 	}
-	var tesxt:Float = -10;
+	var test:Float = -90;
 	public function Render():Void
 	{
 		
@@ -195,30 +197,91 @@ class Renderer
 						
 				lightManager.lightView.identity();
 							
-				if (light.type != LightType.DIRECTIONAL) continue;
+				//if (light.type != LightType.DIRECTIONAL) continue;
+				if (light.type != LightType.POINT) continue;
 				
-				if (light.isDirty){
+				//if (light.isDirty){
+					//
+					//lightManager.lightView.lookAt(light.GetPosition(), new Vector4( 0, 0, 5));
+					//lightManager.lightView.lookAt(light.GetPosition(), new Vector4( 0, 0, 5));
 					
-					lightManager.lightView.lookAt(light.GetPosition(), new Vector4( 0, 0, 0));
-					//else 
-					//lightManager.lightView.lookAt(new Vector4(light.x, light.y, light.z), new Vector4( cast(light, 0, 0, 9));
-													
-					lightManager.lightView.append(projection);
-					lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
-					light.spaceMatrix = lightManager.lightView.clone();
+					//lightManager.lightView.pointAt(new Vector4(0,0,0), new Vector4(0,0,-5 ));
+					//lightManager.lightView.pointAt(new Vector4(0, 0,2), new Vector4(0, 0,5 ));
+					//lightManager.lightView.pointAt(light.GetPosition(), new Vector4(0,0,5 ));
+					//lightManager.lightView.lookAt(light.GetPosition(), new Vector4(0,0,0 ));
+						////lightManager.lightView.identity();
+						////test += 0.05;
+						////trace(test);
+					//lightManager.lightView.appendRotation(0, new Vector4(0, 1, 0));
+					//lightManager.lightView.appendTranslation(-light.x, -light.y, -light.z);
+						//
+					////lightManager.lightView.append(projection);
+					//lightManager.depthShader.SetMatrix4fv("projection", projection);
+					//lightManager.depthShader.Set3Float("lightPos", light.x, light.y, light.z);
+					//lightManager.depthShader.Set3Float("target", test, 0, 5);
+					//test += 0.05;
+					//trace(test);
+					//lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
+					//light.spaceMatrix = lightManager.lightView.clone();
+					//
+					//var rotations:Vector<Float> = new Vector(6);
+					//rotations[0] = -50;
+					//rotations[1] = 50;
+					//rotations[2] = -50;
+					//rotations[3] = 50;
+					//rotations[4] = -50;
+					//rotations[5] = 50;
 					
-				}		
-				
-				for (i in 0...renderables.length)
-				{
-					renderable = renderables.get(i);
-								
-					if (!renderable.readyForRendering || !LightManager.Get().CheckIsGroup(light, renderable.lightGroup) ) continue;
+					var ups:Vector<Vector4> = new Vector(6);
+					ups[0] = new Vector4(0, -1, 0);
+					ups[1] = new Vector4(0, -1, 0);
+					ups[2] = new Vector4(0, 0, 1);
+					ups[3] = new Vector4(0, 0, -1);
+					ups[4] = new Vector4(0, -1, 0);
+					ups[5] = new Vector4(0, -1, 0);
+					
+					var add:Vector<Vector4> = new Vector(6);
+					add[0] = new Vector4(1, 0, 0);
+					add[1] = new Vector4(-1, 0, 0);
+					add[2] = new Vector4(0, 1, 0);
+					add[3] = new Vector4(0, -1, 0);
+					add[4] = new Vector4(0, 0, 1);
+					add[5] = new Vector4(0, 0, -1);
+					
+				//
+				//
+					for (t in 0...6)
+					{
+						//
+						lightManager.lightView.identity();
+						//lightManager.lightView.appendTranslation(light.x, light.y, light.z);
+						//lightManager.lightView.appendRotation(rotations[t],axis[t]);
+						
+						lightManager.depthShader.SetMatrix4fv("projection", projection);
+						lightManager.depthShader.Set3Float("lightPos", light.x, light.y, test);
+						add[t] = add[t].add(new Vector4(light.x, light.y, test) );
+						lightManager.depthShader.Set3Float("target", add[t].x, add[t].y, add[t].z);
+						lightManager.depthShader.Set3Float("up", ups[t].x, ups[t].y, ups[t].z);
+						test += 0.02;
+						trace(test);
+						//lightManager.lightView.append(projection);
+						//lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
+						//light.spaceMatrix = lightManager.lightView.clone();
+				//
+						for (i in 0...renderables.length)
+						{
+							renderable = renderables.get(i);
+									
+							if (!renderable.readyForRendering || !LightManager.Get().CheckIsGroup(light, renderable.lightGroup) ) continue;
 
-					renderable.RenderShadows(light);
-					
-				}
-				
+							renderable.RenderShadows(light);
+							
+						}
+						
+						
+					}
+				//}
+				break;
 			}
 			
 			lightManager.framebuffer.UnBind(GL.FRAMEBUFFER);
@@ -262,8 +325,8 @@ class Renderer
 			{
 				if (camera.framebuffer != null && camera.framebuffer.quad != null)
 				{
-					camera.framebuffer.quad.z+=0.5;
-					camera.framebuffer.quad.Render();
+					//camera.framebuffer.quad.z+=0.5;
+					//camera.framebuffer.quad.Render();
 					//drawCount++;
 					
 				}
@@ -271,7 +334,7 @@ class Renderer
 			}
 		
 			//-----------------------------------Lights Debug
-			//lightManager.framebuffer.quad.Render();
+			lightManager.framebuffer.quad.Render();
 				
 			//trace(renderables);
 			//trace(drawCount);
