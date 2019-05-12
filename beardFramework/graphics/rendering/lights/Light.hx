@@ -1,10 +1,15 @@
 package beardFramework.graphics.rendering.lights;
+import beardFramework.core.BeardGame;
+import beardFramework.graphics.rendering.Framebuffer;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.graphics.Color;
+import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.math.MathU;
 import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLProgram;
+import lime.math.Matrix4;
+import lime.math.Vector4;
 
 /**
  * @author Ludovic
@@ -14,6 +19,8 @@ import lime.graphics.opengl.GLProgram;
  class Light
  {
 	
+	public static var position:Vector4 = new Vector4();
+	 
 	public var name(default, null):String;
 	public var x(default, set):Float;
 	public var y(default, set):Float;
@@ -23,6 +30,7 @@ import lime.graphics.opengl.GLProgram;
 	public var specular(default, set):Color;
 	public var isDirty:Bool;
 	public var type:LightType;
+	public var spaceMatrix:Matrix4;
 	
 	public function new(name:String, position:SVec3, ambient:Color, diffuse:Color, specular:Color)
 	{
@@ -35,6 +43,8 @@ import lime.graphics.opengl.GLProgram;
 		this.name = name;		
 		type = LightType.DIRECTIONAL;
 		isDirty = true;
+		spaceMatrix = new Matrix4();
+		
 	}
 	
 	public inline function SetPosition(x:Float, y:Float, z:Float):Void
@@ -42,6 +52,12 @@ import lime.graphics.opengl.GLProgram;
 		this.x = x;
 		this.y = y;
 		this.z = z;
+	}
+	
+	public inline function GetPosition():Vector4
+	{
+		position.setTo(x, y, z);
+		return position;
 	}
 		
 	function set_x(value:Float):Float 

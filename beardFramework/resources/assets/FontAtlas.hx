@@ -162,7 +162,7 @@ class FontAtlas extends Atlas
 		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
 		
 		
-		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTexture(this.name, textureImage, samplerIndex ));
+		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTextureFromImage(this.name, textureImage, samplerIndex ));
 		Renderer.Get().UpdateAtlasTextureUnits(samplerIndex);
 		//trace(size + " " +keeys);
 	}

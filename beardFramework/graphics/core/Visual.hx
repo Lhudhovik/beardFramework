@@ -3,6 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.RenderingData;
+import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.shaders.MaterialComponent;
@@ -164,7 +165,7 @@ class Visual extends AbstractVisual implements IRenderable
 
 	}
 		
-	public function Render(camera:Camera):Int 
+	public function RenderThroughCamera(camera:Camera):Int 
 	{
 		
 		
@@ -205,6 +206,43 @@ class Visual extends AbstractVisual implements IRenderable
 		return drawCount;
 	}
 	
+	public function RenderShadows(light:Light):Void
+	{
+		
+	
+		LightManager.Get().model.identity();
+		LightManager.Get().model.appendScale(this.width, this.height, 1.0);
+		LightManager.Get().model.appendTranslation(this.x, this.y, (visible ? renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT + 1));
+		LightManager.Get().model.appendRotation(this.rotation, renderer.rotationAxis);
+		LightManager.Get().depthShader.SetMatrix4fv(StringLibrary.MODEL, LightManager.Get().model);
+		LightManager.Get().depthShader.SetInt("useModel", 1);
+		
+		//GL.bindVertexArray(VAO);
+		if (renderer.boundBuffer != VBO){
+		
+			//shader.Use();
+			
+			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
+			renderer.boundBuffer = VBO;
+			
+			GL.enableVertexAttribArray(0);
+			GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
+					
+			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
+		}
+		
+
+		
+		GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
+				
+		GLU.ShowErrors();
+			
+		
+			
+		
+		
+	}
 	
 	public inline function HasCamera(camera:String):Bool
 	{

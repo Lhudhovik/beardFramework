@@ -16,4 +16,5 @@ void main()
 	FragmentPosition =vec3(model * vec4(pos,1.0));
 	FragmentUV = pos;
 	gl_Position = projection * view * vec4( FragmentPosition, 1.0);
+	
 }

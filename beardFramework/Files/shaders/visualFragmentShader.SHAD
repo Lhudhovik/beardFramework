@@ -70,6 +70,10 @@ vec3 ambient;
 void CalculateDirectionalLights(vec3 normal, vec3 viewDirection);
 void CalculatePointLights( vec3 normal,vec3 viewDirection, vec3 fragmentPosition);
 void CalculateSpotLights(vec3 normal,vec3 viewDirection, vec3 fragmentPosition);
+float LinearizeDepth(float depth) ;
+float near = -10; 
+float far  = 10; 
+  
 
 void main()
 {
@@ -101,14 +105,22 @@ void main()
 	diffuse *= matDiff;
 	specular *= matSpec;
 	
-	
+	float depth = LinearizeDepth(gl_FragCoord.z) / far;
 	FragColor =  vec4((ambient + specular + diffuse), material.transparency);
+//FragColor = vec4(vec3(depth), 1.0);
 	
 	
 	
 	
 	
 } 
+
+
+float LinearizeDepth(float depth) 
+{
+    float z = depth * 2.0 - 1.0; // back to NDC 
+    return (2.0 * near * far) / (far + near - z * (far - near));	
+}
 
 
 void CalculateDirectionalLights(vec3 normal, vec3 viewDirection)

@@ -414,13 +414,10 @@ class Camera
 	{
 		
 		view.identity();
+		view.appendRotation(this.rotation, new Vector4(0, 0, 1));
 		view.appendScale(zoom, zoom, 1);
-		var diffW:Float = BeardGame.Get().window.width - viewportWidth;
-		var diffH:Float = BeardGame.Get().window.height - viewportHeight;
-		//view.appendTranslation( -centerX, - centerY, -1);
 		view.appendTranslation(  viewportWidth*0.5 -centerX,  viewportHeight*0.5 - centerY, -1);
-			
-		//view.appendRotation(this.rotation, new Vector4(0, 0, 1));
+		
 		//DataU.DeepTrace(view);
 		
 		if (framebuffer != null && framebuffer.quad != null){

@@ -1,11 +1,15 @@
 package beardFramework.graphics.rendering.lights;
+import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.Color;
+import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.math.MathU;
 import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLProgram;
-
+import lime.graphics.opengl.GLTexture;
+import lime.math.Matrix4;
 /**
  * ...
  * @author Ludovic
@@ -16,10 +20,17 @@ class LightManager
 	private static var instance(default, null):LightManager;
 	
 	public var MAX_LIGHT_COUNT_BY_TYPE(default, never):Int = 10;
-	private var lights:Map<String, Light>;
+	public var lights:Map<String, Light>;
 	private var lightGroups:Map<String,LightGroup>;
 	private var dirtyLights:List<String>;
 	private var dirtyGroups:List<String>;
+	
+	public var lightProjection(default, null):Matrix4;
+	public var lightView(default, null):Matrix4;
+	public var model(default, null):Matrix4;
+	public var depthShader(default, null):Shader;
+	
+	public var framebuffer:Framebuffer;
 	
 	private function new() 
 	{
@@ -41,7 +52,7 @@ class LightManager
 	{
 		
 		lightGroups = new Map();
-		lightGroups["default"] = {
+		lightGroups[StringLibrary.DEFAULT] = {
 			lights:new List<String>(),
 			directionalLightsCount:0,
 			spotLightsCount:0,
@@ -51,8 +62,58 @@ class LightManager
 		dirtyGroups = new List();
 		dirtyLights = new List();
 		
-		dirtyGroups.add("default");
+		dirtyGroups.add(StringLibrary.DEFAULT);
 		lights = new Map();
+		
+		lightProjection = new Matrix4();
+		//lightProjection.( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		
+		lightView = new Matrix4();
+		
+		model = new Matrix4();
+			
+		framebuffer = new Framebuffer();
+		framebuffer.Bind(GL.FRAMEBUFFER);
+		framebuffer.CreateTexture(StringLibrary.SHADOW_MAP, BeardGame.Get().window.width, BeardGame.Get().window.height,GL.DEPTH_COMPONENT, GL.DEPTH_COMPONENT, GL.FLOAT, GL.DEPTH_ATTACHMENT,true);
+		//framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,false);
+		
+		var samplerIndex:Int = AssetManager.Get().AllocateFreeTextureIndex();
+		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
+		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTexture(StringLibrary.SHADOW_MAP,framebuffer.textures[StringLibrary.SHADOW_MAP].texture, BeardGame.Get().window.width,BeardGame.Get().window.height, samplerIndex ));
+			
+		//trace("is the framebuffer ready ? " + (GL.checkFramebufferStatus(GL.FRAMEBUFFER) == GL.FRAMEBUFFER_COMPLETE));
+		
+		
+		
+		depthShader = Shader.GetShader(StringLibrary.DEPTH);
+		
+		framebuffer.quad.shader = Shader.GetShader("debugDepth");
+		framebuffer.quad.shader.Use();
+		framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
+		
+		var depthCubeMap:GLTexture = GL.createTexture();
+		samplerIndex = AssetManager.Get().AllocateFreeTextureIndex();
+		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
+		GL.bindTexture(GL.TEXTURE_CUBE_MAP, depthCubeMap);
+		for (i in 0...6)
+		{
+			GL.texImage2D(GL.TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL.DEPTH_COMPONENT, BeardGame.Get().window.width, BeardGame.Get().window.height,0,GL.DEPTH_COMPONENT,GL.FLOAT,0);
+		}
+		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
+		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+		GL.texParameteri(GL.TEXTURE_CUBE_MAP, GL.TEXTURE_WRAP_R, GL.CLAMP_TO_EDGE); 
+		
+		GL.framebufferTextureLayer(GL.FRAMEBUFFER, GL.DEPTH_ATTACHMENT, depthCubeMap, 0, 1);
+		framebuffer.textures["cube"] = {
+				texture:depthCubeMap,
+				internalFormat:GL.DEPTH_COMPONENT,
+				format:GL.DEPTH_COMPONENT,
+				type:GL.FLOAT,
+				attachment:GL.DEPTH_ATTACHMENT
+			}
+		framebuffer.UnBind(GL.FRAMEBUFFER);
 	}
 	
 	public function AddToGroup(light:Light, group:String="default"):Void
@@ -262,7 +323,9 @@ class LightManager
 							shader.Set3Float( "directionalLights["+directionalIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
 							shader.Set3Float( "directionalLights["+directionalIndex+"].specular", light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
 							shader.Set3Float( "directionalLights["+directionalIndex+"].direction", light.x, light.y, light.z );
-							shader.SetInt("directionalLights["+directionalIndex+"].used", 1);
+							shader.SetInt("directionalLights[" + directionalIndex + "].used", 1);
+							
+							shader.SetMatrix4fv("lightSpaceMatrix", light.spaceMatrix);
 							
 						}
 						directionalIndex++;
@@ -316,6 +379,8 @@ class LightManager
 					shader.SetInt("spotLights["+i+"].used", 0);
 	
 			}
+		
+			shader.SetInt(StringLibrary.SHADOW_MAP, AssetManager.Get().GetTexture(StringLibrary.SHADOW_MAP).fixedIndex);
 			
 		}
 		
@@ -325,6 +390,16 @@ class LightManager
 		
 	}
 	
+	
+	public function CheckIsGroup(light:Light, group:String):Bool
+	{
+		var result:Bool = false;
+		if (lightGroups[group] != null)
+			for (groupedLight in lightGroups[group].lights)
+				if (result = (groupedLight == light.name))	break;
+		
+		return result;
+	}
 }
 
 private typedef LightGroup =

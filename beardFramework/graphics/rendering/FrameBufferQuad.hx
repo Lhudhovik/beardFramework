@@ -30,7 +30,7 @@ class FrameBufferQuad
 	public var renderer:Renderer;
 	public var drawMode:Int = GL.TRIANGLES;
 	public var texture:GLTexture;
-	public var shader(default, null):Shader;
+	public var shader:Shader;
 	
 	private static var verticesData:Float32Array; //overide with local variable if necessary
 	private static var indices:UInt16Array;
@@ -103,8 +103,7 @@ class FrameBufferQuad
 		
 		if (renderer.boundBuffer != VBO){
 		
-			shader.Use();
-			
+					
 			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
 			renderer.boundBuffer = VBO;
 			

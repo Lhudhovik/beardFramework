@@ -1,0 +1,15 @@
+#version 460
+in vec3 pos;
+
+uniform mat4 lightSpaceMatrix;
+uniform mat4 model;
+uniform int useModel;
+
+void main()
+{
+	
+	if(useModel > 0)
+		gl_Position = lightSpaceMatrix*  model * vec4(pos, 1.0);
+	else
+		gl_Position = lightSpaceMatrix * vec4(pos, 1.0);
+}
