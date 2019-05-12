@@ -207,7 +207,7 @@ class AssetManager
 				for (requestedTexture in requestedTexturesQueue)
 				{
 					if (loaders[requestedTexture] != null && loaders[requestedTexture].content != null){
-						AddTextureFromImage(	requestedTexture, cast(loaders[requestedTexture].content, BitmapData).image);		
+						AddTexture(	requestedTexture, cast(loaders[requestedTexture].content, BitmapData).image);		
 					}
 				}
 				requestedTexturesQueue = [];
@@ -367,30 +367,25 @@ class AssetManager
 		}
 	}
 	
-	public inline function AddTextureFromImage(name:String, image:Image, fixedIndex:Int=-1):GLTexture
+	public inline function AddTexture(name:String, texture:Image, fixedIndex:Int=-1):GLTexture
 	{
+		trace(name);
+		trace(texture);
 		
-		var glTexture:GLTexture = null;
-		if (textures[name] == null)	glTexture =	AddTexture(name,  TextureU.GetTexture(image), image.buffer.width, image.buffer.height, fixedIndex);
-		else glTexture = textures[name].glTexture;
-		
-		return glTexture;
-	}
-
-	public inline function AddTexture(name:String, texture:GLTexture, width:Int, height:Int, fixedIndex:Int=-1):GLTexture
-	{
-		var glTexture:GLTexture= null;
+		var glTexture:GLTexture;
 		
 		if (textures[name] == null){
 		
-			textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex, width:width, height:height};
-			glTexture = texture;
+			glTexture = TextureU.GetTexture(texture);
+		
+			textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex, width:texture.buffer.width, height:texture.buffer.height};
+			
 		}
 		else glTexture = textures[name].glTexture;
 		
 		return glTexture;
 	}
-	
+
 	
 	public inline function RemoveTexture(name:String, destroy:Bool = false):Void
 	{

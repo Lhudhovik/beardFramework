@@ -53,10 +53,6 @@ vec3 CalculateDirectionalLights(vec3 normal, vec3 viewDirection);
 vec3 CalculatePointLights( vec3 normal,vec3 viewDirection, vec3 fragmentPosition);
 vec3 CalculateSpotLights(vec3 normal,vec3 viewDirection, vec3 fragmentPosition);
 
-float LinearizeDepth(float depth) ;
-float near = -10; 
-float far  = 10; 
-
 void main()
 {
 	
@@ -78,20 +74,12 @@ void main()
 	FragColor =  texture(atlas[int(floor(TexCoord.z))],vec2(TexCoord.x,TexCoord.y)) * vec4(color, 1.0) * Diffuse;
 	
 	
-	float depth = LinearizeDepth(gl_FragCoord.z) / far;
-	
-	
-//FragColor = vec4(vec3(depth), 1.0);
 	
 	
 	
 	
 } 
-float LinearizeDepth(float depth) 
-{
-    float z = depth * 2.0 - 1.0; // back to NDC 
-    return (2.0 * near * far) / (far + near - z * (far - near));	
-}
+
 
 vec3 CalculateDirectionalLights(vec3 normal, vec3 viewDirection)
 {

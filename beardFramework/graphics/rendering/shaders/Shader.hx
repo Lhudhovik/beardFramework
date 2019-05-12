@@ -145,7 +145,6 @@ class Shader
 		
 	}
 	
-	
 	public function SetInt(name:String, value:Int):Void
 	{
 		if (uniformLocations[name] == null) uniformLocations[name] = GL.getUniformLocation(program, name);

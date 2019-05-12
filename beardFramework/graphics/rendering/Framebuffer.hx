@@ -49,8 +49,8 @@ class Framebuffer
 			
 			GL.texImage2D(GL.TEXTURE_2D, 0,internalFormat, width, height, 0,format,type, 0);
 			
-			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.NEAREST);
-			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.NEAREST);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
 			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
 			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
 			
@@ -64,15 +64,8 @@ class Framebuffer
 				attachment:attachment
 			}
 			
-			if (applyToQuad){
-				quad.texture = texture;
-				quad.width = width;
-				quad.height = height;
-			}
-			//if (!color)
-			//{
-				//GL.readBuffer(GL.NONE);
-			//}
+			if (applyToQuad)	quad.texture = texture;
+
 		}
 		
 	}

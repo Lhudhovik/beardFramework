@@ -465,7 +465,7 @@ import lime.utils.UInt16Array;
 		dirtyObjects.Remove(object);
 	}
 	
-	public function RenderThroughCamera(camera:Camera):Int
+	public function Render(camera:Camera):Int
 	{
 		
 	
@@ -514,51 +514,6 @@ import lime.utils.UInt16Array;
 		//GL.bindVertexArray(0);
 		
 		return drawCount;
-	}
-	
-	public function RenderShadows(light:Light):Void
-	{
-		
-		
-		if (needUpdate) UpdateRenderedData();
-		
-	
-		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-		renderer.boundBuffer = VBO;
-		
-		var stride:Int = 0;
-		for (attribute in vertexAttributes)
-		{
-			if (attribute.name != "pos") continue;
-			pointer = GL.getAttribLocation(shader.program, attribute.name);
-			GL.enableVertexAttribArray(pointer);
-			GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, stride* Float32Array.BYTES_PER_ELEMENT);
-		}
-					
-		if (indicesPerObject > 0){
-			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
-			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
-		}
-		
-		LightManager.Get().depthShader.SetInt("useModel", 0);
-				
-			
-		if (indicesPerObject > 0) GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
-		else GL.drawArrays(drawMode, 0, verticesData.activeDataCount*verticesData.vertexPerObject);
-		
-	
-		
-		GLU.ShowErrors();
-		
-		
-			
-		//GL.bindVertexArray(0);
-		
-		//return drawCount;
-		
-		
-		
-		
 	}
 	
 	

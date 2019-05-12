@@ -52,7 +52,6 @@ class StringLibrary
 	public static inline var SAVE_EXTENSION:String 			= ".BEARD";
 	public static inline var SHADER:String 					= "shader";
 	public static inline var SHADER_EXTENSION:String 		= ".SHAD";
-	public static inline var SHADOW_MAP:String 				= "shadowMap";
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";
 	public static inline var TOUCH_END:String 				= "touchEnd";

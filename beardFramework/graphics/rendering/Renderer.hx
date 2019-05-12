@@ -8,7 +8,8 @@ import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.graphics.rendering.lights.LightManager;
-import beardFramework.graphics.rendering.lights.LightType;
+import beardFramework.graphics.rendering.shaders.RenderedDataBufferArray;
+import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.interfaces.IBatch;
@@ -21,7 +22,6 @@ import beardFramework.utils.graphics.TextureU;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import beardFramework.utils.simpleDataStruct.SVec3;
-import haxe.ds.Vector;
 import lime.app.Application;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
@@ -37,7 +37,6 @@ import lime.math.Vector4;
 import lime.utils.Float32Array;
 import lime.utils.UInt16Array;
 
-using beardFramework.utils.math.MatrixExtension;
 
 @:access(lime.graphics.opengl.GL.GLObject)
 /**
@@ -101,15 +100,13 @@ class Renderer
 		
 		
 		
-		AssetManager.Get().AddTextureFromImage(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.WHITE), AssetManager.Get().AllocateFreeTextureIndex());
+		AssetManager.Get().AddTexture(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.WHITE), AssetManager.Get().AllocateFreeTextureIndex());
 		
 		renderables = new MinAllocArray();
 		
 		model = new Matrix4();
 		projection = new Matrix4();
-		//projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0,- Renderer.Get().VISIBLEDEPTHLIMIT,Renderer.Get().VISIBLEDEPTHLIMIT);
-		//projection.createPerspective( BeardGame.Get().window.width, BeardGame.Get().window.height,90, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		rotationAxis = new Vector4(0, 0, 1);
 	}
 	
@@ -165,175 +162,48 @@ class Renderer
 		
 		
 	}
-	var test:Float = 0;
+	
 	public function Render():Void
 	{
 		
 		if (ready)
 		{
+			DepthSorting();
 			
 			var renderable:IRenderable;
-			var lightManager:LightManager = LightManager.Get();
-			
 			drawCount = 0;
-			
-			DepthSorting();
-			GL.enable(GL.DEPTH_TEST);
-			GL.clear(GL.DEPTH_BUFFER_BIT);
-			
-			//-----------------------------------Lights
-			
-			/*
-			lightManager.depthShader.Use();
-			lightManager.framebuffer.Bind(GL.FRAMEBUFFER);
-			
-			GL.enable(GL.DEPTH_TEST);
-			GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
-			GL.clear(GL.DEPTH_BUFFER_BIT);
-			
-			for (light in LightManager.Get().lights)
-			{
-						
-				lightManager.lightView.identity();
-							
-				//if (light.type != LightType.DIRECTIONAL) continue;
-				if (light.type != LightType.POINT) continue;
-				
-				//if (light.isDirty){
-					//
-					//lightManager.lightView.lookAt(light.GetPosition(), new Vector4( 0, 0, 5));
-					//lightManager.lightView.lookAt(light.GetPosition(), new Vector4( 0, 0, 5));
-					
-					//lightManager.lightView.pointAt(new Vector4(0,0,0), new Vector4(0,0,-5 ));
-					//lightManager.lightView.pointAt(new Vector4(0, 0,2), new Vector4(0, 0,5 ));
-					//lightManager.lightView.pointAt(light.GetPosition(), new Vector4(0,0,5 ));
-					//lightManager.lightView.lookAt(light.GetPosition(), new Vector4(0,0,0 ));
-						////lightManager.lightView.identity();
-						////test += 0.05;
-						////trace(test);
-					//lightManager.lightView.appendRotation(0, new Vector4(0, 1, 0));
-					//lightManager.lightView.appendTranslation(-light.x, -light.y, -light.z);
-						//
-					////lightManager.lightView.append(projection);
-					//lightManager.depthShader.SetMatrix4fv("projection", projection);
-					//lightManager.depthShader.Set3Float("lightPos", light.x, light.y, light.z);
-					//lightManager.depthShader.Set3Float("target", test, 0, 5);
-					//test += 0.05;
-					//trace(test);
-					//lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
-					//light.spaceMatrix = lightManager.lightView.clone();
-					//
-					var rotations:Vector<Float> = new Vector(6);
-					rotations[0] = 0;
-					rotations[1] = -10;
-					rotations[2] = 180;
-					rotations[3] = 10;
-					rotations[4] = -10;
-					rotations[5] = 10;
-					
-					var ups:Vector<Vector4> = new Vector(6);
-					ups[0] = new Vector4(0, -1, 0);
-					ups[1] = new Vector4(0, -1, 0);
-					ups[2] = new Vector4(0, 0, 1);
-					ups[3] = new Vector4(0, 0, -1);
-					ups[4] = new Vector4(0, -1, 0);
-					ups[5] = new Vector4(0, -1, 0);
-					
-					var add:Vector<Vector4> = new Vector(6);
-					add[0] = new Vector4(1, 0, 0);
-					add[1] = new Vector4(-1, 0, 0);
-					add[2] = new Vector4(0, 1, 0);
-					add[3] = new Vector4(0, -1, 0);
-					add[4] = new Vector4(0, 0, 1);
-					add[5] = new Vector4(0, 0, -1);
-					
-					var axis:Vector<Vector4> = new Vector(6);
-					axis[0] = new Vector4(1, 0, 0);
-					axis[1] = new Vector4(1, 0, 0);
-					axis[2] = new Vector4(1, 0, 0);
-					axis[3] = new Vector4(1, 0, 0);
-					axis[4] = new Vector4(0, 1, 0);
-					axis[5] = new Vector4(0, 1, 0);
-					
-				//
-				//
-					for (t in 0...6)
-					{
-						//
-						lightManager.lightView.identity();
-						lightManager.lightView.appendRotation(rotations[t],axis[t]);
-						lightManager.lightView.appendTranslation(light.x, light.y, light.z);
-						//test += 0.05;
-						//trace(test);
-						//lightManager.lightView.appendTranslation(light.x, light.y, light.z);
-						//
-						//var proj:Matrix4 = new Matrix4();
-						//proj.createOrtho( -10, 10, -10, 10, 1, 7);
-						//lightManager.depthShader.SetMatrix4fv("projection", proj);
-						//lightManager.depthShader.Set3Float("lightPos", light.x, light.y, light.z);
-						////lightManager.depthShader.Set3Float("lightPos", light.x, light.y, test);
-						//add[t] = add[t].add(light.GetPosition() );
-						////add[t] = add[t].add(new Vector4(light.x, light.y, test) );
-						//lightManager.depthShader.Set3Float("target", add[t].x, add[t].y, add[t].z);
-						//lightManager.depthShader.Set3Float("up", ups[t].x, ups[t].y, ups[t].z);
-						////test += 0.02;
-						trace(test);
-						lightManager.lightView.append(projection);
-						lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
-						light.spaceMatrix = lightManager.lightView.clone();
-				//
-						for (i in 0...renderables.length)
-						{
-							renderable = renderables.get(i);
-									
-							if (!renderable.readyForRendering || !LightManager.Get().CheckIsGroup(light, renderable.lightGroup) ) continue;
-
-							renderable.RenderShadows(light);
-							
-						}
-						
-						
-					}
-				//}
-				//break;
-			}
-			
-			lightManager.framebuffer.UnBind(GL.FRAMEBUFFER);
-			*/
-			
-			//-----------------------------------Visuals
 			
 			for (camera in BeardGame.Get().cameras)
 			{
 				
 				camera.framebuffer.Bind(GL.FRAMEBUFFER);
-				
+				GL.enable(GL.DEPTH_TEST);
 				GL.clearColor(camera.clearColor.getRedf(),camera.clearColor.getGreenf(), camera.clearColor.getBluef(),1);
 				GL.clear(GL.COLOR_BUFFER_BIT);
 				GL.clear(GL.DEPTH_BUFFER_BIT);
 				GL.viewport(0, - Math.round(BeardGame.Get().window.height - camera.viewportHeight) , BeardGame.Get().window.width, BeardGame.Get().window.height);
-				
+				//GL.viewport(0, 0 camera.viewport.width, camera.viewport.height);
 				for (i in 0...renderables.length)
 				{
 					renderable = renderables.get(i);
 								
 					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
 
-					drawCount+= renderable.RenderThroughCamera(camera);
-					trace(camera.view.position);
+					drawCount+= renderable.Render(camera);
+					//trace("render");
 				}
 			
+				
+				
+				
 			}
 		
 			LightManager.Get().CleanLightStates();
 			
-			
-			//-----------------------------------framebuffers
 			GL.bindFramebuffer(GL.FRAMEBUFFER, 0);
 			GL.disable(GL.DEPTH_TEST);
 			GL.clearColor(1, 1, 1,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
-			GL.clear(GL.DEPTH_BUFFER_BIT);
 			GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			
 			for (camera in BeardGame.Get().cameras)
@@ -342,16 +212,12 @@ class Renderer
 				{
 					camera.framebuffer.quad.Render();
 					//drawCount++;
-					
+					//trace(camera.name);
 				}
 				
 			}
-		
-			//-----------------------------------Lights Debug
-			//lightManager.framebuffer.quad.Render();
-				
 			//trace(renderables);
-			trace(drawCount);
+			//trace(drawCount);
 		}
 		
 
@@ -362,11 +228,9 @@ class Renderer
 	{
 		GL.clearColor(0, 0, 0, 0);
 		GL.viewport(0, 0, width, height);
-		//GL.scissor(0, 0, width, height);
-		projection.createOrtho( 0,width, height, 0,-Renderer.Get().VISIBLEDEPTHLIMIT, Renderer.Get().VISIBLEDEPTHLIMIT);
+		GL.scissor(0, 0, width, height);
+		projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		
-		LightManager.Get().framebuffer.quad.shader.Use();
-		LightManager.Get().framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, projection);
 		
 		
 		for (camera in BeardGame.Get().cameras)

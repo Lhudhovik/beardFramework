@@ -105,7 +105,8 @@ class OptionsManager
 					switch(native.get("type"))
 					{
 						case "VERTEX_SHADER": type = GL.VERTEX_SHADER;
-						case "FRAGMENT_SHADER": type = GL.FRAGMENT_SHADER;											
+						case "FRAGMENT_SHADER": type = GL.FRAGMENT_SHADER;							
+						
 					}
 					resourcesToLoad.push({ type: AssetType.SHADER, name: nativeName , url:BeardGame.Get().SHADERS_PATH + nativeName + StringLibrary.SHADER_EXTENSION});
 					Shader.nativeShaders[native.get("name")] = { src:"", type:type };

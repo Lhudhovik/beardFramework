@@ -1,14 +1,11 @@
 package beardFramework.graphics.rendering.lights;
-import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.shaders.Shader;
-import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.Color;
-import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.math.MathU;
 import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLProgram;
-import lime.math.Matrix4;
+
 /**
  * ...
  * @author Ludovic
@@ -19,17 +16,10 @@ class LightManager
 	private static var instance(default, null):LightManager;
 	
 	public var MAX_LIGHT_COUNT_BY_TYPE(default, never):Int = 10;
-	public var lights:Map<String, Light>;
+	private var lights:Map<String, Light>;
 	private var lightGroups:Map<String,LightGroup>;
 	private var dirtyLights:List<String>;
 	private var dirtyGroups:List<String>;
-	
-	public var lightProjection(default, null):Matrix4;
-	public var lightView(default, null):Matrix4;
-	public var model(default, null):Matrix4;
-	public var depthShader(default, null):Shader;
-	
-	public var framebuffer:Framebuffer;
 	
 	private function new() 
 	{
@@ -51,7 +41,7 @@ class LightManager
 	{
 		
 		lightGroups = new Map();
-		lightGroups[StringLibrary.DEFAULT] = {
+		lightGroups["default"] = {
 			lights:new List<String>(),
 			directionalLightsCount:0,
 			spotLightsCount:0,
@@ -61,35 +51,8 @@ class LightManager
 		dirtyGroups = new List();
 		dirtyLights = new List();
 		
-		dirtyGroups.add(StringLibrary.DEFAULT);
+		dirtyGroups.add("default");
 		lights = new Map();
-		
-		lightProjection = new Matrix4();
-		lightProjection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-		
-		lightView = new Matrix4();
-		
-		model = new Matrix4();
-			
-		framebuffer = new Framebuffer();
-		framebuffer.Bind(GL.FRAMEBUFFER);
-		framebuffer.CreateTexture(StringLibrary.SHADOW_MAP, BeardGame.Get().window.width, BeardGame.Get().window.height,GL.DEPTH_COMPONENT, GL.DEPTH_COMPONENT, GL.FLOAT, GL.DEPTH_ATTACHMENT,true);
-		framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,false);
-		
-		var samplerIndex:Int = AssetManager.Get().AllocateFreeTextureIndex();
-		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
-		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTexture(StringLibrary.SHADOW_MAP,framebuffer.textures[StringLibrary.SHADOW_MAP].texture, BeardGame.Get().window.width,BeardGame.Get().window.height, samplerIndex ));
-			
-		//trace("is the framebuffer ready ? " + (GL.checkFramebufferStatus(GL.FRAMEBUFFER) == GL.FRAMEBUFFER_COMPLETE));
-		
-		framebuffer.UnBind(GL.FRAMEBUFFER);
-		
-		depthShader = Shader.GetShader(StringLibrary.DEPTH);
-		
-		framebuffer.quad.shader = Shader.GetShader("debugDepth");
-		framebuffer.quad.shader.Use();
-		framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
-
 	}
 	
 	public function AddToGroup(light:Light, group:String="default"):Void
@@ -169,7 +132,7 @@ class LightManager
 	public function CreateDirectionalLight(name:String, group:String="default", position:SVec3 = null, ambient:Color = Color.WHITE, diffuse:Color = Color.WHITE, specular:Color=Color.WHITE):Light
 	{
 		
-		if (position == null) position = {x:0, y:0, z: 0};
+		if (position == null) position = {x:0, y:0, z: -50};
 	
 		var light:Light = GetLight(name);
 		
@@ -189,7 +152,7 @@ class LightManager
 	public function CreateSpotLight(name:String, group:String="default", position:SVec3 = null, direction:SVec3=null, cutOff:Float=25, outerCutOff:Float=35):SpotLight
 	{
 		
-		if (position == null) position = {x:0, y:0, z: 0};
+		if (position == null) position = {x:0, y:0, z: -50};
 		if (direction == null) direction = {x:0, y:1, z:0};
 		
 		var light:SpotLight =  cast GetLight(name);
@@ -212,7 +175,7 @@ class LightManager
 	public function CreatePointLight(name:String, group:String="default",position:SVec3 = null, constant:Float = 1.0, linear:Float=0.0014, quadratic:Float=0.000007 ):PointLight
 	{
 		
-		if (position == null) position = {x:0, y:0, z: 0};
+		if (position == null) position = {x:0, y:0, z: -50};
 		
 		var light:PointLight = cast GetLight(name);		
 		
@@ -299,9 +262,7 @@ class LightManager
 							shader.Set3Float( "directionalLights["+directionalIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
 							shader.Set3Float( "directionalLights["+directionalIndex+"].specular", light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
 							shader.Set3Float( "directionalLights["+directionalIndex+"].direction", light.x, light.y, light.z );
-							shader.SetInt("directionalLights[" + directionalIndex + "].used", 1);
-							
-							shader.SetMatrix4fv("lightSpaceMatrix", light.spaceMatrix);
+							shader.SetInt("directionalLights["+directionalIndex+"].used", 1);
 							
 						}
 						directionalIndex++;
@@ -355,8 +316,6 @@ class LightManager
 					shader.SetInt("spotLights["+i+"].used", 0);
 	
 			}
-		
-			shader.SetInt(StringLibrary.SHADOW_MAP, AssetManager.Get().GetTexture(StringLibrary.SHADOW_MAP).fixedIndex);
 			
 		}
 		
@@ -366,16 +325,6 @@ class LightManager
 		
 	}
 	
-	
-	public function CheckIsGroup(light:Light, group:String):Bool
-	{
-		var result:Bool = false;
-		if (lightGroups[group] != null)
-			for (groupedLight in lightGroups[group].lights)
-				if (result = (groupedLight == light.name))	break;
-		
-		return result;
-	}
 }
 
 private typedef LightGroup =
