@@ -84,7 +84,7 @@ class Camera
 		projection = new Matrix4();
 		projection.identity();
 		//projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
-		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, -Renderer.Get().VISIBLEDEPTHLIMIT, Renderer.Get().VISIBLEDEPTHLIMIT);
 		view = new Matrix4();
 		needViewUpdate = true;
 		
@@ -395,7 +395,7 @@ class Camera
 		if (projection != null)
 		{
 			projection.identity();
-			projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+			projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, -Renderer.Get().VISIBLEDEPTHLIMIT, Renderer.Get().VISIBLEDEPTHLIMIT);
 		}
 		
 		if (framebuffer != null && framebuffer.quad != null){

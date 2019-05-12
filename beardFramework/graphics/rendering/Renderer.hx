@@ -165,26 +165,25 @@ class Renderer
 		
 		
 	}
-	var test:Float = -90;
+	var test:Float = 0;
 	public function Render():Void
 	{
 		
 		if (ready)
 		{
-			//projection.identity();
-			//projection.createPerspective( BeardGame.Get().window.width, BeardGame.Get().window.height,90, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+			
 			var renderable:IRenderable;
 			var lightManager:LightManager = LightManager.Get();
 			
 			drawCount = 0;
 			
 			DepthSorting();
-			
-			
+			GL.enable(GL.DEPTH_TEST);
+			GL.clear(GL.DEPTH_BUFFER_BIT);
 			
 			//-----------------------------------Lights
 			
-			
+			/*
 			lightManager.depthShader.Use();
 			lightManager.framebuffer.Bind(GL.FRAMEBUFFER);
 			
@@ -224,13 +223,13 @@ class Renderer
 					//lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
 					//light.spaceMatrix = lightManager.lightView.clone();
 					//
-					//var rotations:Vector<Float> = new Vector(6);
-					//rotations[0] = -50;
-					//rotations[1] = 50;
-					//rotations[2] = -50;
-					//rotations[3] = 50;
-					//rotations[4] = -50;
-					//rotations[5] = 50;
+					var rotations:Vector<Float> = new Vector(6);
+					rotations[0] = 0;
+					rotations[1] = -10;
+					rotations[2] = 180;
+					rotations[3] = 10;
+					rotations[4] = -10;
+					rotations[5] = 10;
 					
 					var ups:Vector<Vector4> = new Vector(6);
 					ups[0] = new Vector4(0, -1, 0);
@@ -248,25 +247,40 @@ class Renderer
 					add[4] = new Vector4(0, 0, 1);
 					add[5] = new Vector4(0, 0, -1);
 					
+					var axis:Vector<Vector4> = new Vector(6);
+					axis[0] = new Vector4(1, 0, 0);
+					axis[1] = new Vector4(1, 0, 0);
+					axis[2] = new Vector4(1, 0, 0);
+					axis[3] = new Vector4(1, 0, 0);
+					axis[4] = new Vector4(0, 1, 0);
+					axis[5] = new Vector4(0, 1, 0);
+					
 				//
 				//
 					for (t in 0...6)
 					{
 						//
 						lightManager.lightView.identity();
+						lightManager.lightView.appendRotation(rotations[t],axis[t]);
+						lightManager.lightView.appendTranslation(light.x, light.y, light.z);
+						//test += 0.05;
+						//trace(test);
 						//lightManager.lightView.appendTranslation(light.x, light.y, light.z);
-						//lightManager.lightView.appendRotation(rotations[t],axis[t]);
-						
-						lightManager.depthShader.SetMatrix4fv("projection", projection);
-						lightManager.depthShader.Set3Float("lightPos", light.x, light.y, test);
-						add[t] = add[t].add(new Vector4(light.x, light.y, test) );
-						lightManager.depthShader.Set3Float("target", add[t].x, add[t].y, add[t].z);
-						lightManager.depthShader.Set3Float("up", ups[t].x, ups[t].y, ups[t].z);
-						test += 0.02;
+						//
+						//var proj:Matrix4 = new Matrix4();
+						//proj.createOrtho( -10, 10, -10, 10, 1, 7);
+						//lightManager.depthShader.SetMatrix4fv("projection", proj);
+						//lightManager.depthShader.Set3Float("lightPos", light.x, light.y, light.z);
+						////lightManager.depthShader.Set3Float("lightPos", light.x, light.y, test);
+						//add[t] = add[t].add(light.GetPosition() );
+						////add[t] = add[t].add(new Vector4(light.x, light.y, test) );
+						//lightManager.depthShader.Set3Float("target", add[t].x, add[t].y, add[t].z);
+						//lightManager.depthShader.Set3Float("up", ups[t].x, ups[t].y, ups[t].z);
+						////test += 0.02;
 						trace(test);
-						//lightManager.lightView.append(projection);
-						//lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
-						//light.spaceMatrix = lightManager.lightView.clone();
+						lightManager.lightView.append(projection);
+						lightManager.depthShader.SetMatrix4fv("lightSpaceMatrix", lightManager.lightView);
+						light.spaceMatrix = lightManager.lightView.clone();
 				//
 						for (i in 0...renderables.length)
 						{
@@ -281,11 +295,11 @@ class Renderer
 						
 					}
 				//}
-				break;
+				//break;
 			}
 			
 			lightManager.framebuffer.UnBind(GL.FRAMEBUFFER);
-			
+			*/
 			
 			//-----------------------------------Visuals
 			
@@ -306,7 +320,7 @@ class Renderer
 					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
 
 					drawCount+= renderable.RenderThroughCamera(camera);
-				
+					trace(camera.view.position);
 				}
 			
 			}
@@ -319,14 +333,14 @@ class Renderer
 			GL.disable(GL.DEPTH_TEST);
 			GL.clearColor(1, 1, 1,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
+			GL.clear(GL.DEPTH_BUFFER_BIT);
 			GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			
 			for (camera in BeardGame.Get().cameras)
 			{
 				if (camera.framebuffer != null && camera.framebuffer.quad != null)
 				{
-					//camera.framebuffer.quad.z+=0.5;
-					//camera.framebuffer.quad.Render();
+					camera.framebuffer.quad.Render();
 					//drawCount++;
 					
 				}
@@ -334,10 +348,10 @@ class Renderer
 			}
 		
 			//-----------------------------------Lights Debug
-			lightManager.framebuffer.quad.Render();
+			//lightManager.framebuffer.quad.Render();
 				
 			//trace(renderables);
-			//trace(drawCount);
+			trace(drawCount);
 		}
 		
 
@@ -348,8 +362,8 @@ class Renderer
 	{
 		GL.clearColor(0, 0, 0, 0);
 		GL.viewport(0, 0, width, height);
-		GL.scissor(0, 0, width, height);
-		projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		//GL.scissor(0, 0, width, height);
+		projection.createOrtho( 0,width, height, 0,-Renderer.Get().VISIBLEDEPTHLIMIT, Renderer.Get().VISIBLEDEPTHLIMIT);
 		
 		LightManager.Get().framebuffer.quad.shader.Use();
 		LightManager.Get().framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, projection);
