@@ -16,10 +16,12 @@ class LightManager
 	private static var instance(default, null):LightManager;
 	
 	public var MAX_LIGHT_COUNT_BY_TYPE(default, never):Int = 10;
-	private var lights:Map<String, Light>;
+	public var lights:Map<String, Light>;
 	private var lightGroups:Map<String,LightGroup>;
 	private var dirtyLights:List<String>;
 	private var dirtyGroups:List<String>;
+	
+	public var shadowShader:Shader;
 	
 	private function new() 
 	{
@@ -53,6 +55,8 @@ class LightManager
 		
 		dirtyGroups.add("default");
 		lights = new Map();
+		
+		shadowShader = Shader.GetShader("shadow");
 	}
 	
 	public function AddToGroup(light:Light, group:String="default"):Void

@@ -517,6 +517,64 @@ import lime.utils.UInt16Array;
 	}
 	
 	
+	public function CastShadow(light:Light, camera:Camera):Void
+	{
+		
+	
+		//drawCount = 0;
+		
+		//if (needUpdate) UpdateRenderedData();
+		
+		var usedShader:Shader = LightManager.Get().shadowShader;
+		
+		usedShader.Use();
+		
+		usedShader.SetInt("useModel", 0);
+	
+		
+		usedShader.Set3Float("lightPos", light.x, light.y, light.z);
+		usedShader.SetFloat("groundY", 100);
+		usedShader.SetFloat("groundAngle", 10);
+		
+		GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
+		renderer.boundBuffer = VBO;
+		
+		
+		var attribute = vertexAttributes[0];
+		pointer = GL.getAttribLocation(shader.program, attribute.name);
+		GL.enableVertexAttribArray(pointer);
+		GL.vertexAttribPointer(pointer, attribute.size, GL.FLOAT, false, verticesData.vertexStride * Float32Array.BYTES_PER_ELEMENT, 0);
+			
+					
+		if (indicesPerObject > 0){
+			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indicesData.byteLength, indicesData, GL.DYNAMIC_DRAW);
+		}
+		
+		//LightManager.Get().CompileLights(shader, lightGroup, lightGroupChanged);
+			
+		//lightGroupChanged = false;
+	
+	
+		usedShader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
+		usedShader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
+			
+			
+		if (indicesPerObject > 0) GL.drawElements(drawMode, indicesData.length, GL.UNSIGNED_SHORT, 0);
+		else GL.drawArrays(drawMode, 0, verticesData.activeDataCount*verticesData.vertexPerObject);
+		
+	
+		//drawCount++;
+		
+		GLU.ShowErrors();
+		
+		
+			
+		//GL.bindVertexArray(0);
+		
+		//return drawCount;
+	}
+	
 	/* INTERFACE beardFramework.interfaces.IBatch */
 	
 	public function IsEmpty():Bool 

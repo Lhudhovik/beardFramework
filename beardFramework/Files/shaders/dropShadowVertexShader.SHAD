@@ -1,0 +1,52 @@
+#version 460
+in vec3 pos;
+
+out vec4 color;
+
+
+uniform vec3 lightPos;
+uniform float groundY;
+uniform float groundAngle;
+uniform mat4 model;
+uniform mat4 projection;
+uniform mat4 view;
+uniform int useModel;
+
+void main()
+{
+	
+	float angle;
+	float shadowLength;
+	vec4 fragPos;
+	vec4 newPosition;
+	
+	if(useModel > 0){
+		
+		fragPos = model * vec4(pos, 1.0);
+		
+		newPosition =model * vec4(pos, 1.0);
+	}
+	else
+	{
+		fragPos = vec4(pos,1.0);
+		newPosition = vec4(pos,1.0);	
+		
+	}
+	//newPosition.x = fragPos.x + 200;
+	//newPosition.y = fragPos.y + 200;
+	
+	if(lightPos.z < fragPos.z && lightPos.y < fragPos.y )//temp safegard
+	{
+		angle = degrees(atan(fragPos.y-lightPos.y, fragPos.x - lightPos.x));
+		
+		shadowLength = ( groundY - fragPos.y) * tan(angle);
+			
+		newPosition.x = fragPos.x - shadowLength ;//+ (fragPos.z - lightPos.z) ;//To do calculate better angle
+		newPosition.y = groundY /*- (fragPos.z - lightPos.z)*/ - (groundY-fragPos.y)*groundAngle/10;
+		
+		color = vec4(0,0,0,1);
+	}
+	else color = vec4(0,0,0,1);
+	
+	gl_Position = projection * view * newPosition;
+}

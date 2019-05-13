@@ -53,7 +53,7 @@ class Camera
 	private var width(default, set):Float;
 	private var height(default, set):Float;
 	
-	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = true, clearColor:Color = Color.BLACK) 
+	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = true, clearColor:Color = Color.WHITE) 
 	{
 		
 		viewport = {x:0,y:0,width:0,height:0}	

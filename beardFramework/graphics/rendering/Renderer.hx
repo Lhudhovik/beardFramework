@@ -173,6 +173,9 @@ class Renderer
 			var renderable:IRenderable;
 			drawCount = 0;
 			
+			
+		
+			
 			for (camera in BeardGame.Get().cameras)
 			{
 				
@@ -189,7 +192,16 @@ class Renderer
 								
 					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
 
-					drawCount+= renderable.Render(camera);
+					drawCount += renderable.Render(camera);
+					
+					for (light in LightManager.Get().lights)
+					{
+						
+						renderable.CastShadow(light, camera);
+						
+					}
+					
+					
 					//trace("render");
 				}
 			
@@ -344,7 +356,6 @@ class Renderer
 		var result:Int = 0;
 		if (renderable1.z < renderable2.z) result = 1;
 		else if (renderable1.z > renderable2.z) result = -1;
-		else result = 0;
 		
 		return result;	
 	}

@@ -18,6 +18,10 @@
 	<shader name="basic" nativeShaders="vertexShader,fragmentShader" />
 	<shader name="debug" nativeShaders="debugVertexShader,debugFragmentShader" />
 	<shader name="frame" nativeShaders="frameVertexShader,frameFragmentShader" />
+	<shader name="depth" nativeShaders="depthVertexShader,depthFragmentShader" />
+	<shader name="debugDepth" nativeShaders="frameVertexShader,debugDepthFragmentShader" />
+	<shader name="shadow" nativeShaders="dropShadowVertexShader,dropShadowFragmentShader" />
+	<!--<shader name="cube" nativeShaders="cubeVertexShader,cubeGeometryShader,cubeFragmentShader" />-->
 	<nativeShader name="frameVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="frameFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="lightVertexShader" type="VERTEX_SHADER"/>
@@ -28,6 +32,14 @@
 	<nativeShader name="fragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="debugVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
+	<nativeShader name="depthVertexShader" type="VERTEX_SHADER"/>
+	<nativeShader name="depthFragmentShader" type="FRAGMENT_SHADER"/>
+	<nativeShader name="debugDepthFragmentShader" type="FRAGMENT_SHADER"/>
+	<nativeShader name="dropShadowVertexShader" type="VERTEX_SHADER"/>
+	<nativeShader name="dropShadowFragmentShader" type="FRAGMENT_SHADER"/>
+	<!--<nativeShader name="cubeVertexShader" type="VERTEX_SHADER"/>-->
+	<!--<nativeShader name="cubeGeometryShader" type="GEOMETRY_SHADER"/>-->
+	<!--<nativeShader name="cubeFragmentShader" type="FRAGMENT_SHADER"/>-->
 </shaders>
 <fonts default="Roboto-Medium">
 	<!--<font name="American Captain" fileExtension="ttf" path="assets/fonts" size="32,72" />-->

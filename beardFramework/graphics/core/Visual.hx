@@ -3,6 +3,7 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.RenderingData;
+import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.shaders.MaterialComponent;
@@ -205,7 +206,60 @@ class Visual extends AbstractVisual implements IRenderable
 		return drawCount;
 	}
 	
-	
+	public function CastShadow(light:Light, camera:Camera):Void 
+	{
+		
+		
+		var usedShader:Shader = LightManager.Get().shadowShader;
+		
+		usedShader.Use();
+		
+		usedShader.SetInt("useModel", 1);
+		
+		renderer.model.identity();
+		renderer.model.appendScale(this.width, this.height, 1.0);
+		renderer.model.appendTranslation(this.x, this.y, (visible ? renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT + 1));
+		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
+		usedShader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
+		
+		usedShader.Set3Float("lightPos", light.x, light.y, light.z);
+		usedShader.SetFloat("groundY", 100);
+		usedShader.SetFloat("groundAngle", 10);
+				
+		//var drawCount:Int = 0;
+		
+		//GL.bindVertexArray(VAO);
+		if (renderer.boundBuffer != VBO){
+		
+			//shader.Use();
+			
+			GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
+			renderer.boundBuffer = VBO;
+			
+			GL.enableVertexAttribArray(0);
+			GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
+					
+			GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
+			GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
+		}
+		
+
+		//LightManager.Get().CompileLights(shader, this.lightGroup, lightGroupChanged);
+		//lightGroupChanged = false;
+		
+		usedShader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
+		usedShader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
+		GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
+		
+		//drawCount++;
+		
+		GLU.ShowErrors();
+			
+		
+			
+		//
+		//return drawCount;
+	}
 	public inline function HasCamera(camera:String):Bool
 	{
 		var result:Bool = false;
