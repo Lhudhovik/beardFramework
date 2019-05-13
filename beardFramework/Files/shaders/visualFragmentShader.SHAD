@@ -77,8 +77,10 @@ void main()
 	//----------------------------------------------------------------------------------------------------------------------initial setup
 	vec3 normal = normalize(vec3(0,0,-1));
 	vec3 viewDirection = normalize(vec3(0,0,-1));
+	vec4 diffTexture = texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentUV.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentUV.y)));
 	
-	vec3 matDiff = vec3(texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentUV.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentUV.y))))* material.diffuse.color; 
+	
+	vec3 matDiff = vec3(diffTexture)* material.diffuse.color; 
 	vec3 matSpec = vec3(texture(material.specular.sampler, vec2(material.specular.uv.x + (material.specular.uv.z*FragmentUV.x),material.specular.uv.y + (material.specular.uv.w*FragmentUV.y)))) * material.specular.color ; 
 	
 	
@@ -102,7 +104,8 @@ void main()
 	specular *= matSpec;
 	
 	
-	FragColor =  vec4((ambient + specular + diffuse), material.transparency);
+	//FragColor =  vec4((ambient + specular + diffuse), material.transparency);
+	FragColor =  vec4((ambient + specular + diffuse), diffTexture.w*material.transparency);
 	
 	
 	

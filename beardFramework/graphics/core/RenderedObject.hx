@@ -17,7 +17,7 @@ import beardFramework.utils.graphics.Color;
 class RenderedObject implements ICameraDependent
 {
 	
-	@:isVar public var alpha(get, set):Float;
+	public var alpha(get, set):Float;
 	
 	public var height(get, set):Float;	
 	public var width(get, set):Float;
@@ -49,7 +49,6 @@ class RenderedObject implements ICameraDependent
 	{
 		
 		visible = true;
-		alpha = 1;
 		z = -1;
 		renderDepth = -2;
 		scaleX = scaleY = 1;
@@ -65,6 +64,7 @@ class RenderedObject implements ICameraDependent
 		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
 		material.components["diffuse"] = diffuseComponent;
 		material.components["specular"] = specularComponent;
+		material.transparency = 1;
 	
 	}
 	
@@ -278,12 +278,12 @@ class RenderedObject implements ICameraDependent
 	
 	function get_alpha():Float 
 	{
-		return alpha;
+		return material.transparency;
 	}
 	
 	function set_alpha(value:Float):Float 
 	{
-		return alpha = value;
+		return material.transparency = value;
 	}
 	
 	function get_color():Color 
