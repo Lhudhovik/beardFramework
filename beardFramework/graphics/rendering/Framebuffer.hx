@@ -64,7 +64,11 @@ class Framebuffer
 				attachment:attachment
 			}
 			
-			if (applyToQuad)	quad.texture = texture;
+			if (applyToQuad){
+				quad.texture = texture;
+				quad.width = width;
+				quad.height = height;
+			}
 
 		}
 		

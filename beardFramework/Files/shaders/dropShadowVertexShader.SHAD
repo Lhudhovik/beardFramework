@@ -2,6 +2,7 @@
 in vec3 pos;
 
 out vec4 color;
+out vec4 dist;
 
 
 uniform vec3 lightPos;
@@ -19,11 +20,11 @@ void main()
 	float shadowLength;
 	vec4 fragPos;
 	vec4 newPosition;
-	
+	vec4 center ;
 	if(useModel > 0){
 		
 		fragPos = model * vec4(pos, 1.0);
-		
+		center = model * vec4(0.5,0.5,0,1);
 		newPosition =model * vec4(pos, 1.0);
 	}
 	else
@@ -32,21 +33,25 @@ void main()
 		newPosition = vec4(pos,1.0);	
 		
 	}
-	//newPosition.x = fragPos.x + 200;
-	//newPosition.y = fragPos.y + 200;
 	
-	if(lightPos.z < fragPos.z && lightPos.y < fragPos.y )//temp safegard
+	
+	angle = atan(fragPos.y-lightPos.y, fragPos.x - lightPos.x);
+	
+	float distFrag = distance(vec2(fragPos.x, fragPos.y), vec2(lightPos.x, lightPos.y));
+	float distCent = distance(vec2(center.x, center.y), vec2(lightPos.x, lightPos.y));
+	
+	
+	if(distFrag >= distCent)
 	{
-		angle = degrees(atan(fragPos.y-lightPos.y, fragPos.x - lightPos.x));
-		
-		shadowLength = ( groundY - fragPos.y) * tan(angle);
-			
-		newPosition.x = fragPos.x - shadowLength ;//+ (fragPos.z - lightPos.z) ;//To do calculate better angle
-		newPosition.y = groundY /*- (fragPos.z - lightPos.z)*/ - (groundY-fragPos.y)*groundAngle/10;
-		
-		color = vec4(0,0,0,1);
+			newPosition.x += distFrag * cos(angle);
+			newPosition.y += distFrag * sin(angle);
+			newPosition.z += 0.5;
 	}
-	else color = vec4(0,0,0,1);
+	
+	distFrag = distance(vec2(newPosition.x, newPosition.y), vec2(lightPos.x, lightPos.y));
+	
+	color = vec4(0,0,0,100/distFrag);
+	
 	
 	gl_Position = projection * view * newPosition;
 }

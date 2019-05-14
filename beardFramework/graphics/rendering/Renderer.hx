@@ -100,7 +100,7 @@ class Renderer
 		
 		
 		
-		AssetManager.Get().AddTexture(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.WHITE), AssetManager.Get().AllocateFreeTextureIndex());
+		AssetManager.Get().AddTextureFromImage(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.WHITE), AssetManager.Get().AllocateFreeTextureIndex());
 		
 		renderables = new MinAllocArray();
 		
@@ -228,6 +228,9 @@ class Renderer
 				}
 				
 			}
+			
+			
+			//lightManager.framebuffer.quad.Render();
 			//trace(renderables);
 			//trace(drawCount);
 		}

@@ -4,12 +4,14 @@ import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.rendering.Framebuffer;
 import beardFramework.graphics.rendering.Renderer;
+import beardFramework.input.MousePos;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.StructDataCamera;
 import beardFramework.utils.data.DataU;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.simpleDataStruct.SRect;
+import beardFramework.utils.simpleDataStruct.SVec2;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLFramebuffer;
 import lime.math.Matrix4;
@@ -432,6 +434,10 @@ class Camera
 		needViewUpdate = false;
 	}
 	
+	public inline function GetMousePos():SVec2
+	{
+		return {x: MousePos.current.x - (viewportWidth*0.5 - centerX) , y:MousePos.current.y - (viewportHeight*0.5 - centerY) };
+	}
 	public function Update():Void
 	{
 		if (attachedObject != null)

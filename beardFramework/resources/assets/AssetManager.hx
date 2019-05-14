@@ -207,7 +207,7 @@ class AssetManager
 				for (requestedTexture in requestedTexturesQueue)
 				{
 					if (loaders[requestedTexture] != null && loaders[requestedTexture].content != null){
-						AddTexture(	requestedTexture, cast(loaders[requestedTexture].content, BitmapData).image);		
+						AddTextureFromImage(	requestedTexture, cast(loaders[requestedTexture].content, BitmapData).image);		
 					}
 				}
 				requestedTexturesQueue = [];
@@ -367,7 +367,7 @@ class AssetManager
 		}
 	}
 	
-	public inline function AddTexture(name:String, texture:Image, fixedIndex:Int=-1):GLTexture
+	public inline function AddTextureFromImage(name:String, texture:Image, fixedIndex:Int=-1):GLTexture
 	{
 		trace(name);
 		trace(texture);
