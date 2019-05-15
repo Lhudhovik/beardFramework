@@ -2,6 +2,7 @@ package beardFramework.graphics.core;
 
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IBatchable;
 import beardFramework.resources.assets.AssetManager;
@@ -91,6 +92,12 @@ class BatchedVisual extends AbstractVisual implements IBatchable
 			renderingBatch.RemoveAtlas(this.atlas);
 			bufferIndex = renderingBatch.FreeBufferIndex(bufferIndex);
 		}
+	}
+	
+	override public function CastShadow(light:Light):Void 
+	{
+		super.CastShadow(light);
+		//vertice0X = x + width * 0.5  + ((renderingBatch.vertices[0] * width) - width * 0.5) * rotationCosine -  ((renderingBatch.vertices[1] * height) - height * 0.5) * rotationSine;
 	}
 
 }

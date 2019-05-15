@@ -48,10 +48,12 @@ class StringLibrary
 	public static inline var MOUSE_WHEEL:String 			= "mouseWheel";
 	public static inline var NONE:String 					= "none";
 	public static inline var PROJECTION:String 				= "projection";
+	public static inline var QUAD:String 					= "quad";
 	public static inline var SAVE:String 					= "save";
 	public static inline var SAVE_EXTENSION:String 			= ".BEARD";
 	public static inline var SHADER:String 					= "shader";
 	public static inline var SHADER_EXTENSION:String 		= ".SHAD";
+	public static inline var SHADOW:String 					= "shadow";
 	public static inline var SHADOW_MAP:String 				= "shadowMap";
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";

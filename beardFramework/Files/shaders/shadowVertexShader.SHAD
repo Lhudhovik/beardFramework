@@ -1,0 +1,60 @@
+#version 460
+in vec3 pos;
+
+out vec4 color;
+
+uniform mat4 model;
+uniform mat4 view;
+uniform mat4 projection;
+uniform vec3 lightPos;
+uniform float groundY;
+uniform float groundAngle;
+uniform int borderPoint1;
+uniform vec2 borderPoint1Pos;
+uniform int borderPoint2;
+uniform vec2 borderPoint2Pos;
+uniform int useModel;
+
+
+void main()
+{
+	float angle;
+	vec4 fragPos;
+	vec4 newPosition;
+
+	if(useModel > 0){
+		
+		fragPos = model * vec4(pos, 1.0);
+		
+		newPosition =model * vec4(pos, 1.0);
+	}
+	else
+	{
+		fragPos = vec4(pos,1.0);
+		newPosition = vec4(pos,1.0);	
+		
+	}
+	
+	if(gl_VertexID == borderPoint1 || gl_VertexID == borderPoint2)
+	{
+		
+		if(gl_VertexID == borderPoint1)	fragPos = vec4(borderPoint1Pos, newPosition.z, 1.0);
+		else fragPos = vec4(borderPoint2Pos, newPosition.z, 1.0);
+				
+		angle = atan(fragPos.y-lightPos.y, fragPos.x - lightPos.x);
+	
+		newPosition.x += 500 * cos(angle);
+		newPosition.y += 500 * sin(angle);
+		newPosition.z += 0.5;
+		
+	}
+	
+
+	
+	color = vec4(0,0,0,1);
+	
+	
+	gl_Position = projection * view * newPosition;
+	
+		
+}

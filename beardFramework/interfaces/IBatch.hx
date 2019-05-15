@@ -1,6 +1,7 @@
 package beardFramework.interfaces;
 import beardFramework.graphics.rendering.batches.BatchRenderingData;
 import beardFramework.resources.MinAllocArray;
+import haxe.ds.Vector;
 import lime.graphics.opengl.GLProgram;
 
 /**
@@ -10,6 +11,7 @@ interface IBatch extends IRenderable
 {
   	public var needOrdering:Bool;
 	private var dirtyObjects:MinAllocArray<IBatchable>;
+	public var vertices:Vector<Float>;
 		
 	public function UpdateRenderedData():Void;
 	public function IsEmpty():Bool;
@@ -21,4 +23,5 @@ interface IBatch extends IRenderable
 	public function RemoveDirtyObject(object:IBatchable):Void;
 	public function AddAtlas(atlas:String):Void;
 	public function RemoveAtlas(atlas:String):Void;
+	
 }

@@ -3,11 +3,13 @@ import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.graphics.rendering.shaders.Material;
 import beardFramework.graphics.rendering.shaders.MaterialComponent;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.utils.graphics.Color;
+import beardFramework.utils.graphics.Edge;
 
 
 /**
@@ -16,6 +18,11 @@ import beardFramework.utils.graphics.Color;
  */
 class RenderedObject implements ICameraDependent
 {
+	
+	public static var topEdge:Edge = {lighted:false, normal: {x:0, y:0}};
+	public static var leftEdge:Edge= {lighted:false, normal: {x:0, y:0}};
+	public static var rightEdge:Edge= {lighted:false, normal: {x:0, y:0}};
+	public static var bottomEdge:Edge= {lighted:false, normal: {x:0, y:0}};
 	
 	public var alpha(get, set):Float;
 	
@@ -319,6 +326,11 @@ class RenderedObject implements ICameraDependent
 		
 	}
 	
+	public function CastShadow(light:Light):Void
+	{
+		
+	}
+		
 	function set_onAABBTree(value:Bool):Bool 
 	{
 		if (value != onAABBTree && layer!= null)
@@ -329,6 +341,7 @@ class RenderedObject implements ICameraDependent
 		}
 		return onAABBTree = value;
 	}
+	
 	
 	
 	

@@ -1,6 +1,7 @@
 package beardFramework.graphics.core;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
+import beardFramework.utils.libraries.StringLibrary;
 
 /**
  * ...
@@ -13,7 +14,7 @@ class AbstractVisual extends RenderedObject
 	@:isVar	public var atlas(default, set):String;
 	@:isVar	public var texture(default, set):String;
 	
-	private function new(texture:String, atlas:String , name:String = "") 
+	private function new(texture:String="", atlas:String="" , name:String = "") 
 	{
 		super();
 		if (name == "") this.name = "Visual_" + instanceCount;
@@ -27,7 +28,7 @@ class AbstractVisual extends RenderedObject
 		material.SetComponentTexture("diffuse",texture);
 		
 		
-		if (atlas != "")
+		if (atlas != "" && texture != "" )
 		{
 			var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
 			SetBaseWidth(texture.imageArea.width);
@@ -36,8 +37,13 @@ class AbstractVisual extends RenderedObject
 			material.SetComponentAtlas("diffuse",  atlas);
 			material.SetComponentUVs("diffuse", texture.uvX, texture.uvY, texture.uvW, texture.uvH);
 		}
-		else if (AssetManager.Get().GetTexture(texture) != null)
+		else 
 		{
+			
+			if (texture == "" || AssetManager.Get().GetTexture(texture) == null)
+			{
+				texture = StringLibrary.DEFAULT;
+			}
 			SetBaseWidth(AssetManager.Get().GetTexture(texture).width);
 			SetBaseHeight(AssetManager.Get().GetTexture(texture).height);
 			material.SetComponentUVs("diffuse", 0, 0, 1, 1);

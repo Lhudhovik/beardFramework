@@ -44,7 +44,7 @@ import lime.utils.UInt16Array;
 	public var drawMode:Int;
 	public var lightGroup(default, set):String;
 	
-	private var vertices:Vector<Float>; //implement as you like on each batch class
+	public var vertices:Vector<Float>; //implement as you like on each batch class
 	private var indices:Vector<Int>;
 	private var vertexAttributes:Vector<VertexAttribute>;
 	private var bufferIndices:Array<BufferIndexData>;

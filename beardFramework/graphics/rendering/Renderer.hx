@@ -1,4 +1,5 @@
 package beardFramework.graphics.rendering;
+import beardFramework.graphics.core.BeardLayer;
 import beardFramework.graphics.core.Visual;
 import beardFramework.graphics.rendering.lights.Light;
 import beardFramework.core.BeardGame;
@@ -141,7 +142,7 @@ class Renderer
 		
 	}
 
-	public function AddRenderable(renderable:IRenderable ):Void
+	public function AddRenderable(renderable:IRenderable, quick:Bool = false ):Void
 	{
 		for (i in 0...renderables.length)
 			if (renderables.get(i).name == renderable.name) return;
@@ -151,7 +152,8 @@ class Renderer
 		#if debug
 		MoveRenderableToLast(StringLibrary.DEBUG);
 		#end
-		MoveRenderableToLast(StringLibrary.UI);
+		if(!quick)
+			MoveRenderableToLast(StringLibrary.UI);
 	}
 	
 	public function Start():Void
@@ -168,14 +170,32 @@ class Renderer
 		
 		if (ready)
 		{
-			DepthSorting();
+			
 			
 			var renderable:IRenderable;
 			drawCount = 0;
 			
 			
-		
+			//calculate light 
+			var layer:BeardLayer;
 			
+			for (i in 0...BeardGame.Get().GetLayersCount())
+			{
+					layer = BeardGame.Get().GetLayer(i);
+					
+					for (light in LightManager.Get().lights)
+					{
+						for (object in layer.renderedObjects)
+						{
+							object.CastShadow(light);
+						}
+				
+					}
+	
+			}
+						
+			DepthSorting();
+		
 			for (camera in BeardGame.Get().cameras)
 			{
 				
@@ -194,12 +214,12 @@ class Renderer
 
 					drawCount += renderable.Render(camera);
 					
-					for (light in LightManager.Get().lights)
-					{
+					//for (light in LightManager.Get().lights)
+					//{
 						
-						renderable.CastShadow(light, camera);
+						//renderable.CastShadow(light, camera);
 						
-					}
+					//}
 					
 					
 					//trace("render");

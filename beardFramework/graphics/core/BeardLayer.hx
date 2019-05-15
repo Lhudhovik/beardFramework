@@ -88,6 +88,7 @@ class BeardLayer
 		if (!renderedObjects.exists(object.name))
 		{
 			//if(object.name == null)		trace(object.layer.id);
+			if (object.layer != null && object.layer != this) object.layer.Remove(object);
 			object.layer = this;
 			object.z = (object.z ==-1) ? insertionDepth++ : object.z;
 			object.visible =  this.visible;

@@ -19,7 +19,7 @@ import lime.utils.UInt16Array;
  * ...
  * @author Ludovic
  */
-class FrameBufferQuad
+class Quad
 {
 	public var x:Float;
 	public var y:Float;

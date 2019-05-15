@@ -17,13 +17,13 @@ class Framebuffer
 	public var textures:Map<String,FrameBufferTexture>;
 	public var renderbuffers:Map<String, GLRenderbuffer>;
 	public var samplerIndex:Int;
-	public var quad:FrameBufferQuad;
+	public var quad:Quad;
 	public function new() 
 	{
 		nativeBuffer = GL.createFramebuffer();
 		textures = new Map();
 		renderbuffers = new Map();
-		quad = new FrameBufferQuad();
+		quad = new Quad();
 		
 	}
 	

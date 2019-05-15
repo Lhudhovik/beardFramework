@@ -429,6 +429,11 @@ class BeardGame extends Application
 	{
 		return layers.get(DEBUGLAYER);
 	}
+	
+	public inline function GetLayersCount():Int
+	{
+		return layers.length;
+	}
 
 }
 

@@ -16,7 +16,6 @@ interface IRenderable
 	public var cameras:List<String>;
 	public var lightGroup(default, set):String;
 	public function Render(camera:Camera):Int;
-	public function CastShadow(light:Light, camera:Camera):Void;
 	public function HasCamera(camera:String):Bool;
 	
 
