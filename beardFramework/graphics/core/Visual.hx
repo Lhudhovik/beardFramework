@@ -247,90 +247,72 @@ class Visual extends AbstractVisual implements IRenderable
 		var direction:SVec2 ={x:light.x - (this.x + this.width * 0.5), y:  light.y - (y + height * 0.5) };
 		
 		var dot:Float; 
-				
+		
 		RenderedObject.topEdge.lighted = ((dot = RenderedObject.topEdge.normal.x * direction.x + RenderedObject.topEdge.normal.y * direction.y) > 0);
-		
+		trace(dot);
 		RenderedObject.leftEdge.lighted = ((dot = RenderedObject.leftEdge.normal.x * direction.x + RenderedObject.leftEdge.normal.y * direction.y) > 0);
-		
+		trace(dot);
 		RenderedObject.rightEdge.lighted = ((dot = RenderedObject.rightEdge.normal.x * direction.x + RenderedObject.rightEdge.normal.y * direction.y) > 0);
-		
+		trace(dot);
 		RenderedObject.bottomEdge.lighted = ((dot = RenderedObject.bottomEdge.normal.x * direction.x + RenderedObject.bottomEdge.normal.y * direction.y) > 0);
-		
-		var shadowPoint:Array<SVec2> = [];
-				
-		var firstIndex:Int =-1;
-		var secondIndex:Int =-1;
-		
-		var pos1:SVec2 = {x:0,y:0};
-		var pos2:SVec2 = {x:0, y: 0};
-		
-		
+			trace(dot);
+			trace("\n\n");
+		var pos1:SVec2 = null;
+		var pos2:SVec2 = null;
 		
 		if ((RenderedObject.topEdge.lighted && !RenderedObject.leftEdge.lighted) || (RenderedObject.leftEdge.lighted && !RenderedObject.topEdge.lighted)){
 			
-			//shadowPoint.push(TopL);
-		
-			firstIndex = 0;
-			
 			pos1 = TopL;
+			//trace("pos1 : TopL");
 		}
-			
 		if ((RenderedObject.topEdge.lighted && !RenderedObject.rightEdge.lighted) || (RenderedObject.rightEdge.lighted && !RenderedObject.topEdge.lighted)){
-			
-			//shadowPoint.push(TopR);
-			
-			if (firstIndex < 0){
-				firstIndex = 1;
+			if (pos1 == null){
 				pos1 = TopR;
+				//trace("pos1 : TopR");
 			}
-			
-			else{
-				secondIndex = 1;
+			else if(pos2 == null) {
 				pos2 = TopR;
+				//trace("pos2 : TopR");
 			}
-			
-			
-		}
-							
+		}				
 		if ((RenderedObject.rightEdge.lighted && !RenderedObject.bottomEdge.lighted) || (RenderedObject.bottomEdge.lighted && !RenderedObject.rightEdge.lighted)){
-			
-		
-			if (firstIndex < 0){
-				firstIndex = 2;
+			if (pos1 == null){
 				pos1 = BotR;
-			}			
-			else{
-				secondIndex = 2;
+				//trace("pos1 : BotR");
+			}
+			else if(pos2 == null) {
 				pos2 = BotR;
+					//trace("pos2 : BotR");
 			}
 			
 		}
-				
 		if ((RenderedObject.bottomEdge.lighted && !RenderedObject.leftEdge.lighted) || (RenderedObject.leftEdge.lighted && !RenderedObject.bottomEdge.lighted)){
-			
-			
-			secondIndex = 3;
-			pos2 = BotL;
-			//shadowPoint.push(BotL);
-		
+			if(pos2 == null) pos2 = BotL;
+				//trace("pos2 : BotL");
 		}
-		
-		
-		
-		
 		
 	
-		//
-		shadow.shader.SetInt("borderPoint1", firstIndex); 
-		shadow.shader.Set2Float("borderPoint1Pos", borderPoint1Pos.x, borderPoint1Pos.y); 
-		shadow.shader.SetInt("borderPoint2", borderPoint2); 
-		shadow.shader.Set2Float("borderPoint2Pos", borderPoint2Pos.x, borderPoint2Pos.y); 
 		
+		//var angle: Float = Math.atan2( pos1.y - light.y, pos1.x - light.x);
+		//
+		//trace("X pos 1 = " + (pos1.x + 10 * Math.cos(angle)));
+		//trace("Y pos 1 = " + (pos1.y + 10 * Math.sin(angle)));
+		//
+		//angle = Math.atan2( pos2.y - light.y, pos2.x - light.x);
+		//
+		//trace("X pos 2 = " + (pos2.x + 10 * Math.cos(angle)));
+		//trace("Y pos 2 = " + (pos2.y + 10 * Math.sin(angle)));
+		
+		shadow.shader.Set2Float("corner1Pos", pos1.x, pos1.y); 
+		shadow.shader.Set2Float("corner2Pos", pos2.x, pos2.y); 
+		shadow.shader.SetFloat("shadowLength", 500); 
+		shadow.shader.Set4Float("shadowColor", 0,0,0,1); 
+				
 		shadow.width = this.width;
 		shadow.height = this.height;
 		shadow.x = this.x;
 		shadow.y = this.y;
-		shadow.z = this.z;
+		shadow.z = this.z+0.5;
 		shadow.cameras = this.cameras;
 		shadow.shader.Set3Float("lightPos", light.x, light.y, light.z);
 		shadow.shader.SetInt("useModel", 1);

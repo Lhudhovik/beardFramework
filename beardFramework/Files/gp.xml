@@ -46,13 +46,13 @@
 	<!--<nativeShader name="cubeGeometryShader" type="GEOMETRY_SHADER"/>-->
 	<!--<nativeShader name="cubeFragmentShader" type="FRAGMENT_SHADER"/>-->
 </shaders>
-<fonts default="American Captain">
-	<font name="American Captain" fileExtension="ttf" path="assets/fonts" size="32,72" />
+<fonts default="Roboto-Medium">
+	<!--<font name="American Captain" fileExtension="ttf" path="assets/fonts" size="32,72" />-->
 	<!--<font name="chinese rocks rg" fileExtension="ttf" path="assets/fonts" size="32"/>-->
 	<!--<font name="INFECTED" fileExtension="ttf" path="assets/fonts" size="32,72"/>-->
 	<!--<font name="Outrun future" fileExtension="otf" path="assets/fonts" size="32,72"/>-->
 	<!--<font name="Presque Normal" fileExtension="ttf" path="assets/fonts" size="32,72"/>-->
-	<!--<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>-->
+	<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>
 </fonts>
 <renderingBatches>
 	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" z="1"  lightGroup="default" shader="default">
