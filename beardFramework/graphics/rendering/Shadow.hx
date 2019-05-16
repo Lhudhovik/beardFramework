@@ -144,7 +144,7 @@ class Shadow implements IRenderable
 		
 		renderer.model.identity();
 		renderer.model.appendScale(width, this.height, 1.0);
-		renderer.model.appendTranslation(this.x, this.y,1);
+		renderer.model.appendTranslation(this.x, this.y,this.z);
 		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
 		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
 		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);

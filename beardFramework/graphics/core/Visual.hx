@@ -17,6 +17,7 @@ import beardFramework.resources.save.data.StructDataVisual;
 import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.math.Edge;
+import beardFramework.utils.math.MathU;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
@@ -245,15 +246,28 @@ class Visual extends AbstractVisual implements IRenderable
 		RenderedObject.bottomEdge.normal.y = -(BotL.x - BotR.x);
 				
 		var direction:SVec2 ={x:light.x - (this.x + this.width * 0.5), y:  light.y - (y + height * 0.5) };
-		
 		var dot:Float; 
 		
+		direction.x = light.x - (this.x + this.width * 0.5);
+		direction.y = light.y- (this.y);
+		
 		RenderedObject.topEdge.lighted = ((dot = RenderedObject.topEdge.normal.x * direction.x + RenderedObject.topEdge.normal.y * direction.y) > 0);
-		trace(dot);
+		//trace(dot);
+		
+		direction.x = light.x - (this.x);
+		direction.y = light.y- (this.y+ this.height *0.5);
+		
 		RenderedObject.leftEdge.lighted = ((dot = RenderedObject.leftEdge.normal.x * direction.x + RenderedObject.leftEdge.normal.y * direction.y) > 0);
-		trace(dot);
+		//trace(dot);
+		
+		direction.x = light.x - (this.x + this.width);
+		direction.y = light.y- (this.y + this.height*0.5);
+		
 		RenderedObject.rightEdge.lighted = ((dot = RenderedObject.rightEdge.normal.x * direction.x + RenderedObject.rightEdge.normal.y * direction.y) > 0);
-		trace(dot);
+		//trace(dot);
+		
+		direction.x = light.x - (this.x + this.width * 0.5);
+		direction.y = light.y- (this.y + this.height);
 		RenderedObject.bottomEdge.lighted = ((dot = RenderedObject.bottomEdge.normal.x * direction.x + RenderedObject.bottomEdge.normal.y * direction.y) > 0);
 			trace(dot);
 			trace("\n\n");
@@ -303,19 +317,28 @@ class Visual extends AbstractVisual implements IRenderable
 		//trace("X pos 2 = " + (pos2.x + 10 * Math.cos(angle)));
 		//trace("Y pos 2 = " + (pos2.y + 10 * Math.sin(angle)));
 		
-		shadow.shader.Set2Float("corner1Pos", pos1.x, pos1.y); 
-		shadow.shader.Set2Float("corner2Pos", pos2.x, pos2.y); 
-		shadow.shader.SetFloat("shadowLength", 500); 
+		
+		if (pos1 == null && pos2 == null){
+			shadow.shader.SetFloat("shadowLength", 0);
+		}
+		else{
+			shadow.shader.SetFloat("shadowLength",500); 
+			shadow.shader.Set2Float("corner1Pos", pos1.x, pos1.y); 
+			shadow.shader.Set2Float("corner2Pos", pos2.x, pos2.y); 
+		}
 		shadow.shader.Set4Float("shadowColor", 0,0,0,1); 
 				
 		shadow.width = this.width;
 		shadow.height = this.height;
 		shadow.x = this.x;
 		shadow.y = this.y;
-		shadow.z = this.z+0.5;
+		shadow.z = this.renderDepth +0.05;
 		shadow.cameras = this.cameras;
 		shadow.shader.Set3Float("lightPos", light.x, light.y, light.z);
 		shadow.shader.SetInt("useModel", 1);
+		shadow.shader.Set4Float("limits", -10,this.y+this.height, -50,150);
+		
+		
 
 		//trace(shadowPointID);
 		//trace("top : " + RenderedObject.topEdge.lighted);

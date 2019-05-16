@@ -7,7 +7,6 @@ out vec4 color;
 
 uniform int useModel;
 
-uniform float groundY;
 uniform float groundAngle;
 uniform float shadowLength;
 
@@ -17,6 +16,7 @@ uniform vec2 corner2Pos;
 uniform vec3 lightPos;
 
 uniform vec4 shadowColor;
+uniform vec4 limits;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -35,6 +35,8 @@ void main()
 		newPosition = vec4(pos,1.0);	
 		
 	}
+		color = shadowColor;
+
 	switch(gl_VertexID)
 	{
 	
@@ -50,17 +52,75 @@ void main()
 		case 2:
 			angle = atan(corner2Pos.y - lightPos.y, corner2Pos.x-lightPos.x);
 			newPosition.x = corner2Pos.x +  shadowLength * cos(angle);
-			newPosition.y = corner2Pos.y - shadowLength * sin(angle);
+			newPosition.y = corner2Pos.y + shadowLength * sin(angle);
+			if(newPosition.y > limits.y){
+				newPosition.x +=    (newPosition.y - limits.y) * cos(angle);
+				newPosition.y = limits.y;
+			}
+			else if( newPosition.y < limits.x)
+			{
+				newPosition.x +=    (limits.x - newPosition.y) * cos(angle);
+				newPosition.y = limits.x;
+			}
+			
+			if(newPosition.x < limits.z)
+			{
+				float dX= limits.z-newPosition.x;	
+				
+				newPosition.x = limits.z;
+				newPosition.y = max(min(newPosition.y  -tan(angle) * dX, limits.y), limits.x);
+				
+			}
+			if(newPosition.x > limits.w)
+			{
+				float dX= newPosition.x - limits.w;	
+				
+				newPosition.x = limits.w;
+				newPosition.y = max(min(newPosition.y + tan(angle) * dX, limits.y), limits.x);
+				
+			}
 			break;
 		
 		case 3: 
 			angle = atan(corner1Pos.y - lightPos.y, corner1Pos.x-lightPos.x);
 			newPosition.x = corner1Pos.x + shadowLength * cos(angle);
 			newPosition.y = corner1Pos.y + shadowLength * sin(angle);
+			if(newPosition.y > limits.y){
+				newPosition.x +=    (newPosition.y - limits.y) * cos(angle);
+				newPosition.y = limits.y;
+			}
+			else if( newPosition.y < limits.x)
+			{
+				newPosition.x +=    (limits.x - newPosition.y) * cos(angle);
+				newPosition.y = limits.x;
+			}
+			
+			
+			if(newPosition.x < limits.z)
+			{
+				float dX= limits.z-newPosition.x;	
+				
+				newPosition.x = limits.z;
+				newPosition.y = max(min(newPosition.y - tan(angle) * dX, limits.y), limits.x);
+				
+			}
+			
+			if(newPosition.x > limits.w)
+			{
+				float dX= newPosition.x - limits.w;	
+				
+				newPosition.x = limits.w;
+				newPosition.y = max(min(newPosition.y + tan(angle) * dX, limits.y), limits.x);
+				
+			}
+			
+			
 			break;
 	}
 
-	color = shadowColor;
+	
+	
+	
 	
 	
 	gl_Position = projection * view * newPosition;
