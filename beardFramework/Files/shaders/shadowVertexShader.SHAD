@@ -53,6 +53,7 @@ void main()
 			angle = atan(corner2Pos.y - lightPos.y, corner2Pos.x-lightPos.x);
 			newPosition.x = corner2Pos.x +  shadowLength * cos(angle);
 			newPosition.y = corner2Pos.y + shadowLength * sin(angle);
+			color.w = 0;
 			if(newPosition.y > limits.y){
 				newPosition.x +=    (newPosition.y - limits.y) * cos(angle);
 				newPosition.y = limits.y;
@@ -85,6 +86,7 @@ void main()
 			angle = atan(corner1Pos.y - lightPos.y, corner1Pos.x-lightPos.x);
 			newPosition.x = corner1Pos.x + shadowLength * cos(angle);
 			newPosition.y = corner1Pos.y + shadowLength * sin(angle);
+			color.w = 0;
 			if(newPosition.y > limits.y){
 				newPosition.x +=    (newPosition.y - limits.y) * cos(angle);
 				newPosition.y = limits.y;

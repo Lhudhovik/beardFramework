@@ -168,7 +168,7 @@ class Shadow implements IRenderable
 		
 		//if (texture != null){
 			//GL.activeTexture( GL.TEXTURE0 + AssetManager.Get().GetFreeTextureUnit());
-			//shader.SetInt("sampler", AssetManager.Get().GetFreeTextureUnit());	
+			//shader.SetInt("sampler", 0);	
 			//GL.bindTexture(GL.TEXTURE_2D, texture);
 		//}
 

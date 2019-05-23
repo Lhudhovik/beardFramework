@@ -222,14 +222,14 @@ class Renderer
 					//}
 					
 					
-					//trace("render");
+					trace("render " +renderable.name);
 				}
 			
 				
 				
 				
 			}
-		
+		trace("  ");
 			LightManager.Get().CleanLightStates();
 			
 			GL.bindFramebuffer(GL.FRAMEBUFFER, 0);

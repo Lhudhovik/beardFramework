@@ -206,7 +206,7 @@ class Visual extends AbstractVisual implements IRenderable
 		GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
 		
 		drawCount++;
-		
+		//trace(renderDepth);
 		GLU.ShowErrors();
 			
 		
@@ -245,164 +245,85 @@ class Visual extends AbstractVisual implements IRenderable
 		RenderedObject.bottomEdge.normal.x = BotL.y - BotR.y;
 		RenderedObject.bottomEdge.normal.y = -(BotL.x - BotR.x);
 				
-		var direction:SVec2 ={x:light.x - (this.x + this.width * 0.5), y:  light.y - (y + height * 0.5) };
+		var direction:SVec2 ={x:0, y: 0 };
 		var dot:Float; 
 		
 		direction.x = light.x - (this.x + this.width * 0.5);
 		direction.y = light.y- (this.y);
-		
 		RenderedObject.topEdge.lighted = ((dot = RenderedObject.topEdge.normal.x * direction.x + RenderedObject.topEdge.normal.y * direction.y) > 0);
-		//trace(dot);
-		
+			
 		direction.x = light.x - (this.x);
 		direction.y = light.y- (this.y+ this.height *0.5);
-		
 		RenderedObject.leftEdge.lighted = ((dot = RenderedObject.leftEdge.normal.x * direction.x + RenderedObject.leftEdge.normal.y * direction.y) > 0);
-		//trace(dot);
 		
+	
 		direction.x = light.x - (this.x + this.width);
 		direction.y = light.y- (this.y + this.height*0.5);
-		
 		RenderedObject.rightEdge.lighted = ((dot = RenderedObject.rightEdge.normal.x * direction.x + RenderedObject.rightEdge.normal.y * direction.y) > 0);
-		//trace(dot);
+	
 		
 		direction.x = light.x - (this.x + this.width * 0.5);
 		direction.y = light.y- (this.y + this.height);
 		RenderedObject.bottomEdge.lighted = ((dot = RenderedObject.bottomEdge.normal.x * direction.x + RenderedObject.bottomEdge.normal.y * direction.y) > 0);
-			trace(dot);
-			trace("\n\n");
+			
 		var pos1:SVec2 = null;
 		var pos2:SVec2 = null;
 		
 		if ((RenderedObject.topEdge.lighted && !RenderedObject.leftEdge.lighted) || (RenderedObject.leftEdge.lighted && !RenderedObject.topEdge.lighted)){
 			
 			pos1 = TopL;
-			//trace("pos1 : TopL");
+			
 		}
 		if ((RenderedObject.topEdge.lighted && !RenderedObject.rightEdge.lighted) || (RenderedObject.rightEdge.lighted && !RenderedObject.topEdge.lighted)){
-			if (pos1 == null){
-				pos1 = TopR;
-				//trace("pos1 : TopR");
-			}
-			else if(pos2 == null) {
-				pos2 = TopR;
-				//trace("pos2 : TopR");
-			}
+			if (pos1 == null)		pos1 = TopR;
+			else if(pos2 == null) 	pos2 = TopR;
+		
 		}				
 		if ((RenderedObject.rightEdge.lighted && !RenderedObject.bottomEdge.lighted) || (RenderedObject.bottomEdge.lighted && !RenderedObject.rightEdge.lighted)){
-			if (pos1 == null){
-				pos1 = BotR;
-				//trace("pos1 : BotR");
-			}
-			else if(pos2 == null) {
-				pos2 = BotR;
-					//trace("pos2 : BotR");
-			}
+			if (pos1 == null)		pos1 = BotR;
+			else if(pos2 == null)	pos2 = BotR;
 			
 		}
 		if ((RenderedObject.bottomEdge.lighted && !RenderedObject.leftEdge.lighted) || (RenderedObject.leftEdge.lighted && !RenderedObject.bottomEdge.lighted)){
 			if(pos2 == null) pos2 = BotL;
-				//trace("pos2 : BotL");
+				
 		}
 		
-	
-		
-		//var angle: Float = Math.atan2( pos1.y - light.y, pos1.x - light.x);
-		//
-		//trace("X pos 1 = " + (pos1.x + 10 * Math.cos(angle)));
-		//trace("Y pos 1 = " + (pos1.y + 10 * Math.sin(angle)));
-		//
-		//angle = Math.atan2( pos2.y - light.y, pos2.x - light.x);
-		//
-		//trace("X pos 2 = " + (pos2.x + 10 * Math.cos(angle)));
-		//trace("Y pos 2 = " + (pos2.y + 10 * Math.sin(angle)));
 		
 		
-		if (pos1 == null && pos2 == null){
+		if (pos1 == null || pos2 == null){
 			shadow.shader.SetFloat("shadowLength", 0);
 		}
 		else{
-			shadow.shader.SetFloat("shadowLength",500); 
+			shadow.shader.SetFloat("shadowLength",1000); 
 			shadow.shader.Set2Float("corner1Pos", pos1.x, pos1.y); 
 			shadow.shader.Set2Float("corner2Pos", pos2.x, pos2.y); 
 		}
-		shadow.shader.Set4Float("shadowColor", 0,0,0,1); 
+		shadow.shader.Set4Float("shadowColor", 0,0,0,0.2); 
 				
 		shadow.width = this.width;
 		shadow.height = this.height;
 		shadow.x = this.x;
 		shadow.y = this.y;
-		shadow.z = this.renderDepth +0.05;
+		shadow.z = this.renderDepth +0.0005;
+		//trace(shadow.z);
+		shadow.name = this.name + "shadow";
 		shadow.cameras = this.cameras;
 		shadow.shader.Set3Float("lightPos", light.x, light.y, light.z);
 		shadow.shader.SetInt("useModel", 1);
-		shadow.shader.Set4Float("limits", -10,this.y+this.height, -50,150);
+		shadow.shader.Set4Float("limits", -10000,this.y+this.height + 10000, -50000,150000);
 		
 		
-
 		//trace(shadowPointID);
 		//trace("top : " + RenderedObject.topEdge.lighted);
 		//trace("left : " +  RenderedObject.leftEdge.lighted);
 		//trace("right : " +  RenderedObject.rightEdge.lighted);
 		//trace("bottom: " +  RenderedObject.bottomEdge.lighted);
-		//trace("\n");
+		////trace("\n");
 		
 		
 	}
-	//public function CastShadow(light:Light, camera:Camera):Void 
-	//{
-		//
-		//
-		//var usedShader:Shader = LightManager.Get().shadowShader;
-		//
-		//usedShader.Use();
-		//
-		//usedShader.SetInt("useModel", 1);
-		//
-		//renderer.model.identity();
-		//renderer.model.appendScale(this.width, this.height, 1.0);
-		//renderer.model.appendTranslation(this.x, this.y, (visible ? renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT + 1));
-		//renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
-		//usedShader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
-		//
-		//usedShader.Set3Float("lightPos", light.x, light.y, light.z);
-		//usedShader.SetFloat("groundY", 100);
-		//usedShader.SetFloat("groundAngle", 10);
-				//
-		////var drawCount:Int = 0;
-		//
-		////GL.bindVertexArray(VAO);
-		//if (renderer.boundBuffer != VBO){
-		//
-			////shader.Use();
-			//
-			//GL.bindBuffer(GL.ARRAY_BUFFER, VBO);
-			//renderer.boundBuffer = VBO;
-			//
-			//GL.enableVertexAttribArray(0);
-			//GL.vertexAttribPointer(0, 3, GL.FLOAT, false, 3 * Float32Array.BYTES_PER_ELEMENT, 0);
-					//
-			//GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
-			//GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
-		//}
-		//
-//
-		////LightManager.Get().CompileLights(shader, this.lightGroup, lightGroupChanged);
-		////lightGroupChanged = false;
-		//
-		//usedShader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
-		//usedShader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
-		//GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
-		//
-		////drawCount++;
-		//
-		//GLU.ShowErrors();
-			//
-		//
-			//
-		////
-		////return drawCount;
-	//}
+	
 	public inline function HasCamera(camera:String):Bool
 	{
 		var result:Bool = false;
