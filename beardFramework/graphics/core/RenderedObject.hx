@@ -1,6 +1,7 @@
 package beardFramework.graphics.core;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.rendering.Shadow;
 import beardFramework.graphics.rendering.batches.Batch;
 import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
 import beardFramework.graphics.rendering.lights.Light;
@@ -10,6 +11,8 @@ import beardFramework.interfaces.ICameraDependent;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.Edge;
+import beardFramework.utils.libraries.StringLibrary;
+import beardFramework.utils.simpleDataStruct.SVec2;
 
 
 /**
@@ -40,17 +43,17 @@ class RenderedObject implements ICameraDependent
 	
 	public var onAABBTree(default, set):Bool;
 	public var layer:BeardLayer;
-	public var displayingCameras(default, null):List<String>;	
+	public var cameras:List<String>;	
 	public var renderDepth(default,null):Float;
 	public var restrictedCameras(default, null):Array<String>;
 	public var rotationCosine(default,null):Float;
 	public var rotationSine(default, null):Float;
 	public var material:Material;
 	public var color(get, set):Color;
-	
+	public var shadowCaster:Bool;
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
-	
+	private var shadows:Map<String, Shadow>;
 	
 	private function new() 
 	{
@@ -63,16 +66,16 @@ class RenderedObject implements ICameraDependent
 		rotation = 0;
 		rotationSine = Math.sin (0);
 		rotationCosine = Math.cos (0);
-		displayingCameras = new List<String>();
+		cameras = new List<String>();
 		onAABBTree = false;
-		
+		shadowCaster = true;
 		material = new Material();
 		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
 		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
 		material.components["diffuse"] = diffuseComponent;
 		material.components["specular"] = specularComponent;
 		material.transparency = 1;
-	
+		shadows = new Map();
 	}
 	
 	inline public function get_x():Float 
@@ -326,11 +329,118 @@ class RenderedObject implements ICameraDependent
 		
 	}
 	
-	public function CastShadow(light:Light):Void
+	public function CastShadow(light:Light):Void 
 	{
 		
-	}
+		if (shadows[light.name] == null){
+			shadows[light.name] = new Shadow();
+			Renderer.Get().AddRenderable(shadows[light.name], true);
+		}
 		
+		var shadow:Shadow =  shadows[light.name] ;
+		shadow.shader.Use();
+			
+		var TopL:SVec2 = {x:x, y:y};
+		var TopR:SVec2 = {x:x+width, y:y};
+		var BotR:SVec2 = {x:x+width, y:y+height};
+		var BotL:SVec2 = {x:x, y:y + height};
+		
+		topEdge.normal.x = TopR.y - TopL.y;
+		topEdge.normal.y = -(TopR.x - TopL.x);
+		
+		leftEdge.normal.x = TopL.y - BotL.y;
+		leftEdge.normal.y = TopL.x - BotL.x;
+		
+		rightEdge.normal.x = BotR.y - TopR.y;
+		rightEdge.normal.y = BotR.x - TopR.x;
+		
+		bottomEdge.normal.x = BotL.y - BotR.y;
+		bottomEdge.normal.y = -(BotL.x - BotR.x);
+				
+		var direction:SVec2 ={x:0, y: 0 };
+		var dot:Float; 
+		
+		direction.x = light.x - (this.x + this.width * 0.5);
+		direction.y = light.y- (this.y);
+		topEdge.lighted = ((dot = topEdge.normal.x * direction.x + topEdge.normal.y * direction.y) > 0);
+			
+		direction.x = light.x - (this.x);
+		direction.y = light.y- (this.y+ this.height *0.5);
+		leftEdge.lighted = ((dot = leftEdge.normal.x * direction.x + leftEdge.normal.y * direction.y) > 0);
+		
+	
+		direction.x = light.x - (this.x + this.width);
+		direction.y = light.y- (this.y + this.height*0.5);
+		rightEdge.lighted = ((dot = rightEdge.normal.x * direction.x + rightEdge.normal.y * direction.y) > 0);
+	
+		
+		direction.x = light.x - (this.x + this.width * 0.5);
+		direction.y = light.y- (this.y + this.height);
+		bottomEdge.lighted = ((dot = bottomEdge.normal.x * direction.x + bottomEdge.normal.y * direction.y) > 0);
+			
+		var pos1:SVec2 = null;
+		var pos2:SVec2 = null;
+		
+		if ((topEdge.lighted && !leftEdge.lighted) || (leftEdge.lighted && !topEdge.lighted)){
+			
+			pos1 = TopL;
+			
+		}
+		if ((topEdge.lighted && !rightEdge.lighted) || (rightEdge.lighted && !topEdge.lighted)){
+			if (pos1 == null)		pos1 = TopR;
+			else if(pos2 == null) 	pos2 = TopR;
+		
+		}				
+		if ((rightEdge.lighted && !bottomEdge.lighted) || (bottomEdge.lighted && !rightEdge.lighted)){
+			if (pos1 == null)		pos1 = BotR;
+			else if(pos2 == null)	pos2 = BotR;
+			
+		}
+		if ((bottomEdge.lighted && !leftEdge.lighted) || (leftEdge.lighted && !bottomEdge.lighted)){
+			if(pos2 == null) pos2 = BotL;
+				
+		}
+		
+		
+		
+		if (pos1 != null && pos2 != null){
+			shadow.corner1.x = pos1.x; 
+			shadow.corner1.y = pos1.y; 
+			shadow.corner2.x = pos2.x; 
+			shadow.corner2.y = pos2.y; 
+			shadow.renderDepth = this.renderDepth +0.0005;
+		}
+		else shadow.renderDepth = Renderer.Get().VISIBLEDEPTHLIMIT + 1;
+		shadow.shader.Set4Float(StringLibrary.SHADOW_COLOR, 0,0,0,0.2); 
+				
+		shadow.width = this.width;
+		shadow.height = this.height;
+		shadow.x = this.x;
+		shadow.y = this.y;
+		
+		shadow.z = this.z + 0.0005;
+		//trace(shadow.z);
+		shadow.name = this.name + StringLibrary.SHADOW;
+		//shadow.cameras = this.cameras;
+		shadow.lightPos.x = light.x; 
+		shadow.lightPos.y = light.y; 
+		shadow.lightPos.z = light.z;
+		shadow.limits.x = -10000;
+		shadow.limits.y = this.y + this.height + 100000;
+		shadow.limits.width = -50000; 
+		shadow.limits.height = 150000;
+		
+		
+		//trace(shadowPointID);
+		//trace("top : " + RenderedObject.topEdge.lighted);
+		//trace("left : " +  RenderedObject.leftEdge.lighted);
+		//trace("right : " +  RenderedObject.rightEdge.lighted);
+		//trace("bottom: " +  RenderedObject.bottomEdge.lighted);
+		////trace("\n");
+		
+		
+	}
+	
 	function set_onAABBTree(value:Bool):Bool 
 	{
 		if (value != onAABBTree && layer!= null)

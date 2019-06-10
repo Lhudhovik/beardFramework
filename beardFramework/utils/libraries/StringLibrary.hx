@@ -54,6 +54,7 @@ class StringLibrary
 	public static inline var SHADER:String 					= "shader";
 	public static inline var SHADER_EXTENSION:String 		= ".SHAD";
 	public static inline var SHADOW:String 					= "shadow";
+	public static inline var SHADOW_COLOR:String 			= "shadowColor";
 	public static inline var SHADOW_MAP:String 				= "shadowMap";
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";

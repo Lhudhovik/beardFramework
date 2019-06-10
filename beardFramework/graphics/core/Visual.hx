@@ -47,13 +47,12 @@ class Visual extends AbstractVisual implements IRenderable
 	@:isVar public var readyForRendering(get, null):Bool;
 	
 	public var shader(default, null):Shader;
-	public var cameras:List<String>;
 	public var drawMode:Int;
 	public var lightGroup(default, set):String;	
 	public var lightGroupChanged:Bool;
 	
 	private var renderer:Renderer;
-	private var shadows:Map<String, Shadow>;
+	
 	
 	public static function InitSharedGraphics():Void
 	{
@@ -102,7 +101,7 @@ class Visual extends AbstractVisual implements IRenderable
 		cameras.add(StringLibrary.DEFAULT);
 		renderer = Renderer.Get();
 		readyForRendering = true;
-		shadows = new Map();
+		
 	}
 	
 	function get_readyForRendering():Bool 
@@ -203,6 +202,7 @@ class Visual extends AbstractVisual implements IRenderable
 		
 		shader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
 		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
+		
 		GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
 		
 		drawCount++;
@@ -216,113 +216,6 @@ class Visual extends AbstractVisual implements IRenderable
 	}
 	
 	
-	
-	override public function CastShadow(light:Light):Void 
-	{
-		
-		if (shadows[light.name] == null){
-			shadows[light.name] = new Shadow();
-			renderer.AddRenderable(shadows[light.name], true);
-		}
-		
-		var shadow:Shadow =  shadows[light.name] ;
-		shadow.shader.Use();
-			
-		var TopL:SVec2 = {x:x, y:y};
-		var TopR:SVec2 = {x:x+width, y:y};
-		var BotR:SVec2 = {x:x+width, y:y+height};
-		var BotL:SVec2 = {x:x, y:y + height};
-		
-		RenderedObject.topEdge.normal.x = TopR.y - TopL.y;
-		RenderedObject.topEdge.normal.y = -(TopR.x - TopL.x);
-		
-		RenderedObject.leftEdge.normal.x = TopL.y - BotL.y;
-		RenderedObject.leftEdge.normal.y = TopL.x - BotL.x;
-		
-		RenderedObject.rightEdge.normal.x = BotR.y - TopR.y;
-		RenderedObject.rightEdge.normal.y = BotR.x - TopR.x;
-		
-		RenderedObject.bottomEdge.normal.x = BotL.y - BotR.y;
-		RenderedObject.bottomEdge.normal.y = -(BotL.x - BotR.x);
-				
-		var direction:SVec2 ={x:0, y: 0 };
-		var dot:Float; 
-		
-		direction.x = light.x - (this.x + this.width * 0.5);
-		direction.y = light.y- (this.y);
-		RenderedObject.topEdge.lighted = ((dot = RenderedObject.topEdge.normal.x * direction.x + RenderedObject.topEdge.normal.y * direction.y) > 0);
-			
-		direction.x = light.x - (this.x);
-		direction.y = light.y- (this.y+ this.height *0.5);
-		RenderedObject.leftEdge.lighted = ((dot = RenderedObject.leftEdge.normal.x * direction.x + RenderedObject.leftEdge.normal.y * direction.y) > 0);
-		
-	
-		direction.x = light.x - (this.x + this.width);
-		direction.y = light.y- (this.y + this.height*0.5);
-		RenderedObject.rightEdge.lighted = ((dot = RenderedObject.rightEdge.normal.x * direction.x + RenderedObject.rightEdge.normal.y * direction.y) > 0);
-	
-		
-		direction.x = light.x - (this.x + this.width * 0.5);
-		direction.y = light.y- (this.y + this.height);
-		RenderedObject.bottomEdge.lighted = ((dot = RenderedObject.bottomEdge.normal.x * direction.x + RenderedObject.bottomEdge.normal.y * direction.y) > 0);
-			
-		var pos1:SVec2 = null;
-		var pos2:SVec2 = null;
-		
-		if ((RenderedObject.topEdge.lighted && !RenderedObject.leftEdge.lighted) || (RenderedObject.leftEdge.lighted && !RenderedObject.topEdge.lighted)){
-			
-			pos1 = TopL;
-			
-		}
-		if ((RenderedObject.topEdge.lighted && !RenderedObject.rightEdge.lighted) || (RenderedObject.rightEdge.lighted && !RenderedObject.topEdge.lighted)){
-			if (pos1 == null)		pos1 = TopR;
-			else if(pos2 == null) 	pos2 = TopR;
-		
-		}				
-		if ((RenderedObject.rightEdge.lighted && !RenderedObject.bottomEdge.lighted) || (RenderedObject.bottomEdge.lighted && !RenderedObject.rightEdge.lighted)){
-			if (pos1 == null)		pos1 = BotR;
-			else if(pos2 == null)	pos2 = BotR;
-			
-		}
-		if ((RenderedObject.bottomEdge.lighted && !RenderedObject.leftEdge.lighted) || (RenderedObject.leftEdge.lighted && !RenderedObject.bottomEdge.lighted)){
-			if(pos2 == null) pos2 = BotL;
-				
-		}
-		
-		
-		
-		if (pos1 == null || pos2 == null){
-			shadow.shader.SetFloat("shadowLength", 0);
-		}
-		else{
-			shadow.shader.SetFloat("shadowLength",1000); 
-			shadow.shader.Set2Float("corner1Pos", pos1.x, pos1.y); 
-			shadow.shader.Set2Float("corner2Pos", pos2.x, pos2.y); 
-		}
-		shadow.shader.Set4Float("shadowColor", 0,0,0,0.2); 
-				
-		shadow.width = this.width;
-		shadow.height = this.height;
-		shadow.x = this.x;
-		shadow.y = this.y;
-		shadow.z = this.renderDepth +0.0005;
-		//trace(shadow.z);
-		shadow.name = this.name + "shadow";
-		shadow.cameras = this.cameras;
-		shadow.shader.Set3Float("lightPos", light.x, light.y, light.z);
-		shadow.shader.SetInt("useModel", 1);
-		shadow.shader.Set4Float("limits", -10000,this.y+this.height + 10000, -50000,150000);
-		
-		
-		//trace(shadowPointID);
-		//trace("top : " + RenderedObject.topEdge.lighted);
-		//trace("left : " +  RenderedObject.leftEdge.lighted);
-		//trace("right : " +  RenderedObject.rightEdge.lighted);
-		//trace("bottom: " +  RenderedObject.bottomEdge.lighted);
-		////trace("\n");
-		
-		
-	}
 	
 	public inline function HasCamera(camera:String):Bool
 	{

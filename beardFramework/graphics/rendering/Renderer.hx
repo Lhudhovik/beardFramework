@@ -89,7 +89,7 @@ class Renderer
 		//
 		GL.enable(GL.DEPTH_TEST);
 		GL.enable(GL.BLEND);
-	
+		
 		//GL.disable(GL.CULL_FACE);
 		//GL.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
 		GL.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
@@ -98,7 +98,6 @@ class Renderer
 		GL.enable(GL.SCISSOR_TEST);
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
-		
 		
 		
 		AssetManager.Get().AddTextureFromImage(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.WHITE), AssetManager.Get().AllocateFreeTextureIndex());
@@ -170,12 +169,13 @@ class Renderer
 		
 		if (ready)
 		{
-			
+			//GL.enable(GL.STENCIL_TEST);
+			//GL.stencilFunc(GL.ALWAYS, 1, 0xFF);
+			//GL.stencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
 			
 			var renderable:IRenderable;
 			drawCount = 0;
-			
-			
+						
 			//calculate light 
 			var layer:BeardLayer;
 			
@@ -187,7 +187,7 @@ class Renderer
 					{
 						for (object in layer.renderedObjects)
 						{
-							object.CastShadow(light);
+							if(object.shadowCaster) object.CastShadow(light);
 						}
 				
 					}
@@ -202,40 +202,47 @@ class Renderer
 				camera.framebuffer.Bind(GL.FRAMEBUFFER);
 				GL.enable(GL.DEPTH_TEST);
 				GL.clearColor(camera.clearColor.getRedf(),camera.clearColor.getGreenf(), camera.clearColor.getBluef(),1);
-				GL.clear(GL.COLOR_BUFFER_BIT);
-				GL.clear(GL.DEPTH_BUFFER_BIT);
+				GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
+				
 				GL.viewport(0, - Math.round(BeardGame.Get().window.height - camera.viewportHeight) , BeardGame.Get().window.width, BeardGame.Get().window.height);
-				//GL.viewport(0, 0 camera.viewport.width, camera.viewport.height);
+								
+				//GL.stencilFunc(GL.ALWAYS, 1, 0xFF);
+				//GL.stencilMask(0xFF);
+				//GL.colorMask(false, false, false, false);		
 				for (i in 0...renderables.length)
 				{
 					renderable = renderables.get(i);
 								
-					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
+					if (!Std.is(renderable, Shadow)) continue;
+
+					renderable.Render(camera);
+				}
+				//GL.colorMask(true, true, true, true);
+				//GL.stencilFunc(GL.NOTEQUAL, 1, 0xFF);
+				//GL.stencilMask(0x00);
+				//GL.disable(GL.DEPTH_TEST);
+							GL.clear(GL.DEPTH_BUFFER_BIT);
+				for (i in 0...renderables.length)
+				{
+					renderable = renderables.get(i);
+								
+					if (Std.is(renderable, Shadow)||!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
 
 					drawCount += renderable.Render(camera);
-					
-					//for (light in LightManager.Get().lights)
-					//{
-						
-						//renderable.CastShadow(light, camera);
-						
-					//}
-					
-					
-					trace("render " +renderable.name);
 				}
-			
-				
-				
-				
+					
 			}
-		trace("  ");
+		
 			LightManager.Get().CleanLightStates();
 			
+			//GL.stencilMask(0xFF);
+				
 			GL.bindFramebuffer(GL.FRAMEBUFFER, 0);
 			GL.disable(GL.DEPTH_TEST);
+			//GL.disable(GL.STENCIL_TEST);
 			GL.clearColor(1, 1, 1,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
+			
 			GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			
 			for (camera in BeardGame.Get().cameras)
@@ -243,15 +250,10 @@ class Renderer
 				if (camera.framebuffer != null && camera.framebuffer.quad != null)
 				{
 					camera.framebuffer.quad.Render();
-					//drawCount++;
-					//trace(camera.name);
 				}
 				
 			}
-			
-			
-			//lightManager.framebuffer.quad.Render();
-			//trace(renderables);
+				
 			//trace(drawCount);
 		}
 		

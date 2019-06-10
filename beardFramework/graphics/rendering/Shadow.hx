@@ -9,6 +9,9 @@ import beardFramework.interfaces.IRenderable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.libraries.StringLibrary;
+import beardFramework.utils.simpleDataStruct.SRect;
+import beardFramework.utils.simpleDataStruct.SVec2;
+import beardFramework.utils.simpleDataStruct.SVec3;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLTexture;
@@ -22,14 +25,18 @@ import lime.utils.UInt16Array;
  */
 class Shadow implements IRenderable
 {
+	public static var shadowLength:Float = 1000;
+	
 	@:isVar public var name(get, set):String;
 	@:isVar public var z(get, set):Float;
+	
+	
 	
 	public var readyForRendering(get, null):Bool;
 	public var shader(default, null):Shader;
 	public var cameras:List<String>;
 	public var lightGroup(default, set):String;
-	
+	public var renderDepth:Float;
 	public var x:Float;
 	public var y:Float;
 	public var width:Float;
@@ -37,6 +44,13 @@ class Shadow implements IRenderable
 	public var rotation:Float;
 	public var renderer:Renderer;
 	public var drawMode:Int = GL.TRIANGLES;
+	public var corner1:SVec2;
+	public var corner2:SVec2;
+	public var lightPos:SVec3;
+	/**
+	 * x: top, y: bottom, width : left, height: right
+	 */
+	public var limits:SRect; 
 	//public var texture:GLTexture;
 	
 	private static var verticesData:Float32Array; //overide with local variable if necessary
@@ -54,6 +68,10 @@ class Shadow implements IRenderable
 		width = 1;
 		height = 1;
 		
+		corner1 = {x:0, y:0};
+		corner2 = {x:0, y:0};
+		lightPos = {x:0, y:0, z:0};
+		limits = {x:0, y:0, width:0, height:0};
 		renderer = Renderer.Get();
 		shader = Shader.GetShader(StringLibrary.SHADOW);
 		shader.Use();
@@ -144,14 +162,20 @@ class Shadow implements IRenderable
 		
 		renderer.model.identity();
 		renderer.model.appendScale(width, this.height, 1.0);
-		renderer.model.appendTranslation(this.x, this.y,this.z);
+		renderer.model.appendTranslation(this.x, this.y,this.renderDepth);
 		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
 		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
 		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
 		shader.SetMatrix4fv(StringLibrary.PROJECTION, renderer.projection);
 		
-	
+		shader.Set2Float("corner1Pos", corner1.x, corner1.y); 
+		shader.Set2Float("corner2Pos", corner2.x, corner2.y); 
+		shader.Set4Float("limits", limits.x,limits.y, limits.width,limits.height);
 		
+		//trace(shadowPointID);
+		shader.Set3Float("lightPos", lightPos.x, lightPos.y, lightPos.z);
+		shader.SetInt("useModel", 1);
+		shader.SetFloat("shadowLength",shadowLength); 
 		if (renderer.boundBuffer != VBO){
 		
 			shader.Use();
@@ -181,16 +205,17 @@ class Shadow implements IRenderable
 	
 	public inline function HasCamera(camera:String):Bool 
 	{
-		var result:Bool = false;
-		
-		for (name in cameras)
-			if (name == camera)
-			{
-				result = true;
-				break;
-			}
+		var result:Bool = true;
+		//
+		//for (name in cameras)
+			//if (name == camera)
+			//{
+				//result = true;
+				//break;
+			//}
 		
 		return result;
 	}
 	
 }
+

@@ -25,6 +25,7 @@ uniform mat4 projection;
 void main()
 {
 	float angle;
+	float length;
 	vec4 newPosition;
 
 	if(useModel > 0){
@@ -37,6 +38,8 @@ void main()
 	}
 		color = shadowColor;
 
+		
+	
 	switch(gl_VertexID)
 	{
 	
@@ -51,8 +54,10 @@ void main()
 			break;
 		case 2:
 			angle = atan(corner2Pos.y - lightPos.y, corner2Pos.x-lightPos.x);
-			newPosition.x = corner2Pos.x +  shadowLength * cos(angle);
-			newPosition.y = corner2Pos.y + shadowLength * sin(angle);
+			length = abs(shadowLength / cos(angle));
+			
+			newPosition.x = corner2Pos.x +  length * cos(angle);
+			newPosition.y = corner2Pos.y + length * sin(angle);
 			color.w = 0;
 			if(newPosition.y > limits.y){
 				newPosition.x +=    (newPosition.y - limits.y) * cos(angle);
@@ -84,8 +89,9 @@ void main()
 		
 		case 3: 
 			angle = atan(corner1Pos.y - lightPos.y, corner1Pos.x-lightPos.x);
-			newPosition.x = corner1Pos.x + shadowLength * cos(angle);
-			newPosition.y = corner1Pos.y + shadowLength * sin(angle);
+			length = abs(shadowLength / cos(angle));
+			newPosition.x = corner1Pos.x + length* cos(angle);
+			newPosition.y = corner1Pos.y + length * sin(angle);
 			color.w = 0;
 			if(newPosition.y > limits.y){
 				newPosition.x +=    (newPosition.y - limits.y) * cos(angle);

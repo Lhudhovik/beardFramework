@@ -15,7 +15,7 @@ interface ICameraDependent
 	public var height(get,set):Float;
 	
 	public var restrictedCameras(default, null):Array<String>;
-	public var displayingCameras(default, null):List<String>;
+	public var cameras:List<String>;
 	public function AuthorizeCamera(addedCameraID : String):Void;
 	public function ForbidCamera(forbiddenCameraID : String):Void;
 	//public function RenderThroughCamera(camera : Camera):Void;

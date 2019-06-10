@@ -2,7 +2,7 @@ package beardFramework.graphics.core;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.libraries.StringLibrary;
-
+import beardFramework.graphics.rendering.Shadow;
 /**
  * ...
  * @author 
@@ -13,7 +13,7 @@ class AbstractVisual extends RenderedObject
 	
 	@:isVar	public var atlas(default, set):String;
 	@:isVar	public var texture(default, set):String;
-	
+
 	private function new(texture:String="", atlas:String="" , name:String = "") 
 	{
 		super();

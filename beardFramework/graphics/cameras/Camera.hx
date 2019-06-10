@@ -99,7 +99,7 @@ class Camera
 		framebuffer.quad.height = viewport.height;
 		framebuffer.quad.x = viewport.x;
 		framebuffer.quad.y = viewport.y;
-		
+	
 		framebuffer.UnBind(GL.FRAMEBUFFER);
 	}
 	
@@ -207,18 +207,18 @@ class Camera
 		
 		if (success && (success = (((visual.x + visual.width) > (centerX - (viewportWidth*0.5) - buffer)) && (visual.x < (centerX + (viewportWidth *0.5)  + buffer)) && ((visual.y + visual.height) > (centerY - (viewportHeight *0.5) - buffer)) && (visual.y < (centerY + (viewportHeight*0.5) + buffer)))))
 		{
-			if (visual.displayingCameras != null){
-				for (camera in visual.displayingCameras)
+			if (visual.cameras != null){
+				for (camera in visual.cameras)
 					if (camera == this.name) return success;
 			
-				visual.displayingCameras.add(this.name);
+				visual.cameras.add(this.name);
 			}
 			
 		}
-		else if (visual.displayingCameras != null)
-			for (camera in visual.displayingCameras)
+		else if (visual.cameras != null)
+			for (camera in visual.cameras)
 				if (camera == this.name){
-					visual.displayingCameras.remove(this.name);
+					visual.cameras.remove(this.name);
 					break;
 				}
 		
