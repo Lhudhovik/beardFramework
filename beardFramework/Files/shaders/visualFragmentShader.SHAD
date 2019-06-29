@@ -58,7 +58,6 @@ struct SpotLight {
 in vec3 FragmentPosition;
 in vec4 ShadowPosition;
 in vec3 FragmentUV;
-in mat3 TBN;
 
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLights[NR_POINT_LIGHTS];
@@ -79,13 +78,13 @@ void main()
 	//----------------------------------------------------------------------------------------------------------------------initial setup
 	//vec3 normal = normalize(vec3(0,0,-1));
 	
-	//if( material.normalMap.uv.z !=0 && material.normalMap.uv.w !=0){
+	if( material.normalMap.uv.z !=0 && material.normalMap.uv.w !=0){
 		
 		normal = texture(material.normalMap.sampler, vec2(material.normalMap.uv.x + (material.normalMap.uv.z*FragmentUV.x),material.normalMap.uv.y + (material.normalMap.uv.w*FragmentUV.y))).rgb;
 		normal = normalize(normal * 2.0 - 1.0);  
 	
-	//}
-	//else normal = normalize(vec3(0,0,-1));
+	}
+	else normal = normalize(vec3(0,0,-1));
 	 
 	vec3 viewDirection = normalize(vec3(0,0,-1));
 	vec4 diffTexture = texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentUV.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentUV.y)));
@@ -150,12 +149,12 @@ void CalculateDirectionalLights(vec3 normal, vec3 viewDirection)
 			lightDirection = normalize(-light.direction);
 				
 			//----------------------------------------------------------------------------------------------------------------------ambient
-			ambient += light.ambient * material.diffuse.color ;
+			ambient += light.ambient /** material.diffuse.color*/ ;
 			
 			//----------------------------------------------------------------------------------------------------------------------diffuse
 
 			diff = max(dot(normal, lightDirection), 0.0);
-			diffuse += diff  * light.diffuse * material.diffuse.color;
+			diffuse += diff  * light.diffuse;
 
 			//----------------------------------------------------------------------------------------------------------------------specular
 			reflectionDirection = reflect(-lightDirection, normal);

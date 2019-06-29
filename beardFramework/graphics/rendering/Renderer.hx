@@ -86,18 +86,11 @@ class Renderer
 	
 	private function Init():Void
 	{
-		
-		
-		//Application.current.window.onResize.add(OnResize);
-		//
+				
 		GL.enable(GL.DEPTH_TEST);
 		GL.enable(GL.BLEND);
 		
-		//GL.disable(GL.CULL_FACE);
-		//GL.blendFunc(GL.ONE, GL.ONE_MINUS_SRC_ALPHA);
 		GL.blendFunc(GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA);
-	
-		//GL.lineWidth(1);
 		GL.enable(GL.SCISSOR_TEST);
 		
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
@@ -191,7 +184,6 @@ class Renderer
 		blurFrameBuffer1.quad.shader = blurShader;
 		blurFrameBuffer2.quad.shader = blurShader;
 		
-		//BeardGame.Get().onWindowResize(Application.current.window.width, Application.current.window.height);
 		OnResize(Application.current.window.width, Application.current.window.height);
 		
 		
@@ -202,14 +194,11 @@ class Renderer
 		
 		if (ready)
 		{
-			//GL.enable(GL.STENCIL_TEST);
-			//GL.stencilFunc(GL.ALWAYS, 1, 0xFF);
-			//GL.stencilOp(GL.KEEP, GL.KEEP, GL.REPLACE);
+	
 			
 			var renderable:IRenderable;
 			drawCount = 0;
 						
-			//trace("shadows calculation starting");
 			var layer:BeardLayer;
 			
 			for (i in 0...BeardGame.Get().GetLayersCount())
@@ -226,10 +215,8 @@ class Renderer
 					}
 	
 			}
-			//trace("shadows calculated");
+			
 			DepthSorting();
-		//trace("depth sorting ended");
-		//trace("start rendering");
 			for (camera in BeardGame.Get().cameras)
 			{
 				
@@ -240,27 +227,12 @@ class Renderer
 				
 				GL.viewport(0, - Math.round(BeardGame.Get().window.height - camera.viewportHeight) , BeardGame.Get().window.width, BeardGame.Get().window.height);
 								
-				////GL.stencilFunc(GL.ALWAYS, 1, 0xFF);
-				////GL.stencilMask(0xFF);
-				////GL.colorMask(false, false, false, false);		
-				//for (i in 0...renderables.length)
-				//{
-					//renderable = renderables.get(i);
-								//
-					//if (!Std.is(renderable, Shadow)) continue;
-//
-					//renderable.Render(camera);
-				//}
-				////GL.colorMask(true, true, true, true);
-				////GL.stencilFunc(GL.NOTEQUAL, 1, 0xFF);
-				////GL.stencilMask(0x00);
-				////GL.disable(GL.DEPTH_TEST);
-				//GL.clear(GL.DEPTH_BUFFER_BIT);
+				
 				for (i in 0...renderables.length)
 				{
 					renderable = renderables.get(i);
 								
-					if (/*Std.is(renderable, Shadow)||*/!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
+					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
 
 					drawCount += renderable.Render(camera);
 				}
@@ -269,57 +241,9 @@ class Renderer
 		
 			LightManager.Get().CleanLightStates();
 			
-			//GL.stencilMask(0xFF);
 				
-			//GL.bindFramebuffer(GL.FRAMEBUFFER, 0);
-			//GL.disable(GL.DEPTH_TEST);
-			////GL.disable(GL.STENCIL_TEST);
-			//GL.clearColor(1, 1, 1,0);
-			//GL.clear(GL.COLOR_BUFFER_BIT);
-			//
-			//GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
-			//
-			//for (camera in BeardGame.Get().cameras)
-			//{
-				//if (camera.framebuffer != null && camera.framebuffer.quad != null)
-				//{
-					//
-					//blurFrameBuffer1.quad.texture = camera.framebuffer.textures[StringLibrary.COLOR+1].texture;
-					//var horizontal:Bool = true;
-					//var amount:Int = 10;
-					//var frameBuffer:Framebuffer = blurFrameBuffer1;
-					//for (i in 0...amount)
-					//{
-						////trace(frameBuffer);
-						//
-						//frameBuffer.Bind(GL.FRAMEBUFFER);
-						//frameBuffer.quad.shader.Use();
-						//frameBuffer.quad.shader.SetInt("horizontal", (horizontal == true ? 1 :0));
-						//frameBuffer.quad.Render();
-						//horizontal = !horizontal;
-						//if (frameBuffer == blurFrameBuffer1)
-						//{
-							//
-							//frameBuffer = blurFrameBuffer2;
-							//frameBuffer.quad.texture = blurFrameBuffer1.textures[StringLibrary.COLOR].texture;						
-							////trace("one");
-						//}
-						//else{
-							//frameBuffer = blurFrameBuffer1;
-							//frameBuffer.quad.texture = blurFrameBuffer2.textures[StringLibrary.COLOR].texture;		
-							////trace("the other");
-						//}
-						//
-						//
-					//}
-				//}
-				//
-			//}
-				//
-			
 			GL.bindFramebuffer(GL.FRAMEBUFFER, 0);
 			GL.disable(GL.DEPTH_TEST);
-			//GL.disable(GL.STENCIL_TEST);
 			GL.clearColor(1, 1, 1,0);
 			GL.clear(GL.COLOR_BUFFER_BIT);
 			
@@ -329,19 +253,13 @@ class Renderer
 			{
 				if (camera.framebuffer != null && camera.framebuffer.quad != null)
 				{
-					//camera.framebuffer.quad.texture = camera.framebuffer.textures[StringLibrary.COLOR].texture;		
-					//camera.framebuffer.quad.texture = blurFrameBuffer1.textures[StringLibrary.COLOR].texture;		
-					camera.framebuffer.quad.shader.Use();
-					//GL.activeTexture( GL.TEXTURE0 + AssetManager.Get().GetFreeTextureUnit()+1);
-					//camera.framebuffer.quad.shader.SetInt("blur", AssetManager.Get().GetFreeTextureUnit()+1);	
-					//GL.bindTexture(GL.TEXTURE_2D, blurFrameBuffer1.textures[StringLibrary.COLOR].texture);
 					
+					camera.framebuffer.quad.shader.Use();
 					camera.framebuffer.quad.Render();
 				}
 				
 			}
-			
-			//trace(drawCount);
+
 		}
 		
 
@@ -486,8 +404,3 @@ class Renderer
 	
 }
 
-//typedef Batch =
-//{
-	//public var name:String;
-	//public var needOrdering:Bool;
-//}
