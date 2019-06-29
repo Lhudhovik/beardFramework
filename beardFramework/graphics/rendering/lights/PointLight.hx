@@ -15,7 +15,7 @@ class PointLight extends Light
 	
 	public function new(name:String, position:SVec3, ambient:Color, diffuse:Color, specular:Color) 
 	{
-		super(name, position, ambient, diffuse, specular);
+		super(name, position, ambient,diffuse, specular);
 		type = LightType.POINT;
 	}
 	

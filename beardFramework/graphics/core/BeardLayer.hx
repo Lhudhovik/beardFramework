@@ -121,7 +121,10 @@ class BeardLayer
 		if (!renderedObjects.exists(object.name))
 		{
 			renderedObjects.remove(object.name);
-			if(Std.is(object, IBatchable)) cast(object, IBatchable).ReleaseBufferIndex();
+			if (Std.is(object, IBatchable)) cast(object, IBatchable).ReleaseBufferIndex();
+			else if (Std.is(object, IRenderable))
+				Renderer.Get().RemoveRenderable(cast object);
+			
 			//object.isDirty = false;
 			if (object.onAABBTree && aabbs[object.name] != null){
 				

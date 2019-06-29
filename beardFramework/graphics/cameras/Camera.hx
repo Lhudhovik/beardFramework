@@ -15,6 +15,7 @@ import beardFramework.utils.simpleDataStruct.SVec2;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLFramebuffer;
 import lime.math.Matrix4;
+import lime.math.Vector4;
 import openfl.display.Tile;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
@@ -55,7 +56,7 @@ class Camera
 	private var width(default, set):Float;
 	private var height(default, set):Float;
 	
-	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = true, clearColor:Color = Color.WHITE) 
+	public function new(name:String, viewPortWidth:Float = 100, viewPortHeight:Float = 57, viewPortX:Float = 0, viewPortY:Float = 0, buffer : Float = 100, keepRatio:Bool = true, clearColor:Color = Color.BLACK) 
 	{
 		
 		viewport = {x:0,y:0,width:0,height:0}	
@@ -92,8 +93,12 @@ class Camera
 		
 		framebuffer = new Framebuffer();
 		framebuffer.Bind(GL.FRAMEBUFFER);
-		framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,true);
+		framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT0,true);
+		framebuffer.CreateTexture(StringLibrary.COLOR+1, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT1,false);
 		framebuffer.CreateRenderBuffer(StringLibrary.DEPTH, GL.RENDERBUFFER, GL.DEPTH24_STENCIL8, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.DEPTH_STENCIL_ATTACHMENT);
+		
+		
+		GL.drawBuffers([GL.COLOR_ATTACHMENT0, GL.COLOR_ATTACHMENT1]);
 		
 		framebuffer.quad.width = viewport.width;
 		framebuffer.quad.height = viewport.height;
@@ -422,7 +427,7 @@ class Camera
 		//view.appendTranslation( -centerX, - centerY, -1);
 		view.appendTranslation(  viewportWidth*0.5 -centerX,  viewportHeight*0.5 - centerY, -1);
 			
-		//view.appendRotation(this.rotation, new Vector4(0, 0, 1));
+		view.appendRotation(0.1, new Vector4(0, 1, 0));
 		//DataU.DeepTrace(view);
 		
 		if (framebuffer != null && framebuffer.quad != null){

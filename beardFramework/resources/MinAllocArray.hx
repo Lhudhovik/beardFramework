@@ -207,6 +207,7 @@ class MinAllocArray<T>
 	public function Sort(f:Null<T>->Null<T>->Int):Void
 	{
 		data.sort(f);
+		//trace(data);
 	}
 	
 	

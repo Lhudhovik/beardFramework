@@ -50,7 +50,7 @@ class RenderedObject implements ICameraDependent
 	public var rotationSine(default, null):Float;
 	public var material:Material;
 	public var color(get, set):Color;
-	public var shadowCaster:Bool;
+	public var shadowCaster(default, set):Bool;
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
 	private var shadows:Map<String, Shadow>;
@@ -68,14 +68,16 @@ class RenderedObject implements ICameraDependent
 		rotationCosine = Math.cos (0);
 		cameras = new List<String>();
 		onAABBTree = false;
-		shadowCaster = true;
 		material = new Material();
 		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
 		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
-		material.components["diffuse"] = diffuseComponent;
-		material.components["specular"] = specularComponent;
+		var normalComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:0, height:0, x : 0, y:0 }};
+		material.components[StringLibrary.DIFFUSE] = diffuseComponent;
+		material.components[StringLibrary.SPECULAR] = specularComponent;
+		material.components[StringLibrary.NORMAL_MAP] = normalComponent;
 		material.transparency = 1;
 		shadows = new Map();
+		shadowCaster = true;
 	}
 	
 	inline public function get_x():Float 
@@ -298,13 +300,13 @@ class RenderedObject implements ICameraDependent
 	
 	function get_color():Color 
 	{
-		return material.components["diffuse"].color;
+		return material.components[StringLibrary.DIFFUSE].color;
 	}
 	
 	function set_color(value:Color):Color 
 	{
 		isDirty = true;
-		return material.components["diffuse"].color = value;
+		return material.components[StringLibrary.DIFFUSE].color = value;
 	}
 	
 	public function SetBaseWidth(value:Float):Void
@@ -331,13 +333,14 @@ class RenderedObject implements ICameraDependent
 	
 	public function CastShadow(light:Light):Void 
 	{
-		
-		if (shadows[light.name] == null){
-			shadows[light.name] = new Shadow();
-			Renderer.Get().AddRenderable(shadows[light.name], true);
+		var shadowName:String = this.name + StringLibrary.SHADOW + light.name;
+		if (shadows[shadowName] == null){
+			shadows[shadowName] = new Shadow();
+			shadows[shadowName].name = shadowName;
+			Renderer.Get().AddRenderable(shadows[shadowName], true);
 		}
 		
-		var shadow:Shadow =  shadows[light.name] ;
+		var shadow:Shadow =  shadows[shadowName] ;
 		shadow.shader.Use();
 			
 		var TopL:SVec2 = {x:x, y:y};
@@ -420,7 +423,6 @@ class RenderedObject implements ICameraDependent
 		
 		shadow.z = this.z + 0.0005;
 		//trace(shadow.z);
-		shadow.name = this.name + StringLibrary.SHADOW;
 		//shadow.cameras = this.cameras;
 		shadow.lightPos.x = light.x; 
 		shadow.lightPos.y = light.y; 
@@ -450,6 +452,21 @@ class RenderedObject implements ICameraDependent
 			
 		}
 		return onAABBTree = value;
+	}
+	
+	function set_shadowCaster(value:Bool):Bool 
+	{
+		
+		if (value != shadowCaster && value == false)
+		{
+			for (shadow in shadows)
+			{				
+				Renderer.Get().RemoveRenderable(shadow);
+				shadows.remove(shadow.name);
+				shadow = null;
+			}
+		}
+		return shadowCaster = value;
 	}
 	
 	

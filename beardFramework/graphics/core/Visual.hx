@@ -18,7 +18,9 @@ import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.math.Edge;
 import beardFramework.utils.math.MathU;
+import beardFramework.utils.simpleDataStruct.SRect;
 import beardFramework.utils.simpleDataStruct.SVec2;
+import beardFramework.utils.simpleDataStruct.SVec3;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
@@ -42,6 +44,10 @@ class Visual extends AbstractVisual implements IRenderable
 	private static var VBO:GLBuffer;
 	private static var EBO:GLBuffer;
 	private static var VAO:GLVertexArrayObject;
+	private static var tangent1:Vector4;
+	private static var tangent2:Vector4;
+	private static var bitangent1:Vector4;
+	private static var bitangent2:Vector4;
 	public static var sharedShader:Shader;
 	
 	@:isVar public var readyForRendering(get, null):Bool;
@@ -87,6 +93,11 @@ class Visual extends AbstractVisual implements IRenderable
 		GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 		GL.bindVertexArray(0);
 		
+		tangent1 = new Vector4();
+		tangent2 = new Vector4();
+		bitangent1 = new Vector4();
+		bitangent2 = new Vector4();
+		
 		
 		
 	}
@@ -101,6 +112,8 @@ class Visual extends AbstractVisual implements IRenderable
 		cameras.add(StringLibrary.DEFAULT);
 		renderer = Renderer.Get();
 		readyForRendering = true;
+		
+		
 		
 	}
 	
@@ -162,6 +175,57 @@ class Visual extends AbstractVisual implements IRenderable
 		shader.SetFloat("material.shininess", material.shininess);
 		
 		
+		if (material.components[StringLibrary.NORMAL_MAP].texture != "")
+		{
+			
+			var uvs:SRect = material.components[StringLibrary.NORMAL_MAP].uv;
+			
+			var pos1:Vector4 = new Vector4(verticesData[0], verticesData[1], verticesData[2]);
+			var pos2:Vector4 = new Vector4(verticesData[3], verticesData[4], verticesData[5]);
+			var pos3:Vector4 = new Vector4(verticesData[6], verticesData[7], verticesData[8]);
+			var pos4:Vector4 = new Vector4(verticesData[9], verticesData[10], verticesData[11]);
+			
+			var uv1:Vector2 = new Vector2(uvs.x + verticesData[0]*uvs.width, uvs.y + verticesData[1]*uvs.height);
+			var uv2:Vector2= new Vector2(uvs.x + verticesData[3]*uvs.width, uvs.y + verticesData[4]*uvs.height);
+			var uv3:Vector2= new Vector2(uvs.x + verticesData[6]*uvs.width, uvs.y + verticesData[7]*uvs.height);
+			var uv4:Vector2= new Vector2(uvs.x + verticesData[9]*uvs.width, uvs.y + verticesData[10]*uvs.height);
+			
+			var edge1 = pos2.subtract(pos1);
+			var edge2 = pos3.subtract(pos1);
+			var deltaUV1 = uv2.subtract(uv1);
+			var deltaUV2 = uv3.subtract(uv1);
+			var f:Float = 1.0 / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+			
+			tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+			tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+			tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+			tangent1.normalize();
+			
+			bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+			bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+			bitangent1.z = f * ( -deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+			bitangent1.normalize();
+			
+			edge1 = pos4.subtract(pos3);
+			edge2 = pos1.subtract(pos3);
+			
+			deltaUV1 = uv4.subtract(uv3);
+			deltaUV2 = uv1.subtract(uv3);
+			
+			tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+			tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+			tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+			tangent2.normalize();
+			
+			bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+			bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+			bitangent2.z = f * ( -deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+			bitangent2.normalize();
+			
+			shader.Set3Float("tangent", tangent1.x, tangent1.y, tangent1.z);
+			shader.Set3Float("bitangent", bitangent1.x, bitangent1.y, bitangent1.z);
+		}
+		
 		
 		renderer.model.identity();
 		renderer.model.appendScale(this.width, this.height, 1.0);
@@ -202,6 +266,7 @@ class Visual extends AbstractVisual implements IRenderable
 		
 		shader.SetMatrix4fv(StringLibrary.PROJECTION, camera.projection);
 		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
+		shader.Set3Float("viewPosition", camera.viewportWidth*0.5 -camera.centerX, camera.viewportHeight*0.5 - camera.centerY, -1 );
 		
 		GL.drawElements(drawMode, indices.length, GL.UNSIGNED_SHORT, 0);
 		
@@ -233,9 +298,9 @@ class Visual extends AbstractVisual implements IRenderable
 	}
 	override function set_atlas(value:String):String 
 	{
-		if (material != null && material.hasComponent("diffuse"))
+		if (material != null && material.hasComponent(StringLibrary.DIFFUSE))
 		{
-			material.components["diffuse"].atlas = value;
+			material.components[StringLibrary.DIFFUSE].atlas = value;
 		}
 		
 		return super.set_atlas(value);

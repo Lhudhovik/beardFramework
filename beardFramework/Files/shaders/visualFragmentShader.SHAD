@@ -1,7 +1,7 @@
 #version 460
 
-
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 struct ColorComponent{
 	sampler2D sampler;
@@ -12,6 +12,7 @@ struct ColorComponent{
 struct Material{
 	ColorComponent diffuse;
 	ColorComponent specular;
+	ColorComponent normalMap;
 	float shininess;
 	float transparency;
 };
@@ -55,18 +56,19 @@ struct SpotLight {
 
 
 in vec3 FragmentPosition;
+in vec4 ShadowPosition;
 in vec3 FragmentUV;
+in mat3 TBN;
 
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform SpotLight spotLights[NR_POINT_LIGHTS];
 uniform DirectionalLight directionalLights[NR_DIR_LIGHTS]; 
 uniform Material material;
 
-
 vec3 specular;
 vec3 diffuse;
 vec3 ambient;
-
+vec3 normal;
 void CalculateDirectionalLights(vec3 normal, vec3 viewDirection);
 void CalculatePointLights( vec3 normal,vec3 viewDirection, vec3 fragmentPosition);
 void CalculateSpotLights(vec3 normal,vec3 viewDirection, vec3 fragmentPosition);
@@ -75,7 +77,16 @@ void main()
 {
 	
 	//----------------------------------------------------------------------------------------------------------------------initial setup
-	vec3 normal = normalize(vec3(0,0,-1));
+	//vec3 normal = normalize(vec3(0,0,-1));
+	
+	//if( material.normalMap.uv.z !=0 && material.normalMap.uv.w !=0){
+		
+		normal = texture(material.normalMap.sampler, vec2(material.normalMap.uv.x + (material.normalMap.uv.z*FragmentUV.x),material.normalMap.uv.y + (material.normalMap.uv.w*FragmentUV.y))).rgb;
+		normal = normalize(normal * 2.0 - 1.0);  
+	
+	//}
+	//else normal = normalize(vec3(0,0,-1));
+	 
 	vec3 viewDirection = normalize(vec3(0,0,-1));
 	vec4 diffTexture = texture(material.diffuse.sampler, vec2(material.diffuse.uv.x + (material.diffuse.uv.z*FragmentUV.x),material.diffuse.uv.y + (material.diffuse.uv.w*FragmentUV.y)));
 	
@@ -102,11 +113,14 @@ void main()
 	ambient *= matDiff;
 	diffuse *= matDiff;
 	specular *= matSpec;
-	
-	
+		
 	//FragColor =  vec4((ambient + specular + diffuse), material.transparency);
-	FragColor =  vec4((ambient + specular + diffuse), diffTexture.w*material.transparency);
-	
+	FragColor =  vec4((ambient + specular + diffuse), diffTexture.w*material.transparency) ;
+	float brightness = dot(FragColor.rgb, vec3(0.2126,0.7152,0.0722));
+	if(brightness > 1.0)
+		BrightColor = vec4(FragColor.rgb, 1.0);
+	else 
+		BrightColor = vec4(0.0,0.0,0.0,1.0);
 	
 	
 	

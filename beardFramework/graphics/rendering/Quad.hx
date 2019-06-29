@@ -6,6 +6,7 @@ import beardFramework.graphics.rendering.lights.LightManager;
 import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.resources.options.GraphicSettings;
 import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.libraries.StringLibrary;
 import lime.graphics.opengl.GL;
@@ -99,7 +100,8 @@ class Quad
 		renderer.model.appendTranslation(this.x, this.y,1);
 		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
 		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
-	
+		shader.SetFloat(StringLibrary.EXPOSURE, GraphicSettings.exposure);
+		shader.SetFloat(StringLibrary.GAMMA, GraphicSettings.gamma);
 		
 		if (renderer.boundBuffer != VBO){
 		

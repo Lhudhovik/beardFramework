@@ -10,11 +10,15 @@ class StringLibrary
 	public static inline var ACTION:String 					= "action";
 	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
 	public static inline var ANY:String 					= "any";
+	public static inline var BLUR:String 					= "blur";
 	public static inline var COLOR:String 					= "color";
 	public static inline var DEBUG:String	 				= "debug";
 	public static inline var DEFAULT:String 				= "default";
 	public static inline var DEPTH:String 					= "depth";
+	public static inline var DIFFUSE:String 				= "diffuse";
 	public static inline var DIRECT_MODE:String 			= "directMode";
+	public static inline var EXPOSURE:String 				= "exposure";
+	public static inline var GAMMA:String 					= "gamma";
 	public static inline var GAMEPAD:String 				= "gamepad";
 	public static inline var GAMEPAD_AXIS_MOVE:String 		= "gamepadAxisMove";
 	public static inline var GAMEPAD_BUTTON_DOWN:String 	= "gamepadButtonDown";
@@ -47,6 +51,7 @@ class StringLibrary
 	public static inline var MOUSE_UP:String 				= "mouseUp";
 	public static inline var MOUSE_WHEEL:String 			= "mouseWheel";
 	public static inline var NONE:String 					= "none";
+	public static inline var NORMAL_MAP:String 				= "normalMap";
 	public static inline var PROJECTION:String 				= "projection";
 	public static inline var QUAD:String 					= "quad";
 	public static inline var SAVE:String 					= "save";
@@ -56,6 +61,7 @@ class StringLibrary
 	public static inline var SHADOW:String 					= "shadow";
 	public static inline var SHADOW_COLOR:String 			= "shadowColor";
 	public static inline var SHADOW_MAP:String 				= "shadowMap";
+	public static inline var SPECULAR:String 				= "specular";
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";
 	public static inline var TOUCH_END:String 				= "touchEnd";

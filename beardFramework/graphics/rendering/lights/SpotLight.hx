@@ -17,7 +17,7 @@ class SpotLight extends PointLight
 	
 	public function new(name:String, position:SVec3, direction:SVec3, ambient:Color, diffuse:Color, specular:Color) 
 	{
-		super(name, position, ambient, diffuse, specular);
+		super(name, position, ambient,diffuse, specular);
 		directionX = direction.x;
 		directionY = direction.y;
 		directionZ = direction.z;

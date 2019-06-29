@@ -25,7 +25,7 @@ class AbstractVisual extends RenderedObject
 		this.atlas = atlas;
 		
 	
-		material.SetComponentTexture("diffuse",texture);
+		material.SetComponentTexture(StringLibrary.DIFFUSE,texture);
 		
 		
 		if (atlas != "" && texture != "" )
@@ -34,8 +34,8 @@ class AbstractVisual extends RenderedObject
 			SetBaseWidth(texture.imageArea.width);
 			SetBaseHeight(texture.imageArea.height);
 			
-			material.SetComponentAtlas("diffuse",  atlas);
-			material.SetComponentUVs("diffuse", texture.uvX, texture.uvY, texture.uvW, texture.uvH);
+			material.SetComponentAtlas(StringLibrary.DIFFUSE,  atlas);
+			material.SetComponentUVs(StringLibrary.DIFFUSE, texture.uvX, texture.uvY, texture.uvW, texture.uvH);
 		}
 		else 
 		{
@@ -46,7 +46,7 @@ class AbstractVisual extends RenderedObject
 			}
 			SetBaseWidth(AssetManager.Get().GetTexture(texture).width);
 			SetBaseHeight(AssetManager.Get().GetTexture(texture).height);
-			material.SetComponentUVs("diffuse", 0, 0, 1, 1);
+			material.SetComponentUVs(StringLibrary.DIFFUSE, 0, 0, 1, 1);
 			
 		}
 		
