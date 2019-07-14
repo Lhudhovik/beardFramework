@@ -11,6 +11,7 @@ class StringLibrary
 	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
 	public static inline var ANY:String 					= "any";
 	public static inline var BLUR:String 					= "blur";
+	public static inline var CAMERA_QUAD:String 			= "cameraQuad";
 	public static inline var COLOR:String 					= "color";
 	public static inline var DEBUG:String	 				= "debug";
 	public static inline var DEFAULT:String 				= "default";
@@ -73,6 +74,7 @@ class StringLibrary
 	public static inline var TOUCH_TAP:String 				= "touchTap";
 	public static inline var UI:String 						= "UI";
 	public static inline var UIBASE:String 					= "UIBase";
+	public static inline var UVS:String 					= "uvs";
 	public static inline var UNKNOWN:String 				= "unknown";
 	public static inline var VIEW:String 					= "view";
 

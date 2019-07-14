@@ -17,13 +17,13 @@ class Framebuffer
 	public var textures:Map<String,FrameBufferTexture>;
 	public var renderbuffers:Map<String, GLRenderbuffer>;
 	public var samplerIndex:Int;
-	public var quad:Quad;
+	//public var quad:Quad;
 	public function new() 
 	{
 		nativeBuffer = GL.createFramebuffer();
 		textures = new Map();
 		renderbuffers = new Map();
-		quad = new Quad();
+		//quad = new Quad();
 		
 	}
 	
@@ -64,11 +64,11 @@ class Framebuffer
 				attachment:attachment
 			}
 			
-			if (applyToQuad){
-				quad.texture = texture;
-				quad.width = width;
-				quad.height = height;
-			}
+			//if (applyToQuad){
+				//quad.texture = texture;
+				//quad.width = width;
+				//quad.height = height;
+			//}
 
 		}
 		
@@ -122,6 +122,8 @@ class Framebuffer
 			
 		}
 	}
+	
+	
 	
 	public function CheckStatus():Void
 	{

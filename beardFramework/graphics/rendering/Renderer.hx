@@ -62,6 +62,7 @@ class Renderer
 	private var BUFFERCOUNT:Int = 1;
 	private var ATTRIBUTEPOINTER:Int = 0;
 	private var renderables:MinAllocArray<IRenderable>;
+	private var cameraQuads:MinAllocArray<CameraQuad>;
 	private	var pointer:Int;
 	private var blurFrameBuffer1:Framebuffer;
 	private var blurFrameBuffer2:Framebuffer;
@@ -96,9 +97,10 @@ class Renderer
 		GL.viewport(0, 0, Application.current.window.width, Application.current.window.height);
 		
 		
-		AssetManager.Get().AddTextureFromImage(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.WHITE), AssetManager.Get().AllocateFreeTextureIndex());
+		AssetManager.Get().AddTextureFromImage(StringLibrary.DEFAULT, new Image(null, 0, 0, 256, 256, Color.PURPLE), AssetManager.Get().AllocateFreeTextureIndex());
 		
 		renderables = new MinAllocArray();
+		cameraQuads = new MinAllocArray();
 		
 		model = new Matrix4();
 		projection = new Matrix4();
@@ -154,6 +156,63 @@ class Renderer
 			MoveRenderableToLast(StringLibrary.UI);
 	}
 	
+	public function AddCameraQuad(name:String, camera:String = null):CameraQuad
+	{
+		var existing:Bool = false;
+		
+		var quad: CameraQuad =null;
+		
+		
+		for (i in 0...cameraQuads.length)
+		{
+			if (existing = (cameraQuads.get(i).name == name)){
+				quad = 	cameraQuads.get(i);
+				break;
+			}
+					
+		}
+	
+		if (!existing)
+		{
+			quad = new CameraQuad(name);
+			quad.camera = camera;
+			cameraQuads.Push(quad);
+		}
+		
+		return quad;
+			
+	}
+	
+	public function GetCameraQuad(name:String):CameraQuad
+	{
+		var quad:CameraQuad = null;
+		
+		for (i in 0...cameraQuads.length)
+		{
+			if (cameraQuads.get(i).name == name){
+				quad = cameraQuads.get(i);
+				break;
+			}
+				
+		}
+		
+		return quad;
+	}
+	
+	public function RemoveCameraQuad(name:String):Void
+	{
+				
+		for (i in 0...cameraQuads.length)
+		{
+			if (cameraQuads.get(i).name == name){
+				cameraQuads.RemoveByIndex(i);
+				break;
+			}
+				
+		}
+		
+	}
+	
 	inline public function RemoveRenderable(renderable:IRenderable, quick:Bool = false ):Void
 	{
 		
@@ -181,8 +240,8 @@ class Renderer
 		blurFrameBuffer2.UnBind(GL.FRAMEBUFFER);
 		
 		blurShader = Shader.GetShader(StringLibrary.BLUR);
-		blurFrameBuffer1.quad.shader = blurShader;
-		blurFrameBuffer2.quad.shader = blurShader;
+		//blurFrameBuffer1.quad.shader = blurShader;
+		//blurFrameBuffer2.quad.shader = blurShader;
 		
 		OnResize(Application.current.window.width, Application.current.window.height);
 		
@@ -224,8 +283,8 @@ class Renderer
 				GL.enable(GL.DEPTH_TEST);
 				GL.clearColor(camera.clearColor.getRedf(),camera.clearColor.getGreenf(), camera.clearColor.getBluef(),1);
 				GL.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT | GL.STENCIL_BUFFER_BIT);
-				
-				GL.viewport(0, - Math.round(BeardGame.Get().window.height - camera.viewportHeight) , BeardGame.Get().window.width, BeardGame.Get().window.height);
+				GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
+				//GL.viewport(0, - Math.round(BeardGame.Get().window.height - camera.GetHeight()) , BeardGame.Get().window.width, BeardGame.Get().window.height);
 								
 				
 				for (i in 0...renderables.length)
@@ -249,15 +308,10 @@ class Renderer
 			
 			GL.viewport(0, 0, BeardGame.Get().window.width, BeardGame.Get().window.height);
 			
-			for (camera in BeardGame.Get().cameras)
+			for (i in 0...cameraQuads.length)
 			{
-				if (camera.framebuffer != null && camera.framebuffer.quad != null)
-				{
-					
-					camera.framebuffer.quad.shader.Use();
-					camera.framebuffer.quad.Render();
-				}
-				
+				//trace(cameraQuads.get(i).name);
+				cameraQuads.get(i).Render();
 			}
 
 		}
@@ -277,9 +331,15 @@ class Renderer
 		
 		for (camera in BeardGame.Get().cameras)
 			camera.AdjustResize();
-		
+		for (i in 0...cameraQuads.length)
+		{
+			cameraQuads.get(i).AdjustResize();
+			
+		}
+			
 		for (i in 0...renderables.length)
-		{			
+		{
+						
 			for (camera in renderables.get(i).cameras)
 			{				
 				renderables.get(i).shader.Use();

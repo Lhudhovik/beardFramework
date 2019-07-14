@@ -2,6 +2,7 @@ package beardFramework.core;
 
 import beardFramework.graphics.core.RenderedObject;
 import beardFramework.graphics.core.Visual;
+import beardFramework.graphics.rendering.CameraQuad;
 import beardFramework.graphics.rendering.Renderer;
 import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.graphics.rendering.batches.Batch;
@@ -63,12 +64,17 @@ class BeardGame extends Application
 	private var layers:MinAllocArray<BeardLayer>;
 	private var pause(default,null):Bool;
 	private var gameReady:Bool;
+	private var previousWidth:Int;
+	private var previousHeight:Int;
+	
 	//public var grid(default,null):RegionGrid;
 	private var splashScreen:SplashScreen;
 	
 	public var entities:Array<GameEntity>;
 	public var cameras:Map<String,Camera>;
 	public var currentScreen:BasicScreen;
+	public var scaleX:Float = 1;
+	public var scaleY:Float = 1;
 	var fps:MemoryUsage;
 	public function new() 
 	{
@@ -99,7 +105,8 @@ class BeardGame extends Application
 		layers.Push(new BeardLayer("UILayer", BeardLayer.DEPTH_UI,UILAYER));
 		layers.Push(new BeardLayer("ContentLayer", BeardLayer.DEPTH_CONTENT, CONTENTLAYER));
 	
-		
+		previousWidth = window.width;
+		previousHeight = window.height;
 		for (i in 0...4)
 			layers.get(i).visible = false;
 			
@@ -190,7 +197,7 @@ class BeardGame extends Application
 		
 		Shader.LoadShaders(OptionsManager.Get().shadersToCreate);
 		
-		var defaultCam:Camera = new Camera(StringLibrary.DEFAULT, window.width, window.height,0,0,100,false);
+		var defaultCam:Camera = new Camera(StringLibrary.DEFAULT, 1,1,100);
 		AddCamera(defaultCam);
 		
 		defaultCam.Center(window.width * 0.5,window.height * 0.5);
@@ -209,7 +216,8 @@ class BeardGame extends Application
 		
 		}
 		
-		
+		var quad :CameraQuad = Renderer.Get().AddCameraQuad(StringLibrary.DEFAULT, StringLibrary.DEFAULT);
+		//quad.x = 150;
 		
 		OptionsManager.Get().batchesToCreate = null;		
 		OptionsManager.Get().shadersToCreate = null;
@@ -305,7 +313,6 @@ class BeardGame extends Application
 		
 	}
 	
-
 	override public function update(deltaTime:Int):Void 
 	{
 		//trace(deltaTime);
@@ -366,7 +373,13 @@ class BeardGame extends Application
 	
 	override public function onWindowResize(width:Int, height:Int):Void 
 	{
+		
+		scaleX = width / previousWidth;
+		scaleY = height / previousHeight;
 		if (gameReady) Renderer.Get().OnResize(width, height );
+		
+		//previousWidth = width;
+		//previousHeight = height;
 	}
 	
 	public static inline function Get():BeardGame
@@ -425,6 +438,7 @@ class BeardGame extends Application
 	{
 		return layers.get(LOADINGLAYER);
 	}
+	
 	public inline function GetDebugLayer():BeardLayer
 	{
 		return layers.get(DEBUGLAYER);
@@ -434,6 +448,8 @@ class BeardGame extends Application
 	{
 		return layers.length;
 	}
+	
+
 
 }
 

@@ -423,7 +423,7 @@ class RenderedObject implements ICameraDependent
 		
 		shadow.z = this.z + 0.0005;
 		//trace(shadow.z);
-		//shadow.cameras = this.cameras;
+		shadow.cameras = this.cameras;
 		shadow.lightPos.x = light.x; 
 		shadow.lightPos.y = light.y; 
 		shadow.lightPos.z = light.z;
