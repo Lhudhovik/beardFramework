@@ -103,12 +103,12 @@ class CameraQuad
 			GL.bindBuffer(GL.ARRAY_BUFFER, 0);
 			GL.bindVertexArray(0);
 			
-			camera = StringLibrary.DEFAULT;
-			uvsAlignment = Alignment.TOP_LEFT;
+			
+			
 		}
 		
-		
-		
+		camera = StringLibrary.DEFAULT;
+		uvsAlignment = Alignment.TOP_LEFT;
 		
 		
 	
@@ -158,8 +158,10 @@ class CameraQuad
 		}
 		else
 		{
-			uvs.width = width / BeardGame.Get().window.width;
-			uvs.height = height / BeardGame.Get().window.height;		
+			//uvs.width = width / BeardGame.Get().window.width;
+			uvs.width = scaleX;
+			//uvs.height = height / BeardGame.Get().window.height;		
+			uvs.height = scaleY;		
 			switch(uvsAlignment)
 			{
 				
@@ -244,8 +246,8 @@ class CameraQuad
 			if (texture != null){
 				GL.activeTexture( GL.TEXTURE0 + AssetManager.Get().GetFreeTextureUnit());
 				shader.SetInt("sampler", AssetManager.Get().GetFreeTextureUnit());	
-				//GL.bindTexture(GL.TEXTURE_2D, texture);
-				GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(StringLibrary.DEFAULT).glTexture);
+				GL.bindTexture(GL.TEXTURE_2D, texture);
+				//GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(StringLibrary.DEFAULT).glTexture);
 				
 				shader.Set4Float(StringLibrary.UVS, uvs.x, uvs.y, uvs.width, uvs.height);
 			}

@@ -240,8 +240,7 @@ class Renderer
 		blurFrameBuffer2.UnBind(GL.FRAMEBUFFER);
 		
 		blurShader = Shader.GetShader(StringLibrary.BLUR);
-		//blurFrameBuffer1.quad.shader = blurShader;
-		//blurFrameBuffer2.quad.shader = blurShader;
+		
 		
 		OnResize(Application.current.window.width, Application.current.window.height);
 		
