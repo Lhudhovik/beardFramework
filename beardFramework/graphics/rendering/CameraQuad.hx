@@ -37,6 +37,7 @@ class CameraQuad
 	public var renderer:Renderer;
 	public var drawMode:Int = GL.TRIANGLES;
 	public var texture:GLTexture;
+	public var bloom:GLTexture;
 	public var shader:Shader;
 	public var camera(default, set):String;
 	public var uvsAlignment(default, set):Alignment;
@@ -218,7 +219,6 @@ class CameraQuad
 			//trace(uvs);
 			if (shader == null) return;
 			
-			
 			shader.Use();
 			
 			renderer.model.identity();
@@ -226,6 +226,7 @@ class CameraQuad
 			renderer.model.appendTranslation(this.x, this.y,1);
 			renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
 			shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
+			shader.SetMatrix4fv(StringLibrary.PROJECTION, renderer.projection);
 			shader.SetFloat(StringLibrary.EXPOSURE, GraphicSettings.exposure);
 			shader.SetFloat(StringLibrary.GAMMA, GraphicSettings.gamma);
 			
@@ -242,12 +243,17 @@ class CameraQuad
 				GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 				GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
 			}
+			trace(texture);
 			
 			if (texture != null){
 				GL.activeTexture( GL.TEXTURE0 + AssetManager.Get().GetFreeTextureUnit());
-				shader.SetInt("sampler", AssetManager.Get().GetFreeTextureUnit());	
+				shader.SetInt("scene", AssetManager.Get().GetFreeTextureUnit());	
 				GL.bindTexture(GL.TEXTURE_2D, texture);
 				//GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(StringLibrary.DEFAULT).glTexture);
+				
+				GL.activeTexture(GL.TEXTURE0 + AssetManager.Get().GetFreeTextureUnit() + 1);
+				shader.SetInt("bloomBlur", AssetManager.Get().GetFreeTextureUnit() +1);
+				GL.bindTexture(GL.TEXTURE_2D, bloom);
 				
 				shader.Set4Float(StringLibrary.UVS, uvs.x, uvs.y, uvs.width, uvs.height);
 			}

@@ -1,6 +1,7 @@
 package beardFramework.graphics.rendering;
 import beardFramework.core.BeardGame;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.graphics.TextureU;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLFramebuffer;
@@ -15,15 +16,17 @@ class Framebuffer
 {
 	private var nativeBuffer:GLFramebuffer;
 	public var textures:Map<String,FrameBufferTexture>;
-	public var renderbuffers:Map<String, GLRenderbuffer>;
+	public var renderbuffers:Map<String, FrameBufferRenderBuffer>;
 	public var samplerIndex:Int;
+	public var name:String;
 	//public var quad:Quad;
-	public function new() 
+	public function new(name:String) 
 	{
 		nativeBuffer = GL.createFramebuffer();
 		textures = new Map();
 		renderbuffers = new Map();
 		//quad = new Quad();
+		this.name = name;
 		
 	}
 	
@@ -33,14 +36,17 @@ class Framebuffer
 	}
 	public inline function UnBind(target:Int):Void
 	{
+		GLU.ShowErrors("Unbinding framebuffer previous");
 		GL.bindFramebuffer(target, 0);
+		GLU.ShowErrors("Unbinding framebuffer " + this);
 	}
 	
 	
-	public function CreateTexture(name:String, width:Int, height:Int, internalFormat:Int, format:Int, type:Int, attachment:Int, applyToQuad:Bool= false):Void
+	public function CreateTexture(name:String, width:Int, height:Int, internalFormat:Int, format:Int, type:Int, attachment:Int):Void
 	{
 		if (textures[name] == null)
 		{
+			
 			samplerIndex = AssetManager.Get().GetFreeTextureUnit();
 	
 			var texture:GLTexture = GL.createTexture();
@@ -55,7 +61,7 @@ class Framebuffer
 			GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
 			
 			GL.framebufferTexture2D(GL.FRAMEBUFFER, attachment, GL.TEXTURE_2D, texture, 0);
-			
+			GLU.ShowErrors("FrameBuffer");
 			textures[name] = {
 				texture:texture,
 				internalFormat:internalFormat,
@@ -84,7 +90,11 @@ class Framebuffer
 			GL.bindRenderbuffer(GL.RENDERBUFFER, buffer);
 			GL.renderbufferStorage(target, internalFormat, width, height);
 			GL.framebufferRenderbuffer(GL.FRAMEBUFFER, attachment, GL.RENDERBUFFER, buffer);
-			renderbuffers[name] = buffer;		
+			renderbuffers[name] = {
+				buffer:buffer,
+				internalFormat:internalFormat,
+				attachment:attachment	
+			}
 			
 			
 		}
@@ -123,12 +133,59 @@ class Framebuffer
 		}
 	}
 	
-	
-	
-	public function CheckStatus():Void
+	public function UpdateRenderBufferSize(name:String = "", width:Int, height:Int):Void
 	{
-		if (GL.checkFramebufferStatus(GL.FRAMEBUFFER) != GL.FRAMEBUFFER_COMPLETE)
-			trace("Framebuffer is not complete");
+		var buffer:GLRenderbuffer;
+		if (name != "")
+		{
+			if (renderbuffers[name] != null)
+			{
+				buffer = renderbuffers[name].buffer;
+				GL.bindRenderbuffer(GL.RENDERBUFFER, buffer);
+				GL.renderbufferStorage(GL.RENDERBUFFER, renderbuffers[name].internalFormat, width, height);
+				GL.bindRenderbuffer(GL.RENDERBUFFER, 0);
+			}
+	
+		}
+		else
+		{
+			
+			for (renderBuffer in renderbuffers)
+			{
+			
+				buffer = renderBuffer.buffer;
+				GL.bindRenderbuffer(GL.RENDERBUFFER, buffer);
+				GL.renderbufferStorage(GL.RENDERBUFFER, renderBuffer.internalFormat, width, height);
+				GL.bindRenderbuffer(GL.RENDERBUFFER, 0);
+				
+			}
+			
+		}
+	}
+	
+	
+	public function CheckStatus(extraInfo:String = ""):Void
+	{
+		
+		var status:String = extraInfo;
+		switch(GL.checkFramebufferStatus(GL.FRAMEBUFFER))
+		{
+			case GL.FRAMEBUFFER_COMPLETE : status += "\nFramebuffer is complete";
+			case GL.FRAMEBUFFER_INCOMPLETE_ATTACHMENT : status += "\nFramebuffer attachment is incomplete";
+			case GL.FRAMEBUFFER_INCOMPLETE_DIMENSIONS : status += "\nFramebuffer dimensions are incomplete";
+			case GL.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT : status += "\nFramebuffer missing attachment";
+			case GL.FRAMEBUFFER_INCOMPLETE_MULTISAMPLE : status += "\nFramebuffer multisample incomplete";
+			case GL.FRAMEBUFFER_UNSUPPORTED : status += "\nFramebuffer is unsupported";
+			case GL.FRAMEBUFFER_BINDING : status += "\nFramebuffer is binding";
+			default : status += GL.checkFramebufferStatus(GL.FRAMEBUFFER);
+			
+		}
+		trace(status);
+		//if (GL.checkFramebufferStatus(GL.FRAMEBUFFER) != GL.FRAMEBUFFER_COMPLETE)
+		//{
+			//switch
+			//trace("Framebuffer is not complete");
+		//}
 	}
 	
 }
@@ -139,6 +196,15 @@ typedef FrameBufferTexture =
 	var internalFormat:Int;
 	var format:Int;
 	var type:Int;
+	var attachment:Int;
+	
+	
+}
+
+typedef FrameBufferRenderBuffer =
+{
+	var buffer:GLRenderbuffer;
+	var internalFormat:Int;
 	var attachment:Int;
 	
 	

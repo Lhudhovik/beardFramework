@@ -11,37 +11,38 @@
 </atlases>
 <textures>
 	<texture name="haxe" path="assets/textures/haxe.png"/>	
+	<texture name="haxeNormal" path="assets/textures/haxeNormal.png"/>	
+	<texture name="brick" path="assets/textures/brick.png"/>	
+	<texture name="brickNormal" path="assets/textures/brickNormal.png"/>	
 </textures>
 <shaders>
 	<shader name="default" nativeShaders="lightVertexShader,lightFragmentShader" />
 	<shader name="visualDefault" nativeShaders="visualVertexShader,visualFragmentShader" />
-	<shader name="basic" nativeShaders="vertexShader,fragmentShader" />
 	<shader name="debug" nativeShaders="debugVertexShader,debugFragmentShader" />
 	<shader name="frame" nativeShaders="frameVertexShader,frameFragmentShader" />
-	<shader name="quad" nativeShaders="quadVertexShader,quadFragmentShader" />
-	<shader name="depth" nativeShaders="depthVertexShader,depthFragmentShader" />
-	<shader name="debugDepth" nativeShaders="frameVertexShader,debugDepthFragmentShader" />
+	<!--<shader name="quad" nativeShaders="quadVertexShader,quadFragmentShader" />-->
 	<shader name="shadow" nativeShaders="shadowVertexShader,shadowFragmentShader" />
+	<shader name="blur" nativeShaders="cameraQuadVertexShader,glaussianBlurframeFragmentShader" />
+	<shader name="cameraQuad" nativeShaders="cameraQuadVertexShader,cameraQuadFragmentShader" />
 	<!--<shader name="cube" nativeShaders="cubeVertexShader,cubeGeometryShader,cubeFragmentShader" />-->
 	<nativeShader name="frameVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="frameFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="quadVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="quadFragmentShader" type="FRAGMENT_SHADER"/>
+	<!--<nativeShader name="quadVertexShader" type="VERTEX_SHADER"/>-->
+	<!--<nativeShader name="quadFragmentShader" type="FRAGMENT_SHADER"/>-->
 	<nativeShader name="lightVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="visualVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="visualFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="vertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="fragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="debugVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="depthVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="depthFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="debugDepthFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="dropShadowVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="dropShadowFragmentShader" type="FRAGMENT_SHADER"/>
 	<nativeShader name="shadowVertexShader" type="VERTEX_SHADER"/>
 	<nativeShader name="shadowFragmentShader" type="FRAGMENT_SHADER"/>
+	<nativeShader name="glaussianBlurframeFragmentShader" type="FRAGMENT_SHADER"/>
+	<nativeShader name="cameraQuadVertexShader" type="VERTEX_SHADER"/>
+	<nativeShader name="cameraQuadFragmentShader" type="FRAGMENT_SHADER"/>
+	
 	<!--<nativeShader name="cubeVertexShader" type="VERTEX_SHADER"/>-->
 	<!--<nativeShader name="cubeGeometryShader" type="GEOMETRY_SHADER"/>-->
 	<!--<nativeShader name="cubeFragmentShader" type="FRAGMENT_SHADER"/>-->

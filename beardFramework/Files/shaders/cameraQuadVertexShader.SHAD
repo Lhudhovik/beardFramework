@@ -1,0 +1,15 @@
+#version 460
+in vec3 pos;
+
+
+out vec2 fragmentUVs;
+
+uniform mat4 model;
+uniform mat4 projection;
+
+void main()
+{
+	gl_Position = projection  * model * vec4( pos.x ,pos.y, pos.z, 1.0);
+	fragmentUVs = vec2(pos.x, abs(pos.y -1));
+	
+}

@@ -121,7 +121,8 @@ class Shader
 	private function new(name:String = "")
 	{
 		program = GL.createProgram();
-		trace(GL.getProgramInfoLog(program ));
+		var info:String = GL.getProgramInfoLog(program );
+		if(info != null) trace(info);
 		isUsed = false;
 		uniformLocations = new Map<String,Int>();
 		

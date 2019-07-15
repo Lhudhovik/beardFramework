@@ -1,0 +1,28 @@
+#version 460
+
+in vec2 fragmentUVs;
+
+out vec4 FragColor;
+
+uniform sampler2D scene;
+uniform sampler2D bloomBlur;
+uniform vec4 uvs;
+
+
+//uniform sampler2D blur;
+uniform float exposure;
+uniform float gamma;
+void main()
+{
+	
+	vec4 hdrColor = texture(scene, vec2(uvs.x + (uvs.z*fragmentUVs.x),uvs.y + (uvs.w*fragmentUVs.y)));
+	vec4 bloomColor = texture(bloomBlur, vec2(uvs.x + (uvs.z*fragmentUVs.x),uvs.y + (uvs.w*fragmentUVs.y)));
+	hdrColor+= bloomColor;
+	
+	vec4 result = vec4(1.0) - exp(-hdrColor * exposure);
+	result = pow(result, vec4(vec3(1.0/gamma),1.0));
+	
+	//FragColor = texture(scene, vec2(uvs.x + (uvs.z*fragmentUVs.x),uvs.y + (uvs.w*fragmentUVs.y)));
+	FragColor = result;
+
+} 

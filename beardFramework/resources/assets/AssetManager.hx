@@ -369,8 +369,8 @@ class AssetManager
 	
 	public inline function AddTextureFromImage(name:String, texture:Image, fixedIndex:Int=-1):GLTexture
 	{
-		trace(name);
-		trace(texture);
+		//trace(name);
+		//trace(texture);
 		
 		var glTexture:GLTexture;
 		

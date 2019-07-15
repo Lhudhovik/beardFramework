@@ -16,9 +16,11 @@ import beardFramework.graphics.ui.UIManager;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.resources.assets.AssetManager;
+import beardFramework.resources.options.GraphicSettings;
 import beardFramework.utils.data.DataU;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.graphics.Color;
+import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.graphics.TextureU;
 import beardFramework.utils.libraries.StringLibrary;
 import beardFramework.utils.simpleDataStruct.SVec2;
@@ -64,8 +66,8 @@ class Renderer
 	private var renderables:MinAllocArray<IRenderable>;
 	private var cameraQuads:MinAllocArray<CameraQuad>;
 	private	var pointer:Int;
-	private var blurFrameBuffer1:Framebuffer;
-	private var blurFrameBuffer2:Framebuffer;
+	private var blurFrameBufferH:Framebuffer;
+	private var blurFrameBufferV:Framebuffer;
 	private var blurShader:Shader;
 	
 	
@@ -229,15 +231,17 @@ class Renderer
 	{
 		ready = true;
 		
-		blurFrameBuffer1 = new Framebuffer();
-		blurFrameBuffer1.Bind(GL.FRAMEBUFFER);
-		blurFrameBuffer1.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT0,true);
-		blurFrameBuffer1.UnBind(GL.FRAMEBUFFER);
-		
-		blurFrameBuffer2 = new Framebuffer();
-		blurFrameBuffer2.Bind(GL.FRAMEBUFFER);
-		blurFrameBuffer2.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT0,true);
-		blurFrameBuffer2.UnBind(GL.FRAMEBUFFER);
+		blurFrameBufferH = new Framebuffer("blurHorizontal");
+		blurFrameBufferH.Bind(GL.FRAMEBUFFER);
+		blurFrameBufferH.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT0);
+		blurFrameBufferH.CheckStatus("blur1");
+		blurFrameBufferH.UnBind(GL.FRAMEBUFFER);
+	
+		blurFrameBufferV = new Framebuffer("blurVertical");
+		blurFrameBufferV.Bind(GL.FRAMEBUFFER);
+		blurFrameBufferV.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT0);
+		blurFrameBufferH.CheckStatus("blur2");
+		blurFrameBufferV.UnBind(GL.FRAMEBUFFER);
 		
 		blurShader = Shader.GetShader(StringLibrary.BLUR);
 		
@@ -299,7 +303,58 @@ class Renderer
 		
 			LightManager.Get().CleanLightStates();
 			
+			var quad:CameraQuad;
+			var framebuffer:Framebuffer;
+			var horizontal:Bool = true;
+			var firstTime:Bool = true;
+			for (i in 0...cameraQuads.length)
+			{
+				blurFrameBufferH.Bind(GL.FRAMEBUFFER);
+				GL.clearColor(1, 1, 1,0);
+				GL.clear(GL.COLOR_BUFFER_BIT);
+				blurFrameBufferV.Bind(GL.FRAMEBUFFER);
+				GL.clearColor(1, 1, 1,0);
+				GL.clear(GL.COLOR_BUFFER_BIT);
+				//trace(cameraQuads.get(i).name);
+				quad = cameraQuads.get(i);
+				quad.shader = blurShader;
+				trace(quad.shader);
+				quad.shader.Use();
+				framebuffer = blurFrameBufferH;
+				for (i in 0...GraphicSettings.bloomIntensity)
+				{
+					framebuffer.Bind(GL.FRAMEBUFFER);
+					quad.shader.SetInt(StringLibrary.HORIZONTAL, horizontal == true ? 1 : 0 );
+					if (firstTime)
+					{
+						firstTime = false;
+						quad.texture = BeardGame.Get().cameras[quad.camera].framebuffer.textures[StringLibrary.COLOR].texture;
+					}	
+					else{
+						
+						if(horizontal)
+							quad.texture = blurFrameBufferV.textures[StringLibrary.COLOR].texture;
+						else quad.texture = blurFrameBufferH.textures[StringLibrary.COLOR].texture;
+					}
+					quad.Render();
 				
+					horizontal = !horizontal;
+					//
+					if (framebuffer == blurFrameBufferH)
+						framebuffer = blurFrameBufferV;
+					else
+						framebuffer = blurFrameBufferH;
+					
+				}
+				
+				quad.shader = Shader.GetShader(StringLibrary.CAMERA_QUAD);
+				quad.texture =  BeardGame.Get().cameras[quad.camera].framebuffer.textures[StringLibrary.COLOR].texture;
+				quad.bloom =  blurFrameBufferH.textures[StringLibrary.COLOR].texture;
+			
+				
+			}
+			
+			
 			GL.bindFramebuffer(GL.FRAMEBUFFER, 0);
 			GL.disable(GL.DEPTH_TEST);
 			GL.clearColor(1, 1, 1,0);
@@ -310,6 +365,7 @@ class Renderer
 			for (i in 0...cameraQuads.length)
 			{
 				//trace(cameraQuads.get(i).name);
+				//cameraQuads.get(i).texture = BeardGame.Get().cameras[StringLibrary.DEFAULT].framebuffer.textures[StringLibrary.COLOR].texture;
 				cameraQuads.get(i).Render();
 			}
 
@@ -327,7 +383,13 @@ class Renderer
 		projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		
 		
+		blurFrameBufferH.Bind(GL.FRAMEBUFFER);
+		blurFrameBufferH.UpdateTextureSize("", width, height);
+		blurFrameBufferH.UnBind(GL.FRAMEBUFFER);
 		
+		blurFrameBufferV.Bind(GL.FRAMEBUFFER);
+		blurFrameBufferV.UpdateTextureSize("", width, height);
+		blurFrameBufferV.UnBind(GL.FRAMEBUFFER);
 		for (camera in BeardGame.Get().cameras)
 			camera.AdjustResize();
 		for (i in 0...cameraQuads.length)

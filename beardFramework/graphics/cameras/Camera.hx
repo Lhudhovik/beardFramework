@@ -65,7 +65,7 @@ class Camera
 		projection = new Matrix4();
 		view = new Matrix4();
 		
-		framebuffer = new Framebuffer();
+		framebuffer = new Framebuffer(StringLibrary.DEFAULT);
 		framebuffer.Bind(GL.FRAMEBUFFER);
 
 		var width:Int = Std.int(width);
@@ -73,13 +73,14 @@ class Camera
 
 
 		
-		framebuffer.CreateTexture(StringLibrary.COLOR, width, height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT0,true);
-		framebuffer.CreateTexture(StringLibrary.COLOR+1, width, height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT1,false);
+		framebuffer.CreateTexture(StringLibrary.COLOR, width, height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT0);
+		framebuffer.CreateTexture(StringLibrary.COLOR+1, width, height, GL.RGBA16F, GL.RGBA, GL.FLOAT, GL.COLOR_ATTACHMENT1);
 
 		framebuffer.CreateRenderBuffer(StringLibrary.DEPTH, GL.RENDERBUFFER, GL.DEPTH24_STENCIL8,width,height, GL.DEPTH_STENCIL_ATTACHMENT);
 
 		GL.drawBuffers([GL.COLOR_ATTACHMENT0, GL.COLOR_ATTACHMENT1]);
 		
+		framebuffer.CheckStatus("Creation");
 		framebuffer.UnBind(GL.FRAMEBUFFER);
 		
 	
@@ -246,7 +247,7 @@ class Camera
 
 		//
 		framebuffer.Bind(GL.FRAMEBUFFER);
-		GL.enable(GL.DEPTH_TEST);
+		//GL.enable(GL.DEPTH_TEST);
 		GL.clearColor(clearColor.getRedf(), clearColor.getGreenf(), clearColor.getBluef(),1);
 		GL.clear(GL.COLOR_BUFFER_BIT);
 		GL.clear(GL.DEPTH_BUFFER_BIT);
@@ -257,17 +258,12 @@ class Camera
 			projection.createOrtho( 0,width,height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
 		}
 
-		if (framebuffer != null /*&& framebuffer.quad != null*/)
-		//{
-			framebuffer.UpdateTextureSize(StringLibrary.COLOR, Std.int(width), Std.int(height));
-			//framebuffer.quad.shader.Use();
-			//framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
-			//framebuffer.quad.width = Std.int(width);
-			//framebuffer.quad.height = Std.int(height);
-			//framebuffer.quad.x = 0;
-			//framebuffer.quad.y = 0;
-		//}
-
+		
+		
+		//framebuffer.UpdateTextureSize("", Std.int(width), Std.int(height));
+		//framebuffer.UpdateRenderBufferSize("", Std.int(width), Std.int(height));
+	
+		framebuffer.CheckStatus("Adjust Resized");
 		framebuffer.UnBind(GL.FRAMEBUFFER);
 		needViewUpdate = true;
 	}
@@ -279,13 +275,6 @@ class Camera
 		view.appendScale(zoom, zoom, 1);
 		view.appendTranslation(  GetWidth()*0.5 -centerX,  GetHeight()*0.5 - centerY, -1);
 		view.appendRotation(0.1, new Vector4(0, 1, 0));
-		//DataU.DeepTrace(view);
-
-		//if (framebuffer != null && framebuffer.quad != null){
-		//framebuffer.quad.x = viewportX;
-		//framebuffer.quad.y = viewportY;
-		//}
-
 		needViewUpdate = false;
 	}
 

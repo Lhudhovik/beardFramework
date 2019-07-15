@@ -29,6 +29,7 @@ class StringLibrary
 	public static inline var GAMEPAD_DISCONNECT:String 		= "gamepadDisconnect";
 	public static inline var GAMEPAD_ID:String 				= "gamepadID";
 	public static inline var GAMEPAD_MAX:String 			= "maxGamepads";
+	public static inline var HORIZONTAL:String 				= "horizontal";
 	public static inline var INPUT:String 					= "input";
 	public static inline var INPUT_DEFAULT:String 			= "defaultInput";
 	public static inline var INPUT_DEFAULT_TYPE:String 		= "defaultInputType";
