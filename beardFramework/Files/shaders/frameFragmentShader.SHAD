@@ -1,14 +1,27 @@
 #version 460
 
-in vec2 uvs;
+in vec2 fragmentUVs;
 
 out vec4 FragColor;
 
 uniform sampler2D sampler;
-
+//uniform sampler2D blur;
+uniform float exposure;
+uniform float gamma;
 void main()
 {
 	
-	FragColor = texture(sampler, uvs);
+	
+	vec3 hdrColor = texture(sampler, fragmentUVs).rgb;
+	//vec3 blurColor = texture(blur, uvs).rgb;
+	
+	//hdrColor += blurColor;
+	
+	vec3 mapped = vec3(1.0) - exp(-hdrColor * exposure);
+	
+	mapped = pow(mapped, vec3(1.0/gamma));
+	
+	//FragColor = vec4(mapped, 1.0);
+	FragColor = texture(sampler, fragmentUVs);
 
 } 

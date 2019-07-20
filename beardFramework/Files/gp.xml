@@ -12,6 +12,7 @@
 <textures>
 	<texture name="haxe" path="assets/textures/haxe.png"/>	
 	<texture name="haxeNormal" path="assets/textures/haxeNormal.png"/>	
+	<texture name="haxeBloom" path="assets/textures/haxeBloom.png"/>	
 	<texture name="brick" path="assets/textures/brick.png"/>	
 	<texture name="brickNormal" path="assets/textures/brickNormal.png"/>	
 </textures>

@@ -54,7 +54,7 @@ void main()
 			break;
 		case 2:
 			angle = atan(corner2Pos.y - lightPos.y, corner2Pos.x-lightPos.x);
-			length = abs(shadowLength / cos(angle));
+			length = abs((shadowLength/abs(newPosition.z - lightPos.z)) / cos(angle));
 			
 			newPosition.x = corner2Pos.x +  length * cos(angle);
 			newPosition.y = corner2Pos.y + length * sin(angle);
@@ -89,7 +89,7 @@ void main()
 		
 		case 3: 
 			angle = atan(corner1Pos.y - lightPos.y, corner1Pos.x-lightPos.x);
-			length = abs(shadowLength / cos(angle));
+			length = abs((shadowLength/abs(newPosition.z - lightPos.z)) / cos(angle));
 			newPosition.x = corner1Pos.x + length* cos(angle);
 			newPosition.y = corner1Pos.y + length * sin(angle);
 			color.w = 0;
