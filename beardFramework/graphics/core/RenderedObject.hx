@@ -72,9 +72,11 @@ class RenderedObject implements ICameraDependent
 		var diffuseComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
 		var specularComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:1, height:1, x : 0, y:0 }};
 		var normalComponent:MaterialComponent = {color:Color.WHITE, texture:"", atlas:"", uv: { width:0, height:0, x : 0, y:0 }};
+		var bloomComponent:MaterialComponent = {color:Color.CLEAR, texture:"", atlas:"", uv: { width:0, height:0, x : 0, y:0 }};
 		material.components[StringLibrary.DIFFUSE] = diffuseComponent;
 		material.components[StringLibrary.SPECULAR] = specularComponent;
 		material.components[StringLibrary.NORMAL_MAP] = normalComponent;
+		material.components[StringLibrary.BLOOM_MAP] = bloomComponent;
 		material.transparency = 1;
 		shadows = new Map();
 		shadowCaster = true;

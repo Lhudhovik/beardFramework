@@ -310,8 +310,8 @@ class LightManager
 						if (light.isDirty || lightGroups[lightGroup].orderChanged || forceUpdated )
 						{
 							shader.Set3Float( "pointLights["+pointIndex+"].ambient", light.ambient.getRedf(), light.ambient.getGreenf(), light.ambient.getBluef());
-							shader.Set3Float( "pointLights["+pointIndex+"].diffuse", 200, 200, 200 );
-							//shader.Set3Float( "pointLights["+pointIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
+							//shader.Set3Float( "pointLights["+pointIndex+"].diffuse", 200, 200, 200 );
+							shader.Set3Float( "pointLights["+pointIndex+"].diffuse", light.diffuse.getRedf(), light.diffuse.getGreenf(), light.diffuse.getBluef() );
 							shader.Set3Float( "pointLights["+pointIndex+"].specular", light.specular.getRedf(), light.specular.getGreenf(), light.specular.getBluef() );
 							shader.Set3Float( "pointLights["+pointIndex+"].position", light.x, light.y, light.z );
 							shader.SetFloat( "pointLights["+pointIndex+"].constant", cast( light, PointLight).constant);

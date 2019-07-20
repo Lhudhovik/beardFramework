@@ -50,7 +50,7 @@ class Framebuffer
 			samplerIndex = AssetManager.Get().GetFreeTextureUnit();
 	
 			var texture:GLTexture = GL.createTexture();
-			GL.activeTexture(GL.TEXTURE0 + samplerIndex);
+			//GL.activeTexture(GL.TEXTURE0 + samplerIndex);
 			GL.bindTexture(GL.TEXTURE_2D, texture);
 			
 			GL.texImage2D(GL.TEXTURE_2D, 0,internalFormat, width, height, 0,format,type, 0);

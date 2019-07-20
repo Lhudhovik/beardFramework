@@ -318,7 +318,7 @@ class Renderer
 				//trace(cameraQuads.get(i).name);
 				quad = cameraQuads.get(i);
 				quad.shader = blurShader;
-				trace(quad.shader);
+				//trace(quad.shader);
 				quad.shader.Use();
 				framebuffer = blurFrameBufferH;
 				for (i in 0...GraphicSettings.bloomIntensity)

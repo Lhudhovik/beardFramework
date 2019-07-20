@@ -173,6 +173,7 @@ class Visual extends AbstractVisual implements IRenderable
 		
 		shader.SetFloat("material.transparency", material.transparency);
 		shader.SetFloat("material.shininess", material.shininess);
+		shader.SetFloat("material.bloom", material.bloom);
 		
 		
 			

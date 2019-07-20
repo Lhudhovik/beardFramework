@@ -24,6 +24,7 @@ abstract Color(UInt) from UInt to UInt
     public static inline var NAVY:UInt    = 0x000080ff;
     public static inline var FUCHSIA:UInt = 0xff00ffff;
     public static inline var PURPLE:UInt  = 0x800080ff;
+    public static inline var CLEAR:UInt  = 0x80008000;
 
     
 	inline function new(value:UInt) this = value;

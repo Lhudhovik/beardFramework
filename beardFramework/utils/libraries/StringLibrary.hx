@@ -10,6 +10,7 @@ class StringLibrary
 	public static inline var ACTION:String 					= "action";
 	public static inline var ACTION_DEFAULT:String 			= "defaultActions";
 	public static inline var ANY:String 					= "any";
+	public static inline var BLOOM_MAP:String 				= "bloomMap";
 	public static inline var BLUR:String 					= "blur";
 	public static inline var CAMERA_QUAD:String 			= "cameraQuad";
 	public static inline var COLOR:String 					= "color";

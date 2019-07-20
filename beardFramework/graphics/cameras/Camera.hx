@@ -78,7 +78,7 @@ class Camera
 
 		framebuffer.CreateRenderBuffer(StringLibrary.DEPTH, GL.RENDERBUFFER, GL.DEPTH24_STENCIL8,width,height, GL.DEPTH_STENCIL_ATTACHMENT);
 
-		GL.drawBuffers([GL.COLOR_ATTACHMENT0, GL.COLOR_ATTACHMENT1]);
+		GL.drawBuffers([0, GL.COLOR_ATTACHMENT1]);
 		
 		framebuffer.CheckStatus("Creation");
 		framebuffer.UnBind(GL.FRAMEBUFFER);

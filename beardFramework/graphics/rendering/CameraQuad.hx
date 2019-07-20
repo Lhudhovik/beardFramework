@@ -243,7 +243,7 @@ class CameraQuad
 				GL.bindBuffer(GL.ELEMENT_ARRAY_BUFFER, EBO);
 				GL.bufferData(GL.ELEMENT_ARRAY_BUFFER, indices.byteLength, indices, GL.DYNAMIC_DRAW);
 			}
-			trace(texture);
+			
 			
 			if (texture != null){
 				GL.activeTexture( GL.TEXTURE0 + AssetManager.Get().GetFreeTextureUnit());

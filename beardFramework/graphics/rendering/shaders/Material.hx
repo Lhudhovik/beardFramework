@@ -13,6 +13,7 @@ class Material
 	public var components(default, null):Map<String,MaterialComponent>;
 	public var shininess(default, null):Float = 32;
 	public var transparency(default, set):Float = 1.0;
+	public var bloom(default, set):Float = 0;
 	public var isDirty:Bool;
 	public var name:String;
 	
@@ -99,6 +100,13 @@ class Material
 	{
 		isDirty = true;
 		return transparency = value;
+	}
+	
+	function set_bloom(value:Float):Float 
+	{
+		isDirty = true;
+		if (value < 0) value = 0;
+		return bloom = value;
 	}
 	
 	
