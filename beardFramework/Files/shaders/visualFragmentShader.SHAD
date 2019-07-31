@@ -1,7 +1,7 @@
 #version 460
 
-layout (location = 1) out vec4 FragColor;
-layout (location = 0) out vec4 BrightColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 struct ColorComponent{
 	sampler2D sampler;
@@ -55,7 +55,7 @@ struct SpotLight {
 #define NR_POINT_LIGHTS 10
 #define NR_SPOT_LIGHTS 10
 #define NR_DIR_LIGHTS 10
-#define MAX_BLOOM_VALUE 500
+
 
 
 in vec3 FragmentPosition;
@@ -92,7 +92,7 @@ void main()
 	 
 	if( material.bloomMap.uv.z !=0 && material.bloomMap.uv.w !=0){
 		
-		bloom = MAX_BLOOM_VALUE * texture(material.bloomMap.sampler, vec2(material.bloomMap.uv.x + (material.bloomMap.uv.z*FragmentUV.x),material.bloomMap.uv.y + (material.bloomMap.uv.w*FragmentUV.y))).rgb;
+		bloom = material.bloom * texture(material.bloomMap.sampler, vec2(material.bloomMap.uv.x + (material.bloomMap.uv.z*FragmentUV.x),material.bloomMap.uv.y + (material.bloomMap.uv.w*FragmentUV.y))).rgb;
 	
 	}
 	else bloom = vec3(material.bloom,material.bloom,material.bloom);

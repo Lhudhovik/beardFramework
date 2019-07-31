@@ -263,6 +263,7 @@ class Renderer
 						
 			var layer:BeardLayer;
 			
+			// 2D SHADOWS
 			for (i in 0...BeardGame.Get().GetLayersCount())
 			{
 					layer = BeardGame.Get().GetLayer(i);
@@ -279,6 +280,8 @@ class Renderer
 			}
 			
 			DepthSorting();
+			
+			// OBJECTS RENDER
 			for (camera in BeardGame.Get().cameras)
 			{
 				
@@ -303,6 +306,7 @@ class Renderer
 		
 			LightManager.Get().CleanLightStates();
 			
+			// BLUR
 			var quad:CameraQuad;
 			var framebuffer:Framebuffer;
 			var horizontal:Bool = true;
@@ -315,10 +319,9 @@ class Renderer
 				blurFrameBufferV.Bind(GL.FRAMEBUFFER);
 				GL.clearColor(1, 1, 1,0);
 				GL.clear(GL.COLOR_BUFFER_BIT);
-				//trace(cameraQuads.get(i).name);
+				
 				quad = cameraQuads.get(i);
 				quad.shader = blurShader;
-				//trace(quad.shader);
 				quad.shader.Use();
 				framebuffer = blurFrameBufferH;
 				for (i in 0...GraphicSettings.bloomIntensity)
@@ -328,7 +331,7 @@ class Renderer
 					if (firstTime)
 					{
 						firstTime = false;
-						quad.texture = BeardGame.Get().cameras[quad.camera].framebuffer.textures[StringLibrary.COLOR].texture;
+						quad.texture = BeardGame.Get().cameras[quad.camera].framebuffer.textures[StringLibrary.COLOR+1].texture;
 					}	
 					else{
 						
@@ -354,7 +357,7 @@ class Renderer
 				
 			}
 			
-			
+			// FINAL RENDER
 			GL.bindFramebuffer(GL.FRAMEBUFFER, 0);
 			GL.disable(GL.DEPTH_TEST);
 			GL.clearColor(1, 1, 1,0);
@@ -364,8 +367,6 @@ class Renderer
 			
 			for (i in 0...cameraQuads.length)
 			{
-				//trace(cameraQuads.get(i).name);
-				//cameraQuads.get(i).texture = BeardGame.Get().cameras[StringLibrary.DEFAULT].framebuffer.textures[StringLibrary.COLOR].texture;
 				cameraQuads.get(i).Render();
 			}
 
