@@ -403,6 +403,7 @@ class TextField extends Visual implements IFocusable
 					height:0,
 					color:this.color,
 					colorChanged:false,
+					isSpecialChar:false,
 					line:0,
 					textureData: null,
 					bufferIndex: -1,
@@ -412,6 +413,7 @@ class TextField extends Visual implements IFocusable
 				glyphsData.Push(glyphData);
 			}
 			
+			glyphData.isSpecialChar = isSpecialChar;
 			
 			glyphMetrics = ((!isEmbedded && !isSpecialChar)? currFont.getGlyphMetrics(currFont.getGlyph(char)):null);	
 		
@@ -458,7 +460,7 @@ class TextField extends Visual implements IFocusable
 					
 				}
 				
-				glyphScale = textureData.uvH / textureData.uvW;
+				glyphScale = textureData.imageArea.height / textureData.imageArea.width;
 				glyphData.height = glyphHeight;
 				glyphData.width = glyphHeight / glyphScale;
 				glyphData.textureData = textureData;
@@ -484,11 +486,11 @@ class TextField extends Visual implements IFocusable
 					
 			//TO change
 			if (this.width == 0){
-				trace("setBaseWidth");
+				//trace("setBaseWidth");
 				SetBaseWidth(glyphData.x + glyphData.width);
 			}
 			if (this.height == 0){
-				trace("setBaseHeight");
+				//trace("setBaseHeight");
 				SetBaseHeight(textSize);
 			}
 			
@@ -512,8 +514,8 @@ class TextField extends Visual implements IFocusable
 					if(glyphData.x + glyphData.width> width)
 						SetBaseWidth(glyphData.x + glyphData.width);
 					if (glyphData.y + glyphData.height > height){
-						trace(this.height);
-						trace(glyphData.y + glyphData.height);
+						//trace(this.height);
+						//trace(glyphData.y + glyphData.height);
 						SetBaseHeight(glyphData.y + glyphData.height);
 					}
 					
@@ -865,6 +867,12 @@ class TextField extends Visual implements IFocusable
 	public function RenderText(camera:Camera):Void
 	{
 		
+		var glyphData:RenderedGlyphData = null;
+		var closerSize:Int = cast(AssetManager.Get().GetAtlas(this.atlas), FontAtlas).GetClosestTextSize(font, Math.round(textSize));
+		var atlasTexture:Texture =  AssetManager.Get().GetTexture(atlas);
+		var screenRatioWidth:Float = BeardGame.Get().window.width / this.width;
+		var screenRatioheight:Float = BeardGame.Get().window.height / this.height;
+		
 		textTexture.width = this.intWidth();
 		textTexture.height = this.intHeight();
 		
@@ -872,31 +880,24 @@ class TextField extends Visual implements IFocusable
 		textTexture.glTexture = GL.createTexture();
 		GL.bindTexture(GL.TEXTURE_2D, textTexture.glTexture);
 		GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, this.intWidth() , this.intHeight(), 0, GL.RGBA, GL.FLOAT, 0);
-		GL.viewport(0,0, this.intWidth(), this.intHeight());
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
 		
-		var widthRatio:Float = 2048 / this.width;
-				
+					
 		framebuffer.Bind();
 		GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, textTexture.glTexture, 0);
 		GL.clearColor(0.2, 0.2, 0,1);
 		GL.clear(GL.COLOR_BUFFER_BIT);
-
-		var glyphData:RenderedGlyphData = null;
-		var closerSize:Int = cast(AssetManager.Get().GetAtlas(this.atlas), FontAtlas).GetClosestTextSize(font, Math.round(textSize));
-		
-		var atlasTexture:Texture =  AssetManager.Get().GetTexture(atlas);
+		GL.viewport(0,0, this.intWidth(), this.intHeight());
 		
 		for (i in 0...glyphsData.length)
 		{
 			glyphData = glyphsData.get(i);
 			
-			if (glyphData != null)
+			if (glyphData != null && !glyphData.isSpecialChar)
 			{
-				
 				if (glyphData.textureData.samplerIndex != atlasTexture.fixedIndex) quad.texture = AssetManager.Get().GetTextureByFixedIndex(glyphData.textureData.samplerIndex).glTexture;
 				else quad.texture = atlasTexture.glTexture;
 				
@@ -904,26 +905,20 @@ class TextField extends Visual implements IFocusable
 				quad.uvs.y = glyphData.textureData.uvY;
 				quad.uvs.width = glyphData.textureData.uvW;
 				quad.uvs.height = glyphData.textureData.uvH;
-				quad.width = Std.int(glyphData.textureData.imageArea.width*widthRatio);
-				quad.height =Std.int(glyphData.textureData.imageArea.height*widthRatio);
-				quad.x = glyphData.x*widthRatio/2;
-				quad.y = glyphData.y*widthRatio/2;
+				quad.width = Std.int(glyphData.width*screenRatioWidth);
+				quad.height =Std.int(glyphData.height*screenRatioheight);
+				quad.x = glyphData.x*screenRatioWidth;
+				quad.y = glyphData.y*screenRatioheight;
 				quad.color = glyphData.color;
 				quad.Render();
-				
-				trace(glyphData);
 			}
 		}
 
 		framebuffer.UnBind();
 		this.texture = this.name;
 		material.components[StringLibrary.DIFFUSE].uv.y = 1;
-		//material.components[StringLibrary.DIFFUSE].uv.y = (glyphData.y + glyphData.height) / this.height;
 		material.components[StringLibrary.DIFFUSE].uv.height = -1;
 	
-		
-		trace(this.width);
-		trace(this.height);
 	}
 	
 	override public function Render(camera:Camera):Int 
@@ -940,7 +935,6 @@ class TextField extends Visual implements IFocusable
 
 typedef RenderedGlyphData =
 {
-	public var char:String;
 	public var x:Float;
 	public var y:Float;
 	public var width:Float;
@@ -950,6 +944,7 @@ typedef RenderedGlyphData =
 	public var line:Int;
 	public var textureData:SubTextureData;
 	public var bufferIndex:Int;
+	public var isSpecialChar:Bool; 
 	public var metrics:GlyphMetrics;
 }
 
