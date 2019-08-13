@@ -152,7 +152,7 @@ class UIBatch extends Batch
 				}
 				else if (Std.is(dirtyObjects.get(0), BatchedTextField) && (textfield = cast(dirtyObjects.get(0), BatchedTextField)) != null)
 				{
-					
+					/*
 					if (textfield.needLayoutUpdate)	textfield.UpdateLayout();
 										center.x =  textfield.width * 0.5;
 						center.y = textfield.height * 0.5;	
@@ -209,7 +209,7 @@ class UIBatch extends Batch
 					}
 					
 					textfield.isDirty = false;
-					
+					*/
 				}
 			}
 			

@@ -12,7 +12,7 @@ class AbstractVisual extends RenderedObject
 	private static var instanceCount:Int = 0;
 	
 	@:isVar	public var atlas(default, set):String;
-	@:isVar	public var texture(default, set):String;
+	@:isVar	public var texture(get, set):String;
 
 	private function new(texture:String="", atlas:String="" , name:String = "") 
 	{
@@ -59,14 +59,14 @@ class AbstractVisual extends RenderedObject
 	function set_texture(value:String):String 
 	{
 		if (value != texture){
-			texture = value;
-			
+			material.components[StringLibrary.DIFFUSE].texture = value;
 			Reinit();
 			isDirty = true;
 		}
-		return texture;
+		return material.components[StringLibrary.DIFFUSE].texture;
 	}
 	
+	function get_texture():String	return material.components[StringLibrary.DIFFUSE].texture;
 	function set_atlas(value:String):String 
 	{
 		if (value != atlas){
@@ -81,12 +81,14 @@ class AbstractVisual extends RenderedObject
 	{
 		if (texture != null && texture != "")
 		{
+			var subData:SubTextureData;
 			
-			if (atlas != "" && atlas != null)
+			if (atlas != "" && atlas != null && (subData = AssetManager.Get().GetSubTextureData(texture, atlas)) != null)
 			{
-				var texture:SubTextureData = AssetManager.Get().GetSubTextureData(texture, atlas);
-				SetBaseWidth(texture.imageArea.width);
-				SetBaseHeight(texture.imageArea.height);
+				SetBaseWidth(subData.imageArea.width);
+				SetBaseHeight(subData.imageArea.height);
+				
+				
 			}
 			else if (AssetManager.Get().GetTexture(texture) != null)
 			{

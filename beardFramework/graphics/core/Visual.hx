@@ -62,7 +62,7 @@ class Visual extends AbstractVisual implements IRenderable
 	
 	public static function InitSharedGraphics():Void
 	{
-		sharedShader = Shader.GetShader("visualDefault");
+		sharedShader = Shader.GetShader(StringLibrary.DEFAULT);
 		
 		VAO = Renderer.Get().GenerateVAO();
 		
@@ -152,6 +152,7 @@ class Visual extends AbstractVisual implements IRenderable
 					GL.activeTexture(GL.TEXTURE0 + activeTextures[component.texture]);
 					GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().GetTexture(component.texture).glTexture);
 					sampleUnit = activeTextures[component.texture] ;
+					
 				}
 				
 				shader.SetInt("material." + componentName + ".sampler", sampleUnit);			
@@ -225,7 +226,7 @@ class Visual extends AbstractVisual implements IRenderable
 		GLU.ShowErrors();
 			
 		
-			
+		isDirty = false;
 		
 		return drawCount;
 	}

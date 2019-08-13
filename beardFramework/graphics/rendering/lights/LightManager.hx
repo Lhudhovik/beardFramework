@@ -63,7 +63,7 @@ class LightManager
 		
 		shadowShader = Shader.GetShader("shadow");
 		//framebuffer = new Framebuffer();
-		//framebuffer.Bind(GL.FRAMEBUFFER);
+		//framebuffer.Bind();
 		//framebuffer.CreateTexture(StringLibrary.SHADOW_MAP, BeardGame.Get().window.width, BeardGame.Get().window.height,GL.DEPTH_COMPONENT, GL.DEPTH_COMPONENT, GL.FLOAT, GL.DEPTH_ATTACHMENT,true);
 		////framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,false);
 		//
@@ -82,7 +82,7 @@ class LightManager
 		//framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
 		//
 		//
-		//framebuffer.UnBind(GL.FRAMEBUFFER);
+		//framebuffer.UnBind();
 	}
 	
 	public function AddToGroup(light:Light, group:String="default"):Void

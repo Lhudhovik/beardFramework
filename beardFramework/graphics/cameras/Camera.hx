@@ -66,7 +66,7 @@ class Camera
 		view = new Matrix4();
 		
 		framebuffer = new Framebuffer(StringLibrary.DEFAULT);
-		framebuffer.Bind(GL.FRAMEBUFFER);
+		framebuffer.Bind();
 
 		var width:Int = Std.int(width);
 		var height:Int = Std.int(height);
@@ -81,7 +81,7 @@ class Camera
 		GL.drawBuffers([GL.COLOR_ATTACHMENT0, GL.COLOR_ATTACHMENT1]);
 		
 		framebuffer.CheckStatus("Creation");
-		framebuffer.UnBind(GL.FRAMEBUFFER);
+		framebuffer.UnBind();
 		
 	
 		this.widthRatio  = widthRatio;
@@ -246,7 +246,7 @@ class Camera
 		height =  BeardGame.Get().window.height * this.heightRatio;
 
 		//
-		framebuffer.Bind(GL.FRAMEBUFFER);
+		framebuffer.Bind();
 		//GL.enable(GL.DEPTH_TEST);
 		GL.clearColor(clearColor.getRedf(), clearColor.getGreenf(), clearColor.getBluef(),1);
 		GL.clear(GL.COLOR_BUFFER_BIT);
@@ -264,7 +264,7 @@ class Camera
 		//framebuffer.UpdateRenderBufferSize("", Std.int(width), Std.int(height));
 	
 		framebuffer.CheckStatus("Adjust Resized");
-		framebuffer.UnBind(GL.FRAMEBUFFER);
+		framebuffer.UnBind();
 		needViewUpdate = true;
 	}
 

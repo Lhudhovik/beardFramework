@@ -65,6 +65,7 @@ class StringLibrary
 	public static inline var SHADOW_COLOR:String 			= "shadowColor";
 	public static inline var SHADOW_MAP:String 				= "shadowMap";
 	public static inline var SPECULAR:String 				= "specular";
+	public static inline var TEXTFIELD:String 				= "textfield";
 	public static inline var TOUCH:String 					= "touch";
 	public static inline var TOUCH_DOUBLE_TAP:String 		= "touchDoubleTap";
 	public static inline var TOUCH_END:String 				= "touchEnd";
@@ -74,6 +75,7 @@ class StringLibrary
 	public static inline var TOUCH_OVER:String 				= "touchOver";
 	public static inline var TOUCH_START:String 			= "touchStart";
 	public static inline var TOUCH_TAP:String 				= "touchTap";
+	public static inline var TRANSPARENCY:String 			= "transparency";
 	public static inline var UI:String 						= "UI";
 	public static inline var UIBASE:String 					= "UIBase";
 	public static inline var UVS:String 					= "uvs";

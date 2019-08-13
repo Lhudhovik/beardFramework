@@ -1,6 +1,7 @@
 package beardFramework.debug;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.text.BatchedTextField;
+import beardFramework.graphics.text.TextField;
 import haxe.Timer;
 import lime.system.System;
 
@@ -10,7 +11,7 @@ using beardFramework.utils.SysPreciseTime;
  * FPS class extension to display memory usage.
  * @author Kirill Poletaev
  */
-class MemoryUsage extends BatchedTextField
+class MemoryUsage extends TextField
 {
 	private var times:Array<Float>;
 	private var memPeak:Float = 0;

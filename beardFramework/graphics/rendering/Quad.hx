@@ -7,8 +7,10 @@ import beardFramework.graphics.rendering.shaders.Shader;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.options.GraphicSettings;
+import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.GLU;
 import beardFramework.utils.libraries.StringLibrary;
+import beardFramework.utils.simpleDataStruct.SRect;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLBuffer;
 import lime.graphics.opengl.GLTexture;
@@ -32,6 +34,10 @@ class Quad
 	public var drawMode:Int = GL.TRIANGLES;
 	public var texture:GLTexture;
 	public var shader:Shader;
+	public var uvs:SRect;
+	public var color:Color;
+	public var alpha:Float;
+	public var reverse:Bool;
 	
 	private static var verticesData:Float32Array; //overide with local variable if necessary
 	private static var indices:UInt16Array;
@@ -46,9 +52,12 @@ class Quad
 		z = 0;
 		width = 1;
 		height = 1;
-		
+		alpha = 1;
+		color = Color.WHITE;
+		reverse = true;
+		uvs = {x:0, y:0, width:0, height:0};
 		renderer = Renderer.Get();
-		shader = Shader.GetShader("frame");
+		shader = Shader.GetShader(StringLibrary.QUAD);
 		shader.Use();
 		shader.SetMatrix4fv(StringLibrary.PROJECTION, renderer.projection);
 		
@@ -102,7 +111,10 @@ class Quad
 		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
 		shader.SetFloat(StringLibrary.EXPOSURE, GraphicSettings.exposure);
 		shader.SetFloat(StringLibrary.GAMMA, GraphicSettings.gamma);
-		
+		shader.Set4Float(StringLibrary.UVS, uvs.x, uvs.y, uvs.width, uvs.height);
+		shader.SetFloat(StringLibrary.TRANSPARENCY, alpha);
+		shader.Set3Float(StringLibrary.COLOR, color.getRedf(), color.getGreenf(), color.getBluef());
+		shader.SetInt("reverse", this.reverse ? 1:0);
 		if (renderer.boundBuffer != VBO){
 		
 			shader.Use();

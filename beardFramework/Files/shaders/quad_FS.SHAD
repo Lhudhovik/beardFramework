@@ -1,0 +1,15 @@
+#version 460
+
+in vec2 fragmentUVs;
+
+out vec4 FragColor;
+
+uniform sampler2D sampler;
+uniform vec3 color;
+uniform float transparency;
+void main()
+{
+	vec4 texture = texture(sampler, fragmentUVs) ;
+	FragColor = vec4(vec3(texture)* color, texture.w * transparency);
+	//FragColor = texture(sampler, fragmentUVs);
+} 

@@ -7,6 +7,7 @@ import beardFramework.resources.assets.Atlas;
 import beardFramework.graphics.text.FontFormat;
 import beardFramework.utils.data.Crypto;
 import beardFramework.utils.graphics.TextureU;
+import beardFramework.utils.libraries.StringLibrary;
 import haxe.Utf8;
 import lime.graphics.Image;
 import lime.graphics.opengl.GL;
@@ -367,25 +368,43 @@ class AssetManager
 		}
 	}
 	
-	public inline function AddTextureFromImage(name:String, texture:Image, fixedIndex:Int=-1):GLTexture
+	public inline function AddTextureFromImage(name:String, image:Image, fixedIndex:Int=-1, replace:Bool = false):Texture
 	{
 		//trace(name);
 		//trace(texture);
 		
-		var glTexture:GLTexture;
+		var texture:Texture;
 		
-		if (textures[name] == null){
+		if (textures[name] == null || replace){
 		
-			glTexture = TextureU.GetTexture(texture);
+			if (replace) RemoveTexture(name, true);
+			var glTexture : GLTexture = TextureU.GetTexture(image);
 		
-			textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex, width:texture.buffer.width, height:texture.buffer.height};
+			texture = textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex, width:image.buffer.width, height:image.buffer.height};
 			
 		}
-		else glTexture = textures[name].glTexture;
+		else texture = textures[name];
 		
-		return glTexture;
+		return texture;
 	}
 
+	
+	public inline function AddTexture(name:String, glTexture:GLTexture, width:Int, height:Int, fixedIndex:Int=-1, replace:Bool = false):Texture
+	{
+		//trace(name);
+		//trace(texture);
+		var texture:Texture;
+		if (textures[name] == null || replace){
+			
+			if (replace) RemoveTexture(name, true);
+			
+			texture = textures[name] = {glTexture:glTexture, fixedIndex:fixedIndex, width:width, height:height};
+			
+		}
+		else texture = textures[name];
+		
+		return texture;
+	}
 	
 	public inline function RemoveTexture(name:String, destroy:Bool = false):Void
 	{
@@ -401,6 +420,23 @@ class AssetManager
 		return textures[name];
 	}
 	
+	/**
+	 * /!\ Only work for textures with a fixed index
+	 * @param index Fixed Index to grab
+	 */
+	public inline function GetTextureByFixedIndex(index:Int):Texture
+	{
+		var result:Texture = textures[StringLibrary.DEFAULT];
+		for (texture in textures)
+		{
+			if (texture.fixedIndex == index){
+				result = texture;
+				break;
+			}
+		}
+		return result;
+		
+	}
 	public inline function AddTemplate(templateData:BatchRenderingData):Void
 	{
 		if (templateData != null)

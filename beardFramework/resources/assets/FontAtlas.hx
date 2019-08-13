@@ -154,7 +154,7 @@ class FontAtlas extends Atlas
 			
 		}
 	
-		
+		trace("------------------------------" +name);
 		
 		fonts.push(fontData);
 		//trace(count);
@@ -162,7 +162,7 @@ class FontAtlas extends Atlas
 		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
 		
 		
-		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTextureFromImage(this.name, textureImage, samplerIndex ));
+		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTextureFromImage(this.name, textureImage, samplerIndex,true ).glTexture);
 		Renderer.Get().UpdateAtlasTextureUnits(samplerIndex);
 		//trace(size + " " +keeys);
 	}
@@ -198,6 +198,12 @@ class FontAtlas extends Atlas
 	public inline function GetGlyphDataName(font:String, glyph:String, size:Int):String
 	{
 		
+		var closerSize:Int = GetClosestTextSize(font, size);
+		return font + closerSize + glyph;
+		
+	}
+	public inline function GetClosestTextSize(font:String, size:Int):Int
+	{
 		var closerSize:Int = 0;
 		if (!ContainsFont(font, size)){
 			
@@ -206,10 +212,9 @@ class FontAtlas extends Atlas
 					closerSize = _font.size;
 		}
 		else closerSize = size;
-		return font + closerSize + glyph;
 		
+		return closerSize;
 	}
-	
 }
 
 typedef AtlasFontData =

@@ -1,0 +1,31 @@
+#version 460
+in vec3 pos;
+
+
+out vec2 fragmentUVs;
+
+uniform mat4 model;
+uniform mat4 projection;
+uniform vec4 uvs; 
+uniform bool reverse;
+void main()
+{
+	gl_Position = projection  * model * vec4( pos.x ,pos.y, pos.z, 1.0);
+	
+	if(reverse){
+		 
+		if(uvs.z != 0 && uvs.w !=0)	
+			fragmentUVs = vec2(uvs.x + (pos.x * uvs.z) , uvs.y + (abs(pos.y -1) * uvs.w));
+		else
+			fragmentUVs = vec2(pos.x, abs(pos.y -1));
+	 }
+	 else{
+		 
+		if(uvs.z != 0 && uvs.w !=0)	
+			fragmentUVs = vec2(uvs.x + (pos.x * uvs.z) , uvs.y + (pos.y  * uvs.w));
+		else
+			fragmentUVs = vec2(pos.x, pos.y);
+	 }
+		
+	
+}

@@ -4,10 +4,7 @@
 	
 <atlases>
 	<atlas name="menuHD" fileExtension="png" path="assets/atlases" />
-	<!--<atlas name="img001" fileExtension="jpg" path="assets/atlases" />-->
 	<atlas name="menuHD2" fileExtension="png" path="assets/atlases" />
-	<!--<atlas name="menuHD3" fileExtension="png" path="assets/atlases" />-->
-	<!--<atlas name="menuHD4" fileExtension="png" path="assets/atlases" />-->
 </atlases>
 <textures>
 	<texture name="haxe" path="assets/textures/haxe.png"/>	
@@ -17,36 +14,25 @@
 	<texture name="brickNormal" path="assets/textures/brickNormal.png"/>	
 </textures>
 <shaders>
-	<shader name="default" nativeShaders="lightVertexShader,lightFragmentShader" />
-	<shader name="visualDefault" nativeShaders="visualVertexShader,visualFragmentShader" />
-	<shader name="debug" nativeShaders="debugVertexShader,debugFragmentShader" />
-	<shader name="frame" nativeShaders="frameVertexShader,frameFragmentShader" />
-	<!--<shader name="quad" nativeShaders="quadVertexShader,quadFragmentShader" />-->
-	<shader name="shadow" nativeShaders="shadowVertexShader,shadowFragmentShader" />
-	<shader name="blur" nativeShaders="cameraQuadVertexShader,glaussianBlurframeFragmentShader" />
-	<shader name="cameraQuad" nativeShaders="cameraQuadVertexShader,cameraQuadFragmentShader" />
-	<!--<shader name="cube" nativeShaders="cubeVertexShader,cubeGeometryShader,cubeFragmentShader" />-->
-	<nativeShader name="frameVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="frameFragmentShader" type="FRAGMENT_SHADER"/>
-	<!--<nativeShader name="quadVertexShader" type="VERTEX_SHADER"/>-->
-	<!--<nativeShader name="quadFragmentShader" type="FRAGMENT_SHADER"/>-->
-	<nativeShader name="lightVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="lightFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="visualVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="visualFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="debugVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="debugFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="dropShadowVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="dropShadowFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="shadowVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="shadowFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="glaussianBlurframeFragmentShader" type="FRAGMENT_SHADER"/>
-	<nativeShader name="cameraQuadVertexShader" type="VERTEX_SHADER"/>
-	<nativeShader name="cameraQuadFragmentShader" type="FRAGMENT_SHADER"/>
+	<shader name="default" nativeShaders="visual_VS,visual_FS" />
+	<shader name="debug" nativeShaders="debug_VS,debug_FS" />
+	<shader name="quad" nativeShaders="quad_VS,quad_FS" />
+	<shader name="shadow" nativeShaders="shadow_VS,shadow_FS" />
+	<shader name="blur" nativeShaders="cameraQuad_VS,glaussianBlurQuad_FS" />
+	<shader name="cameraQuad" nativeShaders="cameraQuad_VS,cameraQuad_FS" />
 	
-	<!--<nativeShader name="cubeVertexShader" type="VERTEX_SHADER"/>-->
-	<!--<nativeShader name="cubeGeometryShader" type="GEOMETRY_SHADER"/>-->
-	<!--<nativeShader name="cubeFragmentShader" type="FRAGMENT_SHADER"/>-->
+	<nativeShader name="quad_VS" type="VERTEX_SHADER"/>
+	<nativeShader name="quad_FS" type="FRAGMENT_SHADER"/>
+	<nativeShader name="visual_VS" type="VERTEX_SHADER"/>
+	<nativeShader name="visual_FS" type="FRAGMENT_SHADER"/>
+	<nativeShader name="debug_VS" type="VERTEX_SHADER"/>
+	<nativeShader name="debug_FS" type="FRAGMENT_SHADER"/>
+	<nativeShader name="shadow_VS" type="VERTEX_SHADER"/>
+	<nativeShader name="shadow_FS" type="FRAGMENT_SHADER"/>
+	<nativeShader name="glaussianBlurQuad_FS" type="FRAGMENT_SHADER"/>
+	<nativeShader name="cameraQuad_VS" type="VERTEX_SHADER"/>
+	<nativeShader name="cameraQuad_FS" type="FRAGMENT_SHADER"/>
+	
 </shaders>
 <fonts default="Roboto-Medium">
 	<!--<font name="American Captain" fileExtension="ttf" path="assets/fonts" size="32,72" />-->
@@ -56,7 +42,7 @@
 	<!--<font name="Presque Normal" fileExtension="ttf" path="assets/fonts" size="32,72"/>-->
 	<font name="Roboto-Medium" fileExtension="ttf" path="assets/fonts" size="32,72"/>
 </fonts>
-<renderingBatches>
+<!--<renderingBatches>
 	<template name="default" vertexPerObject="4" verticesIndices="0,1,2,2,3,0" drawMode="TRIANGLES" type="RenderedObjectBatch" z="1"  lightGroup="default" shader="default">
 		<vertexAttribute name="pos" size="3" index="0" />
 		<vertexAttribute name="uv" size="3" index="1" />
@@ -96,7 +82,7 @@
 	<batch name="debugLine" template="debugLine" needOrdering="false"/>
 	<batch name="debugRect" template="debugRect" needOrdering="false"/>
 	
-</renderingBatches>
+</renderingBatches>-->
 <fx></fx>
 <soundBank></soundBank>
 	

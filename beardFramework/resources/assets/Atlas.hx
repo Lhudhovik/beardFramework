@@ -102,7 +102,7 @@ class Atlas
 		
 		trace(name + " " + samplerIndex);
 		GL.activeTexture(GL.TEXTURE0 + samplerIndex);
-		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTextureFromImage(this.name,textureImage, samplerIndex ));
+		GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTextureFromImage(this.name,textureImage, samplerIndex ).glTexture);
 		Renderer.Get().UpdateAtlasTextureUnits( samplerIndex);
 	
     }

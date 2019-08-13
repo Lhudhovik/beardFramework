@@ -30,11 +30,11 @@ class Framebuffer
 		
 	}
 	
-	public inline function Bind(target:Int):Void
+	public inline function Bind(target:Int = GL.FRAMEBUFFER):Void
 	{
 		GL.bindFramebuffer(target, nativeBuffer);
 	}
-	public inline function UnBind(target:Int):Void
+	public inline function UnBind(target:Int = GL.FRAMEBUFFER):Void
 	{
 		GLU.ShowErrors("Unbinding framebuffer previous");
 		GL.bindFramebuffer(target, 0);
