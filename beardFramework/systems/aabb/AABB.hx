@@ -1,6 +1,6 @@
 package beardFramework.systems.aabb;
 import beardFramework.utils.math.MathU;
-import beardFramework.utils.Tags;
+import beardFramework.utils.Tag;
 import beardFramework.utils.simpleDataStruct.SVec2;
 import lime.math.Vector2;
 
@@ -17,7 +17,7 @@ class AABB
 	public var owner:String;
 	public var layer:Int;
 	public var node:Node;
-	public var tags:UInt;
+	public var tags:Tag;
 	public var needUpdate:Bool;
 	
 	public function new() 

@@ -141,7 +141,7 @@ class Shader
 			isUsed = true;
 		
 			GL.useProgram(program);
-			GLU.ShowErrors("Shader Error at " + this.name);
+			GLU.ShowErrors("Shader Error when trying to use " + this.name);
 		}
 		
 	}

@@ -18,6 +18,7 @@ import beardFramework.resources.assets.FontAtlas;
 import beardFramework.resources.assets.Texture;
 import beardFramework.updateProcess.Wait;
 import beardFramework.utils.graphics.Color;
+import beardFramework.utils.graphics.Scrolling;
 import beardFramework.utils.libraries.StringLibrary;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLTexture;
@@ -36,16 +37,17 @@ class TextField extends Visual implements IFocusable
 	private static var instanceCount:Int = 0;
 	public static var defaultFont:String="";
 	public static var framebuffer:Framebuffer;
-	//public static var textTextures:Map<String, GLTexture>;
 	public static var quad:Quad;
 	
 	public var list:FocusableList;
 	@:isVar public var font(get, set):String;
 	@:isVar public var isInteractive(get, set):Bool = false;
-	public var alignment(default, set):Alignment;
-	public var autoAdjust:AutoAdjust;
+	public var alignment(default, set):TextAlignment;
+	public var autoAdjust(default, set):TextAutoAdjust;
+	public var scrolling(default, set):UInt;
+	public var scrollWidth:Int = 0;
+	public var scrollHeight:Int = 0;
 	public var glyphsData:MinAllocArray<RenderedGlyphData>;
-	//public var lines:Array<Array<LineGlyphData>>;
 	public var needLayoutUpdate(default, null):Bool = false;
 
 	public var lineSpacing(default, set):Float = 0;
@@ -55,6 +57,7 @@ class TextField extends Visual implements IFocusable
 	public var text(default, null):String;
 	public var textSize:Float;
 	public var isForm:Bool;
+	
 	private var linesHeight:Float;
 	private var cursor:Visual;
 	private var cursorIndex(default, set):Int;
@@ -69,8 +72,8 @@ class TextField extends Visual implements IFocusable
 	
 		glyphsData = new MinAllocArray<RenderedGlyphData>();
 		
-		alignment = Alignment.LEFT;
-		autoAdjust = AutoAdjust.ADJUST_FIELD;
+		alignment = TextAlignment.LEFT;
+		autoAdjust = TextAutoAdjust.ADJUST_FIELD;
 		
 		isInteractive = false;
 		linesHeight = textSize = size;
@@ -253,7 +256,9 @@ class TextField extends Visual implements IFocusable
 	public function UpdateLayout():Void
 	{
 		
-		var glyphMetrics:GlyphMetrics=null;
+		var glyphMetrics:GlyphMetrics = null;
+		var defaultGlyphMetrics = new GlyphMetrics();
+
 		var metrics:Metrics=null;
 		var prevMetrics:Metrics=null;
 		var glyphData:RenderedGlyphData = null;
@@ -270,13 +275,6 @@ class TextField extends Visual implements IFocusable
 		var char:String="";
 		var line:Int = 0;
 		var chars:Array<String> = text.split("");
-		//for (i in 0...chars.length)
-		//{
-			//chars[i] = Utf8.encode(chars[i]);
-			////chars.push(String.fromCharCode(Utf8.charCodeAt(text,i)));
-			//
-		//}
-		//trace(chars);
 		var textureData:SubTextureData = null;
 		var glyphScale:Float=0;
 		var glyphHeight:Float=0;
@@ -284,56 +282,70 @@ class TextField extends Visual implements IFocusable
 		var sizeRatio:Float = this.textSize / currFont.height;
 		var carriageReturn:Bool = false;
 		var endOfLineReached:Bool = false;
-		var isSpecialChar:Bool = false;
 		
-		metrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0}
-		prevMetrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0}
+		
+		metrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0, isValid:false}
+		prevMetrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0, isValid:false}
 	
 		var lines = new Array<Array<LineGlyphData>>();
 		lines.push(new Array<LineGlyphData>());
 		
-		//First, add characters to lines
-		for (i in 0...chars.length)
+		var i:Int = 0;
+		var currentAttributeLength:Int = 0;
+		
+		while (i < chars.length)
 		{
 			char = chars[i];
-			//trace(char);
-			if (isEmbedded)
+			
+			if (char == "<" && chars[i + 1] == "{")
 			{
-				isEmbedded = !(char == "}");
-				continue;
-			}	
-			else if (isAttribute)
-			{
-				isAttribute = !(char == ">");
-				if (isAttribute == false)
-				{
-					attribute = null;
-					currFont =  AssetManager.Get().GetFont(font);
-					sizeRatio = this.textSize / currFont.height;
-					metrics.fAsc = currFont.ascender * sizeRatio;
-				}
-				continue;
-			}
-			else if (isAttribute = (char == "<" && chars[i + 1] == "{"))
-			{
+				var startTag:Int = i + 1;
+				var endTag:Int = chars.indexOf(">", startTag);
 				
-				tag =  chars[i + 1];
+				//tag = text.substr(startTag, endTag);
+				tag = chars[startTag];
 				
-				for (j in (i+1)...(chars.indexOf("}", i) + 1)){
-					//trace(tag);
-					tag += chars[j];
-				}
+				for (j in startTag+1...endTag)	tag += chars[j];
 				
 				attribute = haxe.Json.parse(tag);
-				continue;				
+				
+				i = endTag + 1;
+				continue;
+					
+			}
+			else if (char == "~" && chars[i + 1] == "{")
+			{
+				var startTag:Int = i + 1;
+				var endTag:Int = chars.indexOf("~", startTag);
+				
+				tag = chars[startTag]; 
+				for (j in startTag+1...endTag)	tag += chars[j];
+				
+				embedded = haxe.Json.parse(tag);
+				
+				i = endTag + 1;
+				
+				if (embedded == null || embedded.visual == null || embedded.visual == "" || embedded.atlas == null || embedded.atlas == "")
+					continue;
+				else
+				{
+					isEmbedded = true;
+					textureData = AssetManager.Get().GetSubTextureData(embedded.visual,embedded.atlas);
+					currWord.Clean();
+				}
+				
+				
 			}
 			else if (char.charCodeAt(0) < 33 && char.charCodeAt(0) > 0)
 			{
 				
 				currWord.Clean();
-				if (char != "\t" && char != "\n" && char != " ")
-					continue
-				else isSpecialChar = true;
+				textureData = null;
+				if (char != "\t" && char != "\n" && char != " "){
+					i++;
+					continue;
+				}
+				
 				
 				if (char == "\n")
 				{
@@ -341,26 +353,9 @@ class TextField extends Visual implements IFocusable
 					lines.push(new Array<LineGlyphData>());
 				}
 			}
-			
-			if (isEmbedded = (char == "{" && chars[i + 1] == "\""))
-			{
-							
-				tag = char;
-				
-				for (j in (i+1)...(chars.indexOf("}", i) + 1)){
-					//trace(tag);
-					tag += chars[j];
-				}
-				
-				embedded = haxe.Json.parse(tag);
-				
-				if (embedded == null || embedded.visual == null || embedded.visual == "" || embedded.atlas == null || embedded.atlas == "") continue;
-				
-				textureData = AssetManager.Get().GetSubTextureData(embedded.visual,embedded.atlas);
-				currWord.Clean();
-			}
 			else
 			{
+				
 				if (attribute != null)
 				{
 					var usedFont:String = ((attribute.font != null && attribute.font != "") ? attribute.font : font);
@@ -378,55 +373,41 @@ class TextField extends Visual implements IFocusable
 					metrics.fAsc = currFont.ascender * sizeRatio;
 				
 				}
-				else if (!isSpecialChar){
+				else{
 					
 					textureData = AssetManager.Get().GetFontGlyphTextureData(font, char, Math.round(textSize), atlas);
 					if ( textureData == null){
 							
 						trace("Embedded visual or glyph" + char + " doesn't exist " );
+						i++;
 						continue;
 					}	
 			
 					
 				}
 				
+				
+				
 			}
 			
-					
+			
+			//glyph Data and metrics retrieve
 			if (glyphsData.length > glyphDataIndex)		glyphData = glyphsData.get(glyphDataIndex);
 			else {
-					glyphData = {
-					char:char,
-					x:0,
-					y: 0,
-					width:0,
-					height:0,
-					color:this.color,
-					colorChanged:false,
-					isSpecialChar:false,
-					line:0,
-					textureData: null,
-					bufferIndex: -1,
-					metrics:null
-				}
-				
+				glyphData = {x:0, y: 0, width:0, height:0, color:this.color, colorChanged:false, line:0, textureData: null,	metrics:null}
 				glyphsData.Push(glyphData);
 			}
 			
-			glyphData.isSpecialChar = isSpecialChar;
-			
-			glyphMetrics = ((!isEmbedded && !isSpecialChar)? currFont.getGlyphMetrics(currFont.getGlyph(char)):null);	
+			glyphMetrics = ((!isEmbedded && textureData != null) ? currFont.getGlyphMetrics(currFont.getGlyph(char)):defaultGlyphMetrics);	
 		
-			if (glyphMetrics != null)
-			{
-				metrics.gHbX = glyphMetrics.horizontalBearing.x * sizeRatio;
-				metrics.gHbY = glyphMetrics.horizontalBearing.y * sizeRatio;
-				metrics.gAdvX = glyphMetrics.advance.x * sizeRatio;
-			}
-			else metrics.gHbX = metrics.gHbY = metrics.gAdvX = 0;
+			metrics.gHbX = glyphMetrics.hBearing.x * sizeRatio;
+			metrics.gHbY = glyphMetrics.hBearing.y * sizeRatio;
+			metrics.gAdvX = glyphMetrics.advance.x * sizeRatio;
+			metrics.isValid = glyphMetrics.isValid;
 			
 			glyphData.metrics = glyphMetrics;
 				
+			//Color
 			if (isEmbedded && embedded.color >= 0 )
 			{
 				glyphData.colorChanged = true;
@@ -445,7 +426,9 @@ class TextField extends Visual implements IFocusable
 				glyphData.color = this.color;
 			}
 			
-			if (!isSpecialChar)
+			
+			//Size, texture & baseLine position
+			if (textureData != null)
 			{
 				if (isEmbedded)
 				{
@@ -455,16 +438,16 @@ class TextField extends Visual implements IFocusable
 				}
 				else
 				{
-					glyphHeight = ((glyphMetrics != null) ? glyphMetrics.height * sizeRatio : this.textSize);
+					glyphHeight = ((glyphMetrics.isValid) ? glyphMetrics.height * sizeRatio : this.textSize);
 					glyphData.y = line * linesHeight  + (line+1)* metrics.fAsc + ( metrics.fAsc - metrics.gHbY) ;
 					
 				}
 				
-				glyphScale = textureData.imageArea.height / textureData.imageArea.width;
+				glyphScale = textureData.uvH / textureData.uvW;
 				glyphData.height = glyphHeight;
 				glyphData.width = glyphHeight / glyphScale;
 				glyphData.textureData = textureData;
-				//if (glyphData.bufferIndex < 0 && bufferIndex >= 0) glyphData.bufferIndex = (i == 0 ? this.bufferIndex : renderingBatch.AllocateBufferIndex());
+				
 		
 			}
 			else
@@ -479,51 +462,35 @@ class TextField extends Visual implements IFocusable
 				
 				glyphData.height = this.textSize;
 				glyphData.y = glyphHeight * line ;
-				//if (glyphData.bufferIndex >= 0) glyphData.bufferIndex = renderingBatch.FreeBufferIndex(glyphData.bufferIndex);
+				
 			}
 					
 			glyphData.line = line;
-					
-			//TO change
-			if (this.width == 0){
-				//trace("setBaseWidth");
-				SetBaseWidth(glyphData.x + glyphData.width);
-			}
-			if (this.height == 0){
-				//trace("setBaseHeight");
-				SetBaseHeight(textSize);
-			}
+		
 			
+			//Previous glyph metrics retrieve
 			if (prevglyphData != null && char != "\n" )
 			{
-				if (prevglyphData.metrics != null)
-				{
-					prevMetrics.gHbX = prevglyphData.metrics.horizontalBearing.x * sizeRatio;
-					prevMetrics.gHbY = prevglyphData.metrics.horizontalBearing.y * sizeRatio;
-					prevMetrics.gAdvX = prevglyphData.metrics.advance.x * sizeRatio;
-				}
-				else prevMetrics.gHbX = prevMetrics.gHbY = prevMetrics.gAdvX = 0;
-				glyphData.x = metrics.gHbX  + prevglyphData.x + (prevglyphData.metrics != null? prevMetrics.gAdvX - prevMetrics.gHbX : prevglyphData.width /*+ letterSpacing*/);
+				prevMetrics.gHbX = prevglyphData.metrics.hBearing.x * sizeRatio;
+				prevMetrics.gHbY = prevglyphData.metrics.hBearing.y * sizeRatio;
+				prevMetrics.gAdvX = prevglyphData.metrics.advance.x * sizeRatio;
+							
+				glyphData.x = metrics.gHbX  + prevglyphData.x + ((prevMetrics.isValid) ? prevMetrics.gAdvX - prevMetrics.gHbX : prevglyphData.width /*+ letterSpacing*/);
 			}
-			else	glyphData.x = (glyphMetrics != null? metrics.gHbX : 0);
+			else	glyphData.x =  metrics.gHbX;
+			
+			
 			
 			switch(autoAdjust)
 			{
-				case AutoAdjust.ADJUST_FIELD | AutoAdjust.NONE:
+				case TextAutoAdjust.ADJUST_FIELD :
 				
-					if(glyphData.x + glyphData.width> width)
-						SetBaseWidth(glyphData.x + glyphData.width);
-					if (glyphData.y + glyphData.height > height){
-						//trace(this.height);
-						//trace(glyphData.y + glyphData.height);
-						SetBaseHeight(glyphData.y + glyphData.height);
-					}
+					if(glyphData.x + glyphData.width> width)	SetBaseWidth(glyphData.x + glyphData.width);
+					if (glyphData.y + glyphData.height > height)	SetBaseHeight(glyphData.y + glyphData.height);
 					
-				case AutoAdjust.ADJUST_TEXT :
-					if((glyphData.x > this.width || glyphData.x + glyphData.width > this.width))
+				case TextAutoAdjust.ADJUST_TEXT :
+					if((glyphData.x + glyphData.width > this.width))
 					{
-						//update word
-						//trace("update word  " + char);
 						glyphData.line = ++line;
 						lines.push(new Array<LineGlyphData>());
 						
@@ -541,10 +508,10 @@ class TextField extends Visual implements IFocusable
 							data.line = line;
 							
 							if (i == 0)
-							data.x =  (data.metrics != null? data.metrics.horizontalBearing.x * sizeRatio : 0) ;
-							else data.x = (data.metrics != null? data.metrics.horizontalBearing.x * sizeRatio : 0)  + prevData.x + (prevData.metrics != null? (prevData.metrics.advance.x - prevData.metrics.horizontalBearing.x) * sizeRatio : prevData.width + letterSpacing);					
+							data.x =  data.metrics.hBearing.x * sizeRatio;
+							else data.x = data.metrics.hBearing.x * sizeRatio  + prevData.x + (prevData.metrics.isValid ? (prevData.metrics.advance.x - prevData.metrics.hBearing.x) * sizeRatio : prevData.width + letterSpacing);					
 							
-							data.y = (data.metrics != null ? (line * linesHeight + (line+1) * metrics.fAsc + (metrics.fAsc - (data.metrics.horizontalBearing.y * sizeRatio))) :data.height * line) ;
+							data.y = (data.metrics.isValid ? (line * linesHeight + (line+1) * metrics.fAsc + (metrics.fAsc - (data.metrics.hBearing.y * sizeRatio))) : data.height * line) ;
 							
 							prevData = data;
 							
@@ -552,15 +519,15 @@ class TextField extends Visual implements IFocusable
 						
 						
 						
-						glyphData.y = (glyphData.metrics != null ? line * linesHeight  + (line+1)* metrics.fAsc + ( metrics.fAsc - metrics.gHbY) : glyphHeight * line );
-						glyphData.x = (glyphData.metrics != null? metrics.gHbX: 0);
+						glyphData.y = ( metrics.isValid ? line * linesHeight  + (line+1)* metrics.fAsc + ( metrics.fAsc - metrics.gHbY) : glyphHeight * line );
+						glyphData.x = metrics.gHbX;
 						
 						if (prevData != null)
-						glyphData.x += prevData.x + (prevData.metrics != null? (prevData.metrics.advance.x - prevData.metrics.horizontalBearing.x) * sizeRatio : prevData.width + letterSpacing);
+							glyphData.x += prevData.x + (prevData.metrics.isValid ? (prevData.metrics.advance.x - prevData.metrics.hBearing.x) * sizeRatio : prevData.width + letterSpacing);
 						
 					}
 				
-					if (glyphData.y > this.height || glyphData.y+glyphData.height > this.height)
+					if (glyphData.y+glyphData.height > this.height)
 					{
 						
 						var gapFactor:Float =  this.height / (glyphData.y + glyphData.height);
@@ -576,20 +543,34 @@ class TextField extends Visual implements IFocusable
 						return;
 						
 					}
-					
+				case TextAutoAdjust.NONE:
+					if (glyphData.x + glyphData.width > scrollWidth)
+						scrollWidth = Std.int(glyphData.x + glyphData.width);
+					if (glyphData.y + glyphData.height > scrollHeight)
+						scrollHeight = Std.int(glyphData.y + glyphData.height);
 			}
 			
 			
-			if(!isEmbedded && !isSpecialChar) currWord.Push(glyphDataIndex);	
+			if(glyphData.metrics.isValid) currWord.Push(glyphDataIndex);	
 			
 			lines[glyphData.line].push({glyph:glyphDataIndex, tab:false, space:false});
 			
 			prevglyphData = glyphData;
 			glyphDataIndex++;
+					
 			
-			isSpecialChar = false;	
+			if (attribute != null && ++currentAttributeLength >= attribute.attributeLength)
+			{
+				currentAttributeLength = 0;
+				attribute = null;
+				currFont =  AssetManager.Get().GetFont(font);
+				sizeRatio = this.textSize / currFont.height;
+				metrics.fAsc = currFont.ascender * sizeRatio;
+			}
+			
+			i++;
 		}
-		
+				
 		
 		if (lines.length > 0)
 		{
@@ -598,21 +579,21 @@ class TextField extends Visual implements IFocusable
 			var gap:Float;
 			switch(alignment)
 			{
-				case Alignment.LEFT: 
-				case Alignment.RIGHT:
+				case TextAlignment.LEFT: 
+				case TextAlignment.RIGHT:
 					for (lineData in lines){
 						if (lineData.length == 0) continue;
 						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
 						
-						if(data.metrics != null)
-							data.x = this.width - (data.metrics.advance.x - data.metrics.horizontalBearing.x)*sizeRatio;
+						if(data.metrics.isValid)
+							data.x = this.width - (data.metrics.advance.x - data.metrics.hBearing.x)*sizeRatio;
 						else
 							data.x = this.width - data.width;
 									
 						for (i in 1...lineData.length)
 						{
 							data = glyphsData.get(lineData[lineData.length - 1 - i].glyph);
-							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing);				
+							data.x = prevData.x - (prevData.metrics.isValid? (prevData.metrics.hBearing.x) * sizeRatio : 0) -(data.metrics.isValid ? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width + letterSpacing);				
 							prevData = data;
 						}
 							
@@ -620,44 +601,42 @@ class TextField extends Visual implements IFocusable
 							
 					}
 				
-				case Alignment.CENTER:
+				case TextAlignment.CENTER:
 					
 					for (lineData in lines){
 						
 						if (lineData.length == 0) continue;
 						
 						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
-						gap = this.width - data.x + (data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width);
-						//trace(gap);
-						//trace(this.width);
-						//trace(data.x);
-						//trace((data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : 0));
-						if(data.metrics != null)
-							data.x = this.width - (gap*0.5) - (data.metrics.advance.x - data.metrics.horizontalBearing.x)*sizeRatio;
+						gap = this.width - data.x + (data.metrics.isValid? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width);
+						
+						if(data.metrics.isValid)
+							data.x = this.width - (gap*0.5) - (data.metrics.advance.x - data.metrics.hBearing.x)*sizeRatio;
 						else
 							data.x = this.width - data.width - gap * 0.5;
 							
 						for (i in 1...lineData.length){
 							data = glyphsData.get(lineData[lineData.length - 1 - i].glyph);
-							data.x = prevData.x - (prevData.metrics != null? (prevData.metrics.horizontalBearing.x) * sizeRatio : 0) -(data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width + letterSpacing);				
+							data.x = prevData.x - (prevData.metrics.isValid ? (prevData.metrics.hBearing.x) * sizeRatio : 0) -(data.metrics.isValid ? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width + letterSpacing);				
 							prevData = data;
 						}
 						
 					}
 					
-				case Alignment.JUSTIFIED:
+				case TextAlignment.JUSTIFIED:
 					for (lineData in lines){
 						if (lineData.length == 0 || lineData == lines[lines.length -1]) continue;
 						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
-						gap = this.width - data.x + (data.metrics != null? (data.metrics.advance.x - data.metrics.horizontalBearing.x) * sizeRatio : data.width);
+						gap = this.width - data.x + (data.metrics.isValid ? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width);
 						gap /= lineData.length;
 						for (i in 1...lineData.length)
-						glyphsData.get(lineData[i].glyph).x += gap*i;
+							glyphsData.get(lineData[i].glyph).x += gap*i;
 					}
 				
 			}
 			
 		}
+		
 		if (cursor != null){
 			cursorIndex = cursorIndex;
 		}
@@ -665,6 +644,8 @@ class TextField extends Visual implements IFocusable
 		needLayoutUpdate = false;
 		
 		isDirty = true;
+		
+		trace(this.intWidth());
 	}
 	
 	function set_lineSpacing(value:Float):Float 
@@ -796,12 +777,17 @@ class TextField extends Visual implements IFocusable
 		return isInteractive = value;
 	}
 		
-	function set_alignment(value:Alignment):Alignment 
+	function set_alignment(value:TextAlignment):TextAlignment 
 	{
-		autoAdjust = AutoAdjust.ADJUST_TEXT;
-		needLayoutUpdate = isDirty= true;
+		if(alignment!= value) needLayoutUpdate = isDirty= true;
 	
 		return alignment = value;
+	}
+	
+	function set_autoAdjust(value:TextAutoAdjust):TextAutoAdjust 
+	{
+		if (autoAdjust != value) needLayoutUpdate = isDirty = true;
+		return autoAdjust = value;
 	}
 	
 	override function set_name(value:String):String 
@@ -870,12 +856,16 @@ class TextField extends Visual implements IFocusable
 		var glyphData:RenderedGlyphData = null;
 		var closerSize:Int = cast(AssetManager.Get().GetAtlas(this.atlas), FontAtlas).GetClosestTextSize(font, Math.round(textSize));
 		var atlasTexture:Texture =  AssetManager.Get().GetTexture(atlas);
+		
+		
 		var screenRatioWidth:Float = BeardGame.Get().window.width / this.width;
 		var screenRatioheight:Float = BeardGame.Get().window.height / this.height;
 		
 		textTexture.width = this.intWidth();
 		textTexture.height = this.intHeight();
 		
+		trace(this.intWidth());
+		trace(this.intHeight());
 		GL.deleteTexture(textTexture.glTexture);
 		textTexture.glTexture = GL.createTexture();
 		GL.bindTexture(GL.TEXTURE_2D, textTexture.glTexture);
@@ -896,7 +886,7 @@ class TextField extends Visual implements IFocusable
 		{
 			glyphData = glyphsData.get(i);
 			
-			if (glyphData != null && !glyphData.isSpecialChar)
+			if (glyphData != null && glyphData.textureData != null)
 			{
 				if (glyphData.textureData.samplerIndex != atlasTexture.fixedIndex) quad.texture = AssetManager.Get().GetTextureByFixedIndex(glyphData.textureData.samplerIndex).glTexture;
 				else quad.texture = atlasTexture.glTexture;
@@ -931,6 +921,14 @@ class TextField extends Visual implements IFocusable
 		}
 		return super.Render(camera);
 	}
+	
+	function set_scrolling(value:UInt):UInt 
+	{
+		if (scrolling != value) needLayoutUpdate = isDirty = true;
+		return scrolling = value;
+	}
+	
+	
 }
 
 typedef RenderedGlyphData =
@@ -943,8 +941,6 @@ typedef RenderedGlyphData =
 	public var colorChanged:Bool;
 	public var line:Int;
 	public var textureData:SubTextureData;
-	public var bufferIndex:Int;
-	public var isSpecialChar:Bool; 
 	public var metrics:GlyphMetrics;
 }
 
@@ -963,6 +959,7 @@ typedef GlyphAttribute =
 	public var size:Int;
 	public var font:String;
 	public var atlas:String;
+	public var attributeLength:Int;
 }
 
 typedef LineGlyphData =
@@ -980,8 +977,9 @@ typedef Metrics =
 	/** font ascender */public var fAsc:Float;
 	/** Horizontal Bearing X */	public var gHbX:Float;
 	/**	 * Horizontal Bearing X */public var gHbY:Float;
+	/** if the metrics are valid or not*/ public var isValid:Bool;
 }
-enum AutoAdjust 
+enum TextAutoAdjust 
 {
 	ADJUST_TEXT;
 	ADJUST_FIELD;
@@ -989,7 +987,8 @@ enum AutoAdjust
 
 }
 
-enum Alignment 
+
+enum TextAlignment 
 {
 	LEFT;
 	CENTER;

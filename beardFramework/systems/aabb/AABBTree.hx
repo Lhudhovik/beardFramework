@@ -4,7 +4,7 @@ import beardFramework.debug.DebugDraw;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.math.MathU;
 import beardFramework.resources.MinAllocArray;
-import beardFramework.utils.Tags;
+import beardFramework.utils.Tag;
 import beardFramework.utils.simpleDataStruct.SVec2;
 
 /**
@@ -305,7 +305,7 @@ class AABBTree
 				{
 					
 					
-					if ((ray.filterTags == 0 || Tags.HasTag(ray.filterTags, node.aabbLeaf.tags)) && node.aabbLeaf.Raycast(ray, currentResult))
+					if ((ray.filterTags == 0 || Tag.HasTag(ray.filterTags, node.aabbLeaf.tags)) && node.aabbLeaf.Raycast(ray, currentResult))
 					{
 						if (MathU.Abs(currentResult.fraction)< MathU.Abs(bestResult.fraction))
 						{
@@ -382,7 +382,7 @@ class AABBTree
 								
 				if (node.IsLeaf())
 				{
-					if ((ray.filterTags == 0 || Tags.HasTag(ray.filterTags, node.aabbLeaf.tags)) && node.aabbLeaf.Raycast(ray, currentResult))
+					if ((ray.filterTags == 0 || ray.filterTags.HasTag(node.aabbLeaf.tags)) && node.aabbLeaf.Raycast(ray, currentResult))
 						results.push(  {hit:true, collider:node.aabbLeaf, hitPos:{x:currentResult.hitPos.x, y:currentResult.hitPos.y}, normal:{x:currentResult.normal.x, y:currentResult.normal.y}, fraction:currentResult.fraction});
 					
 				}

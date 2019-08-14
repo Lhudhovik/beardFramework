@@ -28,8 +28,8 @@ class MemoryUsage extends TextField
 		width = 150;
 		height = 70;
 		this.color = inCol;
-		alignment = Alignment.LEFT;
-		autoAdjust = AutoAdjust.ADJUST_TEXT;
+		alignment = TextAlignment.LEFT;
+		autoAdjust = TextAutoAdjust.ADJUST_TEXT;
 		
 	}
 
