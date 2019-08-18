@@ -125,6 +125,7 @@ class RenderedObject implements ICameraDependent
 	
 	public function set_width(value:Float):Float 
 	{
+		trace("width set to : " + value);
 		if (value != cachedWidth)
 		{
 			scaleX = (value *scaleX) / cachedWidth;
@@ -159,7 +160,7 @@ class RenderedObject implements ICameraDependent
 	
 	public function set_scaleX (value:Float):Float 
 	{
-		
+		trace("scale X set to " + value);
 		if (value != scaleX)
 		{
 			
@@ -313,7 +314,8 @@ class RenderedObject implements ICameraDependent
 	
 	public function SetBaseWidth(value:Float):Void
 	{
-		//trace("base width set to " + value);
+		trace("base width set to " + value);
+		trace("base scale x is " + scaleX);
 		var currentScale:Float = scaleX;
 		scaleX = 1;
 		cachedWidth = value;

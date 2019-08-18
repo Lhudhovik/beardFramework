@@ -20,6 +20,7 @@ import beardFramework.updateProcess.Wait;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.Scrolling;
 import beardFramework.utils.libraries.StringLibrary;
+import beardFramework.utils.math.MathU;
 import lime.graphics.opengl.GL;
 import lime.graphics.opengl.GLTexture;
 import lime.text.Font;
@@ -43,13 +44,15 @@ class TextField extends Visual implements IFocusable
 	@:isVar public var font(get, set):String;
 	@:isVar public var isInteractive(get, set):Bool = false;
 	public var alignment(default, set):TextAlignment;
-	public var autoAdjust(default, set):TextAutoAdjust;
+	public var verticalAdjust(default, set):TextAdjust;
+	public var horizontalAdjust(default, set):TextAdjust;
+	
 	public var scrolling(default, set):UInt;
-	public var scrollWidth:Int = 0;
-	public var scrollHeight:Int = 0;
+	public var textWidth:Int = 0;
+	public var textHeight:Int = 0;
 	public var glyphsData:MinAllocArray<RenderedGlyphData>;
 	public var needLayoutUpdate(default, null):Bool = false;
-
+	
 	public var lineSpacing(default, set):Float = 0;
 	public var letterSpacing(default, set):Float = 0;
 	public var tabSpacing(default, set):Float = 0;
@@ -57,6 +60,9 @@ class TextField extends Visual implements IFocusable
 	public var text(default, null):String;
 	public var textSize:Float;
 	public var isForm:Bool;
+	public var scrollX(default, null):Int;
+	public var scrollY(default, null):Int;
+	public var background:Color = Color.CLEAR;
 	
 	private var linesHeight:Float;
 	private var cursor:Visual;
@@ -73,7 +79,7 @@ class TextField extends Visual implements IFocusable
 		glyphsData = new MinAllocArray<RenderedGlyphData>();
 		
 		alignment = TextAlignment.LEFT;
-		autoAdjust = TextAutoAdjust.ADJUST_FIELD;
+		horizontalAdjust = verticalAdjust = TextAdjust.FIELD;
 		
 		isInteractive = false;
 		linesHeight = textSize = size;
@@ -95,7 +101,10 @@ class TextField extends Visual implements IFocusable
 		needLayoutUpdate = true;
 		cursorIndex = 0;
 		
+		scrollX = scrollY = 0;
+		
 		isForm = false;
+		
 		
 		if (framebuffer == null) framebuffer = new Framebuffer(StringLibrary.TEXTFIELD);
 		if (quad == null){
@@ -114,8 +123,70 @@ class TextField extends Visual implements IFocusable
 		textTexture = AssetManager.Get().AddTexture(this.name, glTexture , 100, 30);
 		
 		material.SetComponentAtlas(StringLibrary.DIFFUSE,  "");
-		SetBaseWidth(0);
-		SetBaseHeight(0);
+		this.SetBaseHeight(textSize);
+		this.SetBaseWidth(textSize);
+		needLayoutUpdate = true;
+	}
+	
+	public function FocusOn(value:InputData=null):Void 
+	{
+		
+		if (InputManager.Get().focusedObject != this)
+		{
+			if(InputManager.Get().focusedObject != null)	InputManager.Get().focusedObject.FocusOff();
+			InputManager.Get().focusedObject = this;
+		}
+		
+		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
+		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.MOUSE_CLICK, SetCursorPosition, this.name);
+		
+		SetCursorPosition();
+		cursor.height = linesHeight + AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);
+		
+		Wait.ClearWait(this.name);
+		ShowCursor();
+	}
+	
+	public function FocusOff():Void 
+	{
+		
+		InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
+		InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.MOUSE_CLICK, SetCursorPosition, this.name);
+		Wait.ClearWait(this.name);
+		HideCursor();
+		
+	}
+	
+	public function Validate():Void 
+	{
+		
+	}
+		
+	private function SetCursorPosition(value:InputData = null):Void
+	{
+		var mouseX:Float = MousePos.current.x;
+		var mouseY:Float = MousePos.current.y;
+		var distance:Float = this.width * 2;
+		var bestDistance:Float = distance;
+		var position : Int = glyphsData.length ;
+		
+		for (i in 0...glyphsData.length)
+		{
+			
+			if ( glyphsData.get(i).line * linesHeight > mouseY) continue;
+			if (  glyphsData.get(i).x + this.x > mouseX) continue;
+			
+			distance = Math.sqrt(Math.pow(mouseX - glyphsData.get(i).x, 2) + Math.pow(mouseY - glyphsData.get(i).y, 2));
+			
+			if (distance < bestDistance){
+				bestDistance = distance;
+				position = i;
+			}
+				
+			
+		}
+		
+		cursorIndex = position+1;
 	}
 	
 	public function ShowCursor():Void
@@ -127,17 +198,6 @@ class TextField extends Visual implements IFocusable
 		}
 	
 			
-	}
-	
-	override function set_atlas(value:String):String 
-	{
-		if (value != atlas){
-			atlas = value;
-			Reinit();
-			isDirty = true;
-			needLayoutUpdate = true;
-		}
-		return atlas;
 	}
 	
 	private function HideCursor():Void
@@ -166,27 +226,10 @@ class TextField extends Visual implements IFocusable
 			//if (bufferIndex >= 0 && renderingBatch != null) renderingBatch.AllocateBufferIndex(bufferIndex);
 		}
 		
-		UpdateLayout();
+		needLayoutUpdate = true;
 		
  		return this.text;
 		
-	}
-	
-	public function ClearGlyphData(full:Bool = false):Void
-	{
-		//var j:Int = 0;
-		//for (i in 0...glyphsData.length)
-		//{
-			//if (glyphsData.get(j) != null)
-			//{
-				////if (full || glyphsData.get(j).bufferIndex < 0){
-					//glyphsData.set(j,  null);
-					//glyphsData.RemoveByIndex(j);
-				////}
-				////else j++;
-			//}
-		//}	
-	
 	}
 	
 	public function AppendText( addedText:String, index:Int = -1):String
@@ -203,7 +246,7 @@ class TextField extends Visual implements IFocusable
 			text = text.substr(0, index) +addedText + text.substr(index, text.length - index);
 		}
 		
-		UpdateLayout();
+		needLayoutUpdate = true;
 		
 	
  		return this.text;
@@ -240,19 +283,120 @@ class TextField extends Visual implements IFocusable
 		
 	}
 	
-	inline function get_font():String 
+	public function RenderText(camera:Camera):Void
 	{
-		return font;
-	}
-	
-	function set_font(value:String):String 
-	{
-		if (font != value) isDirty = needLayoutUpdate = true;
-		return font = value;
-	}
-	
-	
 		
+		var glyphData:RenderedGlyphData = null;
+		var closerSize:Int = cast(AssetManager.Get().GetAtlas(this.atlas), FontAtlas).GetClosestTextSize(font, Math.round(textSize));
+		var atlasTexture:Texture =  AssetManager.Get().GetTexture(atlas);
+		
+		
+		//var screenRatioWidth:Float = BeardGame.Get().window.width / this.width;
+		var screenRatioWidth:Float = BeardGame.Get().window.width / textWidth;
+		var screenRatioheight:Float = BeardGame.Get().window.height / textHeight;
+		//var screenRatioheight:Float = BeardGame.Get().window.height / this.height;
+		
+		textTexture.width = textWidth;
+		//textTexture.width = this.intWidth();
+		textTexture.height = textHeight;
+		//textTexture.height = this.intHeight();
+		
+		GL.deleteTexture(textTexture.glTexture);
+		textTexture.glTexture = GL.createTexture();
+		GL.bindTexture(GL.TEXTURE_2D, textTexture.glTexture);
+		GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, textWidth ,textHeight, 0, GL.RGBA, GL.FLOAT, 0);
+		//GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, this.intWidth() , this.intHeight(), 0, GL.RGBA, GL.FLOAT, 0);
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
+		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
+		
+					
+		framebuffer.Bind();
+		GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, textTexture.glTexture, 0);
+		GL.clearColor(background.getRedf(), background.getGreenf(), background.getBluef(),background.getAlphaf());
+		GL.clear(GL.COLOR_BUFFER_BIT);
+		GL.viewport(0,0, textWidth, textHeight);
+		//GL.viewport(0,0, this.intWidth(), this.intHeight());
+		
+		for (i in 0...glyphsData.length)
+		{
+			glyphData = glyphsData.get(i);
+			
+			if (glyphData != null && glyphData.textureData != null)
+			{
+				if (glyphData.textureData.samplerIndex != atlasTexture.fixedIndex) quad.texture = AssetManager.Get().GetTextureByFixedIndex(glyphData.textureData.samplerIndex).glTexture;
+				else quad.texture = atlasTexture.glTexture;
+				
+				quad.uvs.x = glyphData.textureData.uvX;
+				quad.uvs.y = glyphData.textureData.uvY;
+				quad.uvs.width = glyphData.textureData.uvW;
+				quad.uvs.height = glyphData.textureData.uvH;
+				quad.width = Std.int(glyphData.width*screenRatioWidth);
+				quad.height =Std.int(glyphData.height*screenRatioheight);
+				quad.x = glyphData.x*screenRatioWidth;
+				quad.y = glyphData.y*screenRatioheight;
+				quad.color = glyphData.color;
+				quad.Render();
+			}
+		}
+
+		framebuffer.UnBind();
+		this.texture = this.name;
+		
+		SetScrollPosition();
+		
+	
+	}
+	override function Reinit():Void 
+	{
+		//super.Reinit();
+	}
+	
+	/**
+	 * Increment the scrolling factors with the specified values
+	 * @param	h horizonal value to add to the scrolling position
+	 * @param	v vertical value to add to the scrolling position
+	 */
+	
+	public inline function Scroll(h:Float =0, v:Float = 0):Void
+	{
+		
+		SetScrollPosition(scrollX += Std.int(h), scrollY += Std.int(v));
+		
+	}
+	/**
+	 * Update the current displayed text depending on the scrolling factor
+	 * @param	h horizonal scroll. If the value is <0 then it is set to 0
+	 * @param	v vertical scroll. If the value is <0 then it is set to 0
+	 */
+	public function SetScrollPosition(h:Int =0, v:Int =0 ):Void
+	{
+		if (h < 0) h = 0;
+		if (v < 0) v = 0;
+		
+		
+		scrollX = Std.int(MathU.Min(h, textWidth - width));
+		material.components[StringLibrary.DIFFUSE].uv.x = scrollX / textWidth;
+		material.components[StringLibrary.DIFFUSE].uv.width = (width / textWidth);
+		
+		scrollY = Std.int(MathU.Min(v, textHeight-height));
+		material.components[StringLibrary.DIFFUSE].uv.y = 1 - (scrollY / textHeight);
+		material.components[StringLibrary.DIFFUSE].uv.height =  -(height/textHeight);
+		
+	}
+	
+	override public function Render(camera:Camera):Int 
+	{
+		if (isDirty){
+			
+			if (needLayoutUpdate) UpdateLayout();		
+			
+			RenderText(camera);
+		}
+		return super.Render(camera);
+	}
+	
 	public function UpdateLayout():Void
 	{
 		
@@ -283,6 +427,8 @@ class TextField extends Visual implements IFocusable
 		var carriageReturn:Bool = false;
 		var endOfLineReached:Bool = false;
 		
+		textWidth = 0;
+		textHeight = 0;
 		
 		metrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0, isValid:false}
 		prevMetrics =  {gAdvX:0, fAsc:currFont.ascender * sizeRatio, gHbX:0, gHbY:0, isValid:false}
@@ -444,6 +590,7 @@ class TextField extends Visual implements IFocusable
 				}
 				
 				glyphScale = textureData.uvH / textureData.uvW;
+				//glyphScale = textureData.imageArea.height / textureData.imageArea.width;
 				glyphData.height = glyphHeight;
 				glyphData.width = glyphHeight / glyphScale;
 				glyphData.textureData = textureData;
@@ -481,14 +628,13 @@ class TextField extends Visual implements IFocusable
 			
 			
 			
-			switch(autoAdjust)
+			switch(horizontalAdjust)
 			{
-				case TextAutoAdjust.ADJUST_FIELD :
 				
-					if(glyphData.x + glyphData.width> width)	SetBaseWidth(glyphData.x + glyphData.width);
-					if (glyphData.y + glyphData.height > height)	SetBaseHeight(glyphData.y + glyphData.height);
-					
-				case TextAutoAdjust.ADJUST_TEXT :
+				case TextAdjust.FIELD: if (glyphData.x + glyphData.width > width)	SetBaseWidth(glyphData.x + glyphData.width);
+					textWidth = this.intWidth();
+					trace("yeah");
+				case TextAdjust.TEXT : 
 					if((glyphData.x + glyphData.width > this.width))
 					{
 						glyphData.line = ++line;
@@ -524,9 +670,27 @@ class TextField extends Visual implements IFocusable
 						
 						if (prevData != null)
 							glyphData.x += prevData.x + (prevData.metrics.isValid ? (prevData.metrics.advance.x - prevData.metrics.hBearing.x) * sizeRatio : prevData.width + letterSpacing);
-						
+					
+						if (glyphData.x + glyphData.width > textWidth)
+							textWidth = Std.int(glyphData.x + glyphData.width);
 					}
+					
+				case TextAdjust.SCROLLING :
+					if (glyphData.x + glyphData.width > textWidth)
+						textWidth = Std.int(glyphData.x + glyphData.width);
 				
+				case TextAdjust.NONE:
+					if (glyphData.x + glyphData.width > textWidth)
+						textWidth = Std.int(glyphData.x + glyphData.width);
+			}
+			
+			switch(verticalAdjust)
+			{
+				case TextAdjust.FIELD :
+					if (glyphData.y + glyphData.height > height)	SetBaseHeight(glyphData.y + glyphData.height);
+					textHeight = this.intHeight();
+					
+				case TextAdjust.TEXT :
 					if (glyphData.y+glyphData.height > this.height)
 					{
 						
@@ -543,11 +707,16 @@ class TextField extends Visual implements IFocusable
 						return;
 						
 					}
-				case TextAutoAdjust.NONE:
-					if (glyphData.x + glyphData.width > scrollWidth)
-						scrollWidth = Std.int(glyphData.x + glyphData.width);
-					if (glyphData.y + glyphData.height > scrollHeight)
-						scrollHeight = Std.int(glyphData.y + glyphData.height);
+					if (glyphData.y + glyphData.height > textHeight)
+						textHeight = Std.int(glyphData.y + glyphData.height);
+					
+				case TextAdjust.SCROLLING:
+					if (glyphData.y + glyphData.height > textHeight)
+						textHeight = Std.int(glyphData.y + glyphData.height);
+				
+				case TextAdjust.NONE:
+					if (glyphData.y + glyphData.height > textHeight)
+						textHeight = Std.int(glyphData.y + glyphData.height);
 			}
 			
 			
@@ -645,7 +814,29 @@ class TextField extends Visual implements IFocusable
 		
 		isDirty = true;
 		
-		trace(this.intWidth());
+
+	}
+	
+	override function set_atlas(value:String):String 
+	{
+		if (value != atlas){
+			atlas = value;
+			Reinit();
+			isDirty = true;
+			needLayoutUpdate = true;
+		}
+		return atlas;
+	}
+		
+	inline function get_font():String 
+	{
+		return font;
+	}
+	
+	function set_font(value:String):String 
+	{
+		if (font != value) isDirty = needLayoutUpdate = true;
+		return font = value;
 	}
 	
 	function set_lineSpacing(value:Float):Float 
@@ -662,6 +853,11 @@ class TextField extends Visual implements IFocusable
 		return letterSpacing = value;
 	}
 	
+	function set_scrolling(value:UInt):UInt 
+	{
+		if (scrolling != value) needLayoutUpdate = isDirty = true;
+		return scrolling = value;
+	}
 		
 	override function set_scaleX(value:Float):Float 
 	{
@@ -704,40 +900,6 @@ class TextField extends Visual implements IFocusable
 		return super.set_width(value);
 	}
 		
-	public function FocusOn(value:InputData=null):Void 
-	{
-		
-		if (InputManager.Get().focusedObject != this)
-		{
-			if(InputManager.Get().focusedObject != null)	InputManager.Get().focusedObject.FocusOff();
-			InputManager.Get().focusedObject = this;
-		}
-		
-		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
-		InputManager.Get().BindToInput(StringLibrary.ANY, InputType.MOUSE_CLICK, SetCursorPosition, this.name);
-		
-		SetCursorPosition();
-		cursor.height = linesHeight + AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);
-		
-		Wait.ClearWait(this.name);
-		ShowCursor();
-	}
-	
-	public function FocusOff():Void 
-	{
-		
-		InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
-		InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.MOUSE_CLICK, SetCursorPosition, this.name);
-		Wait.ClearWait(this.name);
-		HideCursor();
-		
-	}
-	
-	public function Validate():Void 
-	{
-		
-	}
-	
 	function set_tabSpacing(value:Float):Float 
 	{
 		needLayoutUpdate = isDirty = true;
@@ -784,12 +946,6 @@ class TextField extends Visual implements IFocusable
 		return alignment = value;
 	}
 	
-	function set_autoAdjust(value:TextAutoAdjust):TextAutoAdjust 
-	{
-		if (autoAdjust != value) needLayoutUpdate = isDirty = true;
-		return autoAdjust = value;
-	}
-	
 	override function set_name(value:String):String 
 	{
 		var texture:Texture = AssetManager.Get().GetTexture(this.name);
@@ -799,33 +955,6 @@ class TextField extends Visual implements IFocusable
 			AssetManager.Get().AddTexture(this.name, texture.glTexture, texture.width, texture.height, texture.fixedIndex);
 		}
 		return super.set_name(value);
-	}
-	
-	private function SetCursorPosition(value:InputData = null):Void
-	{
-		var mouseX:Float = MousePos.current.x;
-		var mouseY:Float = MousePos.current.y;
-		var distance:Float = this.width * 2;
-		var bestDistance:Float = distance;
-		var position : Int = glyphsData.length ;
-		
-		for (i in 0...glyphsData.length)
-		{
-			
-			if ( glyphsData.get(i).line * linesHeight > mouseY) continue;
-			if (  glyphsData.get(i).x + this.x > mouseX) continue;
-			
-			distance = Math.sqrt(Math.pow(mouseX - glyphsData.get(i).x, 2) + Math.pow(mouseY - glyphsData.get(i).y, 2));
-			
-			if (distance < bestDistance){
-				bestDistance = distance;
-				position = i;
-			}
-				
-			
-		}
-		
-		cursorIndex = position+1;
 	}
 	
 	function set_cursorIndex(value:Int):Int 
@@ -850,83 +979,19 @@ class TextField extends Visual implements IFocusable
 		return cursorIndex ;
 	}
 	
-	public function RenderText(camera:Camera):Void
+	function set_verticalAdjust(value:TextAdjust):TextAdjust 
 	{
-		
-		var glyphData:RenderedGlyphData = null;
-		var closerSize:Int = cast(AssetManager.Get().GetAtlas(this.atlas), FontAtlas).GetClosestTextSize(font, Math.round(textSize));
-		var atlasTexture:Texture =  AssetManager.Get().GetTexture(atlas);
-		
-		
-		var screenRatioWidth:Float = BeardGame.Get().window.width / this.width;
-		var screenRatioheight:Float = BeardGame.Get().window.height / this.height;
-		
-		textTexture.width = this.intWidth();
-		textTexture.height = this.intHeight();
-		
-		trace(this.intWidth());
-		trace(this.intHeight());
-		GL.deleteTexture(textTexture.glTexture);
-		textTexture.glTexture = GL.createTexture();
-		GL.bindTexture(GL.TEXTURE_2D, textTexture.glTexture);
-		GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, this.intWidth() , this.intHeight(), 0, GL.RGBA, GL.FLOAT, 0);
-		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
-		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
-		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
-		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.REPEAT);
-		
-					
-		framebuffer.Bind();
-		GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, textTexture.glTexture, 0);
-		GL.clearColor(0.2, 0.2, 0,1);
-		GL.clear(GL.COLOR_BUFFER_BIT);
-		GL.viewport(0,0, this.intWidth(), this.intHeight());
-		
-		for (i in 0...glyphsData.length)
-		{
-			glyphData = glyphsData.get(i);
-			
-			if (glyphData != null && glyphData.textureData != null)
-			{
-				if (glyphData.textureData.samplerIndex != atlasTexture.fixedIndex) quad.texture = AssetManager.Get().GetTextureByFixedIndex(glyphData.textureData.samplerIndex).glTexture;
-				else quad.texture = atlasTexture.glTexture;
-				
-				quad.uvs.x = glyphData.textureData.uvX;
-				quad.uvs.y = glyphData.textureData.uvY;
-				quad.uvs.width = glyphData.textureData.uvW;
-				quad.uvs.height = glyphData.textureData.uvH;
-				quad.width = Std.int(glyphData.width*screenRatioWidth);
-				quad.height =Std.int(glyphData.height*screenRatioheight);
-				quad.x = glyphData.x*screenRatioWidth;
-				quad.y = glyphData.y*screenRatioheight;
-				quad.color = glyphData.color;
-				quad.Render();
-			}
-		}
-
-		framebuffer.UnBind();
-		this.texture = this.name;
-		material.components[StringLibrary.DIFFUSE].uv.y = 1;
-		material.components[StringLibrary.DIFFUSE].uv.height = -1;
-	
+		if (verticalAdjust != value) needLayoutUpdate = isDirty = true;
+		return verticalAdjust = value;
 	}
 	
-	override public function Render(camera:Camera):Int 
+	function set_horizontalAdjust(value:TextAdjust):TextAdjust 
 	{
-		if (isDirty){
-			
-			if (needLayoutUpdate) UpdateLayout();		
-			
-			RenderText(camera);
-		}
-		return super.Render(camera);
+		if (horizontalAdjust != value) needLayoutUpdate = isDirty = true;
+		return horizontalAdjust = value;
 	}
 	
-	function set_scrolling(value:UInt):UInt 
-	{
-		if (scrolling != value) needLayoutUpdate = isDirty = true;
-		return scrolling = value;
-	}
+	
 	
 	
 }
@@ -979,10 +1044,11 @@ typedef Metrics =
 	/**	 * Horizontal Bearing X */public var gHbY:Float;
 	/** if the metrics are valid or not*/ public var isValid:Bool;
 }
-enum TextAutoAdjust 
+enum TextAdjust 
 {
-	ADJUST_TEXT;
-	ADJUST_FIELD;
+	TEXT;
+	FIELD;
+	SCROLLING;
 	NONE;
 
 }

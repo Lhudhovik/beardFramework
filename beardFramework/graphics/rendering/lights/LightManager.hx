@@ -48,7 +48,7 @@ class LightManager
 	{
 		
 		lightGroups = new Map();
-		lightGroups["default"] = {
+		lightGroups[StringLibrary.DEFAULT] = {
 			lights:new List<String>(),
 			directionalLightsCount:0,
 			spotLightsCount:0,
@@ -58,31 +58,12 @@ class LightManager
 		dirtyGroups = new List();
 		dirtyLights = new List();
 		
-		dirtyGroups.add("default");
+		dirtyGroups.add(StringLibrary.DEFAULT);
 		lights = new Map();
 		
-		shadowShader = Shader.GetShader("shadow");
-		//framebuffer = new Framebuffer();
-		//framebuffer.Bind();
-		//framebuffer.CreateTexture(StringLibrary.SHADOW_MAP, BeardGame.Get().window.width, BeardGame.Get().window.height,GL.DEPTH_COMPONENT, GL.DEPTH_COMPONENT, GL.FLOAT, GL.DEPTH_ATTACHMENT,true);
-		////framebuffer.CreateTexture(StringLibrary.COLOR, BeardGame.Get().window.width, BeardGame.Get().window.height, GL.RGB, GL.RGB, GL.UNSIGNED_BYTE, GL.COLOR_ATTACHMENT0,false);
-		//
-		//var samplerIndex:Int = AssetManager.Get().AllocateFreeTextureIndex();
-		//GL.activeTexture(GL.TEXTURE0 + samplerIndex);
-		//GL.bindTexture(GL.TEXTURE_2D, AssetManager.Get().AddTexture(StringLibrary.SHADOW_MAP,framebuffer.textures[StringLibrary.SHADOW_MAP].texture, BeardGame.Get().window.width,BeardGame.Get().window.height, samplerIndex ));
-			//
-		////trace("is the framebuffer ready ? " + (GL.checkFramebufferStatus(GL.FRAMEBUFFER) == GL.FRAMEBUFFER_COMPLETE));
-		//
-		//
-		//
-		//depthShader = Shader.GetShader(StringLibrary.DEPTH);
-		//
-		//framebuffer.quad.shader = Shader.GetShader("debugDepth");
-		//framebuffer.quad.shader.Use();
-		//framebuffer.quad.shader.SetMatrix4fv(StringLibrary.PROJECTION, Renderer.Get().projection);
-		//
-		//
-		//framebuffer.UnBind();
+		shadowShader = Shader.GetShader(StringLibrary.SHADOW);
+		
+		AddToGroup(CreateDirectionalLight(StringLibrary.DEFAULT));
 	}
 	
 	public function AddToGroup(light:Light, group:String="default"):Void
