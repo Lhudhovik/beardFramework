@@ -1,8 +1,8 @@
-package beardFramework.graphics.rendering.batches;
+package beardFramework.graphics.batches;
 
-import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.objects.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
-import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.graphics.text.BatchedTextField;
 import beardFramework.utils.data.DataU;
 import beardFramework.utils.graphics.Color;

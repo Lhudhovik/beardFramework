@@ -1,6 +1,6 @@
 package beardFramework.resources.assets;
 
-import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.data.DataU;
 import beardFramework.utils.graphics.TextureU;

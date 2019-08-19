@@ -1,7 +1,7 @@
-package beardFramework.graphics.rendering;
-import beardFramework.graphics.rendering.shaders.Shader;
-import beardFramework.graphics.rendering.shaders.Shader.NativeShader;
-import beardFramework.graphics.rendering.shaders.VertexAttribute;
+package beardFramework.graphics.core;
+import beardFramework.graphics.shaders.Shader;
+import beardFramework.graphics.shaders.Shader.NativeShader;
+import beardFramework.graphics.shaders.VertexAttribute;
 
 /**
  * @author 

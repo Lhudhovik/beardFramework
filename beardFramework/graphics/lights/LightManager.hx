@@ -1,6 +1,7 @@
-package beardFramework.graphics.rendering.lights;
+package beardFramework.graphics.lights;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.core.Framebuffer;
+import beardFramework.graphics.shaders.Shader;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.libraries.StringLibrary;

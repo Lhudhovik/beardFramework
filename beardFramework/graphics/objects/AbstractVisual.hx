@@ -1,8 +1,9 @@
-package beardFramework.graphics.core;
+package beardFramework.graphics.objects;
+import beardFramework.graphics.objects.RenderedObject;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
 import beardFramework.utils.libraries.StringLibrary;
-import beardFramework.graphics.rendering.Shadow;
+import beardFramework.graphics.lights.Shadow;
 /**
  * ...
  * @author 

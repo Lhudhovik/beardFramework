@@ -2,7 +2,7 @@ package beardFramework.input;
 
 
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.objects.RenderedObject;
 import beardFramework.input.Action.CallbackDetails;
 import beardFramework.input.Action.ResolvedAction;
 import beardFramework.input.data.InputData;

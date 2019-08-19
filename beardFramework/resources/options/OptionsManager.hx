@@ -1,10 +1,10 @@
 package beardFramework.resources.options;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.shaders.Shader;
-import beardFramework.graphics.rendering.shaders.Shader.NativeShader;
-import beardFramework.graphics.rendering.batches.BatchRenderingData;
-import beardFramework.graphics.rendering.shaders.VertexAttribute;
+import beardFramework.graphics.core.Renderer;
+import beardFramework.graphics.shaders.Shader;
+import beardFramework.graphics.shaders.Shader.NativeShader;
+import beardFramework.graphics.batches.BatchRenderingData;
+import beardFramework.graphics.shaders.VertexAttribute;
 import beardFramework.graphics.screens.BasicLoadingScreen;
 import beardFramework.graphics.text.FontFormat;
 import beardFramework.graphics.text.TextField;

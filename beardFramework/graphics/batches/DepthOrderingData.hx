@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.batches;
+package beardFramework.graphics.batches;
 
 /**
  * @author 

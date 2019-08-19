@@ -1,9 +1,9 @@
 package beardFramework.graphics.cameras;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.objects.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
-import beardFramework.graphics.rendering.Framebuffer;
-import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.core.Framebuffer;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.input.MousePos;
 import beardFramework.interfaces.ICameraDependent;
 import beardFramework.resources.save.data.StructDataCamera;

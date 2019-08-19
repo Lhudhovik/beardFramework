@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.shaders;
+package beardFramework.graphics.shaders;
 import lime.utils.Float32Array;
 
 /**

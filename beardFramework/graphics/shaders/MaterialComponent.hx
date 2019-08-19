@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.shaders;
+package beardFramework.graphics.shaders;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.simpleDataStruct.SRect;
 

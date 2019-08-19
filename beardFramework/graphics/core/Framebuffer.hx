@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering;
+package beardFramework.graphics.core;
 import beardFramework.core.BeardGame;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.utils.graphics.GLU;

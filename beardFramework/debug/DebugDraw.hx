@@ -1,7 +1,7 @@
 package beardFramework.debug;
-import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.batches.Batch;
-import beardFramework.graphics.rendering.batches.LineBatch;
+import beardFramework.graphics.core.Renderer;
+import beardFramework.graphics.batches.Batch;
+import beardFramework.graphics.batches.LineBatch;
 import beardFramework.resources.options.OptionsManager;
 import beardFramework.utils.graphics.Color;
 import beardFramework.resources.MinAllocArray;

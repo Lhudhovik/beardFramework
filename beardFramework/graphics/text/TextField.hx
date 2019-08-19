@@ -1,9 +1,9 @@
 package beardFramework.graphics.text;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.core.Visual;
-import beardFramework.graphics.rendering.Framebuffer;
-import beardFramework.graphics.rendering.Quad;
+import beardFramework.graphics.objects.Visual;
+import beardFramework.graphics.core.Framebuffer;
+import beardFramework.graphics.objects.Quad;
 import beardFramework.graphics.ui.FocusableList;
 import beardFramework.input.InputManager;
 import beardFramework.input.InputType;

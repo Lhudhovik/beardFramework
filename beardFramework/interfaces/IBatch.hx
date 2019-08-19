@@ -1,5 +1,5 @@
 package beardFramework.interfaces;
-import beardFramework.graphics.rendering.batches.BatchRenderingData;
+import beardFramework.graphics.batches.BatchRenderingData;
 import beardFramework.resources.MinAllocArray;
 import haxe.ds.Vector;
 import lime.graphics.opengl.GLProgram;

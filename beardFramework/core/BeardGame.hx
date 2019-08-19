@@ -1,12 +1,12 @@
 package beardFramework.core;
 
-import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.core.Visual;
-import beardFramework.graphics.rendering.CameraQuad;
-import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.shaders.Shader;
-import beardFramework.graphics.rendering.batches.Batch;
-import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.graphics.objects.RenderedObject;
+import beardFramework.graphics.objects.Visual;
+import beardFramework.graphics.objects.CameraQuad;
+import beardFramework.graphics.core.Renderer;
+import beardFramework.graphics.shaders.Shader;
+import beardFramework.graphics.batches.Batch;
+import beardFramework.graphics.batches.RenderedObjectBatch;
 import beardFramework.graphics.screens.regions.RegionGrid;
 import beardFramework.input.MousePos;
 import beardFramework.resources.options.OptionsManager;
@@ -16,7 +16,7 @@ import beardFramework.updateProcess.Wait;
 import beardFramework.updateProcess.sequence.VoidStep;
 import beardFramework.debug.MemoryUsage;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.core.BeardLayer;
+import beardFramework.graphics.screens.BeardLayer;
 import beardFramework.graphics.screens.BasicScreen;
 import beardFramework.graphics.screens.SplashScreen;
 import beardFramework.graphics.ui.UIManager;

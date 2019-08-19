@@ -4,7 +4,7 @@ import beardFramework.systems.aabb.AABBTree;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.core.BeardLayer;
+import beardFramework.graphics.screens.BeardLayer;
 import beardFramework.graphics.ui.UIManager;
 import beardFramework.systems.entities.GameEntity;
 import beardFramework.resources.save.SaveManager;

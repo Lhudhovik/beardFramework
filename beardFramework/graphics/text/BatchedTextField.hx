@@ -1,11 +1,11 @@
 package beardFramework.graphics.text;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.core.BeardLayer;
-import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.screens.BeardLayer;
+import beardFramework.graphics.objects.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
-import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
+import beardFramework.graphics.core.Renderer;
+import beardFramework.graphics.batches.RenderedObjectBatch;
 import beardFramework.graphics.ui.FocusableList;
 import beardFramework.input.InputManager;
 import beardFramework.input.InputType;

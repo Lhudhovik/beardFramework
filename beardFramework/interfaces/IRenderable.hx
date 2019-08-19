@@ -1,7 +1,7 @@
 package beardFramework.interfaces;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.rendering.lights.Light;
-import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.lights.Light;
+import beardFramework.graphics.shaders.Shader;
 import lime.graphics.opengl.GLProgram;
 
 /**

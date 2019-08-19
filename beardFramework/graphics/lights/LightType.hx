@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.lights;
+package beardFramework.graphics.lights;
 
 /**
  * @author 

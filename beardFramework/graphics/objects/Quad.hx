@@ -1,9 +1,9 @@
-package beardFramework.graphics.rendering;
+package beardFramework.graphics.objects;
 
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
-import beardFramework.graphics.rendering.lights.LightManager;
-import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.lights.LightManager;
+import beardFramework.graphics.shaders.Shader;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.options.GraphicSettings;

@@ -1,8 +1,8 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.core.BatchedVisual;
-import beardFramework.graphics.rendering.batches.BatchRenderingData;
-import beardFramework.graphics.rendering.shaders.Shader;
+import beardFramework.graphics.batches.BatchRenderingData;
+import beardFramework.graphics.shaders.Shader;
 import beardFramework.resources.assets.Atlas;
 import beardFramework.graphics.text.FontFormat;
 import beardFramework.utils.data.Crypto;

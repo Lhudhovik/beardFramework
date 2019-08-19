@@ -1,7 +1,7 @@
 package beardFramework.graphics.screens.regions;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.core.RenderedObject;
-import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.objects.RenderedObject;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.resources.MinAllocArray;
 import beardFramework.utils.libraries.StringLibrary;
 import haxe.ds.Vector;

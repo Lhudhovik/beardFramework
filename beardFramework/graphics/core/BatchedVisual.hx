@@ -1,8 +1,9 @@
 package beardFramework.graphics.core;
 
-import beardFramework.graphics.rendering.Renderer;
-import beardFramework.graphics.rendering.batches.RenderedObjectBatch;
-import beardFramework.graphics.rendering.lights.Light;
+import beardFramework.graphics.objects.AbstractVisual;
+import beardFramework.graphics.core.Renderer;
+import beardFramework.graphics.batches.RenderedObjectBatch;
+import beardFramework.graphics.lights.Light;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IBatchable;
 import beardFramework.resources.assets.AssetManager;

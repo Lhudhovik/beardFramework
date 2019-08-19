@@ -1,8 +1,8 @@
 package beardFramework.graphics.screens.regions;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.objects.RenderedObject;
 import beardFramework.graphics.core.BatchedVisual;
-import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.resources.MinAllocArray;
 
 /**

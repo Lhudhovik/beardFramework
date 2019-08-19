@@ -1,5 +1,5 @@
 package beardFramework.utils.extensions;
-import beardFramework.graphics.core.RenderedObject;
+import beardFramework.graphics.objects.RenderedObject;
 
 /**
  * ...

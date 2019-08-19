@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.lights;
+package beardFramework.graphics.lights;
 
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.simpleDataStruct.SVec3;

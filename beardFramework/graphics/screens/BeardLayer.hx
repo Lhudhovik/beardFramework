@@ -1,6 +1,7 @@
-package beardFramework.graphics.core;
+package beardFramework.graphics.screens;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.objects.RenderedObject;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.interfaces.IBatchable;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.systems.aabb.AABB;

@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.shaders;
+package beardFramework.graphics.shaders;
 import beardFramework.core.BeardGame;
 import beardFramework.resources.options.OptionsManager.ShaderToCreate;
 import beardFramework.utils.data.Crypto;

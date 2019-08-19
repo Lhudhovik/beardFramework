@@ -1,4 +1,4 @@
-package beardFramework.graphics.rendering.shaders;
+package beardFramework.graphics.shaders;
 import beardFramework.resources.save.data.StructDataMaterial;
 import beardFramework.resources.save.data.StructDataMaterialComponent;
 import beardFramework.utils.graphics.Color;

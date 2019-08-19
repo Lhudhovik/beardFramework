@@ -1,6 +1,6 @@
 package beardFramework.resources.assets;
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.rendering.Renderer;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.utils.data.DataU;
 import beardFramework.utils.graphics.TextureU;
 import beardFramework.utils.data.XMLU;
