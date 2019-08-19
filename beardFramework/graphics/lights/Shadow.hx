@@ -1,5 +1,6 @@
 package beardFramework.graphics.lights;
 
+import beardFramework.graphics.core.Renderer;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;

@@ -5,14 +5,9 @@ import beardFramework.graphics.cameras.Camera;
 /**
  * @author Ludo
  */
-interface ICameraDependent 
+interface ICameraDependent extends ISpatialized
 {
   
-	
-	public var x(get,set):Float;
-	public var y(get, set):Float;
-	public var width(get,set):Float;
-	public var height(get,set):Float;
 	
 	public var restrictedCameras(default, null):Array<String>;
 	public var cameras:List<String>;

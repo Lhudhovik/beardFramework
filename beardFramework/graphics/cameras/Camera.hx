@@ -6,6 +6,7 @@ import beardFramework.graphics.core.Framebuffer;
 import beardFramework.graphics.core.Renderer;
 import beardFramework.input.MousePos;
 import beardFramework.interfaces.ICameraDependent;
+import beardFramework.interfaces.INamed;
 import beardFramework.resources.save.data.StructDataCamera;
 import beardFramework.utils.data.DataU;
 import beardFramework.utils.graphics.Color;
@@ -25,7 +26,7 @@ import openfl.geom.Rectangle;
  * ...
  * @author Ludo
  */
-class Camera
+class Camera implements INamed
 {
 	private static var utilRect:Rectangle;
 	public static var DEFAULT(default, null):String = "default";

@@ -15,7 +15,7 @@ enum Layout
 	CUSTOM;
 	
 }
-class UIContainer implements IUIComponent
+class UIContainer //implements IUIComponent
 {
 	@:isVar public var width(get, set):Float;
 	@:isVar public var height(get, set):Float;

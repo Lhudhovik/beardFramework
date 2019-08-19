@@ -7,9 +7,8 @@ import lime.graphics.opengl.GLProgram;
 /**
  * @author 
  */
-interface IRenderable 
+interface IRenderable extends INamed
 {
-	public var name(get, set):String;
 	public var z(get, set):Float;
 	public var readyForRendering(get, null):Bool;
 	public var shader(default, null):Shader;

@@ -5,6 +5,7 @@ import beardFramework.graphics.lights.Shadow;
 import beardFramework.graphics.batches.Batch;
 import beardFramework.graphics.batches.RenderedObjectBatch;
 import beardFramework.graphics.lights.Light;
+import beardFramework.graphics.screens.BeardLayer;
 import beardFramework.graphics.shaders.Material;
 import beardFramework.graphics.shaders.MaterialComponent;
 import beardFramework.interfaces.ICameraDependent;

@@ -6,15 +6,10 @@ import beardFramework.resources.save.data.StructDataUIComponent;
 /**
  * @author Ludo
  */
-interface IUIComponent extends IUIGroupable
+interface IUIComponent extends IUIGroupable extends ISpatialized
 {
 	
-	public var x(get,set):Float;
-	public var y(get,set):Float;
-	public var width(get,set):Float;
-	public var height(get,set):Float;
-	public var scaleX(get,set):Float;
-	public var scaleY(get, set):Float;
+	
 	public var preserved(get, set):Bool;
 	public var container(get, set):String;
 	

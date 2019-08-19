@@ -5,9 +5,9 @@ import beardFramework.input.data.InputData;
 /**
  * @author 
  */
-interface IFocusable 
+interface IFocusable extends INamed
 {
-	public var name(get, set):String;
+	
 	public var list:FocusableList;
 	public function FocusOn(inputdata:InputData=null):Void;
 	public function FocusOff():Void;

@@ -1,6 +1,7 @@
 package beardFramework.graphics.objects;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.cameras.Camera;
+import beardFramework.graphics.core.Renderer;
 import beardFramework.graphics.shaders.Shader;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.options.GraphicSettings;
