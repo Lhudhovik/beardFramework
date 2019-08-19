@@ -290,22 +290,17 @@ class TextField extends Visual implements IFocusable
 		var closerSize:Int = cast(AssetManager.Get().GetAtlas(this.atlas), FontAtlas).GetClosestTextSize(font, Math.round(textSize));
 		var atlasTexture:Texture =  AssetManager.Get().GetTexture(atlas);
 		
+		textTexture.width = Std.int(MathU.Max(textWidth, this.width));
+		textTexture.height = Std.int(MathU.Max(textHeight, this.height));
 		
-		//var screenRatioWidth:Float = BeardGame.Get().window.width / this.width;
-		var screenRatioWidth:Float = BeardGame.Get().window.width / textWidth;
-		var screenRatioheight:Float = BeardGame.Get().window.height / textHeight;
-		//var screenRatioheight:Float = BeardGame.Get().window.height / this.height;
+		var screenRatioWidth:Float = BeardGame.Get().window.width / textTexture.width;
+		var screenRatioheight:Float = BeardGame.Get().window.height / textTexture.height;
 		
-		textTexture.width = textWidth;
-		//textTexture.width = this.intWidth();
-		textTexture.height = textHeight;
-		//textTexture.height = this.intHeight();
 		
 		GL.deleteTexture(textTexture.glTexture);
 		textTexture.glTexture = GL.createTexture();
 		GL.bindTexture(GL.TEXTURE_2D, textTexture.glTexture);
-		GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, textWidth ,textHeight, 0, GL.RGBA, GL.FLOAT, 0);
-		//GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, this.intWidth() , this.intHeight(), 0, GL.RGBA, GL.FLOAT, 0);
+		GL.texImage2D(GL.TEXTURE_2D, 0, GL.RGBA, textTexture.width  ,textTexture.height , 0, GL.RGBA, GL.FLOAT, 0);
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
 		GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.REPEAT);
@@ -316,9 +311,8 @@ class TextField extends Visual implements IFocusable
 		GL.framebufferTexture2D(GL.FRAMEBUFFER, GL.COLOR_ATTACHMENT0, GL.TEXTURE_2D, textTexture.glTexture, 0);
 		GL.clearColor(background.getRedf(), background.getGreenf(), background.getBluef(),background.getAlphaf());
 		GL.clear(GL.COLOR_BUFFER_BIT);
-		GL.viewport(0,0, textWidth, textHeight);
-		//GL.viewport(0,0, this.intWidth(), this.intHeight());
-		
+		GL.viewport(0,0, textTexture.width , textTexture.height);
+				
 		for (i in 0...glyphsData.length)
 		{
 			glyphData = glyphsData.get(i);
@@ -376,22 +370,21 @@ class TextField extends Visual implements IFocusable
 		if (v < 0) v = 0;
 		
 		
-		scrollX = Std.int(MathU.Min(h, textWidth - width));
-		material.components[StringLibrary.DIFFUSE].uv.x = scrollX / textWidth;
-		material.components[StringLibrary.DIFFUSE].uv.width = (width / textWidth);
+		scrollX = Std.int(MathU.Min(h, textTexture.width - width));
+		material.components[StringLibrary.DIFFUSE].uv.x = scrollX / textTexture.width;
+		material.components[StringLibrary.DIFFUSE].uv.width = (width / textTexture.width);
 		
-		scrollY = Std.int(MathU.Min(v, textHeight-height));
-		material.components[StringLibrary.DIFFUSE].uv.y = 1 - (scrollY / textHeight);
-		material.components[StringLibrary.DIFFUSE].uv.height =  -(height/textHeight);
+		scrollY = Std.int(MathU.Min(v, textTexture.height-height));
+		material.components[StringLibrary.DIFFUSE].uv.y = 1 - (scrollY / textTexture.height);
+		material.components[StringLibrary.DIFFUSE].uv.height =  -(height/ textTexture.height);
 		
 	}
 	
 	override public function Render(camera:Camera):Int 
 	{
-		if (isDirty){
+		if (isDirty && needLayoutUpdate){
 			
-			if (needLayoutUpdate) UpdateLayout();		
-			
+			UpdateLayout();		
 			RenderText(camera);
 		}
 		return super.Render(camera);
@@ -426,6 +419,7 @@ class TextField extends Visual implements IFocusable
 		var sizeRatio:Float = this.textSize / currFont.height;
 		var carriageReturn:Bool = false;
 		var endOfLineReached:Bool = false;
+		SetScrollPosition();
 		
 		textWidth = 0;
 		textHeight = 0;
@@ -633,7 +627,7 @@ class TextField extends Visual implements IFocusable
 				
 				case TextAdjust.FIELD: if (glyphData.x + glyphData.width > width)	SetBaseWidth(glyphData.x + glyphData.width);
 					textWidth = this.intWidth();
-					trace("yeah");
+					
 				case TextAdjust.TEXT : 
 					if((glyphData.x + glyphData.width > this.width))
 					{
@@ -739,25 +733,26 @@ class TextField extends Visual implements IFocusable
 			
 			i++;
 		}
-				
 		
 		if (lines.length > 0)
 		{
 			var data:RenderedGlyphData;
 			var prevData:RenderedGlyphData;
 			var gap:Float;
+		
 			switch(alignment)
 			{
 				case TextAlignment.LEFT: 
 				case TextAlignment.RIGHT:
 					for (lineData in lines){
+					
 						if (lineData.length == 0) continue;
 						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
 						
 						if(data.metrics.isValid)
-							data.x = this.width - (data.metrics.advance.x - data.metrics.hBearing.x)*sizeRatio;
+							data.x = textWidth - (data.metrics.advance.x - data.metrics.hBearing.x)*sizeRatio;
 						else
-							data.x = this.width - data.width;
+							data.x = textWidth - data.width;
 									
 						for (i in 1...lineData.length)
 						{
@@ -777,12 +772,12 @@ class TextField extends Visual implements IFocusable
 						if (lineData.length == 0) continue;
 						
 						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
-						gap = this.width - data.x + (data.metrics.isValid? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width);
+						gap = textWidth - data.x + (data.metrics.isValid? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width);
 						
 						if(data.metrics.isValid)
-							data.x = this.width - (gap*0.5) - (data.metrics.advance.x - data.metrics.hBearing.x)*sizeRatio;
+							data.x = textWidth - (gap*0.5) - (data.metrics.advance.x - data.metrics.hBearing.x)*sizeRatio;
 						else
-							data.x = this.width - data.width - gap * 0.5;
+							data.x = textWidth - data.width - gap * 0.5;
 							
 						for (i in 1...lineData.length){
 							data = glyphsData.get(lineData[lineData.length - 1 - i].glyph);
@@ -796,7 +791,7 @@ class TextField extends Visual implements IFocusable
 					for (lineData in lines){
 						if (lineData.length == 0 || lineData == lines[lines.length -1]) continue;
 						data = prevData = glyphsData.get(lineData[lineData.length - 1].glyph);
-						gap = this.width - data.x + (data.metrics.isValid ? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width);
+						gap = textWidth - data.x + (data.metrics.isValid ? (data.metrics.advance.x - data.metrics.hBearing.x) * sizeRatio : data.width);
 						gap /= lineData.length;
 						for (i in 1...lineData.length)
 							glyphsData.get(lineData[i].glyph).x += gap*i;
