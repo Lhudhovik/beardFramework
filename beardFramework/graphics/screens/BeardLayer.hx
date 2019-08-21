@@ -2,6 +2,7 @@ package beardFramework.graphics.screens;
 import beardFramework.core.BeardGame;
 import beardFramework.graphics.objects.RenderedObject;
 import beardFramework.graphics.core.Renderer;
+import beardFramework.graphics.objects.WorldObject;
 import beardFramework.interfaces.IBatchable;
 import beardFramework.interfaces.IRenderable;
 import beardFramework.systems.aabb.AABB;
@@ -137,7 +138,7 @@ class BeardLayer
 		}
 	}
 	
-	public function AddAABB(object:RenderedObject):Void
+	public function AddAABB(object:WorldObject):Void
 	{
 		if(aabbs[object.name] == null) 	aabbs[object.name] = new AABB();
 		aabbs[object.name].owner = object.name;
@@ -150,7 +151,7 @@ class BeardLayer
 		aabbTree.Add(aabbs[object.name]);
 	}
 	
-	public function RemoveAABB(object:RenderedObject):Void
+	public function RemoveAABB(object:WorldObject):Void
 	{
 		if (aabbs[object.name] != null)
 		{

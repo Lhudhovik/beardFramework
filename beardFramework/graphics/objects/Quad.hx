@@ -24,7 +24,7 @@ import lime.utils.UInt16Array;
  * ...
  * @author Ludovic
  */
-class Quad extends GraphicsObject
+class Quad extends WorldObject
 {
 	
 	public var renderer:Renderer;
@@ -43,6 +43,7 @@ class Quad extends GraphicsObject
 	
 	public function new(shaderName:String = StringLibrary.QUAD) 
 	{
+		super();
 		x = 0;
 		y = 0;
 		z = 0;

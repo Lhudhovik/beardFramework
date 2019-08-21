@@ -13,6 +13,8 @@ class MinAllocArray<T>
 
 	private var utilInt:Int = 0;
 	
+	private var internalIndex:Int = 0;
+	
 	public function new( ?size:Int,?base:Array<Null<T>>) 
 	{
 		if (base != null){
@@ -208,6 +210,40 @@ class MinAllocArray<T>
 	{
 		data.sort(f);
 		//trace(data);
+	}
+	
+	public function hasNext():Bool {
+    return internalIndex <length;
+	}
+
+	public function next():T{
+		return data[internalIndex++];
+	}
+	
+	
+	public function Concat(minAllocArray:MinAllocArray<T>):MinAllocArray<T>
+	{
+		
+		var newData:Vector<Null<T>> = new Vector(this.length + minAllocArray.length);
+		
+		var i:Int = 0;
+		
+		while (i++< length)
+		newData[i] = this.get(i);
+		
+		i = 0;
+		while (i++ < minAllocArray.length)
+		newData[length + i] = minAllocArray.get(i);
+		
+		this.data = newData;
+		
+		return this;
+		
+	}
+	
+	public function Reverse()
+	{
+		//do stuff;
 	}
 	
 	

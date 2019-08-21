@@ -25,7 +25,7 @@ class BeardGroup implements IBeardyObject
 			groups[name] = null;
 		}
 		
-		groups[name] = new BeardGroup(name);
+		return groups[name] = new BeardGroup(name);
 		
 	}
 	
@@ -44,7 +44,7 @@ class BeardGroup implements IBeardyObject
 		}
 		
 		groups[name] = this;
-		members = new Array<IBeardyObject>();
+		members = new MinAllocArray<IBeardyObject>();
 		this.name = name;
 	}
 	
@@ -52,7 +52,7 @@ class BeardGroup implements IBeardyObject
 	{
 		if (member.group != null && member.group != "" && member.group != name)
 		{
-			groups[member.group].Remouve(member);
+			groups[member.group].Remove(member);
 		}
 		
 		members.Push(member);
@@ -68,7 +68,7 @@ class BeardGroup implements IBeardyObject
 	
 	public inline function Remove(member:IBeardyObject):Void
 	{
-		members.remove(member);
+		members.Remove(member);
 	}
 	
 	public function GetMember(name:String):IBeardyObject
@@ -109,9 +109,9 @@ class BeardGroup implements IBeardyObject
 		{
 			name : this.name,
 			type: Type.getClassName(Type.getClass(this)),
-			canRender: this.canRender,
+			canRender: true,
 			parentGroup: this.group,
-			subGroupsData: [for(member in members) if(Std.is(member,UIGroup)) cast(member, UIGroup).ToData()],
+			subGroupsData: [for(member in members) if(Std.is(member,BeardGroup)) cast(member, BeardGroup).ToData()],
 			componentsData:componentsData,
 			additionalData:""
 		}
@@ -162,18 +162,5 @@ class BeardGroup implements IBeardyObject
 		return name = value;
 	}
 		
-	function get_canRender():Bool 
-	{
-		return canRender;
-	}
-	
-	function set_canRender(value:Bool):Bool 
-	{
-		for (member in members)
-			member.canRender = value;
-				
-		return canRender = value;
-	}
-	
 	
 }

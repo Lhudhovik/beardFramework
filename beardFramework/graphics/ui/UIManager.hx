@@ -309,21 +309,21 @@ class UIManager
 		
 	}
 		
-	public function DestroyUI(td:ThreadDetail):Bool
+	public function ClearUI(td:ThreadDetail):Bool
 	{
 		
 		if (td.progression == 0)
-			baseGroup.members.reverse();
+			baseGroup.members.Reverse();
 		
 		var member:IBeardyObject;
 		while (baseGroup.members.length > 0)
 		{
 			
-			member = baseGroup.members.pop();
+			member = baseGroup.members.Pop();
 			
 			if (Std.is(member, BeardGroup))
 			{
-				baseGroup.members = baseGroup.members.concat(cast(member, BeardGroup).members);
+				baseGroup.members = baseGroup.members.Concat(cast(member, BeardGroup).members);
 				cast(member, BeardGroup).members = null;
 			}
 			else
@@ -334,7 +334,7 @@ class UIManager
 					if (cast(member, UIContainer).components != null)
 					{
 						while (cast(member, UIContainer).components.length > 0)
-						baseGroup.members.push(cast(member, UIContainer).components.pop());
+						baseGroup.members.Push(cast(member, UIContainer).components.pop());
 					}
 					cast(member, UIContainer).components = null;
 				}

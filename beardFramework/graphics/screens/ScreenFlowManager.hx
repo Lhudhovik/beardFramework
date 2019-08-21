@@ -88,7 +88,7 @@ class ScreenFlowManager
 		if (BeardGame.Get().currentScreen != null){
 			
 			BeardGame.Get().currentScreen.Freeze();
-			screenClearTD.action = BeardGame.Get().currentScreen.Clear;
+			screenClearTD.action = BeardGame.Get().currentScreen.Destroy;
 	
 			UIClearTD.action =  UIManager.Get().ClearUI;
 			//UIClearTD.length = 100;

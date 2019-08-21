@@ -23,7 +23,7 @@ import beardFramework.utils.simpleDataStruct.SVec2;
  * ...
  * @author 
  */
-class RenderedObject extends GraphicsObject implements IRenderable
+class RenderedObject extends WorldObject implements IRenderable
 {
 	
 	public static var topEdge:Edge = {lighted:false, normal: {x:0, y:0}};
@@ -33,12 +33,9 @@ class RenderedObject extends GraphicsObject implements IRenderable
 	
 	
 	@:isVar public var canRender(get, set):Bool;
-	@:isVar public var name(get, set):String;
-	
 	@:isVar public var shader(get, set):Shader;
 	@:isVar public var depth(get, set):Float;		
 		
-	public var isActivated(default, null):Bool;
 	public var alpha(get, set):Float;
 	public var cameras:List<String>;	
 	public var rotationCosine(default,null):Float;
@@ -48,8 +45,6 @@ class RenderedObject extends GraphicsObject implements IRenderable
 	public var shadowCaster(default, set):Bool;
 	public var lightGroup(default, set):String;
 	
-	private var cachedWidth:Float;
-	private var cachedHeight:Float;
 	private var shadows:Map<String, Shadow>;
 	
 	private function new() 
@@ -115,28 +110,7 @@ class RenderedObject extends GraphicsObject implements IRenderable
 		return material.components[StringLibrary.DIFFUSE].color = value;
 	}
 	
-	public function SetBaseWidth(value:Float):Void
-	{
-		trace("base width set to " + value);
-		trace("base scale x is " + scaleX);
-		var currentScale:Float = scaleX;
-		scaleX = 1;
-		cachedWidth = value;
-		scaleX = currentScale;
-		isDirty = true;
-		
-	}
 	
-	public function SetBaseHeight(value:Float):Void
-	{
-		//trace("base height set to " + value);
-		var currentScale:Float = scaleY;
-		scaleY = 1;
-		cachedHeight = value;
-		scaleY = currentScale;
-		isDirty = true;
-		
-	}
 	
 	public function CastShadow(light:Light):Void 
 	{
@@ -274,34 +248,11 @@ class RenderedObject extends GraphicsObject implements IRenderable
 		return result;
 	}
 		
-	public function Activate():Void 
-	{
-		isActivated = true;
 		
-	}
-	
-	public function DeActivate():Void 
+	override public function DeActivate():Void 
 	{
 		isActivated = false;
 		canRender = false;
-	}
-	
-	public function Destroy():Void 
-	{
-		
-	}
-	
-	
-
-	
-	function get_group():String 
-	{
-		return group;
-	}
-	
-	function set_group(value:String):String 
-	{
-		return group = value;
 	}
 	
 	inline function get_depth():Float 
@@ -324,16 +275,7 @@ class RenderedObject extends GraphicsObject implements IRenderable
 		return canRender = value;
 	}
 	
-	function set_onAABBTree(value:Bool):Bool 
-	{
-		if (value != onAABBTree && layer!= null)
-		{
-			if (value == true) layer.AddAABB(this);
-			else	layer.RemoveAABB(this);
-			
-		}
-		return onAABBTree = value;
-	}
+	
 	
 	function set_shadowCaster(value:Bool):Bool 
 	{
