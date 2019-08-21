@@ -116,9 +116,9 @@ class UIBatch extends Batch
 						verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] = visual.y + center.y + ((vertices[verIndex] * visual.width)-center.x)*visual.rotationSine +  ((vertices[verIndex+1] * visual.height)-center.y)*visual.rotationCosine;
 						
 						
-						if (verticesData.data[visIndex + attIndex + 2] != (visual.visible ? visual.renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT+1)) depthChange = true;
+						if (verticesData.data[visIndex + attIndex + 2] != (visual.canRender ? visual.depth : Renderer.Get().VISIBLE+1)) depthChange = true;
 							
-						verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.visible ? visual.renderDepth :Renderer.Get().VISIBLEDEPTHLIMIT+1;
+						verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = visual.canRender ? visual.depth :Renderer.Get().VISIBLE+1;
 								
 						
 						//UV + TextureID
@@ -175,10 +175,10 @@ class UIBatch extends Batch
 							verticesData.data[visIndex + attIndex] = utilFloatArray[attIndex] = textfield.x  +  center.x + ((vertices[verIndex] * data.width + data.x)-center.x)*textfield.rotationCosine -  ((vertices[verIndex+1] * data.height + data.y)-center.y)*textfield.rotationSine;
 							verticesData.data[visIndex + attIndex+ 1] = utilFloatArray[attIndex+1] =  textfield.y + center.y + ((vertices[verIndex] * data.width+data.x)-center.x)*textfield.rotationSine +  ((vertices[verIndex+1] * data.height+data.y)-center.y)*textfield.rotationCosine;
 					
-							if (verticesData.data[visIndex + attIndex + 2] != (textfield.visible ? textfield.renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT+1))	depthChange = true;
+							if (verticesData.data[visIndex + attIndex + 2] != (textfield.canRender ? textfield.renderDepth : Renderer.Get().VISIBLE+1))	depthChange = true;
 		
 	
-							verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = textfield.visible ? textfield.renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT+1;
+							verticesData.data[visIndex + attIndex + 2] = utilFloatArray[attIndex + 2] = textfield.canRender ? textfield.renderDepth : Renderer.Get().VISIBLE+1;
 							
 							
 							//UV + Texture ID

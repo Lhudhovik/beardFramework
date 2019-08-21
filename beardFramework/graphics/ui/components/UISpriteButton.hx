@@ -76,7 +76,7 @@ class UISpriteButton extends UISpriteComponent implements IButton
 		InputManager.Get().BindToAction(StringLibrary.MOUSE_WHEEL, OnWheel, this.name);
 		return this.name;
 	}
-	override public function Clear():Void 
+	override public function Destroy():Void 
 	{
 		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OVER, OnOver, this.name);
 		InputManager.Get().UnbindFromAction(StringLibrary.MOUSE_OUT, OnOut, this.name);

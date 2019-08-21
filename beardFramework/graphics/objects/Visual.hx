@@ -36,7 +36,7 @@ import lime.utils.UInt16Array;
  * ...
  * @author 
  */
-class Visual extends AbstractVisual implements IRenderable
+class Visual extends AbstractVisual
 {
 	private static var TEMPLATE(default, never):String ="visual" ; //overide with local variable if necessary
 	private static var verticesData:Float32Array; //overide with local variable if necessary
@@ -52,9 +52,7 @@ class Visual extends AbstractVisual implements IRenderable
 	
 	@:isVar public var readyForRendering(get, null):Bool;
 	
-	public var shader(default, null):Shader;
 	public var drawMode:Int;
-	public var lightGroup(default, set):String;	
 	public var lightGroupChanged:Bool;
 	
 	private var renderer:Renderer;
@@ -180,7 +178,7 @@ class Visual extends AbstractVisual implements IRenderable
 			
 		renderer.model.identity();
 		renderer.model.appendScale(this.width, this.height, 1.0);
-		renderer.model.appendTranslation(this.x, this.y, (visible ? renderDepth : Renderer.Get().VISIBLEDEPTHLIMIT + 1));
+		renderer.model.appendTranslation(this.x, this.y, depth);
 		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
 		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
 		
@@ -188,7 +186,7 @@ class Visual extends AbstractVisual implements IRenderable
 
 	}
 		
-	public function Render(camera:Camera):Int 
+	override public function Render(camera:Camera):Int 
 	{
 		
 		
@@ -233,20 +231,7 @@ class Visual extends AbstractVisual implements IRenderable
 	
 	
 	
-	public inline function HasCamera(camera:String):Bool
-	{
-		var result:Bool = false;
-		
-		for (name in cameras)
-			if (name == camera)
-			{
-				result = true;
-				break;
-			}
-		
-		return result;
-		
-	}
+	
 	override function set_atlas(value:String):String 
 	{
 		if (material != null && material.hasComponent(StringLibrary.DIFFUSE))
@@ -257,7 +242,7 @@ class Visual extends AbstractVisual implements IRenderable
 		return super.set_atlas(value);
 	}
 
-	function set_lightGroup(value:String):String 
+	override function set_lightGroup(value:String):String 
 	{
 		if (lightGroup != value) lightGroupChanged = true;
 		return lightGroup = value;

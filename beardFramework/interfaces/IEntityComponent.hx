@@ -5,7 +5,7 @@ import beardFramework.resources.save.data.StructDataComponent;
 /**
  * @author Ludo
  */
-interface IEntityComponent extends INamed
+interface IEntityComponent extends IBeardyObject
 {
 	public var parentEntity:GameEntity;
 	

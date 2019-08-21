@@ -6,7 +6,7 @@ package beardFramework.resources.save.data;
 typedef StructDataAbstractUI =
 {
 	>StructDataGeneric,
-	var visible:Bool;
+	var canRender:Bool;
 	//var group:String;
 	
 }

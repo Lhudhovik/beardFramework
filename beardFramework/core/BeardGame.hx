@@ -108,7 +108,7 @@ class BeardGame extends Application
 		previousWidth = window.width;
 		previousHeight = window.height;
 		for (i in 0...4)
-			layers.get(i).visible = false;
+			layers.get(i).canRender = false;
 			
 		cameras = new Map<String,Camera>();
 		
@@ -248,7 +248,7 @@ class BeardGame extends Application
 		//fps.renderingBatch = cast Renderer.Get().GetBatch(Renderer.Get().UI);
 		//
 		//GetDebugLayer().Add(fps);
-		//GetDebugLayer().visible = true;
+		//GetDebugLayer().canRender = true;
 		//grid = new RegionGrid(window.width, window.height,5);
 		
 	}

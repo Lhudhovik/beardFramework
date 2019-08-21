@@ -107,7 +107,7 @@ class UICameraComponent extends Camera implements IUIComponent
 	
 	
 	
-	public function Clear():Void 
+	public function Destroy():Void 
 	{
 		
 	}
@@ -139,16 +139,16 @@ class UICameraComponent extends Camera implements IUIComponent
 		return container = value;
 	}
 	
-	@:isVar public var visible(get, set):Bool;
+	@:isVar public var canRender(get, set):Bool;
 	
-	function get_visible():Bool 
+	function get_canRender():Bool 
 	{
-		return visible;
+		return canRender;
 	}
 	
-	function set_visible(value:Bool):Bool 
+	function set_canRender(value:Bool):Bool 
 	{
-		return visible = value;
+		return canRender = value;
 	}
 	
 	@:isVar public var group(get, set):String;

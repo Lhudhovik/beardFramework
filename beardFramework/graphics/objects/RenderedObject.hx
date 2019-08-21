@@ -1,5 +1,6 @@
 package beardFramework.graphics.objects;
 import beardFramework.core.BeardGame;
+import beardFramework.graphics.cameras.Camera;
 import beardFramework.graphics.core.Renderer;
 import beardFramework.graphics.lights.Shadow;
 import beardFramework.graphics.batches.Batch;
@@ -8,7 +9,9 @@ import beardFramework.graphics.lights.Light;
 import beardFramework.graphics.screens.BeardLayer;
 import beardFramework.graphics.shaders.Material;
 import beardFramework.graphics.shaders.MaterialComponent;
-import beardFramework.interfaces.ICameraDependent;
+import beardFramework.graphics.shaders.Shader;
+import beardFramework.interfaces.IRenderable;
+import beardFramework.interfaces.ISpatialized;
 import beardFramework.systems.aabb.AABB;
 import beardFramework.utils.graphics.Color;
 import beardFramework.utils.graphics.Edge;
@@ -20,7 +23,7 @@ import beardFramework.utils.simpleDataStruct.SVec2;
  * ...
  * @author 
  */
-class RenderedObject implements ICameraDependent
+class RenderedObject implements IRenderable implements ISpatialized
 {
 	
 	public static var topEdge:Edge = {lighted:false, normal: {x:0, y:0}};
@@ -28,30 +31,35 @@ class RenderedObject implements ICameraDependent
 	public static var rightEdge:Edge= {lighted:false, normal: {x:0, y:0}};
 	public static var bottomEdge:Edge= {lighted:false, normal: {x:0, y:0}};
 	
-	public var alpha(get, set):Float;
 	
-	public var height(get, set):Float;	
-	public var width(get, set):Float;
-	@:isVar public var isDirty(get, set):Bool = false;
+	@:isVar public var canRender(get, set):Bool;
 	@:isVar public var name(get, set):String;
-	@:isVar public var visible(get, set):Bool;
 	@:isVar public var rotation (get, set):Float;
 	@:isVar public var scaleX (get, set):Float;
 	@:isVar public var scaleY (get, set):Float;
 	@:isVar public var x(get, set):Float;
 	@:isVar public var y(get, set):Float;
 	@:isVar public var z(get, set):Float;
+	@:isVar public var isDirty(get, set):Bool = false;
+	@:isVar public var shader(get, set):Shader;
+	@:isVar public var depth(get, set):Float;		
+	@:isVar public var group(get, set):String;
 	
+	public var isActivated(default, null):Bool;
+	public var alpha(get, set):Float;
+	public var height(get, set):Float;	
+	public var width(get, set):Float;
 	public var onAABBTree(default, set):Bool;
 	public var layer:BeardLayer;
 	public var cameras:List<String>;	
-	public var renderDepth(default,null):Float;
-	public var restrictedCameras(default, null):Array<String>;
 	public var rotationCosine(default,null):Float;
 	public var rotationSine(default, null):Float;
 	public var material:Material;
 	public var color(get, set):Color;
 	public var shadowCaster(default, set):Bool;
+	public var lightGroup(default, set):String;
+	
+	
 	private var cachedWidth:Float;
 	private var cachedHeight:Float;
 	private var shadows:Map<String, Shadow>;
@@ -59,9 +67,9 @@ class RenderedObject implements ICameraDependent
 	private function new() 
 	{
 		
-		visible = true;
+		canRender = true;
 		z = -1;
-		renderDepth = -2;
+		depth = -2;
 		scaleX = scaleY = 1;
 		cachedWidth = cachedHeight = 0;
 		rotation = 0;
@@ -228,18 +236,7 @@ class RenderedObject implements ICameraDependent
 		return value;
 		
 	}
-	
-	public function AuthorizeCamera(addedCameraID:String):Void 
-	{
-		if (restrictedCameras == null) restrictedCameras = new Array<String>();
-		if (restrictedCameras.indexOf(addedCameraID) == -1) restrictedCameras.push(addedCameraID);
-	}
-	
-	public function ForbidCamera(forbiddenCameraID:String):Void 
-	{
-		if (restrictedCameras != null) restrictedCameras.remove(forbiddenCameraID);
-	}
-	
+			
 	inline function get_z():Float 
 	{
 		return z;
@@ -251,7 +248,7 @@ class RenderedObject implements ICameraDependent
 		
 		if (layer != null)
 		{
-			renderDepth = layer.depth + (z*100 / layer.maxObjectsCount);
+			depth = layer.depth + (z*100 / layer.maxObjectsCount);
 			//trace(layer.name);
 			//trace(z);
 			//trace(layer.depth);
@@ -269,17 +266,6 @@ class RenderedObject implements ICameraDependent
 	function set_name(value:String):String 
 	{
 		return name = value;
-	}
-	
-	function get_visible():Bool 
-	{
-		return visible;
-	}
-	
-	function set_visible(value:Bool):Bool 
-	{
-		isDirty = true;
-		return visible = value;
 	}
 	
 	function get_isDirty():Bool 
@@ -416,9 +402,9 @@ class RenderedObject implements ICameraDependent
 			shadow.corner1.y = pos1.y; 
 			shadow.corner2.x = pos2.x; 
 			shadow.corner2.y = pos2.y; 
-			shadow.renderDepth = this.renderDepth +0.0005;
+			shadow.depth = this.depth +0.0005;
 		}
-		else shadow.renderDepth = Renderer.Get().VISIBLEDEPTHLIMIT + 1;
+		else shadow.depth = Renderer.Get().VISIBLE + 1;
 		shadow.shader.Set4Float(StringLibrary.SHADOW_COLOR, 0,0,0,0.2); 
 				
 		shadow.width = this.width;
@@ -448,6 +434,80 @@ class RenderedObject implements ICameraDependent
 		
 	}
 	
+	function set_lightGroup(value:String):String 
+	{
+		return lightGroup = value;
+	}
+	
+	public function Render(camera:Camera):Int 
+	{
+		return 0;
+	}
+	
+	public inline function HasCamera(camera:String):Bool 
+	{
+		var result:Bool = false;
+		
+		for (name in cameras)
+		if (name == camera)
+		{
+			result = true;
+			break;
+		}
+		
+		return result;
+	}
+		
+	public function Activate():Void 
+	{
+		isActivated = true;
+		
+	}
+	
+	public function DeActivate():Void 
+	{
+		isActivated = false;
+		canRender = false;
+	}
+	
+	public function Destroy():Void 
+	{
+		
+	}
+	
+	
+
+	
+	function get_group():String 
+	{
+		return group;
+	}
+	
+	function set_group(value:String):String 
+	{
+		return group = value;
+	}
+	
+	inline function get_depth():Float 
+	{
+		return depth;
+	}
+	
+	inline function set_depth(value:Float):Float 
+	{
+		return depth = value;
+	}
+		
+	function get_canRender():Bool 
+	{
+		return canRender;
+	}
+	
+	function set_canRender(value:Bool):Bool 
+	{
+		return canRender = value;
+	}
+	
 	function set_onAABBTree(value:Bool):Bool 
 	{
 		if (value != onAABBTree && layer!= null)
@@ -474,7 +534,15 @@ class RenderedObject implements ICameraDependent
 		return shadowCaster = value;
 	}
 	
+	function get_shader():Shader 
+	{
+		return shader;
+	}
 	
+	function set_shader(value:Shader):Shader 
+	{
+		return shader=value;
+	}
 	
 	
 	

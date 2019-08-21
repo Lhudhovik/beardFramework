@@ -24,7 +24,7 @@ import lime.utils.UInt16Array;
  * ...
  * @author Ludovic
  */
-class Quad implements ISpatialized
+class Quad 
 {
 	
 	public var renderer:Renderer;
@@ -90,7 +90,7 @@ class Quad implements ISpatialized
 		
 		
 	}
-	
+			
 	public function Render():Void 
 	{
 		

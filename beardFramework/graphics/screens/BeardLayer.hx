@@ -20,11 +20,11 @@ class BeardLayer
 	public static var DEPTH_LOADING:Float = -1;
 	public static var DEPTH_DEBUG:Float = -1;
 	
+	@:isVar public var canRender(get, set):Bool;
 	public var depth:Float; 
 	public var maxObjectsCount(default, null):Int;
 	public var name:String;
 	public var id:Int;
-	@:isVar public var visible(get, set):Bool;
 	public var renderedObjects:Map<String, RenderedObject>;
 	public var aabbs:Map<String, AABB>;
 	public var aabbTree:AABBTree;
@@ -40,7 +40,7 @@ class BeardLayer
 		renderedObjects = new Map();	
 		aabbs = new Map();
 		aabbTree = new AABBTree(5);
-		visible = true;
+		canRender = true;
 		
 		
 	}
@@ -73,7 +73,7 @@ class BeardLayer
 			
 				object.layer = this;
 				object.z = (object.z ==-1) ? insertionDepth++ : object.z;
-				object.visible = this.visible;
+				object.canRender = this.canRender;
 				if(Std.is(object, IBatchable)) cast(object, IBatchable).RequestBufferIndex();
 				object.isDirty = true;
 				renderedObjects.set(object.name, object);
@@ -92,7 +92,7 @@ class BeardLayer
 			if (object.layer != null && object.layer != this) object.layer.Remove(object);
 			object.layer = this;
 			object.z = (object.z ==-1) ? insertionDepth++ : object.z;
-			object.visible =  this.visible;
+			object.canRender =  this.canRender;
 			
 			renderedObjects.set(object.name, object);
 			
@@ -166,17 +166,17 @@ class BeardLayer
 		
 	}
 	
-	function get_visible():Bool 
+	function get_canRender():Bool 
 	{
-		return visible;
+		return canRender;
 	}
 	
-	function set_visible(value:Bool):Bool 
+	function set_canRender(value:Bool):Bool 
 	{
 		
 		for (object in renderedObjects)
-			object.visible = value;
-		return visible = value;
+			object.canRender = value;
+		return canRender = value;
 	}
 	
 	

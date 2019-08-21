@@ -6,6 +6,8 @@ import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.core.Renderer;
 import beardFramework.graphics.batches.RenderedObjectBatch;
 import beardFramework.interfaces.IBatchable;
+import beardFramework.interfaces.IBeardyObject;
+import beardFramework.systems.BeardGroup;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
 import beardFramework.updateProcess.thread.RowThreadDetail;
 import beardFramework.updateProcess.thread.Thread;
@@ -13,7 +15,7 @@ import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.graphics.screens.BeardLayer;
 import beardFramework.graphics.ui.components.UIContainer;
 import beardFramework.interfaces.IUIComponent;
-import beardFramework.interfaces.IUIGroupable;
+import beardFramework.interfaces.IBeardyObject;
 import beardFramework.resources.save.SaveManager;
 import beardFramework.resources.save.data.StructDataComponent;
 import beardFramework.resources.save.data.StructDataUIComponent;
@@ -38,7 +40,7 @@ class UIManager
 	public static var CAMERANAME(default, never):String = "UICamera";
 	private static var instance(default,null):UIManager;
 	private var UILayer:BeardLayer;
-	private var baseGroup:UIGroup;
+	private var baseGroup:BeardGroup;
 	private var templates:Array<DataSlot<StructDataUIGroup>>;
 	private var savedData:DataUIGroup;
 	public var cameras:MinAllocArray<String>;
@@ -61,7 +63,7 @@ class UIManager
 	{
 		UILayer = BeardGame.Get().GetLayer(BeardGame.Get().UILAYER);
 		templates = new Array<DataSlot<StructDataUIGroup>>();
-		baseGroup = new UIGroup("UIBase");
+		baseGroup = BeardGroup.CreateGroup("UIBase");
 		cameras = new MinAllocArray<String>();
 		cameras.Push(CAMERANAME+0);
 		//BeardGame.Get().AddCamera(new Camera(CAMERANAME+0, BeardGame.Get().window.width, BeardGame.Get().window.height, 0, 0, 100, true));
@@ -107,7 +109,7 @@ class UIManager
 	public function RemoveComponent(component:IUIComponent):Void
 	{
 		if (Std.is(component, UIContainer)){
-			cast(component, UIContainer).visible = false;
+			cast(component, UIContainer).canRender = false;
 			for (element in cast(component, UIContainer).components)	RemoveComponent(element);
 		}
 		else UILayer.Remove(cast(component, BatchedVisual));
@@ -115,28 +117,28 @@ class UIManager
 		RemoveFromGroup( component, component.group);
 	}
 		
-	public function AddToGroup(member:IUIGroupable, groupName:String = "UIBase" ):Void
+	public function AddToGroup(member:IBeardyObject, groupName:String = "UIBase" ):Void
 	{
 		
 		if (groupName == baseGroup.name) baseGroup.Add(member);
 		else
 		{
-			var group:IUIGroupable = baseGroup.GetMember(groupName);
+			var group:IBeardyObject = baseGroup.GetMember(groupName);
 			if (group != null)
-				cast(group, UIGroup).Add(member);
+				cast(group, BeardGroup).Add(member);
 		}
 			
 	}
 	
-	public function RemoveFromGroup(member:IUIGroupable, groupName:String = "UIBase"):Void
+	public function RemoveFromGroup(member:IBeardyObject, groupName:String = "UIBase"):Void
 	{
 		
 		if (groupName == baseGroup.name) baseGroup.Remove(member);
 		else
 		{
-			var group:IUIGroupable = baseGroup.GetMember(groupName);
+			var group:IBeardyObject = baseGroup.GetMember(groupName);
 			if (group != null)
-				cast(group, UIGroup).Remove(member);
+				cast(group, BeardGroup).Remove(member);
 		}
 		
 		
@@ -144,24 +146,24 @@ class UIManager
 	
 	public inline function GetUIComponent(componentID:String):IUIComponent
 	{
-		var member:IUIGroupable = baseGroup.GetMember(componentID);
+		var member:IBeardyObject = baseGroup.GetMember(componentID);
 		return (member != null) ? cast(member, IUIComponent) : null;
 	}
 	
-	public inline function GetUIGroup(groupID:String):UIGroup
+	public inline function GetUIGroup(groupID:String):BeardGroup
 	{
-		var member:IUIGroupable = baseGroup.GetMember(groupID);
-		return (member != null) ? cast(member, UIGroup) : null;
+		var member:IBeardyObject = baseGroup.GetMember(groupID);
+		return (member != null) ? cast(member, BeardGroup) : null;
 	}
 	
 	public inline function HideUI():Void
 	{
-		UILayer.visible = false;
+		UILayer.canRender = false;
 	}
 	
 	public inline function ShowUI():Void
 	{
-		UILayer.visible = true;		
+		UILayer.canRender = true;		
 	}
 	
 	public function GetTemplateData(templateID:String):StructDataUIGroup
@@ -208,7 +210,7 @@ class UIManager
 		
 		var componentData :StructDataUIComponent;
 		var groupData:StructDataUIGroup;
-		var group:UIGroup;
+		var group:BeardGroup;
 		
 		if (td.progression == 0)
 		{
@@ -232,7 +234,7 @@ class UIManager
 			else groupData = templateData.subGroupsData[templateData.subGroupsData.length-1];
 					
 			if ((group = GetUIGroup(groupData.name)) == null){
-				group = new UIGroup(groupData.name);
+				group = new BeardGroup(groupData.name);
 				if(groupData.parentGroup != "") AddToGroup(group, groupData.parentGroup);				
 				templateData.subGroupsData = templateData.subGroupsData.concat(groupData.subGroupsData);
 			}
@@ -307,22 +309,22 @@ class UIManager
 		
 	}
 		
-	public function ClearUI(td:ThreadDetail):Bool
+	public function DestroyUI(td:ThreadDetail):Bool
 	{
 		
 		if (td.progression == 0)
 			baseGroup.members.reverse();
 		
-		var member:IUIGroupable;
+		var member:IBeardyObject;
 		while (baseGroup.members.length > 0)
 		{
 			
 			member = baseGroup.members.pop();
 			
-			if (Std.is(member, UIGroup))
+			if (Std.is(member, BeardGroup))
 			{
-				baseGroup.members = baseGroup.members.concat(cast(member, UIGroup).members);
-				cast(member, UIGroup).members = null;
+				baseGroup.members = baseGroup.members.concat(cast(member, BeardGroup).members);
+				cast(member, BeardGroup).members = null;
 			}
 			else
 			{
@@ -339,7 +341,7 @@ class UIManager
 				else
 				{
 					RemoveComponent(cast member);
-					member.Clear();
+					member.Destroy();
 				}
 				
 				
@@ -369,10 +371,10 @@ class UIManager
 	//public function TraceState():Void
 	//{
 		//var string:String = "UI state : \n";
-		//string += "UILayer visibility : " + UILayer.visible +"\n";
-		//string += "Base group visibility : " + baseGroup.visible + "\n";
+		//string += "UILayer visibility : " + UILayer.canRender +"\n";
+		//string += "Base group visibility : " + baseGroup.canRender + "\n";
 		//for (member in baseGroup.members)
-			//string += "Group " + member.name + " visibility : " + member.visible + "\n";
+			//string += "Group " + member.name + " visibility : " + member.canRender + "\n";
 		//
 			//trace(string);
 		//

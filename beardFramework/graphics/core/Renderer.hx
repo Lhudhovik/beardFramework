@@ -55,7 +55,7 @@ class Renderer
 	
 	
 	
-	public var VISIBLEDEPTHLIMIT(default, never):Int = 10;
+	public var VISIBLE(default, never):Int = 10;
 	public var drawCount(default, null):Int = 0;
 	public var model:Matrix4;
 	public var projection:Matrix4;
@@ -109,7 +109,7 @@ class Renderer
 		
 		model = new Matrix4();
 		projection = new Matrix4();
-		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		projection.createOrtho( 0,BeardGame.Get().window.width, BeardGame.Get().window.height, 0, Renderer.Get().VISIBLE, -Renderer.Get().VISIBLE);
 		rotationAxis = new Vector4(0, 0, 1);
 		
 		
@@ -300,7 +300,7 @@ class Renderer
 				{
 					renderable = renderables.get(i);
 								
-					if (!renderable.readyForRendering || !renderable.HasCamera(camera.name) ) continue;
+					if (!renderable.canRender || !renderable.HasCamera(camera.name) ) continue;
 
 					drawCount += renderable.Render(camera);
 				}
@@ -386,7 +386,7 @@ class Renderer
 		GL.clearColor(0, 0, 0, 0);
 		GL.viewport(0, 0, width, height);
 		GL.scissor(0, 0, width, height);
-		projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+		projection.createOrtho( 0,width, height, 0, Renderer.Get().VISIBLE, -Renderer.Get().VISIBLE);
 		
 		
 		blurFrameBufferH.Bind();
@@ -513,8 +513,8 @@ class Renderer
 		var result:Int = 0;
 		if (renderable1 == null) result = 1;
 		else if (renderable2 == null) result = -1;
-		else if (renderable1.z < renderable2.z) result = 1;
-		else if (renderable1.z > renderable2.z) result = -1;
+		else if (renderable1.depth < renderable2.depth) result = 1;
+		else if (renderable1.depth > renderable2.depth) result = -1;
 		
 		return result;	
 	}

@@ -5,7 +5,7 @@ import beardFramework.input.data.InputData;
 /**
  * @author 
  */
-interface IFocusable extends INamed
+interface IFocusable extends IBeardyObject
 {
 	
 	public var list:FocusableList;

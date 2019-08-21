@@ -45,7 +45,7 @@ class MemoryUsage extends TextField
 		var mem:Float = Math.round(untyped __global__.__hxcpp_gc_used_bytes () / 1024 / 1024 * 100)/100;
 		if (mem > memPeak) memPeak = mem;
 		
-		if (visible)
+		if (canRender)
 		{	
 			//SetText( "FPS: " + times.length + "\nMEM: " + mem + " MB\nMEM peak: " + memPeak + " MB");	
 		}

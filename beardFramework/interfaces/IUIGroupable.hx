@@ -3,12 +3,11 @@ package beardFramework.interfaces;
 /**
  * @author Ludo
  */
-interface IUIGroupable extends INamed
+interface IUIGroupable extends IBeardyObject
 {
   
-  public var visible(get,set):Bool;
+  public var canRender(get,set):Bool;
   public var group(get, set):String;
-  
-  public function Clear():Void;
+  public function Destroy():Void;
   
 }

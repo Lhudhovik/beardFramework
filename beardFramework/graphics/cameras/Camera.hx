@@ -5,8 +5,7 @@ import beardFramework.graphics.core.BatchedVisual;
 import beardFramework.graphics.core.Framebuffer;
 import beardFramework.graphics.core.Renderer;
 import beardFramework.input.MousePos;
-import beardFramework.interfaces.ICameraDependent;
-import beardFramework.interfaces.INamed;
+import beardFramework.interfaces.IBeardyObject;
 import beardFramework.resources.save.data.StructDataCamera;
 import beardFramework.utils.data.DataU;
 import beardFramework.utils.graphics.Color;
@@ -26,13 +25,17 @@ import openfl.geom.Rectangle;
  * ...
  * @author Ludo
  */
-class Camera implements INamed
+class Camera implements IBeardyObject
 {
 	private static var utilRect:Rectangle;
 	public static var DEFAULT(default, null):String = "default";
 	public static var MINZOOM(default, null):Float = 0.00001;
 
 	@:isVar public var name(get, set):String;
+	@:isVar public var group(get, set):String;
+	
+	
+	public var isActivated(default, null):Bool;
 	public var zoom(default, set):Float;
 	public var centerX(default, set):Float;
 	public var centerY(default, set):Float;
@@ -42,7 +45,6 @@ class Camera implements INamed
 	public var clearColor:Color;
 	public var widthRatio(default, set):Float;
 	public var heightRatio(default, set):Float;
-	
 	public var view:Matrix4;
 	public var projection:Matrix4;
 	private var attachedObject:RenderedObject;
@@ -155,7 +157,7 @@ class Camera implements INamed
 	public  function Contains(visual:RenderedObject):Bool
 	{
 
-		var success:Bool = (visual.restrictedCameras == null || visual.restrictedCameras.indexOf(name) != -1);
+		var success:Bool = (visual.HasCamera(this.name));
 
 		if (success && (success = (((visual.x + visual.width) > (centerX - (GetWidth()*0.5) - buffer)) && (visual.x < (centerX + (GetWidth() *0.5)  + buffer)) && ((visual.y + visual.height) > (centerY - (GetHeight() *0.5) - buffer)) && (visual.y < (centerY + (GetHeight()*0.5) + buffer)))))
 		{
@@ -256,7 +258,7 @@ class Camera implements INamed
 		if (projection != null)
 		{
 			projection.identity();
-			projection.createOrtho( 0,width,height, 0, Renderer.Get().VISIBLEDEPTHLIMIT, -Renderer.Get().VISIBLEDEPTHLIMIT);
+			projection.createOrtho( 0,width,height, 0, Renderer.Get().VISIBLE, -Renderer.Get().VISIBLE);
 		}
 
 		
@@ -291,6 +293,31 @@ class Camera implements INamed
 
 		if (needViewUpdate) UpdateView();
 
+	}
+	
+	public function Activate():Void 
+	{
+		isActivated = true;
+	}
+	
+	public function DeActivate():Void 
+	{
+		isActivated = false;
+	}
+	
+	public function Destroy():Void 
+	{
+		
+	}
+	
+	function get_group():String 
+	{
+		return group;
+	}
+	
+	function set_group(value:String):String 
+	{
+		return group = value;
 	}
 
 	function set_heightRatio(value:Float):Float 

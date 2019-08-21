@@ -32,7 +32,7 @@ class UITextFieldComponent extends BatchedTextField implements IUIComponent
 		
 	}
 	
-	public function Clear():Void 
+	public function Destroy():Void 
 	{
 		
 	}
@@ -41,7 +41,7 @@ class UITextFieldComponent extends BatchedTextField implements IUIComponent
 	{
 		var data:StructDataUIComponent = 
 		{
-			visible:this.visible,
+			canRender:this.canRender,
 			name:this.name,
 			type:Type.getClassName(Type.getClass(this)),
 			x: this.x,

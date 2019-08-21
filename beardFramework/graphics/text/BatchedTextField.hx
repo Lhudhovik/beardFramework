@@ -14,7 +14,6 @@ import beardFramework.input.data.InputData;
 import beardFramework.input.data.KeyboardInputData;
 import beardFramework.interfaces.IBatch;
 import beardFramework.interfaces.IBatchable;
-import beardFramework.interfaces.ICameraDependent;
 import beardFramework.interfaces.IFocusable;
 import beardFramework.resources.assets.AssetManager;
 import beardFramework.resources.assets.Atlas.SubTextureData;
@@ -94,7 +93,7 @@ class BatchedTextField extends RenderedObject /*implements IFocusable implements
 		//this.atlas = AssetManager.Get().FONT_ATLAS_NAME;
 		//cursor = new BatchedVisual(AssetManager.Get().GetFontGlyphTextureName(this.font, "|",Std.int(this.textSize)), this.atlas, "cursor" + instanceCount);
 	//
-		//cursor.visible = false;
+		//cursor.canRender = false;
 		//cursor.width =  5;
 		//cursor.height = linesHeight ;
 				//
@@ -112,7 +111,7 @@ class BatchedTextField extends RenderedObject /*implements IFocusable implements
 	//{
 		//if (layer != null){
 			//if(cursor.layer == null) layer.Add(cursor);
-			//cursor.visible = true;
+			//cursor.canRender = true;
 			//Wait.WaitFor(0.5, HideCursor,this.name );
 		//}
 	//
@@ -121,7 +120,7 @@ class BatchedTextField extends RenderedObject /*implements IFocusable implements
 	//
 	//private function HideCursor():Void
 	//{
-		//cursor.visible = false;
+		//cursor.canRender = false;
 		//if (InputManager.Get().focusedObject == this) 
 			//Wait.WaitFor(0.5, ShowCursor, this.name);
 		//
@@ -151,7 +150,7 @@ class BatchedTextField extends RenderedObject /*implements IFocusable implements
 		//
 	//}
 	//
-	//public function ClearGlyphData(full:Bool = false):Void
+	//public function DestroyGlyphData(full:Bool = false):Void
 	//{
 		//var j:Int = 0;
 		//for (i in 0...glyphsData.length)
@@ -801,7 +800,7 @@ class BatchedTextField extends RenderedObject /*implements IFocusable implements
 		//SetCursorPosition();
 		//cursor.height = linesHeight + AssetManager.Get().GetFont(font).ascender * (this.textSize / AssetManager.Get().GetFont(font).height);
 		//
-		//Wait.ClearWait(this.name);
+		//Wait.DestroyWait(this.name);
 		//ShowCursor();
 	//}
 	//
@@ -810,7 +809,7 @@ class BatchedTextField extends RenderedObject /*implements IFocusable implements
 		//
 		//InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.KEY_DOWN, AppendTextAtCursor, this.name);
 		//InputManager.Get().UnbindFromInput(StringLibrary.ANY, InputType.MOUSE_CLICK, SetCursorPosition, this.name);
-		//Wait.ClearWait(this.name);
+		//Wait.DestroyWait(this.name);
 		//HideCursor();
 		//
 	//}

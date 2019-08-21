@@ -189,7 +189,7 @@ class BasicScreen
 		
 	}
 		
-	public function Clear(td:ThreadDetail):Bool
+	public function Destroy(td:ThreadDetail):Bool
 	{
 		var entity:GameEntity;
 		if (td.progression == 0){
@@ -273,7 +273,7 @@ class BasicScreen
 	public inline function Hide():Void
 	{
 		if (contentLayer != null){
-			contentLayer.visible = false;
+			contentLayer.canRender = false;
 		}
 		
 	}
@@ -281,7 +281,7 @@ class BasicScreen
 	public inline function Show():Void
 	{
 		if (contentLayer != null){
-			contentLayer.visible = true;
+			contentLayer.canRender = true;
 		}
 		
 	}
@@ -293,7 +293,7 @@ class BasicScreen
 	
 	public inline function isDisplayed():Bool
 	{
-		return contentLayer.visible;
+		return contentLayer.canRender;
 	}
 	
 	public function ToData(complete:Bool=false):StructDataScreen

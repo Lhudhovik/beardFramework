@@ -37,11 +37,13 @@ import lime.utils.UInt16Array;
 	private static var nullPtr:Float32Array = null;
 	@:isVar public var name(get, set):String;
 	@:isVar public var z(get, set):Float;
+	@:isVar public var shader(get, set):Shader;
+	
+	public var isActivated:Bool;
 	public var needUpdate:Bool;
 	public var needOrdering:Bool;
 	public var readyForRendering(get, null):Bool;
 	public var cameras:List<String>;
-	public var shader(default, null):Shader;
 	public var drawMode:Int;
 	public var lightGroup(default, set):String;
 	
@@ -116,6 +118,18 @@ import lime.utils.UInt16Array;
 		//trace(indices);
 		this.vertices = Vector.fromArrayCopy(vertices);
 	
+	}
+	
+	public function Activate():Void 
+	{
+		isActivated = true;
+		
+	}
+	
+	public function DeActivate():Void 
+	{
+		isActivated = false;
+		canRender = false;
 	}
 	
 	public function InitBuffers(attributes:Array<VertexAttribute> = null, vertexStride:Int = 0):Void
@@ -606,6 +620,56 @@ import lime.utils.UInt16Array;
 	
 	
 	
+	
+	public function Destroy():Void 
+	{
+		
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IBatch */
+	
+	@:isVar public var group(get, set):String;
+	
+	function get_group():String 
+	{
+		return group;
+	}
+	
+	function set_group(value:String):String 
+	{
+		return group = value;
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IBatch */
+	
+	@:isVar public var depth(get, set):Float;
+	
+	function get_depth():Float 
+	{
+		return depth;
+	}
+	
+	function set_depth(value:Float):Float 
+	{
+		return depth = value;
+	}
+	
+	@:isVar public var canRender(get, set):Bool;
+	
+	function get_canRender():Bool 
+	{
+		return canRender;
+	}
+	
+	function set_canRender(value:Bool):Bool 
+	{
+		return canRender = value;
+	}
+	
+	
+	
 	function set_lightGroup(value:String):String 
 	{
 		if (lightGroup != value) lightGroupChanged = true;
@@ -635,6 +699,16 @@ import lime.utils.UInt16Array;
 	function get_readyForRendering():Bool 
 	{
 		return verticesData.activeDataCount != 0;
+	}
+	
+	function get_shader():Shader 
+	{
+		return shader;
+	}
+	
+	function set_shader(value:Shader):Shader 
+	{
+		return shader = value;
 	}
 	
 

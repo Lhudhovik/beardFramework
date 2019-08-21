@@ -20,7 +20,7 @@ class UIContainer //implements IUIComponent
 	@:isVar public var width(get, set):Float;
 	@:isVar public var height(get, set):Float;
 	@:isVar public var name(get, set):String;
-	@:isVar public var visible(get, set):Bool = false;
+	@:isVar public var canRender(get, set):Bool = false;
 	@:isVar public var scaleX(get, set):Float;
 	@:isVar public var scaleY(get, set):Float;
 	@:isVar public var x(get, set):Float;
@@ -60,7 +60,7 @@ class UIContainer //implements IUIComponent
 	public inline function Add(component:IUIComponent ):Void
 	{
 		components.push(component);
-		component.visible = this.visible;
+		component.canRender = this.canRender;
 		component.container = this.name;
 		
 		UpdateVisual();
@@ -155,12 +155,12 @@ class UIContainer //implements IUIComponent
 		
 	}
 	
-	public function Clear():Void 
+	public function Destroy():Void 
 	{
 		
 		while (components.length > 0)
 		{
-			components.pop().Clear();
+			components.pop().Destroy();
 		}
 		
 		components = null;
@@ -173,7 +173,7 @@ class UIContainer //implements IUIComponent
 		
 		var data:StructDataUIComponent = 
 		{
-			visible:this.visible,
+			canRender:this.canRender,
 			type:Type.getClassName(Type.getClass(this)),
 			x: this.x,
 			y: this.y,
@@ -211,7 +211,7 @@ class UIContainer //implements IUIComponent
 	public function ParseData(data:StructDataUIComponent):Void 
 	{
 		
-		this.visible=data.visible;
+		this.canRender=data.canRender;
 			
 		this.x= data.x;
 		this.y= data.y;
@@ -329,21 +329,21 @@ class UIContainer //implements IUIComponent
 		return name = value;
 	}
 	
-	function get_visible():Bool
+	function get_canRender():Bool
 	{
-		return visible;
+		return canRender;
 	}
 	
-	function set_visible(value:Bool):Bool 
+	function set_canRender(value:Bool):Bool 
 	{
-		visible = value;
+		canRender = value;
 		
 		for (component in components)
 		{
-			component.visible = value;
+			component.canRender = value;
 		}
 				 
-		return visible;
+		return canRender;
 	}
 	
 	function get_preserved():Bool 

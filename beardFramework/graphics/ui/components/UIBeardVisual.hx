@@ -15,8 +15,7 @@ class UIBeardVisual extends BatchedVisual implements IUIComponent
 	
 	@:isVar public var preserved(get, set):Bool;
 	@:isVar public var container(get, set):String;
-	@:isVar public var group(get, set):String;
-	
+		
 	public var vAlign:UInt;
 	public var hAlign:UInt;
 	public var fillPart:Float;
@@ -62,7 +61,7 @@ class UIBeardVisual extends BatchedVisual implements IUIComponent
 	{
 		var data:StructDataUIVisualComponent = 
 		{
-			visible:this.visible,
+			canRender:this.canRender,
 			type:Type.getClassName(Type.getClass(this)),
 			x: this.x,
 			y: this.y,
@@ -91,7 +90,7 @@ class UIBeardVisual extends BatchedVisual implements IUIComponent
 	{
 		var img:DataUIVisualComponent = cast data;
 				
-		this.visible=img.visible;
+		this.canRender=img.canRender;
 			
 		this.x= img.x;
 		this.y= img.y;
@@ -110,19 +109,5 @@ class UIBeardVisual extends BatchedVisual implements IUIComponent
 	}
 		
 	
-	function get_group():String 
-	{
-		return group;
-	}
-	
-	function set_group(value:String):String 
-	{
-		return group = value;
-	}
-	
-	public function Clear():Void 
-	{
-		
-	}
 	
 }

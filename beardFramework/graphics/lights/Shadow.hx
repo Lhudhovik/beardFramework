@@ -30,14 +30,11 @@ class Shadow implements IRenderable
 	
 	@:isVar public var name(get, set):String;
 	@:isVar public var z(get, set):Float;
+	@:isVar public var shader(get, set):Shader;
 	
-	
-	
-	public var readyForRendering(get, null):Bool;
-	public var shader(default, null):Shader;
+	public var isActivated(default, null):Bool;
 	public var cameras:List<String>;
 	public var lightGroup(default, set):String;
-	public var renderDepth:Float;
 	public var x:Float;
 	public var y:Float;
 	public var width:Float;
@@ -48,6 +45,9 @@ class Shadow implements IRenderable
 	public var corner1:SVec2;
 	public var corner2:SVec2;
 	public var lightPos:SVec3;
+		
+	@:isVar public var group(get, set):String;
+	@:isVar public var depth(get, set):Float;
 	/**
 	 * x: top, y: bottom, width : left, height: right
 	 */
@@ -77,7 +77,7 @@ class Shadow implements IRenderable
 		shader = Shader.GetShader(StringLibrary.SHADOW);
 		shader.Use();
 		shader.SetMatrix4fv(StringLibrary.PROJECTION, renderer.projection);
-		readyForRendering = true;
+		canRender = true;
 		if (VAO == null || VBO == null)
 		{
 			VAO = Renderer.Get().GenerateVAO();
@@ -140,13 +140,20 @@ class Shadow implements IRenderable
 		return z = value;
 	}
 	
-	
-	
-	function get_readyForRendering():Bool 
+	public function Activate():Void 
 	{
-		return readyForRendering;
+		isActivated = true;
+		
 	}
 	
+	public function DeActivate():Void 
+	{
+		isActivated = false;
+		canRender = false;
+	}
+	
+	
+		
 		
 	function set_lightGroup(value:String):String 
 	{
@@ -163,7 +170,7 @@ class Shadow implements IRenderable
 		
 		renderer.model.identity();
 		renderer.model.appendScale(width, this.height, 1.0);
-		renderer.model.appendTranslation(this.x, this.y,this.renderDepth);
+		renderer.model.appendTranslation(this.x, this.y,this.depth);
 		renderer.model.appendRotation(this.rotation, renderer.rotationAxis);
 		shader.SetMatrix4fv(StringLibrary.MODEL, renderer.model);
 		shader.SetMatrix4fv(StringLibrary.VIEW, camera.view);
@@ -216,6 +223,60 @@ class Shadow implements IRenderable
 			//}
 		
 		return result;
+	}
+		
+	public function Destroy():Void 
+	{
+		
+	}
+	
+	
+	
+	function get_group():String 
+	{
+		return group;
+	}
+	
+	function set_group(value:String):String 
+	{
+		return group = value;
+	}
+	
+	
+	/* INTERFACE beardFramework.interfaces.IRenderable */
+	
+	
+	
+	function get_depth():Float 
+	{
+		return depth;
+	}
+	
+	function set_depth(value:Float):Float 
+	{
+		return depth = value;
+	}
+	
+	@:isVar public var canRender(get, set):Bool;
+	
+	function get_canRender():Bool 
+	{
+		return canRender;
+	}
+	
+	function set_canRender(value:Bool):Bool 
+	{
+		return canRender = value;
+	}
+	
+	function get_shader():Shader 
+	{
+		return shader;
+	}
+	
+	function set_shader(value:Shader):Shader 
+	{
+		return shader = value;
 	}
 	
 }

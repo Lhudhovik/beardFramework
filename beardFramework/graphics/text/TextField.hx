@@ -90,7 +90,7 @@ class TextField extends Visual implements IFocusable
 	
 		cursor = new Visual(AssetManager.Get().GetFontGlyphTextureName(this.font, "|",Std.int(this.textSize)), this.atlas, "cursor" + (instanceCount-1));
 	
-		cursor.visible = false;
+		cursor.canRender = false;
 		cursor.width =  5;
 		cursor.height = linesHeight ;
 				
@@ -193,7 +193,7 @@ class TextField extends Visual implements IFocusable
 	{
 		if (layer != null){
 			if(cursor.layer == null) layer.Add(cursor);
-			cursor.visible = true;
+			cursor.canRender = true;
 			Wait.WaitFor(0.5, HideCursor,this.name );
 		}
 	
@@ -202,7 +202,7 @@ class TextField extends Visual implements IFocusable
 	
 	private function HideCursor():Void
 	{
-		cursor.visible = false;
+		cursor.canRender = false;
 		if (InputManager.Get().focusedObject == this) 
 			Wait.WaitFor(0.5, ShowCursor, this.name);
 		
