@@ -1,7 +1,7 @@
 package beardFramework.systems;
 
 import beardFramework.core.BeardGame;
-import beardFramework.graphics.ui.components.UIContainer;
+import beardFramework.graphics.objects.LayoutContainer;
 import beardFramework.interfaces.IBeardyObject;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.interfaces.IUIGroupable;
@@ -99,7 +99,7 @@ class BeardGroup implements IBeardyObject
 		var componentsData:Array <StructDataUIComponent> = [];
 		for (member in members)
 			if (!Std.is(member, BeardGroup)){ 
-				if (Std.is(member, UIContainer)) componentsData = componentsData.concat(cast(member, UIContainer).ToDeepData());
+				if (Std.is(member, LayoutContainer)) componentsData = componentsData.concat(cast(member, LayoutContainer).ToDeepData());
 				else componentsData.push( cast(member, IUIComponent).ToData());
 				
 			}

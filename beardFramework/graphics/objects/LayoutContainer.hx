@@ -1,5 +1,7 @@
-package beardFramework.graphics.ui.components;
+package beardFramework.graphics.objects;
+import beardFramework.graphics.objects.WorldObject;
 import beardFramework.interfaces.IUIComponent;
+import beardFramework.resources.MinAllocArray;
 import beardFramework.resources.save.data.StructDataUIComponent;
 import openfl.display.DisplayObject;
 
@@ -15,17 +17,8 @@ enum Layout
 	CUSTOM;
 	
 }
-class UIContainer //implements IUIComponent
+class LayoutContainer extends WorldObject
 {
-	@:isVar public var width(get, set):Float;
-	@:isVar public var height(get, set):Float;
-	@:isVar public var name(get, set):String;
-	@:isVar public var canRender(get, set):Bool = false;
-	@:isVar public var scaleX(get, set):Float;
-	@:isVar public var scaleY(get, set):Float;
-	@:isVar public var x(get, set):Float;
-	@:isVar public var y(get, set):Float;
-	@:isVar public var group(get, set):String;
 	@:isVar public var preserved(get, set):Bool;
 	@:isVar public var container(get, set):String;
 	
@@ -40,7 +33,7 @@ class UIContainer //implements IUIComponent
 	public var rightMargin:Float;
 	public var separator:Float; // see to add a range
 	public var similarChildren:Bool;
-	public var components:Array<IUIComponent>;
+	public var components:MinAllocArray<WorldObject>;
 	
 	
 	public function new(layout:Layout, x:Float=0, y:Float = 0, width:Float = -1, height:Float = -1,  similarChildren:Bool = true) 
@@ -54,26 +47,26 @@ class UIContainer //implements IUIComponent
 		hAlign = vAlign = 0;
 		layoutType = layout;
 		keepRatio = false;
-		components = new Array<IUIComponent>();
+		components = new MinAllocArray<WorldObject>();
 	}
 	
 	public inline function Add(component:IUIComponent ):Void
 	{
-		components.push(component);
-		component.canRender = this.canRender;
+		components.Push(component);
+		//component.canRender = this.canRender;
 		component.container = this.name;
 		
 		UpdateVisual();
 
 	}
 	
-	public inline function Remove(component:IUIComponent):Void
+	public inline function Remove(component:WorldObject):Void
 	{
-		components.remove(component);
+		components.Remove(component);
 		UpdateVisual();
 	}
 	
-	public function GetComponent(name:String):IUIComponent
+	public function GetComponent(name:String):WorldObject
 	{
 		
 		for (component in components){
@@ -96,25 +89,21 @@ class UIContainer //implements IUIComponent
 					component.width = (width - leftMargin - rightMargin - (separator * width * (components.length - 1))) / components.length;
 				
 					component.height = height - topMargin - bottomMargin;
-					if (component.keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
+					if (keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
 					
 					component.x = this.x + (component.width + separator*width) * i++ + leftMargin;
 					component.y = this.y + topMargin;
-					component.UpdateVisual();
-					
-					
 				}
 			}
 			else {
 				for (component in components){
 					component.width =  ((width - leftMargin - rightMargin) * component.fillPart) - ((separator*width*(components.length-1)) / components.length);
 					component.height = height - topMargin - bottomMargin;
-					if (component.keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
+					if (keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
 					
 					component.x = this.x + helper + separator*width*i++ + leftMargin;
 					component.y = this.y +topMargin;
 					helper += component.width;
-					component.UpdateVisual();
 				}	
 			}
 			
@@ -129,25 +118,21 @@ class UIContainer //implements IUIComponent
 					component.height = (height - topMargin - bottomMargin - (separator * height * (components.length - 1))) / components.length;
 				
 					component.width = width - leftMargin - rightMargin;
-					if (component.keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
+					if (keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
 					
 					component.y = this.y + (component.height + separator*height) * i++ + topMargin;
 					component.x = this.x + leftMargin;
-					component.UpdateVisual();	
-					
-					
 				}
 			}
 			else {
 				for (component in components){
 					component.height = ((height - topMargin - bottomMargin) * component.fillPart) - ((separator*height*(components.length-1)) / components.length);
 					component.width = width - leftMargin - rightMargin;
-					if (component.keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
+					if (keepRatio) component.scaleX = component.scaleY = component.scaleX > component.scaleY? component.scaleY:component.scaleX;
 					
 					component.y = this.y + helper + separator*height*i++ + topMargin;
 					component.x = this.x + leftMargin;
 					helper += component.height;
-					component.UpdateVisual();
 				}	
 			}
 			
@@ -160,7 +145,7 @@ class UIContainer //implements IUIComponent
 		
 		while (components.length > 0)
 		{
-			components.pop().Destroy();
+			components.Pop().Destroy();
 		}
 		
 		components = null;
@@ -201,7 +186,7 @@ class UIContainer //implements IUIComponent
 		var data:Array<StructDataUIComponent> = [ToData()];
 		
 		for (component in components){
-			if (Std.is(component, UIContainer)) data = data.concat(cast(component, UIContainer).ToDeepData());
+			if (Std.is(component, LayoutContainer)) data = data.concat(cast(component, LayoutContainer).ToDeepData());
 			else data.push(component.ToData());
 		}
 		
@@ -228,6 +213,16 @@ class UIContainer //implements IUIComponent
 		UpdateVisual();
 		
 	}
+	
+	override public function set_width(value:Float):Float 
+	{
+		return SetBaseWidth(value);
+	}
+	
+	override public function set_height(value:Float):Float 
+	{
+		return SetBaseHeight(value);
+	}
 		
 	function get_group():String 
 	{
@@ -247,105 +242,7 @@ class UIContainer //implements IUIComponent
 		return x;
 	}
 	
-	function set_x(value:Float):Float 
-	{
-		if (x != value){
-			x = value;
-			//UpdateVisual();
-		}
-		return x;
-	}
-	
-	function get_y():Float 
-	{
-		return y;
-	}
-	
-	function set_y(value:Float):Float 
-	{
-		if (y != value){
-			y = value;
-			//UpdateVisual();
-		}
-		return y;
-	}
-	
-	function get_scaleX():Float 
-	{
-		return scaleX;
-	}
-	
-	function set_scaleX(value:Float):Float 
-	{
-		return scaleX = value;
-	}
 		
-	function get_scaleY():Float 
-	{
-		return scaleY;
-	}
-	
-	function set_scaleY(value:Float):Float 
-	{
-		return scaleY = value;
-	}
-		
-	function set_width(value:Float):Float 
-	{
-		if (width != value){
-		width = value;
-		//UpdateVisual();	
-		}
-		
-		return width;
-	}
-	
-	function set_height(value:Float):Float 
-	{
-		if (height != value){
-			height = value;
-			//UpdateVisual();
-		}
-		return height;
-	}
-	
-	function get_width():Float 
-	{
-		return width;
-	}
-	
-	function get_height():Float 
-	{
-		return height;
-	}
-	
-	function get_name():String 
-	{
-		return name;
-	}
-	
-	function set_name(value:String):String 
-	{
-		return name = value;
-	}
-	
-	function get_canRender():Bool
-	{
-		return canRender;
-	}
-	
-	function set_canRender(value:Bool):Bool 
-	{
-		canRender = value;
-		
-		for (component in components)
-		{
-			component.canRender = value;
-		}
-				 
-		return canRender;
-	}
-	
 	function get_preserved():Bool 
 	{
 		return preserved;

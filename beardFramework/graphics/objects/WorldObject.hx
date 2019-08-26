@@ -31,6 +31,7 @@ class WorldObject implements ISpatialized
 	public function new() 
 	{
 		scaleX = scaleY = 1;
+		cachedHeight = cachedWidth = 1;
 		onAABBTree = false;
 	}
 	

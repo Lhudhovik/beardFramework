@@ -1,7 +1,7 @@
 package beardFramework.graphics.screens;
 import beardFramework.core.BeardGame;
 import beardFramework.updateProcess.thread.ParamThreadDetail;
-import beardFramework.graphics.ui.components.UIContainer;
+import beardFramework.graphics.objects.LayoutContainer;
 import beardFramework.resources.assets.AssetManager;
 
 using beardFramework.utils.SysPreciseTime;
@@ -13,7 +13,7 @@ class BasicLoadingScreen extends BasicScreen
 {
 	private static var instance(get, null):BasicLoadingScreen;
 	public static var MINLOADINGTIME:Float = 10;
-	private var components:UIContainer;
+	private var components:LayoutContainer;
 	public var loadingTasksCount : Int;
 	public var completedLoadingTasksCount : Int;
 	

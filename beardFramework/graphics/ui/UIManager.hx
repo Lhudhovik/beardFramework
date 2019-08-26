@@ -13,7 +13,7 @@ import beardFramework.updateProcess.thread.RowThreadDetail;
 import beardFramework.updateProcess.thread.Thread;
 import beardFramework.updateProcess.thread.ThreadDetail;
 import beardFramework.graphics.screens.BeardLayer;
-import beardFramework.graphics.ui.components.UIContainer;
+import beardFramework.graphics.objects.LayoutContainer;
 import beardFramework.interfaces.IUIComponent;
 import beardFramework.interfaces.IBeardyObject;
 import beardFramework.resources.save.SaveManager;
@@ -257,7 +257,7 @@ class UIManager
 					component.ParseData(componentData);
 				
 				if (componentData.parent != "")
-					cast(GetUIComponent(componentData.name), UIContainer).Add(component);
+					cast(GetUIComponent(componentData.name), LayoutContainer).Add(component);
 				else
 					AddComponent(component,group.name);
 				
@@ -329,14 +329,14 @@ class UIManager
 			else
 			{
 				
-				if (Std.is(member, UIContainer))
+				if (Std.is(member, LayoutContainer))
 				{
-					if (cast(member, UIContainer).components != null)
+					if (cast(member, LayoutContainer).components != null)
 					{
-						while (cast(member, UIContainer).components.length > 0)
-						baseGroup.members.Push(cast(member, UIContainer).components.pop());
+						while (cast(member, LayoutContainer).components.length > 0)
+						baseGroup.members.Push(cast(member, LayoutContainer).components.pop());
 					}
-					cast(member, UIContainer).components = null;
+					cast(member, LayoutContainer).components = null;
 				}
 				else
 				{
